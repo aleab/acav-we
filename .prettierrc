@@ -1,0 +1,21 @@
+{
+    "printWidth": 150,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "es5",
+    "overrides": [
+        {
+            "files": ["**/*.css"],
+            "options": {
+                "singleQuote": false,
+                "tabWidth": 2
+            }
+        },
+        {
+            "files": ["**/*.html"],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}

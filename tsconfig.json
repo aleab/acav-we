@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "target": "ES2018",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "outDir": "./dist",
+        "lib": ["ES2018", "DOM"],
+        "allowJs": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "jsx": "react",
+        "resolveJsonModule": true,
+        "strict": true
+    },
+    "include": ["./src/**/*.ts", "src/index.tsx"],
+    "exclude": ["./node_modules"]
+}
