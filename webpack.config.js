@@ -7,6 +7,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const { LicenseWebpackPlugin } = require('license-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -94,7 +95,26 @@ function getWebpackConfig(env, argv) {
         },
         plugins: [
             new webpack.ProgressPlugin(),
+            new LicenseWebpackPlugin({
+                outputFilename: 'LICENSES.3RD-PARTY.txt',
+                perChunkOutput: false,
+                renderLicenses: modules => {
+                    let text = '';
+                    const M = _.sortBy(modules, m => m.name);
+                    for (let i = 0; i < M.length; ++i) {
+                        text += '/**\n' +
+                                ` * ${M[i].name}\n` +
+                                ' *\n' +
+                                ` * ${M[i].licenseId}\n` +
+                                M[i].licenseText.split(/\r?\n/).map(s => ` * ${s}`).join('\n') + '\n' +
+                                ' */\n' +
+                                '\n';
+                    }
+                    return text;
+                },
+            }),
             new CopyWebpackPlugin([
+                { from: './LICENSE.txt' },
                 {
                     from: './static/**/*',
                     transformPath(targetPath) { return path.relative('./static', targetPath); },
