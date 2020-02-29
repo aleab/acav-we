@@ -195,11 +195,12 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
     },
 
+    // [AUDIO SAMPLES]
     "audioSamples_buffer": {
         "order": 50,
         "type": "slider",
         "text": "ui_audioSamples_buffer",
-        "value": 0.3,
+        "value": 0.4,
         "min": 0,
         "max": 1,
         "fraction": true,
@@ -257,7 +258,7 @@
         "order": 104,
         "type": "slider",
         "text": "ui_barVisualizer_smoothing",
-        "value": 45,
+        "value": 38,
         "min": 0,
         "max": 100,
         "condition": "showAdvancedOptions.value"
@@ -313,7 +314,9 @@
             { "label": "<samp>H<u>S</u>*</samp> - Saturation", "value": "Saturation" },
             { "label": "<samp>HS<u>V</u></samp> - Brightness", "value": "HsvBrightness" },
             { "label": "<samp>HS<u>L</u></samp> - Lightness", "value": "HslLightness" },
-            { "label": "<samp><u>L</u>AB</samp> - Lightness", "value": "LabLightness" }
+            { "label": "<samp><u>L</u>AB</samp> - Lightness", "value": "LabLightness" },
+            { "label": "<samp>L<u>A</u>B</samp> - Green&#8596;Red", "value": "LabA" },
+            { "label": "<samp>LA<u>B</u></samp> - Blue&#8596;Yellow", "value": "LabB" }
         ],
         "value": "HsvBrightness"
     },
@@ -329,10 +332,11 @@
         "text": "ui_barVisualizer_bars_responseProvider",
         "options": [
             { "label": "Value", "value": "Value" },
-            { "label": "Value (normalized)", "value": "NormalizedValue" },
-            { "label": "Value Change", "value": "Change" }
+            { "label": "Value (normalized)", "value": "ValueNormalized" },
+            { "label": "Change", "value": "Change" },
+            { "label": "Change (absolute)", "value": "ChangeAbsolute" }
         ],
-        "value": "NormalizedValue",
+        "value": "ValueNormalized",
         "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
     },
     "$_barVisualizer_bars_responseProvider": {
@@ -359,13 +363,13 @@
         "value": 25,
         "min": -50,
         "max": 50,
-        "condition": "['Saturation','HsvBrightness','HslLightness','LabLightness'].includes(barVisualizer_bars_responseType.value)"
+        "condition": "!['None','Hue'].includes(barVisualizer_bars_responseType.value)"
     },
     "$_barVisualizer_bars_responseRange": {
         "order": 137,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseRange",
-        "condition": "showDescriptions.value && ['Saturation','HsvBrightness','HslLightness','LabLightness'].includes(barVisualizer_bars_responseType.value)"
+        "condition": "showDescriptions.value && !['None','Hue'].includes(barVisualizer_bars_responseType.value)"
     },
     "barVisualizer_bars_responseDegree": {
         "order": 138,
@@ -396,13 +400,17 @@
     "notes": {
         "order": 9000,
         "type": "text",
-        "text": "ui_notes",
-        "condition": "showAdvancedOptions.value"
+        "text": "ui_notes"
     },
     "note1": {
         "order": 9001,
         "type": "text",
         "text": "ui_note1",
         "condition": "showAdvancedOptions.value"
+    },
+    "note2": {
+        "order": 9002,
+        "type": "text",
+        "text": "ui_note2"
     }
 }

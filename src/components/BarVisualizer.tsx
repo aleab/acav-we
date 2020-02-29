@@ -6,8 +6,8 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';
 import WallpaperContext from '../app/WallpaperContext';
-import { ResponseType, ResponseTypeArgs, ResponseTypes } from '../app/ColorReactiveMode';
-import { ColorReactiveValueProvider, ColorReactiveValueProviders } from '../app/ColorReactiveValueProvider';
+import { ColorReactionArgs, ColorReactionFactory, ColorReactionType } from '../app/ColorReactionType';
+import { AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
 import AudioSamplesArray from '../common/AudioSamplesArray';
 import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
 
@@ -139,21 +139,18 @@ export default function BarVisualizer() {
                 ) * (O.bars.height / 100);
 
                 const barColorRgb: Readonly<RGB> = [ O.bars.color.r, O.bars.color.g, O.bars.color.b ];
-                const barResponseType = O.bars.responseType !== ResponseType.None ? (ResponseTypes[O.bars.responseType] ?? undefined) : undefined;
-                const barResponseProvider = ColorReactiveValueProviders[O.bars.responseProvider] ?? ColorReactiveValueProviders[ColorReactiveValueProvider.Value];
-                const barResponseValueGain = O.bars.responseValueGain;
-                const barResponseDegree = O.bars.responseDegree;
-                const barResponseTypeArgs: ResponseTypeArgs = {
-                    fromRgb: barColorRgb,
-                    fromHsv: ColorConvert.rgb.hsv(barColorRgb as RGB),
-                    fromHsl: ColorConvert.rgb.hsl(barColorRgb as RGB),
-                    toRgb: [ O.bars.responseToHue.r, O.bars.responseToHue.g, O.bars.responseToHue.b ],
-                    range: O.bars.responseRange,
-                };
+                const barColorReaction = O.bars.responseType !== ColorReactionType.None
+                    ? ColorReactionFactory.buildColorReaction(O.bars.responseType, {
+                        fromRgb: barColorRgb,
+                        toRgb: [ O.bars.responseToHue.r, O.bars.responseToHue.g, O.bars.responseToHue.b ],
+                        degree: O.bars.responseDegree,
+                        range: O.bars.responseRange,
+                    }) : undefined;
+                const barColorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(O.bars.responseProvider, O.bars.responseValueGain);
 
                 const spacing = (width - N_BARS * barWidth) / (N_BARS - 1);
 
-                if (barResponseType === undefined) {
+                if (barColorReaction === undefined) {
                     canvasContext.setFillColorRgb(barColorRgb as RGB);
                 }
                 samples.forEach((sample, i) => {
@@ -173,15 +170,15 @@ export default function BarVisualizer() {
                     const index = flipFrequencies ? (samples!.length - 1 - i) : i;
                     const dx = spacing / 2 + index * (barWidth + spacing);
 
-                    if (barResponseType !== undefined) {
-                        const value = barResponseProvider([ sample[0], sample[1] ], i, barResponseValueGain, { samplesBuffer, peak });
+                    if (barColorReaction !== undefined) {
+                        const value = barColorReactionValueProvider([ sample[0], sample[1] ], i, { samplesBuffer, peak });
 
                         if (sample[0] !== 0) {
-                            canvasContext.setFillColorRgb(barResponseType(value[0], barResponseDegree, barResponseTypeArgs) as RGB);
+                            canvasContext.setFillColorRgb(barColorReaction(value[0]) as RGB);
                             canvasContext.fillRect(canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight);
                         }
                         if (sample[1] !== 0) {
-                            canvasContext.setFillColorRgb(barResponseType(value[1], barResponseDegree, barResponseTypeArgs) as RGB);
+                            canvasContext.setFillColorRgb(barColorReaction(value[1]) as RGB);
                             canvasContext.fillRect(canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight);
                         }
                     } else {

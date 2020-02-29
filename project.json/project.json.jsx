@@ -58,6 +58,7 @@ function samp(text) { return `<samp>${text}</samp>`; }
 const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/mz2cdi4qlf">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
+const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -135,7 +136,7 @@ function getProjectJson() {
                     ui_barVisualizer_bars_height: indent('Height (%)'),
                     ui_barVisualizer_bars_alignment: indent('Alignment'),
                     ui_barVisualizer_bars_color: indent('Color'),
-                    ui_barVisualizer_bars_responseType: indent('Response Type'),
+                    ui_barVisualizer_bars_responseType: indent('Response Type') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,
                     ui_barVisualizer_bars_responseProvider: indent('React to', { n: 3 }) + asterisk(),
                     ui_barVisualizer_bars_responseValueGain: indent('Gain', { n: 3 }) + asterisk(),
                     ui_barVisualizer_bars_responseRange: indent('Range', { n: 3 }),
@@ -149,17 +150,19 @@ function getProjectJson() {
                         '<samp><u>Value Change</u></samp>: the absolute difference between the current sample and the oldest one in the buffer.',
                     ),
                     ui_$_barVisualizer_bars_responseRange: note(
-                        'The intensity of the effect, i.e. the difference between the maximum and minimum possible values of the color component to which the effect applies after the effect has been applied to the base color.',
-                        'If the component of the base color is too high/low, it will be automatically decreased/increased to be able to use the whole selected range effectively.',
+                        'The intensity of the effect, i.e. the difference between the maximum and minimum possible values of the color component(s) involved after the effect has been applied to the base color.',
+                        '<u>Example</u>: for a base color with lightness 75, and a range of 35, the effect will produce a color with lightness 100 when the sample value is 1 (maximum) and 65 when the sample value is 0 (minimum).',
                     ),
-                    ui_$_barVisualizer_bars_responseDegree: note(
-                        'Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.',
-                    ),
+                    ui_$_barVisualizer_bars_responseDegree: note('Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.'),
 
                     ui_notes: section('Notes', true),
                     ui_note1: note(
                         `<sup>${scalingFunctionsLink('[1]')}</sup> Graphical comparison of the scaling functions.`,
                         `<sup>${smoothingLink('[2]')}</sup> Graphical visualization of the smoothing function.`,
+                    ),
+                    ui_note2: note(
+                        `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
+                        null,
                     ),
                 },
             },

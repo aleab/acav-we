@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { DeepReadonly } from 'utility-types';
 
 import { ScaleFunction } from '../ScaleFunction';
-import { ResponseType } from '../ColorReactiveMode';
-import { ColorReactiveValueProvider } from '../ColorReactiveValueProvider';
+import { ColorReactionType } from '../ColorReactionType';
+import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import AudioSamplesProperties from './AudioSamplesProperties';
 
 export default interface Properties {
@@ -19,8 +19,8 @@ export default interface Properties {
             height: number;
             alignment: number;
             color: RgbaColor;
-            responseType: ResponseType;
-            responseProvider: ColorReactiveValueProvider;
+            responseType: ColorReactionType;
+            responseProvider: AudioResponsiveValueProvider;
             responseValueGain: number;
             responseRange: number;
             responseDegree: number;
@@ -96,8 +96,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(barVisualizerOptions.bars!, 'height', raw.barVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'alignment', raw.barVisualizer_bars_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'color', raw.barVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
-    setProperty(barVisualizerOptions.bars!, 'responseType', raw.barVisualizer_bars_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ResponseType));
-    setProperty(barVisualizerOptions.bars!, 'responseProvider', raw.barVisualizer_bars_responseProvider as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactiveValueProvider));
+    setProperty(barVisualizerOptions.bars!, 'responseType', raw.barVisualizer_bars_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));
+    setProperty(barVisualizerOptions.bars!, 'responseProvider', raw.barVisualizer_bars_responseProvider as WEProperty<'combo'>, _r => parseComboProperty(_r, AudioResponsiveValueProvider));
     setProperty(barVisualizerOptions.bars!, 'responseValueGain', raw.barVisualizer_bars_responseValueGain as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'responseRange', raw.barVisualizer_bars_responseRange as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'responseDegree', raw.barVisualizer_bars_responseDegree as WEProperty<'slider'>, _r => parseSliderProperty(_r));
