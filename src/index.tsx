@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import Wallpaper from './components/Wallpaper';
-import WallpaperProperties, { mapProperties } from './app/properties';
+import Properties, { mapProperties } from './app/properties/Properties';
 
 import projectProperties from '../project.json/project.properties.json';
 
@@ -22,7 +22,7 @@ function run(Component: typeof Wallpaper) {
         onresizeEventSubs.forEach(callback => callback({}));
     };
 
-    const defaultProperties = mapProperties(projectProperties) as WallpaperProperties;
+    const defaultProperties = mapProperties(projectProperties) as Properties;
     const rootElement = document.getElementById('root');
 
     window.wallpaperReload = () => {

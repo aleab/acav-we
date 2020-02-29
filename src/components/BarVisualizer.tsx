@@ -1,7 +1,7 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
-import { HSV, RGB } from 'color-convert/conversions';
+import { RGB } from 'color-convert/conversions';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';

@@ -1,20 +1,14 @@
 import _ from 'lodash';
 import { DeepReadonly } from 'utility-types';
 
-import { ScaleFunction } from './ScaleFunction';
-import { ResponseType } from './ColorReactiveMode';
-import { ColorReactiveValueProvider } from './ColorReactiveValueProvider';
+import { ScaleFunction } from '../ScaleFunction';
+import { ResponseType } from '../ColorReactiveMode';
+import { ColorReactiveValueProvider } from '../ColorReactiveValueProvider';
+import AudioSamplesProperties from './AudioSamplesProperties';
 
-export default interface WallpaperProperties {
+export default interface Properties {
     audioprocessing: boolean;
-    audioSamples: {
-        correctSamples: boolean;
-        audioVolumeGain: number;
-        audioFreqThreshold: number;
-        scale: ScaleFunction;
-        normalize: boolean;
-        bufferLength: number;
-    };
+    audioSamples: AudioSamplesProperties;
     barVisualizer: {
         position: number;
         width: number;
@@ -66,24 +60,33 @@ function setProperty<TOption, Type extends WEPropertyType | string, P extends ke
     }
 }
 
-export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): MappedWallpaperProperties {
+export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): MappedProperties {
     // .
-    const rootOptions: MappedWallpaperProperties = {};
+    const rootOptions: MappedProperties = {};
     if (raw.audioprocessing) {
         setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r.value);
     }
 
     // .audioSamples
-    const audioSamplesOptions: MappedWallpaperProperties['audioSamples'] = {};
+    const audioSamplesOptions: MappedProperties['audioSamples'] = { scale: {} };
     setProperty(audioSamplesOptions, 'correctSamples', raw.audioSamples_correct as WEProperty<'bool'>, _r => _r.value);
     setProperty(audioSamplesOptions, 'audioVolumeGain', raw.audioSamples_volumeGain as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(audioSamplesOptions, 'audioFreqThreshold', raw.audioSamples_freqThreshold as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(audioSamplesOptions, 'scale', raw.audioSamples_scale as WEProperty<'combo'>, _r => parseComboProperty(_r, ScaleFunction));
     setProperty(audioSamplesOptions, 'normalize', raw.audioSamples_normalize as WEProperty<'bool'>, _r => _r.value);
     setProperty(audioSamplesOptions, 'bufferLength', raw.audioSamples_buffer as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r) * 28));
+    // .audioSamples.scale
+    setProperty(audioSamplesOptions.scale!, 'function', raw.audioSamples_scale as WEProperty<'combo'>, _r => parseComboProperty(_r, ScaleFunction));
+    setProperty(audioSamplesOptions.scale!, 'powExponent', raw.audioSamples_scale_Power_exponent as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'expBase', raw.audioSamples_scale_Exponential_base as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'logBase', raw.audioSamples_scale_Logarithm_base as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'log$powA', raw.audioSamples_scale_Logarithm$Power_a as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'log$powBase', raw.audioSamples_scale_Logarithm$Power_base as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'log$powExponent', raw.audioSamples_scale_Logarithm$Power_exponent as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'gaussianDeviation', raw.audioSamples_scale_Gaussian_deviation as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(audioSamplesOptions.scale!, 'gaussianMean', raw.audioSamples_scale_Gaussian_mean as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     // .barVisualizer
-    const barVisualizerOptions: MappedWallpaperProperties['barVisualizer'] = { bars: {} };
+    const barVisualizerOptions: MappedProperties['barVisualizer'] = { bars: {} };
     setProperty(barVisualizerOptions, 'position', raw.barVisualizer_position as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions, 'width', raw.barVisualizer_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions, 'flipFrequencies', raw.barVisualizer_flipFrequencies as WEProperty<'bool'>, _r => _r.value);
@@ -111,7 +114,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
  * @param properties Mutable properties object
  * @param newRawProperties The raw object received by Wallpaper Engine
  */
-export function applyUserProperties(properties: WallpaperProperties, newRawProperties: DeepReadonly<RawWallpaperProperties>): MappedWallpaperProperties {
+export function applyUserProperties(properties: Properties, newRawProperties: DeepReadonly<RawWallpaperProperties>): MappedProperties {
     const newProperties = mapProperties(newRawProperties);
     _.merge(properties, newProperties);
     return _.cloneDeep(newProperties);

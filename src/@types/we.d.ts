@@ -1,11 +1,8 @@
-// Project-related types
-
 type ProjectJsonProperties = typeof import('../../project.json/project.properties.json');
-
 type RawWallpaperProperties = Partial<ProjectJsonProperties & WEUserProperties>;
-type MappedWallpaperProperties = import('utility-types').DeepPartial<import('../app/properties').default>;
+type MappedProperties = import('utility-types').DeepPartial<import('../app/properties/Properties').default>;
 
-// Wallpaper Engine types
+// PROPERTIES
 
 type WEPropertyType = 'color' | 'slider' | 'bool' | 'combo' | 'text' | 'file' | 'directory';
 type WEProperty<T extends WEPropertyType | string = string> = Readonly<{
@@ -45,6 +42,8 @@ type WEGeneralProperties = Readonly<{
     resolution: 'full' | 'half';
 }>;
 
+// EVENTS
+
 type WEPropertyListener = {
     applyUserProperties?: (props: RawWallpaperProperties) => void;
     applyGeneralProperties?: (props: WEGeneralProperties) => void;
@@ -52,7 +51,10 @@ type WEPropertyListener = {
 };
 type WEAudioListener = (audioArray: number[]) => void;
 
-type UserPropertiesChangedEventArgs = { oldProps: DeepReadonly<import('../app/properties').default>, newProps: DeepReadonly<MappedWallpaperProperties> };
+type UserPropertiesChangedEventArgs = {
+    oldProps: import('utility-types').DeepReadonly<import('../app/properties/Properties').default>;
+    newProps: import('utility-types').DeepReadonly<MappedProperties>;
+};
 type AudioSamplesEventArgs = {
     samples: import('../common/AudioSamplesArray').default;
     samplesBuffer: import('../common/AudioSamplesBuffer').default;

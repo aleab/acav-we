@@ -57,73 +57,163 @@
         "step": 0.1,
         "editable": false
     },
+
+    // [AUDIO SAMPLES/SCALE]
     "audioSamples_scale": {
         "order": 26,
         "type": "combo",
         "text": "ui_audioSamples_scale",
         "options": [
-            { "label": "x", "value": "Linear" },
-            { "label": "x<sup>2</sup>", "value": "Square" },
-            { "label": "sqrt(x)", "value": "Sqrt" },
-            { "label": "log(x+1)", "value": "Log" },
-            { "label": "a&#8201;log(x+1) + b&#8201;x<sup>2</sup>", "value": "Log$Square" },
-            { "label": "Gaussian", "value": "Gaussian" }
+            { "label": "ui_audioSamples_scale_Linear", "value": "Linear" },
+            { "label": "ui_audioSamples_scale_Power", "value": "Power" },
+            { "label": "ui_audioSamples_scale_Exponential", "value": "Exponential" },
+            { "label": "ui_audioSamples_scale_Logarithm", "value": "Logarithm" },
+            { "label": "ui_audioSamples_scale_Logarithm$Power", "value": "Logarithm$Power" },
+            { "label": "ui_audioSamples_scale_Gaussian", "value": "Gaussian" }
         ],
-        "value": "Log",
+        "value": "Logarithm",
         "condition": "showAdvancedOptions.value"
     },
-
-    "$_audioSamples_scale_Square": {
+    "$_audioSamples_scale_Power": {
         "order": 27,
         "type": "text",
-        "text": "ui_$_audioSamples_scale_Square",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Square'"
+        "text": "ui_$_audioSamples_scale_Power",
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Power'"
     },
-    "$_audioSamples_scale_Sqrt": {
+    "audioSamples_scale_Power_exponent": {
         "order": 28,
-        "type": "text",
-        "text": "ui_$_audioSamples_scale_Sqrt",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Sqrt'"
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Power_exponent",
+        "value": 2,
+        "min": 0.2,
+        "max": 4,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Power'"
     },
-    "$_audioSamples_scale_Log": {
+    "$_audioSamples_scale_Exponential": {
         "order": 29,
         "type": "text",
-        "text": "ui_$_audioSamples_scale_Log",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Log'"
+        "text": "ui_$_audioSamples_scale_Exponential",
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Exponential'"
     },
-    "$_audioSamples_scale_Log$Square": {
+    "audioSamples_scale_Exponential_base": {
         "order": 30,
-        "type": "text",
-        "text": "ui_$_audioSamples_scale_Log$Square",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Log$Square'"
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Exponential_base",
+        "value": 2,
+        "min": 1.5,
+        "max": 3,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Exponential'"
     },
-    "$_audioSamples_scale_Gaussian": {
+    "$_audioSamples_scale_Logarithm": {
         "order": 31,
         "type": "text",
-        "text": "ui_$_audioSamples_scale_Gaussian",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Gaussian'"
+        "text": "ui_$_audioSamples_scale_Logarithm",
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Logarithm'"
     },
-
-    "audioSamples_buffer": {
-        "order": 35,
+    "audioSamples_scale_Logarithm_base": {
+        "order": 32,
         "type": "slider",
-        "text": "ui_audioSamples_buffer",
+        "text": "ui_audioSamples_scale_Logarithm_base",
+        "value": 2,
+        "min": 1.8,
+        "max": 3,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm'"
+    },
+    "$_audioSamples_scale_Logarithm$Power": {
+        "order": 33,
+        "type": "text",
+        "text": "ui_$_audioSamples_scale_Logarithm$Power",
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Logarithm$Power'"
+    },
+    "audioSamples_scale_Logarithm$Power_a": {
+        "order": 34,
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Logarithm$Power_a",
         "value": 0.4,
         "min": 0,
         "max": 1,
         "fraction": true,
         "step": 0.1,
-        "editable": false,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
+    },
+    "audioSamples_scale_Logarithm$Power_base": {
+        "order": 35,
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Logarithm$Power_base",
+        "value": 3,
+        "min": 1.8,
+        "max": 5,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
+    },
+    "audioSamples_scale_Logarithm$Power_exponent": {
+        "order": 36,
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Logarithm$Power_exponent",
+        "value": 1.8,
+        "min": 0.2,
+        "max": 5,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
+    },
+    "$_audioSamples_scale_Gaussian": {
+        "order": 37,
+        "type": "text",
+        "text": "ui_$_audioSamples_scale_Gaussian",
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Gaussian'"
+    },
+    "audioSamples_scale_Gaussian_deviation": {
+        "order": 38,
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Gaussian_deviation",
+        "value": 0.43,
+        "min": 0.01,
+        "max": 0.6,
+        "fraction": true,
+        "step": 0.1,
+        "editable": true,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
+    },
+    "audioSamples_scale_Gaussian_mean": {
+        "order": 39,
+        "type": "slider",
+        "text": "ui_audioSamples_scale_Gaussian_mean",
+        "value": 0.92,
+        "min": 0,
+        "max": 1.2,
+        "fraction": true,
+        "step": 0.1,
+        "editable": true,
+        "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
+    },
+
+    "audioSamples_buffer": {
+        "order": 50,
+        "type": "slider",
+        "text": "ui_audioSamples_buffer",
+        "value": 0.3,
+        "min": 0,
+        "max": 1,
+        "fraction": true,
+        "step": 0.1,
         "condition": "showAdvancedOptions.value"
     },
     "$_audioSamples_buffer": {
-        "order": 36,
+        "order": 51,
         "type": "text",
         "text": "ui_$_audioSamples_buffer",
         "condition": "(showAdvancedOptions.value && showDescriptions.value)"
     },
     "audioSamples_normalize": {
-        "order": 37,
+        "order": 52,
         "type": "bool",
         "text": "ui_audioSamples_normalize",
         "value": false,
@@ -154,7 +244,6 @@
         "value": 45,
         "min": 25,
         "max": 100,
-        "fraction": false,
         "editable": false
     },
     "barVisualizer_flipFrequencies": {
@@ -168,11 +257,9 @@
         "order": 104,
         "type": "slider",
         "text": "ui_barVisualizer_smoothing",
-        "value": 35,
+        "value": 45,
         "min": 0,
         "max": 100,
-        "fraction": false,
-        "editable": false,
         "condition": "showAdvancedOptions.value"
     },
     "barVisualizer_bars": {
@@ -187,7 +274,6 @@
         "value": 38,
         "min": 1,
         "max": 100,
-        "fraction": false,
         "editable": false
     },
     "barVisualizer_bars_height": {
@@ -197,7 +283,6 @@
         "value": 45,
         "min": 10,
         "max": 100,
-        "fraction": false,
         "editable": false
     },
     "barVisualizer_bars_alignment": {
@@ -265,7 +350,6 @@
         "max": 5,
         "fraction": true,
         "step": 0.1,
-        "editable": false,
         "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_responseRange": {
@@ -275,8 +359,6 @@
         "value": 25,
         "min": -50,
         "max": 50,
-        "fraction": false,
-        "editable": false,
         "condition": "['Saturation','HsvBrightness','HslLightness','LabLightness'].includes(barVisualizer_bars_responseType.value)"
     },
     "$_barVisualizer_bars_responseRange": {
@@ -294,7 +376,6 @@
         "max": 3,
         "fraction": true,
         "step": 0.1,
-        "editable": false,
         "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
     },
     "$_barVisualizer_bars_responseDegree": {
