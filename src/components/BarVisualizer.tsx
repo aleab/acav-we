@@ -1,37 +1,38 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
-import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';
-import WallpaperContext from '../app/WallpaperContext';
-import { ColorReactionArgs, ColorReactionFactory, ColorReactionType } from '../app/ColorReactionType';
-import { AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
 import AudioSamplesArray from '../common/AudioSamplesArray';
 import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
+import { AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
+import { ColorReactionFactory, ColorReactionType } from '../app/ColorReactionType';
+import WallpaperContext from '../app/WallpaperContext';
 
 export default function BarVisualizer() {
-    useEffect(() => Log.debug('[BarVisualizer]'));
     const context = useContext(WallpaperContext)!;
+    const O = useRef(context.wallpaperProperties.barVisualizer);
 
     const canvas = useRef<HTMLCanvasElement>(null);
     const [ canvasContext, setCanvasContext ] = useState<CanvasRenderingContext2D>();
 
-    const O = context.wallpaperProperties.barVisualizer;
-
-    // <canvas>
+    // ==========
+    //  <canvas>
+    // ==========
     useEffect(() => {
+        Log.debug('%c[BarVisualizer] Initializing canvas...', 'color:darkblue');
         canvas.current!.width = window.innerWidth;
         canvas.current!.height = window.innerHeight;
-    }, []);
-    useEffect(() => {
         const _canvasContext = canvas.current?.getContext('2d', { desynchronized: true });
         setCanvasContext(_canvasContext ?? undefined);
-    }, []);
+    }, []); // just once
 
-    // onUserPropertiesChanged
+    // =========================
+    //  onUserPropertiesChanged
+    // =========================
     useEffect(() => {
+        Log.debug('%c[BarVisualizer] Registering on*PropertiesChanged callbacks...', 'color:darkblue');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
             if (args.newProps.audioprocessing !== undefined) {
                 if (!args.newProps.audioprocessing && canvasContext) {
@@ -48,8 +49,12 @@ export default function BarVisualizer() {
         };
     }, [ context, canvasContext ]);
 
-    // onAudioSamples
+    // ================
+    //  onAudioSamples
+    // ================
     useEffect(() => {
+        Log.debug('%c[BarVisualizer] Registering onAudioSamples and render callbacks...', 'color:darkblue');
+
         let samplesBuffer: AudioSamplesBuffer | undefined;
         let samples: AudioSamplesArray | undefined;
         let peak = 1;
@@ -93,7 +98,7 @@ export default function BarVisualizer() {
             //   L = [f₀ f₁ ... fₙ]
             //   R = [f₀ f₁ ... fₙ]
             //   fᵢ: weighted mean of frequency i samples
-            const smoothFactor = O.smoothing / 100;
+            const smoothFactor = O.current.smoothing / 100;
             const smoothSamples = samplesBuffer.size > 1
                 ? _reduxSamplesWeightedMean(samplesBuffer.samples, smoothFactor)
                 : prevSamples !== undefined && samplesBuffer.size === 1
@@ -128,25 +133,25 @@ export default function BarVisualizer() {
                 const N_BARS = samples.length * 2;
 
                 // Snapshot current properties, to render all bars consistently with the same settings
-                const width = canvasContext.canvas.width * (O.width / 100);
-                const flipFrequencies = O.flipFrequencies;
-                const alignment = O.bars.alignment;
-                const position = canvasContext.canvas.height * (O.position / 100);
-                const barWidth = (width / N_BARS) * (O.bars.width / 100);
+                const width = canvasContext.canvas.width * (O.current.width / 100);
+                const flipFrequencies = O.current.flipFrequencies;
+                const alignment = O.current.bars.alignment;
+                const position = canvasContext.canvas.height * (O.current.position / 100);
+                const barWidth = (width / N_BARS) * (O.current.bars.width / 100);
                 const barHeight = Math.min(
                     (2 / (1 - alignment)) * position,                                   // (1-a)/2: section of the bar below the pivot point
                     (2 / (1 + alignment)) * (canvasContext.canvas.height - position),   // (1+a)/2: section of the bar above the pivot point
-                ) * (O.bars.height / 100);
+                ) * (O.current.bars.height / 100);
 
-                const barColorRgb: Readonly<RGB> = [ O.bars.color.r, O.bars.color.g, O.bars.color.b ];
-                const barColorReaction = O.bars.responseType !== ColorReactionType.None
-                    ? ColorReactionFactory.buildColorReaction(O.bars.responseType, {
+                const barColorRgb: Readonly<RGB> = [ O.current.bars.color.r, O.current.bars.color.g, O.current.bars.color.b ];
+                const barColorReaction = O.current.bars.responseType !== ColorReactionType.None
+                    ? ColorReactionFactory.buildColorReaction(O.current.bars.responseType, {
                         fromRgb: barColorRgb,
-                        toRgb: [ O.bars.responseToHue.r, O.bars.responseToHue.g, O.bars.responseToHue.b ],
-                        degree: O.bars.responseDegree,
-                        range: O.bars.responseRange,
+                        toRgb: [ O.current.bars.responseToHue.r, O.current.bars.responseToHue.g, O.current.bars.responseToHue.b ],
+                        degree: O.current.bars.responseDegree,
+                        range: O.current.bars.responseRange,
                     }) : undefined;
-                const barColorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(O.bars.responseProvider, O.bars.responseValueGain);
+                const barColorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(O.current.bars.responseProvider, O.current.bars.responseValueGain);
 
                 const spacing = (width - N_BARS * barWidth) / (N_BARS - 1);
 
@@ -203,7 +208,7 @@ export default function BarVisualizer() {
             }
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
         };
-    }, [ context, canvasContext, O ]);
+    }, [ context, canvasContext ]);
 
     return (
       <canvas ref={canvas} />

@@ -1,18 +1,18 @@
 /* eslint-disable no-multi-spaces */
 
 import _ from 'lodash';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import { PINK_NOISE } from '../app/noise';
+import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
 import Properties, { applyUserProperties } from '../app/properties/Properties';
+import { PINK_NOISE } from '../app/noise';
+import { ScaleFunctionFactory } from '../app/ScaleFunction';
 import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
 
 import Stats from './Stats';
 import BarVisualizer from './BarVisualizer';
-import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
-import { ScaleFunctionFactory } from '../app/ScaleFunction';
 
 interface WallpaperProps {
     windowEvents: WindowEvents;
@@ -20,12 +20,12 @@ interface WallpaperProps {
 }
 
 export function Wallpaper(props: WallpaperProps) {
-    useEffect(() => Log.debug('[Wallpaper]', props.options));
-    const O = props.options;
+    const O = useRef(props.options);
 
-    const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = new Set();
-    const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = new Set();
-    const wallpaperEvents: WallpaperEvents = {
+    // Observer
+    const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
+    const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = useMemo(() => new Set(), []);
+    const wallpaperEvents: WallpaperEvents = useMemo(() => ({
         onUserPropertiesChanged: {
             subscribe: callback => { onUserPropertiesChangedSubs.add(callback); },
             unsubscribe: callback => { onUserPropertiesChangedSubs.delete(callback); },
@@ -34,16 +34,21 @@ export function Wallpaper(props: WallpaperProps) {
             subscribe: callback => { onAudioSamplesSubs.add(callback); },
             unsubscribe: callback => { onAudioSamplesSubs.delete(callback); },
         },
-    };
+    }), [ onUserPropertiesChangedSubs, onAudioSamplesSubs ]);
 
-    const samplesBuffer = new AudioSamplesBuffer(1 + O.audioSamples.bufferLength);
+    const samplesBufferLength = O.current.audioSamples.bufferLength;
+    const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + samplesBufferLength), [samplesBufferLength]);
 
-    // window.wallpaperPropertyListener
+    // ==================================
+    //  window.wallpaperPropertyListener
+    // ==================================
     useEffect(() => {
+        Log.debug('%c[Wallpaper] Registering wallpaperPropertyListener callbacks...', 'color:crimson');
+
         window.wallpaperPropertyListener = {
             applyUserProperties: _props => {
-                const oldProps = _.cloneDeep(O);
-                const newProps = applyUserProperties(O, _props);
+                const oldProps = _.cloneDeep(O.current);
+                const newProps = applyUserProperties(O.current, _props);
 
                 // Log.debug('User properties applied', newProps);
                 if (newProps.audioSamples?.bufferLength !== undefined) {
@@ -57,25 +62,29 @@ export function Wallpaper(props: WallpaperProps) {
             onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener;
         };
-    }, [ O, onUserPropertiesChangedSubs, samplesBuffer ]);
+    }, [ onUserPropertiesChangedSubs, samplesBuffer ]);
 
-    // window.wallpaperRegisterAudioListener
+    // =======================================
+    //  window.wallpaperRegisterAudioListener
+    // =======================================
     useEffect(() => {
+        Log.debug('%c[Wallpaper] Registering wallpaperRegisterAudioListener callback...', 'color:crimson');
+
         let samples: AudioSamplesArray | undefined;
         let peak: number = 0;
         const mean: number = 0;
 
         function _preProcessSamples(_samples: number[]): number[] {
-            const shouldCorrectSamples = O.audioSamples.correctSamples;
-            const scaleFn = ScaleFunctionFactory.buildScaleFunction(O.audioSamples.scale);
+            const shouldCorrectSamples = O.current.audioSamples.correctSamples;
+            const scaleFn = ScaleFunctionFactory.buildScaleFunction(O.current.audioSamples.scale);
 
             const filteredSamples = _samples.map((vin, i) => {
                 let vout = vin;
                 if (shouldCorrectSamples) {
                     vout /= PINK_NOISE[i % PINK_NOISE.length];                                      // CORRECT SAMPLES
                 }
-                vout *= (1 + O.audioSamples.audioVolumeGain / 100);                     // LINEAR GAIN
-                vout = vout >= O.audioSamples.audioFreqThreshold / 1000 ? vout : 0;     // THRESHOLD
+                vout *= (1 + O.current.audioSamples.audioVolumeGain / 100);                     // LINEAR GAIN
+                vout = vout >= O.current.audioSamples.audioFreqThreshold / 1000 ? vout : 0;     // THRESHOLD
 
                 vout = scaleFn(vout);                                                               // SCALE
                 return vout;
@@ -83,7 +92,7 @@ export function Wallpaper(props: WallpaperProps) {
 
             peak = _.max(filteredSamples) ?? 0;
 
-            if (O.audioSamples.normalize) {
+            if (O.current.audioSamples.normalize) {
                 let totalWeight = 1;
                 const peaks = samplesBuffer.samples.map((v, i, arr) => {
                     const w = 6 ** (i / arr.length - 1);
@@ -121,13 +130,16 @@ export function Wallpaper(props: WallpaperProps) {
             onAudioSamplesSubs.clear();
             window.wallpaperRegisterAudioListener(null);
         };
-    }, [ O, onAudioSamplesSubs, samplesBuffer ]);
+    }, [ onAudioSamplesSubs, samplesBuffer ]);
 
-    const wallpaperContext = useMemo<WallpaperContextType>(() => ({
-        windowEvents: props.windowEvents,
-        wallpaperEvents,
-        wallpaperProperties: O,
-    }), [ O, props.windowEvents, wallpaperEvents ]);
+    const wallpaperContext = useMemo<WallpaperContextType>(() => {
+        Log.debug('%c[Wallpaper] Creating WallpaperContext...', 'color:crimson');
+        return {
+            windowEvents: props.windowEvents,
+            wallpaperEvents,
+            wallpaperProperties: O.current,
+        };
+    }, [ props.windowEvents, wallpaperEvents ]);
 
     return (
       <WallpaperContext.Provider value={wallpaperContext}>
