@@ -49,6 +49,7 @@ export function Wallpaper(props: WallpaperProps) {
             applyUserProperties: _props => {
                 const oldProps = _.cloneDeep(O.current);
                 const newProps = applyUserProperties(O.current, _props);
+                if (_.isEmpty(newProps)) return;
 
                 // Log.debug('User properties applied', newProps);
                 if (newProps.audioSamples?.bufferLength !== undefined) {

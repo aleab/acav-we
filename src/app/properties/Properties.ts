@@ -110,12 +110,28 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     );
 }
 
+function removeUnchangedProperties(_old: any, _new: any) {
+    Object.keys(_new).forEach(k => {
+        if (_old[k] !== undefined && _.isObjectLike(_new[k])) {
+            removeUnchangedProperties(_old[k], _new[k]);
+            if (_.isEmpty(_new[k])) {
+                // eslint-disable-next-line no-param-reassign
+                delete _new[k];
+            }
+        } else if (_old[k] === _new[k]) {
+            // eslint-disable-next-line no-param-reassign
+            delete _new[k];
+        }
+    });
+}
+
 /**
  * @param properties Mutable properties object
  * @param newRawProperties The raw object received by Wallpaper Engine
  */
 export function applyUserProperties(properties: Properties, newRawProperties: DeepReadonly<RawWallpaperProperties>): MappedProperties {
     const newProperties = mapProperties(newRawProperties);
+    removeUnchangedProperties(properties, newProperties);
     _.merge(properties, newProperties);
     return _.cloneDeep(newProperties);
 }
