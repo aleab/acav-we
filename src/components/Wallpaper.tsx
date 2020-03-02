@@ -26,6 +26,8 @@ interface WallpaperProps {
 export function Wallpaper(props: WallpaperProps) {
     const O = useRef(props.options);
 
+    window.acav.getProperties = () => _.cloneDeep(O.current);
+
     // Observer
     const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
     const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = useMemo(() => new Set(), []);
@@ -249,7 +251,7 @@ export function Wallpaper(props: WallpaperProps) {
         }
 
         let listenerIsPaused = false;
-        window.wallpaperTogglePauseAudioListener = () => {
+        window.acav.togglePauseAudioListener = () => {
             listenerIsPaused = !listenerIsPaused;
         };
 
@@ -266,6 +268,7 @@ export function Wallpaper(props: WallpaperProps) {
         return () => {
             onAudioSamplesSubs.clear();
             window.wallpaperRegisterAudioListener(null);
+            delete window.acav.togglePauseAudioListener;
         };
     }, [ onAudioSamplesSubs, samplesBuffer ]);
 

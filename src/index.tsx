@@ -8,6 +8,7 @@ import projectProperties from '../project.json/project.properties.json';
 
 import './common/index';
 import './app/index';
+import Log from './common/Log';
 
 function run(Component: typeof Wallpaper) {
     const onresizeEventSubs = new Set<(args: {}) => void>();
@@ -25,14 +26,23 @@ function run(Component: typeof Wallpaper) {
     const defaultProperties = mapProperties(projectProperties) as Properties;
     const rootElement = document.getElementById('root');
 
-    window.wallpaperReload = () => {
+    window.acav.reload = () => {
+        Log.info(
+            '%c' +
+            '========================================\n' +
+            'LOADING WALLPAPER\n' +
+            `  NODE_ENV: "${process.env['NODE_ENV']}"\n` +
+            '========================================\n',
+            'color: #350E23; font-weight:bold',
+        );
+
         if (rootElement !== null) {
             ReactDOM.unmountComponentAtNode(rootElement);
             ReactDOM.render(<Component options={defaultProperties} windowEvents={windowEvents} />, rootElement);
         }
     };
 
-    window.wallpaperReload();
+    window.acav.reload();
 }
 
 run(Wallpaper);
