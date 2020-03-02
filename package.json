@@ -8,8 +8,8 @@
         "clean:windows": "if exist dist (del /S /Q dist\\* && for /D %d in (dist\\*) do rmdir /S /Q \"%d\")",
         "clean:nix": "[ -d dist ] && rm -r ./dist/*",
         "pre-build": "npm run clean && babel-node ./pre-build.js",
-        "build:dev": "npm run pre-build && cross-env NODE_ENV=development webpack --mode development",
         "build": "npm run pre-build && cross-env NODE_ENV=production webpack -p",
+        "build:dev": "npm run pre-build && cross-env NODE_ENV=development webpack --mode development",
         "start:dev": "npm run build:dev && webpack-dev-server --mode development",
         "start:we": "npm run pre-build && babel-node ./webpack-start-we.js",
         "lint": "eslint ."

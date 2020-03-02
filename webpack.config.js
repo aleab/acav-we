@@ -23,6 +23,7 @@ const DIST_PATH = path.resolve(__dirname, 'dist');
  */
 function getWebpackConfig(env, argv) {
     const isProduction = argv.mode !== 'development';
+    const hot = argv.hot;
 
     /** @type {import('webpack').Configuration} */
     const prodConfig = {
@@ -142,16 +143,11 @@ function getWebpackConfig(env, argv) {
     /** @type {import('webpack').Configuration} */
     const devConfigPatch = {
         mode: 'development',
-        entry: [
-            'webpack-dev-server/client?http://localhost:3000',
-            'webpack/hot/only-dev-server',
-            ...prodConfig.entry,
-        ],
+        entry: [...prodConfig.entry],
         output: { publicPath: '/' },
         optimization: { minimize: false },
         plugins: [
             ...prodConfig.plugins,
-            new webpack.HotModuleReplacementPlugin(),
             new webpack.NamedModulesPlugin(),
         ],
         devServer: {
@@ -163,6 +159,14 @@ function getWebpackConfig(env, argv) {
         },
         devtool: 'inline-source-map',
     };
+    if (hot) {
+        devConfigPatch.entry = [
+            'webpack-dev-server/client?http://localhost:3000',
+            'webpack/hot/only-dev-server',
+            ...devConfigPatch.entry,
+        ];
+        devConfigPatch.plugins.push(new webpack.HotModuleReplacementPlugin());
+    }
 
     const config = isProduction ? prodConfig : _.merge(prodConfig, devConfigPatch);
     return config;
