@@ -77,14 +77,16 @@ export function Wallpaper(props: WallpaperProps) {
         if (_dir && _dir.length > 0) {
             const _id = applyNewRandomImageRequestId.current;
             window.wallpaperRequestRandomFileForProperty('background_playlist', (_p, filePath) => {
+                Log.debug('%c[Wallpaper] Got new image from wallpaperRequestRandomFileForProperty:', 'color:green', `"${filePath}"`);
+
                 // Depending on the size of the selected directory and its subdirectories, wallpaperRequestRandomFileForProperty may
                 // take a while get a file and execute this callback, so we need to check if the user still needs this random file
                 const tooSlow = O.current.background.mode !== BackgroundMode.Playlist
                             || O.current.background.playlistDirectory !== _dir
                             || _id !== applyNewRandomImageRequestId.current;
                 if (tooSlow) return;
-                if (!filePath || (filePath === backgroundImagePath.current && maxTries > 0)) {
-                    // Same image, retry
+                if ((!filePath || filePath === backgroundImagePath.current) && maxTries > 0) {
+                    // Same image or no image at all (?!), retry
                     applyNewRandomImage(maxTries - 1);
                 } else {
                     setBackgroundImage(filePath);
@@ -97,7 +99,7 @@ export function Wallpaper(props: WallpaperProps) {
 
     const updateBackgroundFirst = useRef(true);
     const updateBackground = useCallback(() => {
-        Log.debug('%c[Wallpaper] Updating background...', 'color:green', { background: _.cloneDeep(O.current.background) });
+        Log.debug('%c[Wallpaper] Updating background...', 'color:green', { firstUpdate: updateBackgroundFirst.current, background: _.cloneDeep(O.current.background) });
 
         function clearPlaylistState() {
             backgroundImagePath.current = null;
