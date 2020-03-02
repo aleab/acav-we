@@ -10,6 +10,8 @@ import { AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValue
 import { ColorReactionFactory, ColorReactionType } from '../app/ColorReactionType';
 import WallpaperContext from '../app/WallpaperContext';
 
+const Logc = Log.getLogger('BarVisualizer', 'darkblue');
+
 export default function BarVisualizer() {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.barVisualizer);
@@ -21,7 +23,7 @@ export default function BarVisualizer() {
     //  <canvas>
     // ==========
     useEffect(() => {
-        Log.debug('%c[BarVisualizer] Initializing canvas...', 'color:darkblue');
+        Logc.debug('Initializing canvas...');
         canvas.current!.width = window.innerWidth;
         canvas.current!.height = window.innerHeight;
         const _canvasContext = canvas.current?.getContext('2d', { desynchronized: true });
@@ -32,7 +34,7 @@ export default function BarVisualizer() {
     //  onUserPropertiesChanged
     // =========================
     useEffect(() => {
-        Log.debug('%c[BarVisualizer] Registering on*PropertiesChanged callbacks...', 'color:darkblue');
+        Logc.debug('Registering on*PropertiesChanged callbacks...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
             if (args.newProps.audioprocessing !== undefined) {
                 if (!args.newProps.audioprocessing && canvasContext) {
@@ -53,7 +55,7 @@ export default function BarVisualizer() {
     //  onAudioSamples
     // ================
     useEffect(() => {
-        Log.debug('%c[BarVisualizer] Registering onAudioSamples and render callbacks...', 'color:darkblue');
+        Logc.debug('Registering onAudioSamples and render callbacks...');
 
         let samplesBuffer: AudioSamplesBuffer | undefined;
         let samples: AudioSamplesArray | undefined;

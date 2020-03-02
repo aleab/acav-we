@@ -5,6 +5,8 @@ import Log from '../common/Log';
 import BackgroundMode from '../app/BackgroundMode';
 import Properties from '../app/properties/Properties';
 
+const Logc = Log.getLogger('useWallpaperBackground', 'darkolivegreen');
+
 interface UseWallpaperBackgroundArgs {
     localStorageKeys: {
         currentImage: string;
@@ -23,7 +25,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
     const scheduleBackgroundImageChange = useCallback((fn: () => void, ms: number) => {
         clearTimeout(backgroundPlaylistTimer.current);
         backgroundPlaylistTimer.current = setTimeout((() => fn()) as TimerHandler, ms);
-        Log.debug(`%c[useWallpaperBackground] Scheduled background image change in ${ms / 1000}s.`, 'color:seagreen');
+        Logc.debug(`Scheduled background image change in ${ms / 1000}s.`);
     }, []);
 
     const setBackgroundImage = useCallback((imagePath: string) => {
@@ -35,7 +37,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
                 background: `center / cover no-repeat url("file:///${imagePath}")`,
             });
 
-            Log.debug(`%c[Wallpaper] Background image set to "${imagePath}"`, 'color:green');
+            Logc.debug(`Background image set to "${imagePath}"`);
         }
     }, [args.localStorageKeys.currentImage]);
 
@@ -47,7 +49,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
         if (_dir && _dir.length > 0) {
             const _id = applyNewRandomImageRequestId.current;
             window.wallpaperRequestRandomFileForProperty('background_playlist', (_p, filePath) => {
-                Log.debug('%c[Wallpaper] Got new image from wallpaperRequestRandomFileForProperty:', 'color:green', `"${filePath}"`);
+                Logc.debug('Got new image from wallpaperRequestRandomFileForProperty:', `"${filePath}"`);
 
                 // Depending on the size of the selected directory and its subdirectories, wallpaperRequestRandomFileForProperty may
                 // take a while get a file and execute this callback, so we need to check if the user still needs this random file
@@ -69,7 +71,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
 
     const updateBackgroundFirst = useRef(true);
     const updateBackground = useCallback(() => {
-        Log.debug('%c[Wallpaper] Updating background...', 'color:green', { firstUpdate: updateBackgroundFirst.current, background: _.cloneDeep(O.current.background) });
+        Logc.debug('Updating background...', { firstUpdate: updateBackgroundFirst.current, background: _.cloneDeep(O.current.background) });
 
         function clearPlaylistState() {
             backgroundImagePath.current = null;

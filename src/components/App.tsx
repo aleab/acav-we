@@ -18,6 +18,8 @@ import useWallpaperBackground from '../hooks/useWallpaperBackground';
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
 
+const Logc = Log.getLogger('App', 'darkgreen');
+
 interface AppProps {
     windowEvents: WindowEvents;
     options: Properties
@@ -61,7 +63,7 @@ export default function App(props: AppProps) {
     //  window.wallpaperPropertyListener
     // ==================================
     useEffect(() => {
-        Log.debug('%c[Wallpaper] Registering wallpaperPropertyListener callbacks...', 'color:green');
+        Logc.debug('Registering wallpaperPropertyListener callbacks...');
 
         window.wallpaperPropertyListener = {
             applyUserProperties: _props => {
@@ -97,7 +99,7 @@ export default function App(props: AppProps) {
     //  window.wallpaperRegisterAudioListener
     // =======================================
     useEffect(() => {
-        Log.debug('%c[Wallpaper] Registering wallpaperRegisterAudioListener callback...', 'color:green');
+        Logc.debug('Registering wallpaperRegisterAudioListener callback...');
 
         let samples: AudioSamplesArray | undefined;
         let peak: number = 0;
@@ -163,7 +165,7 @@ export default function App(props: AppProps) {
     }, [ onAudioSamplesSubs, samplesBuffer ]);
 
     const wallpaperContext = useMemo<WallpaperContextType>(() => {
-        Log.debug('%c[Wallpaper] Creating WallpaperContext...', 'color:green');
+        Logc.debug('Creating WallpaperContext...');
         return {
             windowEvents: props.windowEvents,
             wallpaperEvents,
