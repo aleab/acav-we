@@ -1,16 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import Wallpaper from './components/Wallpaper';
+import App from './components/App';
+import Log from './common/Log';
 import Properties, { mapProperties } from './app/properties/Properties';
 
 import projectProperties from '../project.json/project.properties.json';
 
 import './common/index';
 import './app/index';
-import Log from './common/Log';
 
-function run(Component: typeof Wallpaper) {
+function run(Component: typeof App) {
     const onresizeEventSubs = new Set<(args: {}) => void>();
     const windowEvents: WindowEvents = {
         onresize: {
@@ -45,5 +45,5 @@ function run(Component: typeof Wallpaper) {
     window.acav.reload();
 }
 
-run(Wallpaper);
-module.hot?.accept('./components/Wallpaper', () => run(Wallpaper));
+run(App);
+module.hot?.accept('./components/App', () => run(App));

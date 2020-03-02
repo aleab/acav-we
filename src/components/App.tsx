@@ -18,12 +18,12 @@ import BarVisualizer from './BarVisualizer';
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
 
-interface WallpaperProps {
+interface AppProps {
     windowEvents: WindowEvents;
     options: Properties
 }
 
-export function Wallpaper(props: WallpaperProps) {
+export function App(props: AppProps) {
     const O = useRef(props.options);
 
     window.acav.getProperties = () => _.cloneDeep(O.current);
@@ -291,4 +291,4 @@ export function Wallpaper(props: WallpaperProps) {
     );
 }
 
-export default Wallpaper;
+export default App;
