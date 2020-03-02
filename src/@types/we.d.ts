@@ -4,12 +4,15 @@ type MappedProperties = import('utility-types').DeepPartial<import('../app/prope
 
 // PROPERTIES
 
-type WEPropertyType = 'color' | 'slider' | 'bool' | 'combo' | 'text' | 'file' | 'directory';
+type WEPropertyType = 'color' | 'slider' | 'bool' | 'combo' | 'text' | 'textinput' | 'file' | 'directory';
 type WEProperty<T extends WEPropertyType | string = string> = Readonly<{
     type: T;
     text: string;
 } & (
-    T extends 'text' ? {} : {
+    T extends 'text' ? {} :
+    T extends 'file' | 'directory' ? {
+        value?: string;
+    } : {
         value: T extends 'slider' ? number : T extends 'bool' ? boolean : string;
     }
 ) & (
@@ -21,11 +24,11 @@ type WEProperty<T extends WEPropertyType | string = string> = Readonly<{
     } : {}
 ) & (
     T extends 'file' ? {
-        fileType?: 'video' | string
+        fileType?: 'video' | string;
     } : {}
 ) & (
     T extends 'directory' ? {
-        mode: 'ondemand' | 'fetchall'
+        mode: 'ondemand' | 'fetchall';
     } : {}
 )>;
 
@@ -48,6 +51,8 @@ type WEPropertyListener = {
     applyUserProperties?: (props: RawWallpaperProperties) => void;
     applyGeneralProperties?: (props: WEGeneralProperties) => void;
     setPaused?: (isPaused: boolean) => void;
+    userDirectoryFilesAddedOrChanged?: (propertyName: string, changedFiles: string[]) => void;
+    userDirectoryFilesRemoved?: (propertyName: string, removedFiles: string[]) => void;
 };
 type WEAudioListener = (audioArray: number[]) => void;
 

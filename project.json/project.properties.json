@@ -18,6 +18,64 @@
         "value": false
     },
 
+    // [BACKGROUND]
+    "background": {
+        "order": 5,
+        "type": "text",
+        "text": "ui_background"
+    },
+    "background_type": {
+        "order": 6,
+        "type": "combo",
+        "text": "ui_background_type",
+        "options": [
+            { "label": "Color", "value": "Color" },
+            { "label": "Image", "value": "Image" },
+            { "label": "CSS", "value": "Css" },
+            { "label": "Playlist", "value": "Playlist" }
+        ],
+        "value": "Color"
+    },
+    "background_color": {
+        "order": 7,
+        "type": "color",
+        "text": "ui_background_color",
+        "value": "0 0.003921 0.035294",
+        "condition": "background_type.value === 'Color'"
+    },
+    "background_image": {
+        "order": 7,
+        "type": "file",
+        "text": "ui_background_image",
+        "condition": "background_type.value === 'Image'"
+    },
+    "background_css": {
+        "order": 7,
+        "type": "textinput",
+        "text": "ui_background_css",
+        "value": "background: radial-gradient(ellipse at center, #0d0f16 0%,#030611 60%,#000105 100%);",
+        "condition": "background_type.value === 'Css'"
+    },
+    "background_playlist": {
+        "order": 7,
+        "type": "directory",
+        "text": "ui_background_playlist",
+        "mode": "ondemand",
+        "condition": "background_type.value === 'Playlist'"
+    },
+    "background_playlistTimer": {
+        "order": 8,
+        "type": "slider",
+        "text": "ui_background_playlistTimer",
+        "value": 1,
+        "min": 0.1,
+        "max": 24,
+        "fraction": true,
+        "step": 0.1,
+        "editable": false,
+        "condition": "background_type.value === 'Playlist'"
+    },
+
     // [AUDIO SAMPLES]
     "audioSamples": {
         "order": 20,

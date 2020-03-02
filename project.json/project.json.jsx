@@ -74,6 +74,15 @@ function getProjectJson() {
                     ui_showDescriptions: 'Show Descriptions',
                     ui_showAdvancedOptions: 'Show Advanced Options' + asterisk(),
 
+                    // [BACKGROUND]
+                    ui_background: section('Background'),
+                    ui_background_type: indent('Type'),
+                    ui_background_color: indent(withPropertyIcon('fas fa-palette', 'Color')),
+                    ui_background_image: indent(withPropertyIcon('fas fa-image', 'Image')),
+                    ui_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS')),
+                    ui_background_playlist: indent(withPropertyIcon('fas fa-images', 'Playlist')),
+                    ui_background_playlistTimer: indent('Timer (hours)'),
+
                     // [AUDIO SAMPLES]
                     ui_audioSamples: section('Audio Samples'),
                     ui_audioSamples_correct: withPropertyIcon('fas fa-filter', 'Correct Samples') + asterisk(),

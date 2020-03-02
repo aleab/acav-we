@@ -43,6 +43,9 @@ function getWebpackConfig(env, argv) {
                     loader: 'eslint-loader',
                     include: SRC_PATH,
                     exclude: [path.resolve(__dirname, 'node_modules')],
+                    options: {
+                        configFile: './.eslintrc',
+                    },
                 },
                 {
                     oneOf: [

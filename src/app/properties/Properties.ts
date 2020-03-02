@@ -1,13 +1,17 @@
 import _ from 'lodash';
 import { DeepReadonly } from 'utility-types';
 
-import { ScaleFunction } from '../ScaleFunction';
-import { ColorReactionType } from '../ColorReactionType';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
+import BackgroundMode from '../BackgroundMode';
+import { ColorReactionType } from '../ColorReactionType';
+import { ScaleFunction } from '../ScaleFunction';
+
 import AudioSamplesProperties from './AudioSamplesProperties';
+import BackgroundProperties from './BackgroundProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
+    background: BackgroundProperties;
     audioSamples: AudioSamplesProperties;
     barVisualizer: {
         position: number;
@@ -67,6 +71,15 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r.value);
     }
 
+    // .background
+    const backgroundOptions: MappedProperties['background'] = {};
+    setProperty(backgroundOptions, 'mode', raw.background_type as WEProperty<'combo'>, _r => parseComboProperty(_r, BackgroundMode));
+    setProperty(backgroundOptions, 'color', raw.background_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(backgroundOptions, 'imagePath', raw.background_image as WEProperty<'file'>, _r => _r.value);
+    setProperty(backgroundOptions, 'css', raw.background_css as WEProperty<'textinput'>, _r => _r.value);
+    setProperty(backgroundOptions, 'playlistDirectory', raw.background_playlist as WEProperty<'directory'>, _r => _r.value);
+    setProperty(backgroundOptions, 'playlistTimerMinutes', raw.background_playlistTimer as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r) * 60));
+
     // .audioSamples
     const audioSamplesOptions: MappedProperties['audioSamples'] = { scale: {} };
     setProperty(audioSamplesOptions, 'correctSamples', raw.audioSamples_correct as WEProperty<'bool'>, _r => _r.value);
@@ -84,6 +97,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(audioSamplesOptions.scale!, 'log$powExponent', raw.audioSamples_scale_Logarithm$Power_exponent as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(audioSamplesOptions.scale!, 'gaussianDeviation', raw.audioSamples_scale_Gaussian_deviation as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(audioSamplesOptions.scale!, 'gaussianMean', raw.audioSamples_scale_Gaussian_mean as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(audioSamplesOptions.scale)) delete audioSamplesOptions.scale;
 
     // .barVisualizer
     const barVisualizerOptions: MappedProperties['barVisualizer'] = { bars: {} };
@@ -102,9 +116,11 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(barVisualizerOptions.bars!, 'responseRange', raw.barVisualizer_bars_responseRange as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'responseDegree', raw.barVisualizer_bars_responseDegree as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'responseToHue', raw.barVisualizer_bars_response_toHue as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
     return _.merge(
         { ...rootOptions },
+        !_.isEmpty(backgroundOptions) ? { background: backgroundOptions } : {},
         !_.isEmpty(audioSamplesOptions) ? { audioSamples: audioSamplesOptions } : {},
         !_.isEmpty(barVisualizerOptions) ? { barVisualizer: barVisualizerOptions } : {},
     );

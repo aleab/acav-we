@@ -28,6 +28,7 @@
         "linebreak-style": "off",
         "lines-between-class-members": "off",
         "max-len": "off",
+        "no-cond-assign": "off",
         "no-console": "off",
         "no-nested-ternary": "off",
         "no-plusplus": "off",

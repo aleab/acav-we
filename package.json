@@ -17,7 +17,6 @@
     "author": "Sp3l",
     "license": "MPL-2.0",
     "dependencies": {
-        "@types/color-convert": "^1.9.0",
         "color-convert": "^2.0.1",
         "lodash": "^4.17.15",
         "react": "^16.12.0",
@@ -31,6 +30,7 @@
         "@babel/preset-env": "^7.8.4",
         "@babel/preset-react": "^7.8.3",
         "@babel/standalone": "^7.8.4",
+        "@types/color-convert": "^1.9.0",
         "@types/lodash": "^4.14.149",
         "@types/react": "^16.9.20",
         "@types/react-dom": "^16.9.5",
