@@ -40,7 +40,7 @@
         "order": 7,
         "type": "color",
         "text": "ui_background_color",
-        "value": "0 0.003921 0.035294",
+        "value": "0 0.007843 0.035294",
         "condition": "background_type.value === 'Color'"
     },
     "background_image": {
@@ -68,10 +68,10 @@
         "type": "slider",
         "text": "ui_background_playlistTimer",
         "value": 1,
-        "min": 0.1,
+        "min": 0.5,
         "max": 24,
         "fraction": true,
-        "step": 0.1,
+        "step": 0.5,
         "editable": false,
         "condition": "background_type.value === 'Playlist'"
     },
@@ -150,13 +150,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Power'"
     },
     "$_audioSamples_scale_Exponential": {
-        "order": 29,
+        "order": 27,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Exponential",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Exponential'"
     },
     "audioSamples_scale_Exponential_base": {
-        "order": 30,
+        "order": 28,
         "type": "slider",
         "text": "ui_audioSamples_scale_Exponential_base",
         "value": 2,
@@ -167,13 +167,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Exponential'"
     },
     "$_audioSamples_scale_Logarithm": {
-        "order": 31,
+        "order": 27,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Logarithm",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Logarithm'"
     },
     "audioSamples_scale_Logarithm_base": {
-        "order": 32,
+        "order": 28,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm_base",
         "value": 2,
@@ -184,13 +184,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm'"
     },
     "$_audioSamples_scale_Logarithm$Power": {
-        "order": 33,
+        "order": 27,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Logarithm$Power",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Logarithm$Power'"
     },
     "audioSamples_scale_Logarithm$Power_a": {
-        "order": 34,
+        "order": 28,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm$Power_a",
         "value": 0.4,
@@ -201,7 +201,7 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
     },
     "audioSamples_scale_Logarithm$Power_base": {
-        "order": 35,
+        "order": 29,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm$Power_base",
         "value": 3,
@@ -212,7 +212,7 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
     },
     "audioSamples_scale_Logarithm$Power_exponent": {
-        "order": 36,
+        "order": 30,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm$Power_exponent",
         "value": 1.8,
@@ -223,13 +223,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
     },
     "$_audioSamples_scale_Gaussian": {
-        "order": 37,
+        "order": 27,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Gaussian",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Gaussian'"
     },
     "audioSamples_scale_Gaussian_deviation": {
-        "order": 38,
+        "order": 28,
         "type": "slider",
         "text": "ui_audioSamples_scale_Gaussian_deviation",
         "value": 0.43,
@@ -241,7 +241,7 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
     },
     "audioSamples_scale_Gaussian_mean": {
-        "order": 39,
+        "order": 29,
         "type": "slider",
         "text": "ui_audioSamples_scale_Gaussian_mean",
         "value": 0.92,
@@ -255,7 +255,7 @@
 
     // [AUDIO SAMPLES]
     "audioSamples_buffer": {
-        "order": 50,
+        "order": 40,
         "type": "slider",
         "text": "ui_audioSamples_buffer",
         "value": 0.4,
@@ -266,13 +266,13 @@
         "condition": "showAdvancedOptions.value"
     },
     "$_audioSamples_buffer": {
-        "order": 51,
+        "order": 41,
         "type": "text",
         "text": "ui_$_audioSamples_buffer",
         "condition": "(showAdvancedOptions.value && showDescriptions.value)"
     },
     "audioSamples_normalize": {
-        "order": 52,
+        "order": 42,
         "type": "bool",
         "text": "ui_audioSamples_normalize",
         "value": false,
@@ -359,7 +359,7 @@
         "order": 124,
         "type": "color",
         "text": "ui_barVisualizer_bars_color",
-        "value": "0.305882 0.529411 0.698039"
+        "value": "0.176470 0.266667 0.611764"
     },
 
     "barVisualizer_bars_responseType": {

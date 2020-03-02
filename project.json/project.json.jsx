@@ -81,7 +81,7 @@ function getProjectJson() {
                     ui_background_image: indent(withPropertyIcon('fas fa-image', 'Image')),
                     ui_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS')),
                     ui_background_playlist: indent(withPropertyIcon('fas fa-images', 'Playlist')),
-                    ui_background_playlistTimer: indent('Timer (hours)'),
+                    ui_background_playlistTimer: indent('Interval (hours)'),
 
                     // [AUDIO SAMPLES]
                     ui_audioSamples: section('Audio Samples'),
@@ -109,6 +109,7 @@ function getProjectJson() {
                     ui_audioSamples_scale_Gaussian_deviation: indent('<samp>&#120590;</samp>', { n: 2 }),
                     ui_audioSamples_scale_Gaussian_mean: indent('<samp>&#120583;</samp>', { n: 2 }),
 
+                    // $[AUDIO SAMPLES]
                     ui_$_audioSamples: note('The following filters are applied sequentially in the order they are listed here.'),
                     ui_$_audioSamples_buffer: note('How many seconds of samples to buffer for normalization and smoothing purposes.'),
                     ui_$_audioSamples_scale_Power: note(
@@ -152,6 +153,7 @@ function getProjectJson() {
                     ui_barVisualizer_bars_responseDegree: indent('Degree', { n: 3 }) + asterisk(),
                     ui_barVisualizer_bars_response_toHue: indent('Max Color (Hue)', { n: 3 }),
 
+                    // $[BAR VISUALIZER]
                     ui_$_barVisualizer_bars_responseType: note('This options controls what kind of audio-responsive effect to apply to the color of each bar.'),
                     ui_$_barVisualizer_bars_responseProvider: note(
                         'This defines which parameter or characteristic <samp>P</samp> of the audio samples to use to determine the <em>amount of effect</em> to apply to the color of each bar.',
@@ -164,6 +166,7 @@ function getProjectJson() {
                     ),
                     ui_$_barVisualizer_bars_responseDegree: note('Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.'),
 
+                    // [NOTES]
                     ui_notes: section('Notes', true),
                     ui_note1: note(
                         `<sup>${scalingFunctionsLink('[1]')}</sup> Graphical comparison of the scaling functions.`,
