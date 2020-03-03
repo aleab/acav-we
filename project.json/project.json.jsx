@@ -155,11 +155,11 @@ function getProjectJson() {
                     ui_barVisualizer_bars_response_toHue: indent('Max Color (Hue)', { n: 3 }),
 
                     // $[BAR VISUALIZER]
-                    ui_$_barVisualizer_bars_responseType: note('This options controls what kind of audio-responsive effect to apply to the color of each bar.'),
+                    ui_$_barVisualizer_bars_responseType: note('This option controls what kind of transformation to apply to the color of each bar.'),
                     ui_$_barVisualizer_bars_responseProvider: note(
                         'This defines which parameter or characteristic <samp>P</samp> of the audio samples to use to determine the <em>amount of effect</em> to apply to the color of each bar.',
                         '<samp><u>Value</u></samp>: the (normalized) value of the current sample.',
-                        '<samp><u>Value Change</u></samp>: the absolute difference between the current sample and the oldest one in the buffer.',
+                        '<samp><u>Value Change</u></samp>: the (absolute) difference between the current sample and the oldest one in the buffer.',
                     ),
                     ui_$_barVisualizer_bars_responseRange: note(
                         'The intensity of the effect, i.e. the difference between the maximum and minimum possible values of the color component(s) involved after the effect has been applied to the base color.',
