@@ -145,11 +145,11 @@ export default function BarVisualizer() {
                     (2 / (1 + alignment)) * (canvasContext.canvas.height - position),   // (1+a)/2: section of the bar above the pivot point
                 ) * (O.current.bars.height / 100);
 
-                const barColorRgb: Readonly<RGB> = [ O.current.bars.color.r, O.current.bars.color.g, O.current.bars.color.b ];
+                const barColorRgb: Readonly<RGB> = [ O.current.bars.color[0], O.current.bars.color[1], O.current.bars.color[2] ];
                 const barColorReaction = O.current.bars.responseType !== ColorReactionType.None
                     ? ColorReactionFactory.buildColorReaction(O.current.bars.responseType, {
                         fromRgb: barColorRgb,
-                        toRgb: [ O.current.bars.responseToHue.r, O.current.bars.responseToHue.g, O.current.bars.responseToHue.b ],
+                        toRgb: [ O.current.bars.responseToHue[0], O.current.bars.responseToHue[1], O.current.bars.responseToHue[2] ],
                         degree: O.current.bars.responseDegree,
                         range: O.current.bars.responseRange,
                     }) : undefined;

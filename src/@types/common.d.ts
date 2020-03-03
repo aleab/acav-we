@@ -1,5 +1,4 @@
-type Vector = Readonly<{ x: number; y: number; }>;
-type RgbaColor = Readonly<{ r: number; g: number; b: number; a: number; }>;
+type RGBA = [number, number, number, number];
 
 type ComponentEventArgs = {};
 type ComponentEvent<T extends ComponentEventArgs> = {

@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
+import { RGB } from 'color-convert/conversions';
 import { DeepReadonly } from 'utility-types';
 
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
@@ -23,13 +24,13 @@ export default interface Properties {
             width: number;
             height: number;
             alignment: number;
-            color: RgbaColor;
+            color: RGBA;
             responseType: ColorReactionType;
             responseProvider: AudioResponsiveValueProvider;
             responseValueGain: number;
             responseRange: number;
             responseDegree: number;
-            responseToHue: RgbaColor;
+            responseToHue: RGB;
         };
     }
 }
@@ -47,8 +48,8 @@ function parseSliderProperty(prop: WEProperty<'slider'>): number {
     return Math.clamp(prop.value, prop.min, prop.max);
 }
 
-function toRgbaColor(color: [number, number, number]): RgbaColor {
-    return { r: color[0], g: color[1], b: color[2], a: 255 };
+function toRgbaColor(color: [number, number, number]): RGBA {
+    return [ color[0], color[1], color[2], 255 ];
 }
 
 function setProperty<TOption, Type extends WEPropertyType | string, P extends keyof TOption>(
