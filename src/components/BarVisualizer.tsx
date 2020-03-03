@@ -30,9 +30,9 @@ export default function BarVisualizer() {
         setCanvasContext(_canvasContext ?? undefined);
     }, []); // just once
 
-    // =========================
-    //  onUserPropertiesChanged
-    // =========================
+    // =====================
+    //  PROPERTIES LISTENER
+    // =====================
     useEffect(() => {
         Logc.debug('Registering on*PropertiesChanged callbacks...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
@@ -51,9 +51,9 @@ export default function BarVisualizer() {
         };
     }, [ context, canvasContext ]);
 
-    // ================
-    //  onAudioSamples
-    // ================
+    // ========================
+    //  AUDIO SAMPLES LISTENER
+    // ========================
     useEffect(() => {
         Logc.debug('Registering onAudioSamples and render callbacks...');
 
@@ -64,7 +64,7 @@ export default function BarVisualizer() {
         let prevSamples: AudioSamplesArray | undefined;
         let prevSamplesCount = 0;
 
-        const _reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
+        const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;
             return _samples.reduce<number[]>((acc, curr, i, arr) => {
                 const x = i / (arr.length - 1);
@@ -79,7 +79,7 @@ export default function BarVisualizer() {
                 return acc;
             }, []).map(v => v / totalWeight);
         };
-        const _lerpSamples = (_samples: AudioSamplesArray, _prevSamples: AudioSamplesArray, _smoothFactor: number): number[] => {
+        const lerpSamples = (_samples: AudioSamplesArray, _prevSamples: AudioSamplesArray, _smoothFactor: number): number[] => {
             const _prevRaw = _prevSamples.raw;
             const s = 0.35 * _smoothFactor;
             return _samples.raw.map((v, i) => Math.lerp(_prevRaw[i], v, 1 - s));
@@ -102,9 +102,9 @@ export default function BarVisualizer() {
             //   fᵢ: weighted mean of frequency i samples
             const smoothFactor = O.current.smoothing / 100;
             const smoothSamples = samplesBuffer.size > 1
-                ? _reduxSamplesWeightedMean(samplesBuffer.samples, smoothFactor)
+                ? reduxSamplesWeightedMean(samplesBuffer.samples, smoothFactor)
                 : prevSamples !== undefined && samplesBuffer.size === 1
-                    ? _lerpSamples(args.samples, prevSamples, smoothFactor)
+                    ? lerpSamples(args.samples, prevSamples, smoothFactor)
                     : args.samples.raw;
 
             // If any value is above 1, normalize

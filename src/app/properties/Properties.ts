@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import _ from 'lodash';
 import { DeepReadonly } from 'utility-types';
 
@@ -128,14 +129,16 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
 
 function removeUnchangedProperties(_old: any, _new: any) {
     Object.keys(_new).forEach(k => {
-        if (_old[k] !== undefined && _.isObjectLike(_new[k])) {
+        if (_.isArrayLike(_new[k])) {
+            if (_.isEqual(_new[k], _old[k])) {
+                delete _new[k];
+            }
+        } else if (_old[k] !== undefined && _.isObjectLike(_new[k])) {
             removeUnchangedProperties(_old[k], _new[k]);
             if (_.isEmpty(_new[k])) {
-                // eslint-disable-next-line no-param-reassign
                 delete _new[k];
             }
         } else if (_old[k] === _new[k]) {
-            // eslint-disable-next-line no-param-reassign
             delete _new[k];
         }
     });

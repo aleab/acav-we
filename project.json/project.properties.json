@@ -29,7 +29,7 @@
         "type": "combo",
         "text": "ui_background_type",
         "options": [
-            { "label": "Color", "value": "Color" },
+            { "label": "Solid Color", "value": "Color" },
             { "label": "Image", "value": "Image" },
             { "label": "CSS", "value": "Css" },
             { "label": "Playlist", "value": "Playlist" }
@@ -55,6 +55,12 @@
         "text": "ui_background_css",
         "value": "background: radial-gradient(ellipse at center, #0d0f16 0%,#030611 60%,#000105 100%);",
         "condition": "background_type.value === 'Css'"
+    },
+    "background_$_css": {
+        "order": 8,
+        "type": "text",
+        "text": "ui_background_$_css",
+        "condition": "showDescriptions.value && background_type.value === 'Css'"
     },
     "background_playlist": {
         "order": 7,

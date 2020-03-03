@@ -1,5 +1,4 @@
 /* eslint-disable no-multi-spaces */
-
 import _ from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 
@@ -44,12 +43,22 @@ export default function App(props: AppProps) {
         },
     }), [ onUserPropertiesChangedSubs, onAudioSamplesSubs ]);
 
+    // Context
+    const wallpaperContext = useMemo<WallpaperContextType>(() => {
+        Logc.debug('Creating WallpaperContext...');
+        return {
+            windowEvents: props.windowEvents,
+            wallpaperEvents,
+            wallpaperProperties: O.current,
+        };
+    }, [ props.windowEvents, wallpaperEvents ]);
+
     const samplesBufferLength = O.current.audioSamples.bufferLength;
     const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + samplesBufferLength), [samplesBufferLength]);
 
-    // ============
-    //  BACKGROUND
-    // ============
+    // ===========
+    //  CSS STYLE
+    // ===========
     const { styleBackground, updateBackground, scheduleBackgroundImageChange } = useWallpaperBackground({
         localStorageKeys: {
             currentImage: LOCALSTORAGE_BG_CURRENT_IMAGE,
@@ -59,9 +68,9 @@ export default function App(props: AppProps) {
     });
     const style = { ...styleBackground };
 
-    // ==================================
-    //  window.wallpaperPropertyListener
-    // ==================================
+    // ============
+    //  PROPERTIES
+    // ============
     useEffect(() => {
         Logc.debug('Registering wallpaperPropertyListener callbacks...');
 
@@ -70,10 +79,13 @@ export default function App(props: AppProps) {
                 const oldProps = _.cloneDeep(O.current);
                 const newProps = applyUserProperties(O.current, _props);
                 if (_.isEmpty(newProps)) return;
-
                 // Log.debug('User properties applied', newProps);
+
                 if (newProps.background !== undefined) {
                     const { playlistTimerMinutes: _playlistTimerMinutes, ..._background } = newProps.background;
+
+                    // Give precedence to all the other properties over `playlistTimerMinutes`,
+                    // because updating the background will automatically also update the timer if necessary
                     if (!_.isEmpty(_background)) {
                         updateBackground();
                     } else if (_playlistTimerMinutes) {
@@ -82,6 +94,7 @@ export default function App(props: AppProps) {
                         scheduleBackgroundImageChange(_timeRemaining >= 0 ? _timeRemaining : 0);
                     }
                 }
+
                 if (newProps.audioSamples?.bufferLength !== undefined) {
                     samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
                 }
@@ -95,9 +108,11 @@ export default function App(props: AppProps) {
         };
     }, [ onUserPropertiesChangedSubs, samplesBuffer, updateBackground, scheduleBackgroundImageChange ]);
 
-    // =======================================
-    //  window.wallpaperRegisterAudioListener
-    // =======================================
+    // ================
+    //  AUDIO LISTENER
+    // ================
+    // All preliminary operations that need to be applied to the audio samples and shared by all the
+    // audio-responsive elements of the wallpaper, such as filters and peak calculations, are done here.
     useEffect(() => {
         Logc.debug('Registering wallpaperRegisterAudioListener callback...');
 
@@ -105,7 +120,8 @@ export default function App(props: AppProps) {
         let peak: number = 0;
         const mean: number = 0;
 
-        function _preProcessSamples(_samples: number[]): number[] {
+        // == preProcessSamples()
+        function preProcessSamples(_samples: number[]): number[] {
             const shouldCorrectSamples = O.current.audioSamples.correctSamples;
             const scaleFn = ScaleFunctionFactory.buildScaleFunction(O.current.audioSamples.scale);
 
@@ -149,7 +165,7 @@ export default function App(props: AppProps) {
 
         window.wallpaperRegisterAudioListener(rawSamples => {
             if (!listenerIsPaused) {
-                samples = new AudioSamplesArray(_preProcessSamples(rawSamples), 2);
+                samples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
                 samplesBuffer.push(samples);
             }
             if (samples !== undefined) {
@@ -163,15 +179,6 @@ export default function App(props: AppProps) {
             delete window.acav.togglePauseAudioListener;
         };
     }, [ onAudioSamplesSubs, samplesBuffer ]);
-
-    const wallpaperContext = useMemo<WallpaperContextType>(() => {
-        Logc.debug('Creating WallpaperContext...');
-        return {
-            windowEvents: props.windowEvents,
-            wallpaperEvents,
-            wallpaperProperties: O.current,
-        };
-    }, [ props.windowEvents, wallpaperEvents ]);
 
     return (
       <div style={style}>
