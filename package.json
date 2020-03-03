@@ -7,7 +7,7 @@
         "clean": "run-script-os",
         "clean:windows": "if exist dist (del /S /Q dist\\* && for /D %d in (dist\\*) do rmdir /S /Q \"%d\")",
         "clean:nix": "[ -d dist ] && rm -r ./dist/*",
-        "pre-build": "npm run clean && babel-node ./pre-build.js",
+        "pre-build": "npm run clean && babel-node ./build-scripts/pre-build.js",
         "build": "npm run pre-build && cross-env NODE_ENV=production webpack -p",
         "build:dev": "npm run pre-build && cross-env NODE_ENV=development webpack --mode development",
         "start:dev": "npm run build:dev && webpack-dev-server --mode development",

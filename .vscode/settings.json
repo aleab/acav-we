@@ -1,0 +1,26 @@
+{
+    // [editor]
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    },
+    "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "editor.wordWrap": "off",
+    //
+    // [javascript]
+    "javascript.format.semicolons": "insert",
+    "javascript.preferences.quoteStyle": "single",
+    //
+    // [typescript]
+    "typescript.format.semicolons": "insert",
+    "typescript.preferences.quoteStyle": "single",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    //
+    // [eslint]
+    "eslint.alwaysShowStatus": false,
+    "eslint.enable": true,
+    "eslint.format.enable": true
+}

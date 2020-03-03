@@ -1,4 +1,4 @@
-const buildProjectJson = require('./project.json/build');
+const buildProjectJson = require('../project.json/build');
 
 (async () => {
     await buildProjectJson().catch(e => {

@@ -66,7 +66,7 @@ function getWebpackConfig(env, argv) {
                         },
                         {
                             test: /\.(json|jsonc)$/,
-                            loader: path.resolve(__dirname, 'jsonc-loader.js'),
+                            loader: path.resolve(__dirname, 'build-scripts', 'jsonc-loader.js'),
                         },
                         {
                             loader: 'file-loader',
@@ -119,9 +119,12 @@ function getWebpackConfig(env, argv) {
                 },
             }),
             new webpack.BannerPlugin({
-                banner: 'This Source Code Form is subject to the terms of the Mozilla Public\n' +
-                        'License, v. 2.0. If a copy of the MPL was not distributed with this\n' +
-                        'file, You can obtain one at http://mozilla.org/MPL/2.0/.\n',
+                raw: true,
+                banner: '/*!\n' +
+                        ' * This Source Code Form is subject to the terms of the Mozilla Public\n' +
+                        ' * License, v. 2.0. If a copy of the MPL was not distributed with this\n' +
+                        ' * file, You can obtain one at http://mozilla.org/MPL/2.0/.\n' +
+                        ' */\n',
             }),
             new CopyWebpackPlugin([
                 { from: './LICENSE.txt' },

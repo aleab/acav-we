@@ -6,12 +6,13 @@ const os = require('os');
 const path = require('path');
 const webpack = require('webpack');
 
-const getWebpackConfig = require('./webpack.config');
-const buildProjectJson = require('./project.json/build');
+const getWebpackConfig = require('../webpack.config');
+const buildProjectJson = require('../project.json/build');
 
 const username = os.userInfo().username;
-const monitorId = String.raw`//?/DISPLAY#BNQ7F1C#5&49e848f&5&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}`;
 const projectJsonPath = path.win32.join(__dirname, 'dist', 'project.json');
+
+const monitorId = String.raw`//?/DISPLAY#BNQ7F1C#5&49e848f&5&UID4352#{e6f07b5f-ee97-4a90-b076-33f57bf4eaa7}`;
 const wePath = String.raw`C:\Program Files (x86)\Steam\steamapps\common\wallpaper_engine`;
 const weProjectPath = path.win32.join(wePath, 'projects', 'myprojects', "Aleab's Customizable Audio Visualizer");
 
