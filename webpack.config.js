@@ -86,8 +86,9 @@ function getWebpackConfig(env, argv) {
                     terserOptions: {
                         parse: { ecma: 8 },
                         compress: { ecma: 5 },
-                        output: { ecma: 5, comments: false },
+                        output: { ecma: 5, comments: /^\**!|@preserve/i },
                     },
+                    extractComments: false,
                 }),
                 new OptimizeCSSAssetsPlugin({
                     cssProcessor: cssNano,
@@ -116,6 +117,11 @@ function getWebpackConfig(env, argv) {
                     }
                     return text;
                 },
+            }),
+            new webpack.BannerPlugin({
+                banner: 'This Source Code Form is subject to the terms of the Mozilla Public\n' +
+                        'License, v. 2.0. If a copy of the MPL was not distributed with this\n' +
+                        'file, You can obtain one at http://mozilla.org/MPL/2.0/.\n',
             }),
             new CopyWebpackPlugin([
                 { from: './LICENSE.txt' },
