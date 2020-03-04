@@ -183,7 +183,7 @@ function getProjectJson() {
             properties: projectJsonProperties,
             supportsaudioprocessing: true,
         },
-        preview: 'preview.jpg',
+        preview: 'preview.gif',
         tags: ['Abstract'],
         title: 'Aleab\'s Customizable Audio Visualizer',
         type: 'web',

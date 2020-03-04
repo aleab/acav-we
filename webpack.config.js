@@ -154,6 +154,12 @@ function getWebpackConfig(env, argv) {
                 chunkFilename: '[id].css',
             }),
         ],
+        performance: {
+            hints: false,
+            assetFilter: assetFilename => {
+                return !(/^preview\.gif$/.test(assetFilename));
+            },
+        },
     };
 
     /** @type {import('webpack').Configuration} */
