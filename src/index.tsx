@@ -9,6 +9,7 @@ import projectProperties from '../project.json/project.properties.json';
 
 import './common/index';
 import './app/index';
+import './main.css';
 
 function run(Component: typeof App) {
     const onresizeEventSubs = new Set<(args: {}) => void>();

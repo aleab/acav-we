@@ -2,14 +2,15 @@
 /* eslint-disable global-require */
 
 const _ = require('lodash');
-const cssNano = require('cssnano');
 const path = require('path');
 const webpack = require('webpack');
+
+const cssnano = require('cssnano');
+const purgecss = require('@fullhuman/postcss-purgecss');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { LicenseWebpackPlugin } = require('license-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
 const SRC_PATH = path.resolve(__dirname, 'src');
@@ -55,14 +56,23 @@ function getWebpackConfig(env, argv) {
                             loader: 'ts-loader',
                             exclude: [path.resolve(__dirname, 'node_modules')],
                         },
-                        // {
-                        //     test: /\.(js|mjs)$/,
-                        //     loader: 'babel-loader',
-                        //     options: { presets: ['@babel/env'] },
-                        // },
                         {
                             test: /\.css$/,
-                            use: [ MiniCssExtractPlugin.loader, 'css-loader' ],
+                            use: [
+                                MiniCssExtractPlugin.loader,
+                                { loader: 'css-loader', options: { importLoaders: true } },
+                                {
+                                    loader: 'postcss-loader',
+                                    options: {
+                                        plugins: [
+                                            cssnano({ preset: 'default' }),
+                                            purgecss({
+                                                content: [ './static/**/*.html', './src/**/*.tsx' ],
+                                            }),
+                                        ],
+                                    },
+                                },
+                            ],
                         },
                         {
                             test: /\.(json|jsonc)$/,
@@ -89,12 +99,6 @@ function getWebpackConfig(env, argv) {
                         output: { ecma: 5, comments: /^\**!|@preserve/i },
                     },
                     extractComments: false,
-                }),
-                new OptimizeCSSAssetsPlugin({
-                    cssProcessor: cssNano,
-                    cssProcessorPluginOptions: {
-                        preset: [ 'default', { discardComments: { removeAll: true } } ],
-                    },
                 }),
             ],
         },
@@ -135,13 +139,16 @@ function getWebpackConfig(env, argv) {
                         if (isProduction) {
                             // Minify css
                             if (path.extname(filePath) === '.css') {
-                                return cssNano.process(content).then(v => v.css);
+                                return cssnano.process(content).then(v => v.css);
                             }
                         }
                         return content;
                     },
                 },
             ]),
+
+            // This plugin extracts CSS into separate files.
+            // It creates a CSS file per JS file which imports CSS.
             new MiniCssExtractPlugin({
                 filename: '[name].css',
                 chunkFilename: '[id].css',
