@@ -104,7 +104,9 @@ export default function App(props: AppProps) {
 
             if (newProps.fps !== undefined) {
                 targetFps.current = newProps.fps;
-                renderer.fps = targetFps.current;
+                if (O.current.limitFps) {
+                    renderer.fps = targetFps.current;
+                }
             }
 
             onGeneralPropertiesChangedSubs.forEach(callback => callback({ newProps }));
