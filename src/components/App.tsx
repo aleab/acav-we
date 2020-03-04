@@ -1,6 +1,6 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
@@ -26,6 +26,7 @@ interface AppProps {
 
 export default function App(props: AppProps) {
     const O = useRef(props.options);
+    const [ showStats, setShowStats ] = useState(false);
 
     window.acav.getProperties = () => _.cloneDeep(O.current);
 
@@ -80,6 +81,10 @@ export default function App(props: AppProps) {
                 const newProps = applyUserProperties(O.current, _props);
                 if (_.isEmpty(newProps)) return;
                 // Log.debug('User properties applied', newProps);
+
+                if (newProps.showStats !== undefined) {
+                    setShowStats(newProps.showStats);
+                }
 
                 if (newProps.background !== undefined) {
                     const { playlistTimerMinutes: _playlistTimerMinutes, ..._background } = newProps.background;
@@ -184,7 +189,7 @@ export default function App(props: AppProps) {
     return (
       <div style={style}>
         <WallpaperContext.Provider value={wallpaperContext}>
-          {process.env.NODE_ENV !== 'production' ? <Stats /> : null}
+          {showStats ? <Stats /> : null}
           <BarVisualizer />
         </WallpaperContext.Provider>
       </div>

@@ -13,6 +13,7 @@ import BackgroundProperties from './BackgroundProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
+    showStats: boolean;
     background: BackgroundProperties;
     audioSamples: AudioSamplesProperties;
     barVisualizer: {
@@ -69,9 +70,8 @@ function setProperty<TOption, Type extends WEPropertyType | string, P extends ke
 export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): MappedProperties {
     // .
     const rootOptions: MappedProperties = {};
-    if (raw.audioprocessing) {
-        setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r.value);
-    }
+    setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r?.value);
+    setProperty(rootOptions, 'showStats', raw.showStats as WEProperty<'bool'>, _r => _r.value);
 
     // .background
     const backgroundOptions: MappedProperties['background'] = {};

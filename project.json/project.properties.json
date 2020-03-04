@@ -17,6 +17,13 @@
         "text": "ui_showAdvancedOptions",
         "value": false
     },
+    "showStats": {
+        "order": 3,
+        "type": "bool",
+        "text": "ui_showStats",
+        "value": false,
+        "condition": "showAdvancedOptions.value"
+    },
 
     // [BACKGROUND]
     "background": {
