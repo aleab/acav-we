@@ -121,8 +121,8 @@ export default function App(props: AppProps) {
     useEffect(() => {
         Logc.debug('Registering wallpaperRegisterAudioListener callback...');
 
-        let peak: number = 0;
-        const mean: number = 0;
+        let peak = 0;
+        let mean = 0;
 
         // == preProcessSamples()
         function preProcessSamples(_samples: number[]): number[] {
@@ -151,7 +151,7 @@ export default function App(props: AppProps) {
                     return v.max() * w;
                 }).concat(peak);
 
-                peak = _.sumBy(peaks) / totalWeight;
+                peak = _.sum(peaks) / totalWeight;
                 if (peak > 0) {
                     filteredSamples.forEach((_v, i) => {
                         filteredSamples[i] /= peak;                                             // NORMALIZE
@@ -159,6 +159,7 @@ export default function App(props: AppProps) {
                 }
             }
 
+            mean = _.mean(filteredSamples) ?? 0;
             return filteredSamples;
         }
 
@@ -175,7 +176,7 @@ export default function App(props: AppProps) {
                 samplesBuffer.push(samples);
             }
             if (samples !== undefined) {
-                onAudioSamplesSubs.forEach(callback => callback({ samples: samples!, samplesBuffer, peak }));
+                onAudioSamplesSubs.forEach(callback => callback({ samples: samples!, samplesBuffer, peak, mean }));
             }
         });
 

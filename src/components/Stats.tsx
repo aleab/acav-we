@@ -8,15 +8,14 @@ import useCanvas2dTimeGraph, { UseCanvas2dTimeGraphOptions } from '../hooks/useC
 
 const Logc = Log.getLogger('Stats', '#323338');
 
-interface StatsProps {}
-
-export default function Stats(props: StatsProps) {
+export default function Stats() {
     const context = useContext(WallpaperContext);
 
     const [ frameRate, setFrameRate ] = useState({ fps: 0, frameTime: 0 });
     const [ audioUpdatesPerSecond, setAudioUpdatesPerSecond ] = useState(0);
     const [ audioSamplesPerChannel, setAudioSamplesPerChannel ] = useState(0);
     const [ audioSamplesMean, setAudioSamplesMean ] = useState(0);
+    const [ audioSamplesPeak, setAudioSamplesPeak ] = useState(0);
 
     // These refs are used in the graphs
     const fps = useRef(0);
@@ -25,27 +24,40 @@ export default function Stats(props: StatsProps) {
     useEffect(() => {
         Logc.debug('Initializing component...');
 
-        let audioSamples: AudioSamplesArray | undefined;
-        let audioUpdatesCount = 0;
-
         let frameCount = 0;
         let frameTimeCount = 0;
         let prevAnimationTimestamp = 0;
 
-        const perSecondIntervalId = setInterval(() => {
-            // Sample rate
-            setAudioUpdatesPerSecond(audioUpdatesCount);
-            audioUpdatesCount = 0;
+        let audioSamples: AudioSamplesArray | undefined;
+        let audioUpdatesCount = 0;
+        let audioSamplesPerChannelCount = 0;
+        let audioMeanCount = [ 0, 0 ];
+        let audioPeakCount = [ 0, 0 ];
 
-            // FPS and Frame Time
+        const perSecondIntervalId = setInterval((() => {
+            // Frame rate
             fps.current = frameCount;
             setFrameRate({
                 fps: fps.current,
-                frameTime: frameTimeCount / frameCount,
+                frameTime: frameCount > 0 ? frameTimeCount / frameCount : 0,
             });
             frameCount = 0;
             frameTimeCount = 0;
-        }, 1000);
+
+            // Audio Data
+            setAudioUpdatesPerSecond(audioUpdatesCount);
+            setAudioSamplesPerChannel(audioUpdatesCount > 0 ? Math.round(audioSamplesPerChannelCount / audioUpdatesCount) : 0);
+            audioUpdatesCount = 0;
+            audioSamplesPerChannelCount = 0;
+        }) as TimerHandler, 1000);
+
+        // Audio Data
+        const audioDataStateIntervalId = setInterval((() => {
+            setAudioSamplesMean(audioMeanCount[1] > 0 ? audioMeanCount[0] / audioMeanCount[1] : 0);
+            setAudioSamplesPeak(audioPeakCount[1] > 0 ? audioPeakCount[0] / audioPeakCount[1] : 0);
+            audioMeanCount = [ 0, 0 ];
+            audioPeakCount = [ 0, 0 ];
+        }) as TimerHandler, 150);
 
         // ==========================
         //  ANIMATION FRAME CALLBACK
@@ -54,13 +66,6 @@ export default function Stats(props: StatsProps) {
         const frameRequestCallback = () => {
             const timestamp = performance.now();
             requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
-
-            if (audioSamples) {
-                setAudioSamplesPerChannel(audioSamples.length);
-                setAudioSamplesMean((
-                    _.mean(audioSamples.raw.slice(0, audioSamples.raw.length / 2)) +
-                    _.mean(audioSamples.raw.slice(audioSamples.raw.length / 2))) / 2);
-            }
 
             frameCount++;
             frameTime.current = prevAnimationTimestamp > 0 ? (timestamp - prevAnimationTimestamp) : 0;
@@ -75,6 +80,12 @@ export default function Stats(props: StatsProps) {
         const audioSamplesCallback = (args: AudioSamplesEventArgs) => {
             audioSamples = args.samples;
             audioUpdatesCount++;
+            audioSamplesPerChannelCount += audioSamples.length;
+
+            audioMeanCount[0] += args.mean;
+            audioMeanCount[1]++;
+            audioPeakCount[0] += args.peak;
+            audioPeakCount[1]++;
         };
         context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesCallback);
 
@@ -90,6 +101,7 @@ export default function Stats(props: StatsProps) {
 
         return () => {
             clearInterval(perSecondIntervalId);
+            clearInterval(audioDataStateIntervalId);
             window.cancelAnimationFrame(requestAnimationFrameId);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesCallback);
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
@@ -136,6 +148,10 @@ export default function Stats(props: StatsProps) {
             <tr>
               <th>Mean</th>
               <td colSpan={2}>{`${audioSamplesMean.toFixed(6)}`}</td>
+            </tr>
+            <tr>
+              <th>Peak</th>
+              <td colSpan={2}>{`${audioSamplesPeak.toFixed(6)}`}</td>
             </tr>
           </tbody>
         </table>

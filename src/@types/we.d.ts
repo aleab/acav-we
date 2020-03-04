@@ -64,6 +64,7 @@ type AudioSamplesEventArgs = {
     samples: import('../common/AudioSamplesArray').default;
     samplesBuffer: import('../common/AudioSamplesBuffer').default;
     peak: number;
+    mean: number;
 };
 type WallpaperEvents = {
     onUserPropertiesChanged: ComponentEvent<UserPropertiesChangedEventArgs>;
