@@ -6,6 +6,7 @@ import { OptionalKeys } from 'utility-types';
 export interface UseCanvas2dTimeGraphOptions {
     width: number;
     height: number;
+    resolution?: number;
     backgroundColor?: string;
     lineColor?: string;
     refreshInterval?: number;
@@ -17,6 +18,7 @@ export interface UseCanvas2dTimeGraphOptions {
 const DEFAULT_OPTIONS: Required<Pick<UseCanvas2dTimeGraphOptions, OptionalKeys<UseCanvas2dTimeGraphOptions>>> & {
     showAverage: string;
 } = {
+    resolution: 1,
     backgroundColor: 'black',
     lineColor: 'green',
     refreshInterval: 100,
@@ -36,18 +38,18 @@ export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOption
     // Size
     useEffect(() => {
         if (canvas.current === null) throw new Error('Canvas ref is not bound to any DOM element!');
-        canvas.current!.width = options.width;
-        canvas.current!.height = options.height;
+        canvas.current!.width = options.width * (options.resolution ?? DEFAULT_OPTIONS.resolution);
+        canvas.current!.height = options.height * (options.resolution ?? DEFAULT_OPTIONS.resolution);
         context.current = canvas.current!.getContext('2d') ?? undefined;
-    }, [ options.height, options.width ]);
+    }, [ options.height, options.width, options.resolution ]);
 
     // Style
     useEffect(() => {
         assertCanvasAndContextAreDefined();
         canvas.current!.style.backgroundColor = options.backgroundColor ?? DEFAULT_OPTIONS.backgroundColor;
         context.current!.strokeStyle = options.lineColor ?? DEFAULT_OPTIONS.lineColor;
-        context.current!.lineWidth = 1;
-    }, [ assertCanvasAndContextAreDefined, options.backgroundColor, options.lineColor ]);
+        context.current!.lineWidth = options.resolution ?? DEFAULT_OPTIONS.resolution;
+    }, [ assertCanvasAndContextAreDefined, options.resolution, options.backgroundColor, options.lineColor ]);
 
     // Refresh interval
     useEffect(() => {

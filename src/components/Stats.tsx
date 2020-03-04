@@ -10,6 +10,7 @@ const Logc = Log.getLogger('Stats', '#323338');
 
 export default function Stats() {
     const context = useContext(WallpaperContext);
+    const [ resolution, setResolution ] = useState(1);
 
     const [ frameRate, setFrameRate ] = useState({ fps: 0, frameTime: 0 });
     const [ audioUpdatesPerSecond, setAudioUpdatesPerSecond ] = useState(0);
@@ -95,12 +96,20 @@ export default function Stats() {
         };
         context?.wallpaperEvents.onUserPropertiesChanged.subscribe(userPropertiesChangedCallback);
 
+        const generalPropertiesChangedCallback = (args: GeneralPropertiesChangedEventArgs) => {
+            if (args.newProps.resolution !== undefined) {
+                setResolution(args.newProps.resolution === 'half' ? 0.5 : 1);
+            }
+        };
+        context?.wallpaperEvents.onGeneralPropertiesChanged.subscribe(generalPropertiesChangedCallback);
+
         return () => {
             clearInterval(perSecondIntervalId);
             clearInterval(audioDataStateIntervalId);
             context?.renderer.unsubscribe(frameRendererCallback);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesCallback);
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
+            context?.wallpaperEvents.onGeneralPropertiesChanged.unsubscribe(generalPropertiesChangedCallback);
         };
     }, [context]);
 
@@ -110,32 +119,34 @@ export default function Stats() {
     const fpsCanvasOptions = useMemo<UseCanvas2dTimeGraphOptions>(() => ({
         width: 140,
         height: 30,
+        resolution,
         refreshInterval: 500,
         getValue: () => fps.current,
         showAverage: false,
-    }), []);
+    }), [resolution]);
     const fpsCanvas = useCanvas2dTimeGraph(fpsCanvasOptions);
     const frameTimeCanvasOptions = useMemo<UseCanvas2dTimeGraphOptions>(() => ({
         width: 140,
         height: 30,
+        resolution,
         refreshInterval: 50,
         getValue: () => frameTime.current,
-    }), []);
+    }), [resolution]);
     const frameTimeCanvas = useCanvas2dTimeGraph(frameTimeCanvasOptions);
 
     return (
-      <div id="stats" className="p-1">
+      <div id="stats" className="p-1" style={{ bottom: 30 * resolution, fontSize: 14 * resolution }}>
         <table>
           <tbody>
             <tr>
               <th>Frame rate</th>
               <td><div>{`${frameRate.fps}fps`}</div></td>
-              <td><canvas ref={fpsCanvas} width={0} height={0} /></td>
+              <td className="lh-0"><canvas ref={fpsCanvas} width={0} height={0} /></td>
             </tr>
             <tr>
               <th>Frame time</th>
               <td><div>{`${frameRate.frameTime.toFixed(2)}ms`.padEnd(9, '\u00A0')}</div></td>
-              <td><canvas ref={frameTimeCanvas} width={0} height={0} /></td>
+              <td className="lh-0"><canvas ref={frameTimeCanvas} width={0} height={0} /></td>
             </tr>
             <tr>
               <th>Audio Data</th>

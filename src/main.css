@@ -25,12 +25,13 @@ html, body {
   color: #f8f9fa;
   position: absolute;
   left: 0;
-  bottom: 30px;
   font-family: 'Courier New', Courier, monospace;
-  font-size: 14px;
 }
 #stats table th { text-align: right; vertical-align: middle; }
 #stats table th + td { padding-left: .5rem; }
+
+/* ================= */
+.lh-0 { line-height: 0; }
 
 /* ===[ SPACING ]=== */
 /* padding */
