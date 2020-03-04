@@ -325,7 +325,7 @@
         "value": 38,
         "min": 0,
         "max": 100,
-        "condition": "showAdvancedOptions.value"
+        "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
     },
     "barVisualizer_bars": {
         "order": 120,

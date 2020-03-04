@@ -57,13 +57,6 @@ export default function BarVisualizer() {
     useEffect(() => {
         Logc.debug('Registering onAudioSamples and render callbacks...');
 
-        let samplesBuffer: AudioSamplesBuffer | undefined;
-        let samples: AudioSamplesArray | undefined;
-        let peak = 1;
-
-        let prevSamples: AudioSamplesArray | undefined;
-        let prevSamplesCount = 0;
-
         const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;
             return _samples.reduce<number[]>((acc, curr, i, arr) => {
@@ -85,6 +78,14 @@ export default function BarVisualizer() {
             return _samples.raw.map((v, i) => Math.lerp(_prevRaw[i], v, 1 - s));
         };
 
+        let samplesBuffer: AudioSamplesBuffer | undefined;
+        let samples: AudioSamplesArray | undefined;
+        let peak = 1;
+
+        let prevSamples: AudioSamplesArray | undefined;
+        let prevSamplesCount = 0;
+
+        // Audio samples callback
         const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
             samplesBuffer = args.samplesBuffer;
 
@@ -122,10 +123,12 @@ export default function BarVisualizer() {
                 prevSamplesCount = 0;
             }
         };
+        context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
 
-        let $animationFrameId = 0;
-        const renderCallback = (time: number) => {
-            $animationFrameId = window.requestAnimationFrame(renderCallback);
+        // Render frame callback
+        let requestAnimationFrameId = 0;
+        const frameRequestCallback = (time: number) => {
+            requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
             if (!canvasContext) return;
 
             canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
@@ -200,14 +203,10 @@ export default function BarVisualizer() {
                 });
             }
         };
-
-        $animationFrameId = window.requestAnimationFrame(renderCallback);
-        context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
+        requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
 
         return () => {
-            if ($animationFrameId) {
-                window.cancelAnimationFrame($animationFrameId);
-            }
+            window.cancelAnimationFrame(requestAnimationFrameId);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
         };
     }, [ context, canvasContext ]);

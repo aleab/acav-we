@@ -116,7 +116,6 @@ export default function App(props: AppProps) {
     useEffect(() => {
         Logc.debug('Registering wallpaperRegisterAudioListener callback...');
 
-        let samples: AudioSamplesArray | undefined;
         let peak: number = 0;
         const mean: number = 0;
 
@@ -163,6 +162,8 @@ export default function App(props: AppProps) {
             listenerIsPaused = !listenerIsPaused;
         };
 
+        // The samples array is declared outside the callback to let the previous samples pass throught if listenerIsPaused is true
+        let samples: AudioSamplesArray | undefined;
         window.wallpaperRegisterAudioListener(rawSamples => {
             if (!listenerIsPaused) {
                 samples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
