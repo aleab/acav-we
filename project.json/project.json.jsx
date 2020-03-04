@@ -123,8 +123,8 @@ function getProjectJson() {
                         `${samp('n')}&#8201;${samp('&gt;')}&#8201;${samp('2')}: Increases higher values.`,
                     ),
                     ui_$_audioSamples_scale_Logarithm: note(
-                        `${samp('B')}&#8201;${samp('&lt;')}&#8201;${samp('2')}: Increases mid values.`,
-                        `${samp('B')}&#8201;${samp('&gt;')}&#8201;${samp('2')}: Reduces higher values.`,
+                        `${samp('b')}&#8201;${samp('&lt;')}&#8201;${samp('2')}: Increases mid values.`,
+                        `${samp('b')}&#8201;${samp('&gt;')}&#8201;${samp('2')}: Reduces higher values.`,
                     ),
                     ui_$_audioSamples_scale_Logarithm$Power: note(
                         'Increasing <samp>a</samp> increases the contribution of the logarithm vs the power function.',
