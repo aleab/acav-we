@@ -51,9 +51,9 @@ export default function BarVisualizer() {
         };
     }, [ context, canvasContext ]);
 
-    // ========================
-    //  AUDIO SAMPLES LISTENER
-    // ========================
+    // =================================
+    //  AUDIO SAMPLES LISTENER + RENDER
+    // =================================
     useEffect(() => {
         Logc.debug('Registering onAudioSamples and render callbacks...');
 
@@ -85,50 +85,8 @@ export default function BarVisualizer() {
         let prevSamples: AudioSamplesArray | undefined;
         let prevSamplesCount = 0;
 
-        // Audio samples callback
-        const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
-            samplesBuffer = args.samplesBuffer;
-
-            if (args.peak > 1) {
-                Log.warn('Current peak > 1!', {
-                    peak: args.peak,
-                    samples: args.samples.raw,
-                });
-            }
-
-            // Reduce the buffer of arrays to a single array containing the weighted means
-            // of the frequency samples for each frequency of both channels: [L R]
-            //   L = [f₀ f₁ ... fₙ]
-            //   R = [f₀ f₁ ... fₙ]
-            //   fᵢ: weighted mean of frequency i samples
-            const smoothFactor = O.current.smoothing / 100;
-            const smoothSamples = samplesBuffer.size > 1
-                ? reduxSamplesWeightedMean(samplesBuffer.samples, smoothFactor)
-                : prevSamples !== undefined && samplesBuffer.size === 1
-                    ? lerpSamples(args.samples, prevSamples, smoothFactor)
-                    : args.samples.raw;
-
-            // If any value is above 1, normalize
-            const max = _.max(smoothSamples) ?? 0;
-            if (max > 1) {
-                smoothSamples.forEach((_v, i) => {
-                    smoothSamples[i] /= max;
-                });
-            }
-
-            peak = _.max(smoothSamples) ?? 0;
-            samples = new AudioSamplesArray(smoothSamples, 2);
-            if (++prevSamplesCount >= 2) {
-                prevSamples = args.samples;
-                prevSamplesCount = 0;
-            }
-        };
-        context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
-
-        // Render frame callback
-        let requestAnimationFrameId = 0;
-        const frameRequestCallback = (time: number) => {
-            requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
+        // Render callback
+        const renderCallback = () => {
             if (!canvasContext) return;
 
             canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
@@ -203,10 +161,51 @@ export default function BarVisualizer() {
                 });
             }
         };
-        requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
+
+        // Audio samples callback
+        const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
+            samplesBuffer = args.samplesBuffer;
+
+            if (args.peak > 1) {
+                Log.warn('Current peak > 1!', {
+                    peak: args.peak,
+                    samples: args.samples.raw,
+                });
+            }
+
+            // Reduce the buffer of arrays to a single array containing the weighted means
+            // of the frequency samples for each frequency of both channels: [L R]
+            //   L = [f₀ f₁ ... fₙ]
+            //   R = [f₀ f₁ ... fₙ]
+            //   fᵢ: weighted mean of frequency i samples
+            const smoothFactor = O.current.smoothing / 100;
+            const smoothSamples = samplesBuffer.size > 1
+                ? reduxSamplesWeightedMean(samplesBuffer.samples, smoothFactor)
+                : prevSamples !== undefined && samplesBuffer.size === 1
+                    ? lerpSamples(args.samples, prevSamples, smoothFactor)
+                    : args.samples.raw;
+
+            // If any value is above 1, normalize
+            const max = _.max(smoothSamples) ?? 0;
+            if (max > 1) {
+                smoothSamples.forEach((_v, i) => {
+                    smoothSamples[i] /= max;
+                });
+            }
+
+            peak = _.max(smoothSamples) ?? 0;
+            samples = new AudioSamplesArray(smoothSamples, 2);
+            if (++prevSamplesCount >= 2) {
+                prevSamples = args.samples;
+                prevSamplesCount = 0;
+            }
+
+            context.renderer.queue('BarVisualizer', renderCallback);
+        };
+        context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
 
         return () => {
-            window.cancelAnimationFrame(requestAnimationFrameId);
+            context?.renderer.cancel('BarVisualizer');
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
         };
     }, [ context, canvasContext ]);

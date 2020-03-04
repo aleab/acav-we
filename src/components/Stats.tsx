@@ -59,20 +59,16 @@ export default function Stats() {
             audioPeakCount = [ 0, 0 ];
         }) as TimerHandler, 150);
 
-        // ==========================
-        //  ANIMATION FRAME CALLBACK
-        // ==========================
-        let requestAnimationFrameId = 0;
-        const frameRequestCallback = () => {
-            const timestamp = performance.now();
-            requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
-
+        // ===================
+        //  RENDERED CALLBACK
+        // ===================
+        const frameRendererCallback = (timestamp: number) => {
             frameCount++;
             frameTime.current = prevAnimationTimestamp > 0 ? (timestamp - prevAnimationTimestamp) : 0;
             frameTimeCount += frameTime.current;
             prevAnimationTimestamp = timestamp;
         };
-        requestAnimationFrameId = window.requestAnimationFrame(frameRequestCallback);
+        context?.renderer.subscribe(frameRendererCallback);
 
         // ========================
         //  AUDIO SAMPLES CALLBACK
@@ -102,7 +98,7 @@ export default function Stats() {
         return () => {
             clearInterval(perSecondIntervalId);
             clearInterval(audioDataStateIntervalId);
-            window.cancelAnimationFrame(requestAnimationFrameId);
+            context?.renderer.unsubscribe(frameRendererCallback);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesCallback);
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
         };

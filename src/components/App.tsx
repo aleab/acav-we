@@ -7,6 +7,7 @@ import AudioSamplesArray from '../common/AudioSamplesArray';
 import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
 import Properties, { applyUserProperties } from '../app/properties/Properties';
 import { PINK_NOISE } from '../app/noise';
+import Renderer from '../app/Renderer';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
 import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
 
@@ -45,14 +46,21 @@ export default function App(props: AppProps) {
     }), [ onUserPropertiesChangedSubs, onAudioSamplesSubs ]);
 
     // Context
+    // TODO: Use FPS property
+    const renderer = useMemo(() => Renderer(), []);
+    useEffect(() => {
+        renderer.start();
+        return () => renderer.stop();
+    }, [renderer]);
     const wallpaperContext = useMemo<WallpaperContextType>(() => {
         Logc.debug('Creating WallpaperContext...');
         return {
             windowEvents: props.windowEvents,
             wallpaperEvents,
             wallpaperProperties: O.current,
+            renderer,
         };
-    }, [ props.windowEvents, wallpaperEvents ]);
+    }, [ props.windowEvents, wallpaperEvents, renderer ]);
 
     const samplesBufferLength = O.current.audioSamples.bufferLength;
     const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + samplesBufferLength), [samplesBufferLength]);
