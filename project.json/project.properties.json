@@ -27,12 +27,12 @@
 
     // [BACKGROUND]
     "background": {
-        "order": 5,
+        "order": 50,
         "type": "text",
         "text": "ui_background"
     },
     "background_type": {
-        "order": 6,
+        "order": 51,
         "type": "combo",
         "text": "ui_background_type",
         "options": [
@@ -44,40 +44,40 @@
         "value": "Color"
     },
     "background_color": {
-        "order": 7,
+        "order": 52,
         "type": "color",
         "text": "ui_background_color",
         "value": "0 0.007843 0.035294",
         "condition": "background_type.value === 'Color'"
     },
     "background_image": {
-        "order": 7,
+        "order": 52,
         "type": "file",
         "text": "ui_background_image",
         "condition": "background_type.value === 'Image'"
     },
     "background_css": {
-        "order": 7,
+        "order": 52,
         "type": "textinput",
         "text": "ui_background_css",
         "value": "background: radial-gradient(ellipse at center, #0d0f16 0%,#030611 60%,#000105 100%);",
         "condition": "background_type.value === 'Css'"
     },
     "background_$_css": {
-        "order": 8,
+        "order": 53,
         "type": "text",
         "text": "ui_background_$_css",
         "condition": "showDescriptions.value && background_type.value === 'Css'"
     },
     "background_playlist": {
-        "order": 7,
+        "order": 52,
         "type": "directory",
         "text": "ui_background_playlist",
         "mode": "ondemand",
         "condition": "background_type.value === 'Playlist'"
     },
     "background_playlistTimer": {
-        "order": 8,
+        "order": 53,
         "type": "slider",
         "text": "ui_background_playlistTimer",
         "value": 1,
@@ -91,25 +91,25 @@
 
     // [AUDIO SAMPLES]
     "audioSamples": {
-        "order": 20,
+        "order": 100,
         "type": "text",
         "text": "ui_audioSamples"
     },
     "$_audioSamples": {
-        "order": 21,
+        "order": 101,
         "type": "text",
         "text": "ui_$_audioSamples",
         "condition": "(showAdvancedOptions.value && showDescriptions.value)"
     },
     "audioSamples_correct": {
-        "order": 22,
+        "order": 102,
         "type": "bool",
         "text": "ui_audioSamples_correct",
         "value": true,
         "condition": "showAdvancedOptions.value"
     },
     "audioSamples_volumeGain": {
-        "order": 24,
+        "order": 104,
         "type": "slider",
         "text": "ui_audioSamples_volumeGain",
         "value": 35,
@@ -118,7 +118,7 @@
         "editable": false
     },
     "audioSamples_freqThreshold": {
-        "order": 25,
+        "order": 105,
         "type": "slider",
         "text": "ui_audioSamples_freqThreshold",
         "value": 0.1,
@@ -131,7 +131,7 @@
 
     // [AUDIO SAMPLES/SCALE]
     "audioSamples_scale": {
-        "order": 26,
+        "order": 110,
         "type": "combo",
         "text": "ui_audioSamples_scale",
         "options": [
@@ -146,13 +146,13 @@
         "condition": "showAdvancedOptions.value"
     },
     "$_audioSamples_scale_Power": {
-        "order": 27,
+        "order": 111,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Power",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Power'"
     },
     "audioSamples_scale_Power_exponent": {
-        "order": 28,
+        "order": 112,
         "type": "slider",
         "text": "ui_audioSamples_scale_Power_exponent",
         "value": 2,
@@ -163,13 +163,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Power'"
     },
     "$_audioSamples_scale_Exponential": {
-        "order": 27,
+        "order": 111,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Exponential",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Exponential'"
     },
     "audioSamples_scale_Exponential_base": {
-        "order": 28,
+        "order": 112,
         "type": "slider",
         "text": "ui_audioSamples_scale_Exponential_base",
         "value": 2,
@@ -180,13 +180,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Exponential'"
     },
     "$_audioSamples_scale_Logarithm": {
-        "order": 27,
+        "order": 111,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Logarithm",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Logarithm'"
     },
     "audioSamples_scale_Logarithm_base": {
-        "order": 28,
+        "order": 112,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm_base",
         "value": 2,
@@ -197,13 +197,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm'"
     },
     "$_audioSamples_scale_Logarithm$Power": {
-        "order": 27,
+        "order": 111,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Logarithm$Power",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Logarithm$Power'"
     },
     "audioSamples_scale_Logarithm$Power_a": {
-        "order": 28,
+        "order": 112,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm$Power_a",
         "value": 0.4,
@@ -214,7 +214,7 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
     },
     "audioSamples_scale_Logarithm$Power_base": {
-        "order": 29,
+        "order": 113,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm$Power_base",
         "value": 3,
@@ -225,7 +225,7 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
     },
     "audioSamples_scale_Logarithm$Power_exponent": {
-        "order": 30,
+        "order": 114,
         "type": "slider",
         "text": "ui_audioSamples_scale_Logarithm$Power_exponent",
         "value": 1.8,
@@ -236,13 +236,13 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Logarithm$Power'"
     },
     "$_audioSamples_scale_Gaussian": {
-        "order": 27,
+        "order": 111,
         "type": "text",
         "text": "ui_$_audioSamples_scale_Gaussian",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && audioSamples_scale.value === 'Gaussian'"
     },
     "audioSamples_scale_Gaussian_deviation": {
-        "order": 28,
+        "order": 112,
         "type": "slider",
         "text": "ui_audioSamples_scale_Gaussian_deviation",
         "value": 0.43,
@@ -254,7 +254,7 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
     },
     "audioSamples_scale_Gaussian_mean": {
-        "order": 29,
+        "order": 113,
         "type": "slider",
         "text": "ui_audioSamples_scale_Gaussian_mean",
         "value": 0.92,
@@ -266,9 +266,9 @@
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
     },
 
-    // [AUDIO SAMPLES]
+    // --[AUDIO SAMPLES]
     "audioSamples_buffer": {
-        "order": 40,
+        "order": 120,
         "type": "slider",
         "text": "ui_audioSamples_buffer",
         "value": 0.4,
@@ -279,13 +279,13 @@
         "condition": "showAdvancedOptions.value"
     },
     "$_audioSamples_buffer": {
-        "order": 41,
+        "order": 121,
         "type": "text",
         "text": "ui_$_audioSamples_buffer",
         "condition": "(showAdvancedOptions.value && showDescriptions.value)"
     },
     "audioSamples_normalize": {
-        "order": 42,
+        "order": 122,
         "type": "bool",
         "text": "ui_audioSamples_normalize",
         "value": false,
@@ -294,12 +294,12 @@
 
     // [BAR VISUALIZER]
     "barVisualizer": {
-        "order": 100,
+        "order": 1000,
         "type": "text",
         "text": "ui_barVisualizer"
     },
     "barVisualizer_position": {
-        "order": 101,
+        "order": 1001,
         "type": "slider",
         "text": "ui_barVisualizer_position",
         "value": 50,
@@ -310,7 +310,7 @@
         "editable": false
     },
     "barVisualizer_width": {
-        "order": 102,
+        "order": 1002,
         "type": "slider",
         "text": "ui_barVisualizer_width",
         "value": 45,
@@ -319,14 +319,14 @@
         "editable": false
     },
     "barVisualizer_flipFrequencies": {
-        "order": 103,
+        "order": 1003,
         "type": "bool",
         "text": "ui_barVisualizer_flipFrequencies",
         "value": false,
         "condition": "showAdvancedOptions.value"
     },
     "barVisualizer_smoothing": {
-        "order": 104,
+        "order": 1004,
         "type": "slider",
         "text": "ui_barVisualizer_smoothing",
         "value": 38,
@@ -334,13 +334,14 @@
         "max": 100,
         "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
     },
+
     "barVisualizer_bars": {
-        "order": 120,
+        "order": 1020,
         "type": "text",
         "text": "ui_barVisualizer_bars"
     },
     "barVisualizer_bars_width": {
-        "order": 121,
+        "order": 1021,
         "type": "slider",
         "text": "ui_barVisualizer_bars_width",
         "value": 38,
@@ -349,7 +350,7 @@
         "editable": false
     },
     "barVisualizer_bars_height": {
-        "order": 122,
+        "order": 1022,
         "type": "slider",
         "text": "ui_barVisualizer_bars_height",
         "value": 45,
@@ -358,7 +359,7 @@
         "editable": false
     },
     "barVisualizer_bars_alignment": {
-        "order": 123,
+        "order": 1023,
         "type": "slider",
         "text": "ui_barVisualizer_bars_alignment",
         "value": 0,
@@ -369,14 +370,14 @@
         "editable": false
     },
     "barVisualizer_bars_color": {
-        "order": 124,
+        "order": 1024,
         "type": "color",
         "text": "ui_barVisualizer_bars_color",
         "value": "0.176470 0.266667 0.611764"
     },
 
     "barVisualizer_bars_responseType": {
-        "order": 130,
+        "order": 1050,
         "type": "combo",
         "text": "ui_barVisualizer_bars_responseType",
         "options": [
@@ -392,13 +393,13 @@
         "value": "HsvBrightness"
     },
     "$_barVisualizer_bars_responseType": {
-        "order": 131,
+        "order": 1051,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseType",
         "condition": "showDescriptions.value"
     },
     "barVisualizer_bars_responseProvider": {
-        "order": 132,
+        "order": 1052,
         "type": "combo",
         "text": "ui_barVisualizer_bars_responseProvider",
         "options": [
@@ -411,13 +412,13 @@
         "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
     },
     "$_barVisualizer_bars_responseProvider": {
-        "order": 133,
+        "order": 1053,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseProvider",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_responseValueGain": {
-        "order": 134,
+        "order": 1054,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseValueGain",
         "value": 1,
@@ -428,7 +429,7 @@
         "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_responseRange": {
-        "order": 136,
+        "order": 1056,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseRange",
         "value": 25,
@@ -437,13 +438,13 @@
         "condition": "!['None','Hue'].includes(barVisualizer_bars_responseType.value)"
     },
     "$_barVisualizer_bars_responseRange": {
-        "order": 137,
+        "order": 1057,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseRange",
         "condition": "showDescriptions.value && !['None','Hue'].includes(barVisualizer_bars_responseType.value)"
     },
     "barVisualizer_bars_responseDegree": {
-        "order": 138,
+        "order": 1058,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseDegree",
         "value": 0.8,
@@ -454,13 +455,13 @@
         "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
     },
     "$_barVisualizer_bars_responseDegree": {
-        "order": 139,
+        "order": 1059,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseDegree",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_response_toHue": {
-        "order": 140,
+        "order": 1060,
         "type": "color",
         "text": "ui_barVisualizer_bars_response_toHue",
         "value": "0.4 0.839 0.8",
