@@ -33,17 +33,23 @@ export default function App(props: AppProps) {
 
     // Observer
     const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
+    const onGeneralPropertiesChangedSubs: Set<(args: GeneralPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
     const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = useMemo(() => new Set(), []);
+
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
         onUserPropertiesChanged: {
             subscribe: callback => { onUserPropertiesChangedSubs.add(callback); },
             unsubscribe: callback => { onUserPropertiesChangedSubs.delete(callback); },
         },
+        onGeneralPropertiesChanged: {
+            subscribe: callback => { onGeneralPropertiesChangedSubs.add(callback); },
+            unsubscribe: callback => { onGeneralPropertiesChangedSubs.delete(callback); },
+        },
         onAudioSamples: {
             subscribe: callback => { onAudioSamplesSubs.add(callback); },
             unsubscribe: callback => { onAudioSamplesSubs.delete(callback); },
         },
-    }), [ onUserPropertiesChangedSubs, onAudioSamplesSubs ]);
+    }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs ]);
 
     // Context
     // TODO: Use FPS property
@@ -62,8 +68,17 @@ export default function App(props: AppProps) {
         };
     }, [ props.windowEvents, wallpaperEvents, renderer ]);
 
+    // Shared state
+    const targetFps = useRef(0);
     const samplesBufferLength = O.current.audioSamples.bufferLength;
     const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + samplesBufferLength), [samplesBufferLength]);
+
+    useEffect(() => {
+        window.wallpaperPropertyListener = {};
+        return () => {
+            delete window.wallpaperPropertyListener;
+        };
+    }, []);
 
     // ===========
     //  CSS STYLE
@@ -77,49 +92,72 @@ export default function App(props: AppProps) {
     });
     const style = { ...styleBackground };
 
-    // ============
-    //  PROPERTIES
-    // ============
+    // ====================
+    //  GENERAL PROPERTIES
+    // ====================
     useEffect(() => {
-        Logc.debug('Registering wallpaperPropertyListener callbacks...');
+        Logc.debug('Registering user properties callback...');
+        window.wallpaperPropertyListener!.applyGeneralProperties = _props => {
+            const newProps = _.cloneDeep(_props);
+            if (_.isEmpty(newProps)) return;
+            // Log.debug('General Properties applied', newProps);
 
-        window.wallpaperPropertyListener = {
-            applyUserProperties: _props => {
-                const oldProps = _.cloneDeep(O.current);
-                const newProps = applyUserProperties(O.current, _props);
-                if (_.isEmpty(newProps)) return;
-                // Log.debug('User properties applied', newProps);
+            if (newProps.fps !== undefined) {
+                targetFps.current = newProps.fps;
+                renderer.fps = targetFps.current;
+            }
 
-                if (newProps.showStats !== undefined) {
-                    setShowStats(newProps.showStats);
+            onGeneralPropertiesChangedSubs.forEach(callback => callback({ newProps }));
+        };
+        return () => {
+            onGeneralPropertiesChangedSubs.clear();
+            delete window.wallpaperPropertyListener?.applyGeneralProperties;
+        };
+    }, [ onGeneralPropertiesChangedSubs, renderer.fps ]);
+
+    // =================
+    //  USER PROPERTIES
+    // =================
+    useEffect(() => {
+        Logc.debug('Registering user properties callback...');
+        window.wallpaperPropertyListener!.applyUserProperties = _props => {
+            const oldProps = _.cloneDeep(O.current);
+            const newProps = applyUserProperties(O.current, _props);
+            if (_.isEmpty(newProps)) return;
+            // Log.debug('User properties applied', newProps);
+
+            if (newProps.showStats !== undefined) {
+                setShowStats(newProps.showStats);
+            }
+            if (newProps.limitFps !== undefined) {
+                renderer.fps = newProps.limitFps ? targetFps.current : 0;
+            }
+
+            if (newProps.background !== undefined) {
+                const { playlistTimerMinutes: _playlistTimerMinutes, ..._background } = newProps.background;
+
+                // Give precedence to all the other properties over `playlistTimerMinutes`,
+                // because updating the background will automatically also update the timer if necessary
+                if (!_.isEmpty(_background)) {
+                    updateBackground();
+                } else if (_playlistTimerMinutes) {
+                    const _startTime = Number(window.localStorage.getItem(LOCALSTORAGE_BG_PLAYLIST_TIMER) ?? '0');
+                    const _timeRemaining = (_playlistTimerMinutes * 60 * 1000) - (Date.now() - _startTime);
+                    scheduleBackgroundImageChange(_timeRemaining >= 0 ? _timeRemaining : 0);
                 }
+            }
 
-                if (newProps.background !== undefined) {
-                    const { playlistTimerMinutes: _playlistTimerMinutes, ..._background } = newProps.background;
+            if (newProps.audioSamples?.bufferLength !== undefined) {
+                samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
+            }
 
-                    // Give precedence to all the other properties over `playlistTimerMinutes`,
-                    // because updating the background will automatically also update the timer if necessary
-                    if (!_.isEmpty(_background)) {
-                        updateBackground();
-                    } else if (_playlistTimerMinutes) {
-                        const _startTime = Number(window.localStorage.getItem(LOCALSTORAGE_BG_PLAYLIST_TIMER) ?? '0');
-                        const _timeRemaining = (_playlistTimerMinutes * 60 * 1000) - (Date.now() - _startTime);
-                        scheduleBackgroundImageChange(_timeRemaining >= 0 ? _timeRemaining : 0);
-                    }
-                }
-
-                if (newProps.audioSamples?.bufferLength !== undefined) {
-                    samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
-                }
-
-                onUserPropertiesChangedSubs.forEach(callback => callback({ oldProps, newProps }));
-            },
+            onUserPropertiesChangedSubs.forEach(callback => callback({ oldProps, newProps }));
         };
         return () => {
             onUserPropertiesChangedSubs.clear();
-            delete window.wallpaperPropertyListener;
+            delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onUserPropertiesChangedSubs, samplesBuffer, updateBackground, scheduleBackgroundImageChange ]);
+    }, [ onUserPropertiesChangedSubs, samplesBuffer, updateBackground, scheduleBackgroundImageChange, renderer.fps ]);
 
     // ================
     //  AUDIO LISTENER

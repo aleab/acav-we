@@ -74,6 +74,7 @@ function getProjectJson() {
                     ui_showDescriptions: 'Show Descriptions',
                     ui_showAdvancedOptions: 'Show Advanced Options' + asterisk(),
                     ui_showStats: 'Show Stats' + asterisk(),
+                    ui_limitFps: 'Limit FPS' + asterisk(),
 
                     // [BACKGROUND]
                     ui_background: section('Background'),

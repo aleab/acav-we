@@ -24,6 +24,13 @@
         "value": false,
         "condition": "showAdvancedOptions.value"
     },
+    "limitFps": {
+        "order": 4,
+        "type": "bool",
+        "text": "ui_limitFps",
+        "value": true,
+        "condition": "showAdvancedOptions.value"
+    },
 
     // [BACKGROUND]
     "background": {

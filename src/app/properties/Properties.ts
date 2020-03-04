@@ -14,6 +14,7 @@ import BackgroundProperties from './BackgroundProperties';
 export default interface Properties {
     audioprocessing: boolean;
     showStats: boolean;
+    limitFps: boolean;
     background: BackgroundProperties;
     audioSamples: AudioSamplesProperties;
     barVisualizer: {
@@ -72,6 +73,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     const rootOptions: MappedProperties = {};
     setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r?.value);
     setProperty(rootOptions, 'showStats', raw.showStats as WEProperty<'bool'>, _r => _r.value);
+    setProperty(rootOptions, 'limitFps', raw.limitFps as WEProperty<'bool'>, _r => _r.value);
 
     // .background
     const backgroundOptions: MappedProperties['background'] = {};

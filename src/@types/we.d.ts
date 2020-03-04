@@ -49,7 +49,7 @@ type WEGeneralProperties = Readonly<{
 
 type WEPropertyListener = {
     applyUserProperties?: (props: RawWallpaperProperties) => void;
-    applyGeneralProperties?: (props: WEGeneralProperties) => void;
+    applyGeneralProperties?: (props: Partial<WEGeneralProperties>) => void;
     setPaused?: (isPaused: boolean) => void;
     userDirectoryFilesAddedOrChanged?: (propertyName: string, changedFiles: string[]) => void;
     userDirectoryFilesRemoved?: (propertyName: string, removedFiles: string[]) => void;
@@ -60,6 +60,7 @@ type UserPropertiesChangedEventArgs = {
     oldProps: import('utility-types').DeepReadonly<import('../app/properties/Properties').default>;
     newProps: import('utility-types').DeepReadonly<MappedProperties>;
 };
+type GeneralPropertiesChangedEventArgs = { newProps: Partial<import('utility-types').DeepReadonly<WEGeneralProperties>>; };
 type AudioSamplesEventArgs = {
     samples: import('../common/AudioSamplesArray').default;
     samplesBuffer: import('../common/AudioSamplesBuffer').default;
@@ -68,6 +69,7 @@ type AudioSamplesEventArgs = {
 };
 type WallpaperEvents = {
     onUserPropertiesChanged: ComponentEvent<UserPropertiesChangedEventArgs>;
+    onGeneralPropertiesChanged: ComponentEvent<GeneralPropertiesChangedEventArgs>;
     onAudioSamples: ComponentEvent<AudioSamplesEventArgs>;
 };
 
