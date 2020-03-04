@@ -99,24 +99,20 @@ export default function Stats(props: StatsProps) {
     // ===========================
     //  FPS & FRAME TIME CANVASES
     // ===========================
-    const fpsCanvasOptions: UseCanvas2dTimeGraphOptions = useMemo(() => {
-        return {
-            width: 140,
-            height: 30,
-            refreshInterval: 500,
-            timeLength: 10 * 1000,
-            getValue: () => fps.current,
-        };
-    }, []);
+    const fpsCanvasOptions = useMemo<UseCanvas2dTimeGraphOptions>(() => ({
+        width: 140,
+        height: 30,
+        refreshInterval: 500,
+        getValue: () => fps.current,
+        showAverage: false,
+    }), []);
     const fpsCanvas = useCanvas2dTimeGraph(fpsCanvasOptions);
-    const frameTimeCanvasOptions: UseCanvas2dTimeGraphOptions = useMemo(() => {
-        return {
-            ...fpsCanvasOptions,
-            refreshInterval: 200,
-            getValue: () => frameTime.current,
-            showAverage: true,
-        };
-    }, [fpsCanvasOptions]);
+    const frameTimeCanvasOptions = useMemo<UseCanvas2dTimeGraphOptions>(() => ({
+        width: 140,
+        height: 30,
+        refreshInterval: 50,
+        getValue: () => frameTime.current,
+    }), []);
     const frameTimeCanvas = useCanvas2dTimeGraph(frameTimeCanvasOptions);
 
     return (
@@ -135,7 +131,7 @@ export default function Stats(props: StatsProps) {
             </tr>
             <tr>
               <th>Audio Data</th>
-              <td colSpan={2}>{`${audioUpdatesPerSecond}⨯${audioSamplesPerChannel} Hz`}</td>
+              <td colSpan={2}>{`${audioUpdatesPerSecond}⨯${2 * audioSamplesPerChannel} Hz`}</td>
             </tr>
             <tr>
               <th>Mean</th>
