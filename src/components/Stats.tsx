@@ -134,12 +134,12 @@ export default function Stats() {
             <tr>
               <th>Frame rate</th>
               <td><div>{`${frameRate.fps}fps`}</div></td>
-              <td><canvas ref={fpsCanvas} /></td>
+              <td><canvas ref={fpsCanvas} width={0} height={0} /></td>
             </tr>
             <tr>
               <th>Frame time</th>
               <td><div>{`${frameRate.frameTime.toFixed(2)}ms`.padEnd(9, '\u00A0')}</div></td>
-              <td><canvas ref={frameTimeCanvas} /></td>
+              <td><canvas ref={frameTimeCanvas} width={0} height={0} /></td>
             </tr>
             <tr>
               <th>Audio Data</th>
