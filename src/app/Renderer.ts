@@ -30,18 +30,20 @@ export default function Renderer(fps: number = 0): Renderer {
             renderCallback(timestamp);
         });
 
-        setTimeout((() => {
-            eventSubscribers.forEach(callback => callback(timestamp));
-        }) as TimerHandler);
+        if (eventSubscribers.size > 0) {
+            setTimeout(((ts: number) => {
+                eventSubscribers.forEach(callback => callback(ts));
+            }) as TimerHandler, 0, timestamp);
+        }
     }
 
-    function renderLoop() {
-        const timestamp = performance.now();
+    function renderLoop(ts?: number) {
+        const timestamp = ts ?? performance.now();
         flushRenderQueue(timestamp);
-        const delay = performance.now() - timestamp;
+        const renderDelay = performance.now() - timestamp;
 
         if (_fps > 0) {
-            _renderTimeoutId = setTimeout(renderLoop as TimerHandler, Math.max(0, 1000 / _fps - delay));
+            _renderTimeoutId = setTimeout(renderLoop as TimerHandler, Math.max(0, 1000 / _fps - renderDelay));
             _animationFrameId = 0;
         } else {
             _animationFrameId = window.requestAnimationFrame(renderLoop);
