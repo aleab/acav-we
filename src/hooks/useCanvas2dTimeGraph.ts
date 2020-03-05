@@ -6,12 +6,20 @@ import { OptionalKeys } from 'utility-types';
 export interface UseCanvas2dTimeGraphOptions {
     width: number;
     height: number;
+    /** Graph's resolution factor ∈ (0,∞). [default: 1] */
     resolution?: number;
+    /** A CSS-style background color. [default: 'black'] */
     backgroundColor?: string;
+    /** A CSS-style foreground color. [default: 'green'] */
     lineColor?: string;
+    /** Refresh interval in milliseconds. [default: 100] */
     refreshInterval?: number;
+    /** The width of the graph in milliseconds. [default: 5000] */
     duration?: number;
+    /** The function that's going to provide the live value to plot against time. */
     getValue(): number;
+    /** Whether to draw an horizontal line representing the average of the currently plotted values.
+     *  The value should be either a boolean or a string representing a CSS-style color for the line. [default: #D4C103] */
     showAverage?: boolean | string;
 }
 
@@ -26,6 +34,10 @@ const DEFAULT_OPTIONS: Required<Pick<UseCanvas2dTimeGraphOptions, OptionalKeys<U
     showAverage: '#D4C103',
 };
 
+/**
+ * Plots a value vs time graph on a canvas.
+ * @returns A {@link React.RefObject<HTMLCanvasElement>} that needs to be bound to a DOM's canvas element.
+ */
 export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOptions) {
     const canvas = useRef<HTMLCanvasElement>(null);
     const context = useRef<CanvasRenderingContext2D>();

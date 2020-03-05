@@ -1,7 +1,7 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
@@ -14,6 +14,7 @@ const Logc = Log.getLogger('BarVisualizer', 'darkblue');
 
 export default function BarVisualizer() {
     const context = useContext(WallpaperContext)!;
+    const RENDER_ID = useMemo(() => `BarVisualizer-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const O = useRef(context.wallpaperProperties.barVisualizer);
 
     const canvas = useRef<HTMLCanvasElement>(null);
@@ -38,9 +39,7 @@ export default function BarVisualizer() {
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
             if (args.newProps.audioprocessing !== undefined) {
                 if (!args.newProps.audioprocessing && canvasContext) {
-                    window.requestAnimationFrame(() => {
-                        canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
-                    });
+                    context.renderer.queue(RENDER_ID, () => canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height));
                 }
             }
         };
@@ -49,7 +48,7 @@ export default function BarVisualizer() {
         return () => {
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
         };
-    }, [ context, canvasContext ]);
+    }, [ context, canvasContext, RENDER_ID ]);
 
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
@@ -200,15 +199,15 @@ export default function BarVisualizer() {
                 prevSamplesCount = 0;
             }
 
-            context.renderer.queue('BarVisualizer', renderCallback);
+            context.renderer.queue(RENDER_ID, renderCallback);
         };
         context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
 
         return () => {
-            context?.renderer.cancel('BarVisualizer');
+            context?.renderer.cancel(RENDER_ID);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
         };
-    }, [ context, canvasContext ]);
+    }, [ context, canvasContext, RENDER_ID ]);
 
     return (
       <canvas ref={canvas} />

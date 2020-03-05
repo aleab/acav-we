@@ -52,7 +52,6 @@ export default function App(props: AppProps) {
     }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs ]);
 
     // Context
-    // TODO: Use FPS property
     const renderer = useMemo(() => Renderer(), []);
     useEffect(() => {
         renderer.start();
