@@ -1,8 +1,8 @@
 export default class Log {
-    static debug = console.debug;
-    static info = console.info;
-    static warn = console.warn;
-    static error = console.error;
+    static readonly debug = console.debug;
+    static readonly info = console.info;
+    static readonly warn = console.warn;
+    static readonly error = console.error;
 
     static getLogger(caller: string | null, color: string) {
         const args: any[] = caller ? [

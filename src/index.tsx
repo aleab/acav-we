@@ -1,15 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import App from './components/App';
-import Log from './common/Log';
-import Properties, { mapProperties } from './app/properties/Properties';
-
-import projectProperties from '../project.json/project.properties.json';
-
 import './common/index';
 import './app/index';
+
+import App from './components/App';
+import Properties, { mapProperties } from './app/properties/Properties';
+
 import './main.css';
+import projectProperties from '../project.json/project.properties.json';
 
 function run(Component: typeof App) {
     const onresizeEventSubs = new Set<(args: {}) => void>();
@@ -28,12 +27,12 @@ function run(Component: typeof App) {
     const rootElement = document.getElementById('root');
 
     window.acav.reload = () => {
-        Log.info(
+        console.info(
             '%c' +
-            '========================================\n' +
-            'LOADING WALLPAPER\n' +
-            `  NODE_ENV: "${process.env['NODE_ENV']}"\n` +
-            '========================================\n',
+            '=========================================\n' +
+            ' LOADING WALLPAPER\n' +
+            `   NODE_ENV: "${process.env['NODE_ENV']}"\n` +
+            '=========================================\n',
             'color: #350E23; font-weight:bold',
         );
 
