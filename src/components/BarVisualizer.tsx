@@ -21,7 +21,7 @@ export default function BarVisualizer() {
     //  <canvas>
     // ==========
     useEffect(() => {
-        Logc.debug('Initializing canvas...');
+        Logc.info('Initializing canvas...');
         canvas.current!.width = window.innerWidth;
         canvas.current!.height = window.innerHeight;
         const _canvasContext = canvas.current?.getContext('2d', { desynchronized: true });
@@ -32,7 +32,7 @@ export default function BarVisualizer() {
     //  PROPERTIES LISTENER
     // =====================
     useEffect(() => {
-        Logc.debug('Registering on*PropertiesChanged callbacks...');
+        Logc.info('Registering on*PropertiesChanged callbacks...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
             if (args.newProps.audioprocessing !== undefined) {
                 if (!args.newProps.audioprocessing && canvasContext) {
@@ -52,7 +52,7 @@ export default function BarVisualizer() {
     // =================================
     const render = useBarVisualizerRendering(canvasContext);
     useEffect(() => {
-        Logc.debug('Registering onAudioSamples and render callbacks...');
+        Logc.info('Registering onAudioSamples and render callbacks...');
 
         const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;

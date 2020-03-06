@@ -51,7 +51,7 @@ export default function Renderer(fps: number = 0): Renderer {
         }
     }
 
-    Logc.debug('Created!');
+    Logc.info('Created!');
     return {
         get fps() { return _fps; },
         set fps(newFps) { _fps = newFps; },
@@ -59,14 +59,14 @@ export default function Renderer(fps: number = 0): Renderer {
             if (_isRunning) return;
             _isRunning = true;
             renderLoop();
-            Logc.debug('Started!');
+            Logc.info('Started!');
         },
         stop() {
             if (!_isRunning) return;
             _isRunning = false;
             clearTimeout(_renderTimeoutId);
             window.cancelAnimationFrame(_animationFrameId);
-            Logc.debug('Stopped!');
+            Logc.info('Stopped!');
         },
         queue(id, callback) {
             if (!_isRunning) return;

@@ -23,7 +23,7 @@ export default function Stats() {
     const frameTime = useRef(0);
 
     useEffect(() => {
-        Logc.debug('Initializing component...');
+        Logc.info('Initializing component...');
 
         let frameCount = 0;
         let frameTimeCount = 0;

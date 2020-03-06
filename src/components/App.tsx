@@ -58,7 +58,7 @@ export default function App(props: AppProps) {
         return () => renderer.stop();
     }, [renderer]);
     const wallpaperContext = useMemo<WallpaperContextType>(() => {
-        Logc.debug('Creating WallpaperContext...');
+        Logc.info('Creating WallpaperContext...');
         return {
             windowEvents: props.windowEvents,
             wallpaperEvents,
@@ -95,11 +95,11 @@ export default function App(props: AppProps) {
     //  GENERAL PROPERTIES
     // ====================
     useEffect(() => {
-        Logc.debug('Registering user properties callback...');
+        Logc.info('Registering general properties callback...');
         window.wallpaperPropertyListener!.applyGeneralProperties = _props => {
             const newProps = _.cloneDeep(_props);
             if (_.isEmpty(newProps)) return;
-            // Log.debug('General Properties applied', newProps);
+            Logc.debug('General Properties applied', newProps);
 
             if (newProps.fps !== undefined) {
                 targetFps.current = newProps.fps;
@@ -120,12 +120,12 @@ export default function App(props: AppProps) {
     //  USER PROPERTIES
     // =================
     useEffect(() => {
-        Logc.debug('Registering user properties callback...');
+        Logc.info('Registering user properties callback...');
         window.wallpaperPropertyListener!.applyUserProperties = _props => {
             const oldProps = _.cloneDeep(O.current);
             const newProps = applyUserProperties(O.current, _props);
             if (_.isEmpty(newProps)) return;
-            // Log.debug('User properties applied', newProps);
+            Logc.debug('User properties applied', newProps);
 
             if (newProps.showStats !== undefined) {
                 setShowStats(newProps.showStats);
