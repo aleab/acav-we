@@ -449,7 +449,7 @@
         "order": 1056,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseRange",
-        "value": 25,
+        "value": 35,
         "min": -50,
         "max": 50,
         "condition": "!['None','Hue'].includes(barVisualizer_bars_responseType.value)"
