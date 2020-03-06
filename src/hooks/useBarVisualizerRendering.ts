@@ -15,8 +15,8 @@ interface RenderArgs {
 }
 
 /**
- * @param x x coordinate of the top-left corner of the bar.
- * @param y y coordinate of the top-left corner of the bar.
+ * @param {number} x x coordinate of the top-left corner of the bar.
+ * @param {number} y y coordinate of the top-left corner of the bar.
  */
 function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius: number) {
     const radius = borderRadius > width / 2 ? width / 2 : borderRadius;
