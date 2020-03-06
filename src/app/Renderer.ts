@@ -3,7 +3,7 @@ import Log from '../common/Log';
 const Logc = Log.getLogger('Renderer', '#703431');
 
 interface Renderer {
-    fps: number;
+    readonly setFps: (fps: number) => void;
     readonly start: () => void;
     readonly stop: () => void;
     readonly queue: (id: string, callback: (timestamp: number) => void) => void;
@@ -53,8 +53,7 @@ export default function Renderer(fps: number = 0): Renderer {
 
     Logc.info('Created!');
     return {
-        get fps() { return _fps; },
-        set fps(newFps) { _fps = newFps; },
+        setFps(newFps) { _fps = newFps; },
         start() {
             if (_isRunning) return;
             _isRunning = true;

@@ -1,4 +1,4 @@
-import { useCallback, useContext, useRef } from 'react';
+import { RefObject, useCallback, useContext, useRef } from 'react';
 import { RGB } from 'color-convert/conversions';
 
 import Log from '../common/Log';
@@ -42,11 +42,12 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
     }
 }
 
-export default function useBarVisualizerRendering(canvasContext: CanvasRenderingContext2D | undefined) {
+export default function useBarVisualizerRendering(canvas: RefObject<HTMLCanvasElement>) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.barVisualizer);
 
     return useCallback((args: RenderArgs) => {
+        const canvasContext = canvas.current?.getContext('2d');
         if (!canvasContext) return;
 
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
@@ -120,5 +121,5 @@ export default function useBarVisualizerRendering(canvasContext: CanvasRendering
                 canvasContext.restore();
             });
         }
-    }, [ canvasContext, context ]);
+    }, [ canvas, context ]);
 }

@@ -14,18 +14,14 @@ export default function BarVisualizer() {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.barVisualizer);
 
-    const canvas = useRef<HTMLCanvasElement>(null);
-    const [ canvasContext, setCanvasContext ] = useState<CanvasRenderingContext2D>();
-
     // ==========
     //  <canvas>
     // ==========
+    const canvas = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         Logc.info('Initializing canvas...');
         canvas.current!.width = window.innerWidth;
         canvas.current!.height = window.innerHeight;
-        const _canvasContext = canvas.current?.getContext('2d', { desynchronized: true });
-        setCanvasContext(_canvasContext ?? undefined);
     }, []); // just once
 
     // =====================
@@ -34,23 +30,18 @@ export default function BarVisualizer() {
     useEffect(() => {
         Logc.info('Registering on*PropertiesChanged callbacks...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
-            if (args.newProps.audioprocessing !== undefined) {
-                if (!args.newProps.audioprocessing && canvasContext) {
-                    context.renderer.queue(RENDER_ID, () => canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height));
-                }
-            }
         };
 
         context?.wallpaperEvents.onUserPropertiesChanged.subscribe(userPropertiesChangedCallback);
         return () => {
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
         };
-    }, [ context, canvasContext, RENDER_ID ]);
+    }, [ RENDER_ID, context ]);
 
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
     // =================================
-    const render = useBarVisualizerRendering(canvasContext);
+    const render = useBarVisualizerRendering(canvas);
     useEffect(() => {
         Logc.info('Registering onAudioSamples and render callbacks...');
 

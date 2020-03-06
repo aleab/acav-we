@@ -69,8 +69,7 @@ export default function App(props: AppProps) {
 
     // Shared state
     const targetFps = useRef(0);
-    const samplesBufferLength = O.current.audioSamples.bufferLength;
-    const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + samplesBufferLength), [samplesBufferLength]);
+    const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + O.current.audioSamples.bufferLength ?? 0), []);
 
     useEffect(() => {
         window.wallpaperPropertyListener = {};
@@ -104,7 +103,7 @@ export default function App(props: AppProps) {
             if (newProps.fps !== undefined) {
                 targetFps.current = newProps.fps;
                 if (O.current.limitFps) {
-                    renderer.fps = targetFps.current;
+                    renderer.setFps(targetFps.current);
                 }
             }
 
@@ -114,7 +113,7 @@ export default function App(props: AppProps) {
             onGeneralPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyGeneralProperties;
         };
-    }, [ onGeneralPropertiesChangedSubs, renderer.fps ]);
+    }, [ onGeneralPropertiesChangedSubs, renderer ]);
 
     // =================
     //  USER PROPERTIES
@@ -131,7 +130,7 @@ export default function App(props: AppProps) {
                 setShowStats(newProps.showStats);
             }
             if (newProps.limitFps !== undefined) {
-                renderer.fps = newProps.limitFps ? targetFps.current : 0;
+                renderer.setFps(newProps.limitFps ? targetFps.current : 0);
             }
 
             if (newProps.background !== undefined) {
@@ -158,7 +157,7 @@ export default function App(props: AppProps) {
             onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onUserPropertiesChangedSubs, samplesBuffer, updateBackground, scheduleBackgroundImageChange, renderer.fps ]);
+    }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground ]);
 
     // ================
     //  AUDIO LISTENER
@@ -166,7 +165,7 @@ export default function App(props: AppProps) {
     // All preliminary operations that need to be applied to the audio samples and shared by all the
     // audio-responsive elements of the wallpaper, such as filters and peak calculations, are done here.
     useEffect(() => {
-        Logc.debug('Registering wallpaperRegisterAudioListener callback...');
+        Logc.info('Registering wallpaperRegisterAudioListener callback...');
 
         let peak = 0;
         let mean = 0;
