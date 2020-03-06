@@ -18,7 +18,6 @@ export default function Renderer(fps: number = 0): Renderer {
     let _isRunning: boolean = false;
 
     const renderQueue: Map<string, (timestamp: number) => void> = new Map();
-    let _renderTimeoutId = 0;
     let _animationFrameId = 0;
 
     const eventSubscribers: Set<(timestamp: number) => void> = new Set();
@@ -37,17 +36,15 @@ export default function Renderer(fps: number = 0): Renderer {
         }
     }
 
-    function renderLoop(ts?: number) {
-        const timestamp = ts ?? performance.now();
-        flushRenderQueue(timestamp);
-        const renderDelay = performance.now() - timestamp;
+    let prevRenderTimestamp = 0;
+    function renderLoop() {
+        _animationFrameId = window.requestAnimationFrame(renderLoop);
 
-        if (_fps > 0) {
-            _renderTimeoutId = setTimeout(renderLoop as TimerHandler, Math.max(0, 1000 / _fps - renderDelay));
-            _animationFrameId = 0;
-        } else {
-            _animationFrameId = window.requestAnimationFrame(renderLoop);
-            _renderTimeoutId = 0;
+        const timestamp = performance.now();
+        const elapsed = timestamp - prevRenderTimestamp;
+        if (_fps === 0 || elapsed > 1000 / _fps) {
+            prevRenderTimestamp = timestamp - (elapsed % (1000 / _fps));
+            flushRenderQueue(timestamp);
         }
     }
 
@@ -63,7 +60,6 @@ export default function Renderer(fps: number = 0): Renderer {
         stop() {
             if (!_isRunning) return;
             _isRunning = false;
-            clearTimeout(_renderTimeoutId);
             window.cancelAnimationFrame(_animationFrameId);
             Logc.info('Stopped!');
         },
