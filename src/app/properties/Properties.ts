@@ -25,6 +25,7 @@ export default interface Properties {
         bars: {
             width: number;
             height: number;
+            borderRadius: number;
             alignment: number;
             color: RGBA;
             responseType: ColorReactionType;
@@ -112,6 +113,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .barVisualizer.bars
     setProperty(barVisualizerOptions.bars!, 'width', raw.barVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'height', raw.barVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(barVisualizerOptions.bars!, 'borderRadius', raw.barVisualizer_bars_borderRadius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'alignment', raw.barVisualizer_bars_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'color', raw.barVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     setProperty(barVisualizerOptions.bars!, 'responseType', raw.barVisualizer_bars_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));

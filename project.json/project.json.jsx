@@ -94,7 +94,7 @@ function getProjectJson() {
                     ui_audioSamples_buffer: withPropertyIcon('fas fa-stream', 'Buffer Length (s)') + asterisk(),
                     ui_audioSamples_normalize: withPropertyIcon('far fa-balance-scale', 'Normalize') + asterisk(),
 
-                    // [AUDIO SAMPLES/SCALE]
+                    // [AUDIO SAMPLES > SCALE]
                     ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;<sup>${scalingFunctionsLink('[1]')}</sup>`,
                     ui_audioSamples_scale_Linear: 'x',
                     ui_audioSamples_scale_Power: 'x<sup>n</sup>',
@@ -144,9 +144,11 @@ function getProjectJson() {
                     ui_barVisualizer_flipFrequencies: indent('Flip Frequencies'),
                     ui_barVisualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
 
+                    // [BAR VISUALIZER > BARS]
                     ui_barVisualizer_bars: subSection('Bars'),
                     ui_barVisualizer_bars_width: indent('Width (%)'),
                     ui_barVisualizer_bars_height: indent('Height (%)'),
+                    ui_barVisualizer_bars_borderRadius: indent('Border Radius (%)'),
                     ui_barVisualizer_bars_alignment: indent('Alignment'),
                     ui_barVisualizer_bars_color: indent('Color'),
                     ui_barVisualizer_bars_responseType: indent('Response Type') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,

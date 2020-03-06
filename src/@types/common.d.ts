@@ -11,6 +11,8 @@ type WindowEvents = {
 };
 
 interface Math {
+    /** PI / 2 */
+    readonly PI_2: number;
     clamp(x: number, min: number, max: number): number;
     lerp(from: number, to: number, k: number): number;
 }

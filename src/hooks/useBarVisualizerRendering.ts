@@ -14,6 +14,34 @@ interface RenderArgs {
     readonly peak: number;
 }
 
+/**
+ * @param x x coordinate of the top-left corner of the bar.
+ * @param y y coordinate of the top-left corner of the bar.
+ */
+function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius: number) {
+    const radius = borderRadius > width / 2 ? width / 2 : borderRadius;
+    if (height > 1 && radius > 0) {
+        canvasContext.beginPath();
+        if (height > 2 * radius) {
+            canvasContext.rect(x, y + radius, width, height - 2 * radius);
+            canvasContext.arc(x + radius, y + radius, radius, -Math.PI, -Math.PI_2);          // top-left
+            canvasContext.arc(x + width - radius, y + radius, radius, -Math.PI_2, 0);         // top-right
+            canvasContext.arc(x + width - radius, y + height - radius, radius, 0, Math.PI_2); // bottom-right
+            canvasContext.arc(x + radius, y + height - radius, radius, Math.PI_2, Math.PI);   // bottom-left
+            if (radius < width / 2) {
+                canvasContext.rect(x + radius, y, width - 2 * radius, radius);
+                canvasContext.rect(x + radius, y + height - radius, width - 2 * radius, radius);
+            }
+        } else {
+            canvasContext.ellipse(x + radius, y + height / 2, radius, height / 2, 0, Math.PI_2, 3 * Math.PI_2);      // left
+            canvasContext.ellipse(x + width - radius, y + height / 2, radius, height / 2, 0, -Math.PI_2, Math.PI_2); // right
+        }
+        canvasContext.fill();
+    } else {
+        canvasContext.fillRect(x, y, width, height);
+    }
+}
+
 export default function useBarVisualizerRendering(canvasContext: CanvasRenderingContext2D | undefined) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.barVisualizer);
@@ -37,6 +65,7 @@ export default function useBarVisualizerRendering(canvasContext: CanvasRendering
                 (2 / (1 - alignment)) * position,                                   // (1-a)/2: section of the bar below the pivot point
                 (2 / (1 + alignment)) * (canvasContext.canvas.height - position),   // (1+a)/2: section of the bar above the pivot point
             ) * (O.current.bars.height / 100);
+            const barBorderRadius = (barWidth / 2) * (O.current.bars.borderRadius / 100);
 
             const barColorRgb: Readonly<RGB> = [ O.current.bars.color[0], O.current.bars.color[1], O.current.bars.color[2] ];
             const barColorReaction = O.current.bars.responseType !== ColorReactionType.None
@@ -70,26 +99,25 @@ export default function useBarVisualizerRendering(canvasContext: CanvasRendering
                 const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
                 const dx = spacing / 2 + index * (barWidth + spacing);
 
+                const fillColor = [barColorRgb];
                 if (barColorReaction !== undefined) {
                     const value = barColorReactionValueProvider([ sample[0], sample[1] ], i, { samplesBuffer: args.samplesBuffer, peak: args.peak });
-
-                    if (sample[0] !== 0) {
-                        canvasContext.setFillColorRgb(barColorReaction(value[0]) as RGB);
-                        canvasContext.fillRect(canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight);
-                    }
-                    if (sample[1] !== 0) {
-                        canvasContext.setFillColorRgb(barColorReaction(value[1]) as RGB);
-                        canvasContext.fillRect(canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight);
-                    }
-                } else {
-                    canvasContext.setFillColorRgb(barColorRgb as RGB);
-                    if (sample[0] !== 0) {
-                        canvasContext.fillRect(canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight);
-                    }
-                    if (sample[1] !== 0) {
-                        canvasContext.fillRect(canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight);
-                    }
+                    fillColor[0] = barColorReaction(value[0]);
+                    fillColor[1] = barColorReaction(value[1]);
                 }
+
+                canvasContext.save();
+                if (sample[0] !== 0) {
+                    canvasContext.setFillColorRgb(fillColor[0] as RGB);
+                    renderBar(canvasContext, canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight, barBorderRadius);
+                }
+                if (sample[1] !== 0) {
+                    if (fillColor.length > 0) {
+                        canvasContext.setFillColorRgb(fillColor[1] as RGB);
+                    }
+                    renderBar(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight, barBorderRadius);
+                }
+                canvasContext.restore();
             });
         }
     }, [ canvasContext, context ]);

@@ -1,3 +1,5 @@
+/// <reference path="../@types/app.d.ts" />
+
 if (!window.wallpaperRegisterAudioListener) {
     window.wallpaperRegisterAudioListener = samples => {};
 }
