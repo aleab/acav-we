@@ -135,7 +135,7 @@ export default function Stats() {
     const frameTimeCanvas = useCanvas2dTimeGraph(frameTimeCanvasOptions);
 
     return (
-      <div id="stats" className="p-1" style={{ bottom: 30 * resolution, fontSize: 14 * resolution }}>
+      <div id="stats" className="overlay p-1" style={{ left: 0, bottom: 30 * resolution, fontSize: 14 * resolution }}>
         <table>
           <tbody>
             <tr>

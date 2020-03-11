@@ -36,7 +36,7 @@ export default function BarVisualizer() {
         return () => {
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
         };
-    }, [ RENDER_ID, context ]);
+    }, [context]);
 
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
