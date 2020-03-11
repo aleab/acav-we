@@ -115,11 +115,15 @@ function getWebpackConfig(env, argv) {
                                 ` * ${M[i].name}\n` +
                                 ' *\n' +
                                 ` * ${M[i].licenseId}\n` +
-                                M[i].licenseText.split(/\r?\n/).map(s => ` * ${s}`).join('\n') + '\n' +
+                                (M[i].licenseText !== null ? M[i].licenseText.split(/\r?\n/).map(s => ` * ${s}`).join('\n') : ' * null') + '\n' +
                                 ' */\n' +
                                 '\n';
                     }
                     return text;
+                },
+                licenseTextOverrides: {
+                    '@xstate/react': '<missing license text>',
+                    xstate: '<missing license text>',
                 },
             }),
             new webpack.BannerPlugin({
