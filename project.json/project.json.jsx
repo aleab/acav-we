@@ -19,12 +19,21 @@ function withPropertyIcon(className, text) {
     );
 }
 
-function section(name, muted = false) {
+function section(name, muted = false, propertyIcon = null) {
+    const icon = propertyIcon ? (
+      <span className={`${propertyIcon} fa-fw propertyIcon`} />
+    ) : null;
     return renderToStaticMarkup(
         muted ? (
-          <h3 className="text-muted"><ins>{name}</ins></h3>
+          <h3 className="text-muted">
+            {icon}
+            <ins>{name}</ins>
+          </h3>
         ) : (
-          <h3><ins>{name}</ins></h3>
+          <h3>
+            {icon}
+            <ins>{name}</ins>
+          </h3>
         ),
     );
 }
@@ -59,6 +68,7 @@ const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/mz2cdi4qlf">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
+const spotifyAuthLink = text => `<a href="">${text}</a>`;
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -170,6 +180,16 @@ function getProjectJson() {
                         '<u>Example</u>: for a base color with lightness 75, and a range of 35, the effect will produce a color with lightness 100 when the sample value is 1 (maximum) and 65 when the sample value is 0 (minimum).',
                     ),
                     ui_$_barVisualizer_bars_responseDegree: note('Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.'),
+
+                    // [SPOTIFY]
+                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),
+                    ui_spotify_token: indent('Token'),
+                    ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a token ${spotifyAuthLink('here')}.`),
+                    ui_$_spotify_token_note: note(
+                        '<u>Technical note</u>: The token returned by the service linked above is encrypted and only valid for a few minutes, ' +
+                          'until the app exchanges it for the actual token and saves the latter in the local storage for future use; ' +
+                          'including it in shared presets will not leak any potentially private information.',
+                    ),
 
                     // [NOTES]
                     ui_notes: section('Notes', true),

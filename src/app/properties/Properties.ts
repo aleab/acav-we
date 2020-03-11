@@ -35,7 +35,11 @@ export default interface Properties {
             responseDegree: number;
             responseToHue: RGB;
         };
-    }
+    },
+    spotify: {
+        showOverlay: boolean;
+        token: string;
+    },
 }
 
 function parseComboProperty<TEnum>(prop: WEProperty<'combo'>, EnumType: TEnum): TEnum[keyof TEnum] {
@@ -124,11 +128,17 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(barVisualizerOptions.bars!, 'responseToHue', raw.barVisualizer_bars_response_toHue as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
+    // .spotify
+    const spotifyOptions: MappedProperties['spotify'] = {};
+    setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
+
     return _.merge(
         { ...rootOptions },
         !_.isEmpty(backgroundOptions) ? { background: backgroundOptions } : {},
         !_.isEmpty(audioSamplesOptions) ? { audioSamples: audioSamplesOptions } : {},
         !_.isEmpty(barVisualizerOptions) ? { barVisualizer: barVisualizerOptions } : {},
+        !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
     );
 }
 

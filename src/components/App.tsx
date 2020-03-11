@@ -11,8 +11,9 @@ import Renderer from '../app/Renderer';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
 import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
 
-import Stats from './Stats';
 import BarVisualizer from './BarVisualizer';
+import Spotify from './Spotify';
+import Stats from './Stats';
 import useWallpaperBackground from '../hooks/useWallpaperBackground';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
@@ -98,7 +99,7 @@ export default function App(props: AppProps) {
         window.wallpaperPropertyListener!.applyGeneralProperties = _props => {
             const newProps = _.cloneDeep(_props);
             if (_.isEmpty(newProps)) return;
-            Logc.debug('General Properties applied', newProps);
+            Logc.debug('General properties applied', newProps);
 
             if (newProps.fps !== undefined) {
                 targetFps.current = newProps.fps;
@@ -238,6 +239,7 @@ export default function App(props: AppProps) {
         <WallpaperContext.Provider value={wallpaperContext}>
           {showStats ? <Stats /> : null}
           <BarVisualizer />
+          <Spotify />
         </WallpaperContext.Provider>
       </div>
     );

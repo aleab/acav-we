@@ -485,6 +485,33 @@
         "condition": "barVisualizer_bars_responseType.value === 'Hue'"
     },
 
+    // [SPOTIFY]
+    "spotify": {
+        "order": 5000,
+        "type": "bool",
+        "text": "ui_spotify",
+        "value": false
+    },
+    "spotify_token": {
+        "order": 5001,
+        "type": "textinput",
+        "text": "ui_spotify_token",
+        "value": "",
+        "condition": "spotify.value"
+    },
+    "$_spotify_token": {
+        "order": 5002,
+        "type": "text",
+        "text": "ui_$_spotify_token",
+        "condition": "showDescriptions.value && spotify.value"
+    },
+    "$_spotify_token_note": {
+        "order": 5003,
+        "type": "text",
+        "text": "ui_$_spotify_token_note",
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && spotify.value"
+    },
+
     // [NOTES]
     "notes": {
         "order": 9000,

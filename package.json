@@ -17,6 +17,9 @@
     "author": "Sp3l",
     "license": "MPL-2.0",
     "dependencies": {
+        "@fortawesome/fontawesome-svg-core": "^1.2.27",
+        "@fortawesome/free-brands-svg-icons": "^5.12.1",
+        "@fortawesome/react-fontawesome": "^0.1.9",
         "@xstate/react": "^0.8.1",
         "color-convert": "^2.0.1",
         "lodash": "^4.17.15",
