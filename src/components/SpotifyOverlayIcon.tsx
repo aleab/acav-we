@@ -7,6 +7,11 @@ export default function SpotifyOverlayIcon() {
     // Spotify White:       #FFFFFF
     // Spotify Black:       #191414
 
+    // TODO: Change color automatically depending on the background color to respect Spotify giudelines
+    //       - Green, when the background is black/white/gray
+    //       - Black, when the background is light
+    //       - White, when the background is dark
+
     const style = {
         margin: 14,
         fontSize: 28,

@@ -70,7 +70,7 @@ export default function Spotify() {
     // =========
     //  OVERLAY
     // =========
-    const [ currentlyPlaying, setCurrentlyPlaying ] = useState<SpotifyCurrentlyPlayingObject | null>(null);
+    const [ currentlyPlaying, setCurrentlyPlaying ] = useState<SpotifyCurrentlyPlayingObject | null | undefined>(undefined);
     useEffect(() => {
         const INTERVAL = 2 * 1000;
         let timeoutId = 0;
@@ -112,7 +112,7 @@ export default function Spotify() {
                     timeoutId = setTimeout(refreshLoop as TimerHandler, INTERVAL);
                 }
             };
-            timeoutId = setTimeout(refreshLoop as TimerHandler, INTERVAL);
+            refreshLoop();
         }
 
         return () => clearTimeout(timeoutId);
@@ -129,12 +129,12 @@ export default function Spotify() {
     switch (state.value) {
         case SpotifyStateMachineState.Ls:
         case SpotifyStateMachineState.LsIdle:
-            return (
+            return currentlyPlaying !== undefined ? (
               <div id="spotify" className="overlay" style={style}>
                 <SpotifyOverlayIcon />
                 <SpotifyOverlaySongInfo currentlyPlaying={currentlyPlaying} fontSize={14} color="#FFFFFF" />
               </div>
-            );
+            ) : null;
 
         default: return null;
     }
