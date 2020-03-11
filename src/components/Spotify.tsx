@@ -132,7 +132,7 @@ export default function Spotify() {
             return (
               <div id="spotify" className="overlay" style={style}>
                 <SpotifyOverlayIcon />
-                <SpotifyOverlaySongInfo currentlyPlaying={currentlyPlaying} fontSize={14} color="#F8F9FA" />
+                <SpotifyOverlaySongInfo currentlyPlaying={currentlyPlaying} fontSize={14} color="#FFFFFF" />
               </div>
             );
 

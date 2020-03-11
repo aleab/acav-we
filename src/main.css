@@ -51,10 +51,7 @@ body {
   display: inline-block;
   letter-spacing: .015em;
 }
-.song-info .song-info-item.artist {
-  margin-left: 1px;
-  opacity: 0.8;
-}
+.song-info .song-info-item.artist { margin-left: 1px; }
 
 /* ================= */
 .lh-0 { line-height: 0; }
