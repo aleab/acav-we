@@ -7,7 +7,7 @@ import './app/index';
 import App from './components/App';
 import Properties, { mapProperties } from './app/properties/Properties';
 
-import './main.css';
+import './css/main.css';
 import projectProperties from '../project.json/project.properties.json';
 
 function run(Component: typeof App) {

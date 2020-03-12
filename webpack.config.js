@@ -60,7 +60,7 @@ function getWebpackConfig(env, argv) {
                             test: /\.css$/,
                             use: [
                                 MiniCssExtractPlugin.loader,
-                                { loader: 'css-loader', options: { importLoaders: true } },
+                                { loader: 'css-loader', options: { importLoaders: 1 } },
                                 {
                                     loader: 'postcss-loader',
                                     options: {

@@ -1,0 +1,32 @@
+/* https://developer.spotify.com/branding-guidelines/ */
+
+#spotify {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  font-family: 'Helvetica Neue', Helvetica, Arial, 'Hiragino Kaku Gothic Pro', 'Meiryo', 'MS Gothic', sans-serif;
+}
+
+.spotify-icon {
+  margin: .5em;
+  font-size: calc(2em + 4px);
+}
+
+.song-info {
+  overflow: hidden;
+  padding: 1em 0;
+}
+
+.song-info .song-info-field {
+  display: inline-block;
+  letter-spacing: .015em;
+}
+
+.song-info .song-info-field.track {
+  line-height: calc(1em + 4px);
+}
+
+.song-info .song-info-field.artists {
+  line-height: calc(1em + 2px);
+  font-size: calc(1em - 2px);
+}
