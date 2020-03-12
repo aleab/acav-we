@@ -1,12 +1,5 @@
 import ColorConvert from 'color-convert';
-import { RGB } from 'color-convert/conversions';
-import React, { useState } from 'react';
-
-interface SpotifyOverlaySongInfoProps {
-    currentlyPlaying: SpotifyCurrentlyPlayingObject | null;
-    fontSize: number;
-    color: string;
-}
+import React from 'react';
 
 function darken(cssColor: string): string {
     let rgba: RGBA = [ 255, 255, 255, 1 ];
@@ -24,28 +17,35 @@ function darken(cssColor: string): string {
     return rgba[3] !== 1 ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${rgba[3]})` : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
 }
 
+interface SpotifyOverlaySongInfoProps {
+    currentlyPlaying: SpotifyCurrentlyPlayingObject | null;
+    width: number;
+    color: string;
+}
+
 export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProps) {
     if (props.currentlyPlaying === null || props.currentlyPlaying.item === null) {
-        return <div />;
+        return null;
     }
 
     // TODO: Show all artists
 
-    const songInfoStyle = { color: props.color };
-    const titleStyle = { lineHeight: `${props.fontSize + 4}px` };
-    const artistStyle = {
-        fontSize: props.fontSize - 2,
-        lineHeight: `${props.fontSize + 2}px`,
+    const songInfoStyle = {
+        width: props.width,
+        color: props.color,
+    };
+    const trackStyle = {};
+    const artistsStyle = {
         color: darken(props.color),
     };
 
     return (
-      <div className="song-info py-3 pr-2" style={songInfoStyle}>
-        <div style={titleStyle}>
-          <span className="song-info-item">{props.currentlyPlaying.item.name}</span>
+      <div className="song-info pr-2" style={songInfoStyle}>
+        <div className="scrollable-x">
+          <span className="song-info-field track" style={trackStyle}>{props.currentlyPlaying.item.name}</span>
         </div>
-        <div style={artistStyle}>
-          <span className="song-info-item artist">{props.currentlyPlaying.item.artists[0].name}</span>
+        <div className="scrollable-x">
+          <span className="song-info-field artists" style={artistsStyle}>{props.currentlyPlaying.item.artists[0].name}</span>
         </div>
       </div>
     );

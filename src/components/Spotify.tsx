@@ -188,18 +188,17 @@ export default function Spotify() {
     const style = {
         bottom: 42,
         right: 0,
+        fontSize: 14,
         backgroundColor: 'rgba(6,70,50,0.6)',
-        width: 200,
-        minHeight: '4em',
     };
 
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle:
             return currentlyPlaying !== undefined ? (
-              <div id="spotify" className="overlay" style={style}>
+              <div id="spotify" className="d-flex align-items-center overlay overflow-hidden" style={style}>
                 <SpotifyOverlayIcon />
-                <SpotifyOverlaySongInfo currentlyPlaying={currentlyPlaying} fontSize={14} color="#FFFFFF" />
+                <SpotifyOverlaySongInfo currentlyPlaying={currentlyPlaying} width={160} color="#FFFFFF" />
               </div>
             ) : null;
 

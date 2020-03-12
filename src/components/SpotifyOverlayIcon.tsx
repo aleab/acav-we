@@ -2,7 +2,11 @@ import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 
-export default function SpotifyOverlayIcon() {
+interface SpotifyOverlayIconProps {
+}
+
+export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
+    // https://developer.spotify.com/branding-guidelines/
     // Spotify Light Green: #1ED760
     // Spotify White:       #FFFFFF
     // Spotify Black:       #191414
@@ -12,15 +16,9 @@ export default function SpotifyOverlayIcon() {
     //       - Black, when the background is light
     //       - White, when the background is dark
 
-    const style = {
-        margin: 14,
-        fontSize: 28,
-        color: '#1ED760',
-    };
-
     return (
-      <span>
-        <FontAwesomeIcon icon={faSpotify} style={style} />
+      <span className="spotify-icon">
+        <FontAwesomeIcon icon={faSpotify} color="#1ED760" />
       </span>
     );
 }
