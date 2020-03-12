@@ -87,6 +87,124 @@ function isValidTokenObject(token: any): boolean {
     return _.isObjectLike(token) && token['access_token'] && token['refresh_token'] && token['expires_at'];
 }
 
+/**
+ * Request a decrypted token from the backend
+ * @param context The current context of the state machine
+ * @param retry
+ * @returns A RaiseAction for the state machine
+ */
+async function fetchToken(context: SsmContext, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
+    try {
+        const res = await fetch(`${BACKEND_API_BASEURL}/token`, {
+            method: 'POST',
+            body: new URLSearchParams({ token: context.token.current! }),
+        });
+
+        switch (res.status) {
+            case 200:
+                return await res.json().then(json => {
+                    if (!isValidTokenObject(json)) {
+                        Log.error('The backend returned an invalid token (!?):', json);
+                        return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+                    }
+
+                    Logc.debug('Received a valid token:', json);
+                    window.localStorage.setItem(LOCALSTORAGE_SPOTIFY_TOKEN, JSON.stringify(json));
+                    return raise(SsmEvent.GotSpotifyToken);
+                });
+
+            case 400: // token was null|undefined|'' or not a valid encrypted token at all
+            case 403: // token is old
+                return raise(SsmEvent.BackendTokenBadRequestOrForbidden);
+
+            case 500: // internal server error
+                return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+
+            default:
+                return res.text().then(body => {
+                    Log.error(`The backend returned ${res.status}:`, { body });
+                    return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+                });
+        }
+    } catch (err) {
+        if (retry <= 0) {
+            Log.error(err);
+            return raise(SsmEvent.NoInternetConnection);
+        }
+        // TODO: Is it fine to sleep? Does it block everything?
+        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchToken(context, retry - 1));
+    }
+}
+
+/**
+ * Refresh the current token
+ * @param spotifyToken The current stored token
+ * @param retry
+ * @returns A RaiseAction for the state machine
+ */
+async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
+    try {
+        const res = await fetch(`${BACKEND_API_BASEURL}/refresh`, {
+            method: 'POST',
+            body: new URLSearchParams({ refresh_token: spotifyToken.refresh_token }),
+        });
+
+        switch (res.status) {
+            case 200:
+                return res.json().then(json => {
+                    if (!json['access_token'] || !json['expires_at']) {
+                        Log.error('The backend returned an invalid refreshed token object (!?):', json);
+                        return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
+                    }
+
+                    spotifyToken.access_token = json['access_token'];
+                    spotifyToken.expires_at = Number(json['expires_at']);
+                    window.localStorage.setItem(LOCALSTORAGE_SPOTIFY_TOKEN, JSON.stringify(spotifyToken));
+                    return raise(SsmEvent.SpotifyTokenRefreshed);
+                });
+
+            case 400:
+                return res.text().then(body => {
+                    if (body === '') {
+                        return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);    // refresh_token is null|undefined|''
+                    }
+                    Log.error('The backend returned 400:', JSON.parse(body));
+                    return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);        // Spotify's 400: not sure what it could mean
+                });
+
+            case 401: // unauthorized: the user revoked authorization
+                return raise(SsmEvent.SpotifyTokenRevoked);
+
+            case 429: // rate limit (Spotify's)
+                return raise({
+                    type: SsmEvent.RefreshTokenAfterSeconds,
+                    seconds: Number(res.headers.get('Retry-After') ?? 4) + 1,
+                    status: 429,
+                } as AnyEventObject);
+
+            case 500: // internal server error (ours or Spotify's)
+                return raise({
+                    type: SsmEvent.RefreshTokenAfterSeconds,
+                    seconds: 5,
+                    status: 500,
+                } as AnyEventObject);
+
+            default:
+                return res.text().then(body => {
+                    Log.error(`The backend returned ${res.status}:`, { body });
+                    return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
+                });
+        }
+    } catch (err) {
+        if (retry <= 0) {
+            Log.error(err);
+            return raise(SsmEvent.NoInternetConnection);
+        }
+        // TODO: Is it fine to sleep? Does it block everything?
+        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRefreshToken(spotifyToken, retry - 1));
+    }
+}
+
 const SpotifyStateMachine = Machine<SsmContext>({
     id: 'spotify',
     initial: SsmState.S0Unknown,
@@ -142,49 +260,7 @@ const SpotifyStateMachine = Machine<SsmContext>({
                 id: '3_fetchToken',
                 src: async ctx => {
                     Logc.debug('~> (3)');
-                    async function fetchToken(retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
-                        try {
-                            const res = await fetch(`${BACKEND_API_BASEURL}/token`, {
-                                method: 'POST',
-                                body: new URLSearchParams({ token: ctx.token.current! }),
-                            });
-
-                            switch (res.status) {
-                                case 200:
-                                    return await res.json().then(json => {
-                                        if (!isValidTokenObject(json)) {
-                                            Log.error('The backend returned an invalid token (!?):', json);
-                                            return raise(SsmEvent.CouldntGetBackendTokenFatalError);
-                                        }
-
-                                        Logc.debug('Received a valid token:', json);
-                                        window.localStorage.setItem(LOCALSTORAGE_SPOTIFY_TOKEN, JSON.stringify(json));
-                                        return raise(SsmEvent.GotSpotifyToken);
-                                    });
-
-                                case 400: // token was null|undefined|'' or not a valid encrypted token at all
-                                case 403: // token is old
-                                    return raise(SsmEvent.BackendTokenBadRequestOrForbidden);
-
-                                case 500: // internal server error
-                                    return raise(SsmEvent.CouldntGetBackendTokenFatalError);
-
-                                default:
-                                    return res.text().then(body => {
-                                        Log.error(`The backend returned ${res.status}:`, { body });
-                                        return raise(SsmEvent.CouldntGetBackendTokenFatalError);
-                                    });
-                            }
-                        } catch (err) {
-                            if (retry <= 0) {
-                                Log.error(err);
-                                return raise(SsmEvent.NoInternetConnection);
-                            }
-                            // TODO: Is it fine to sleep? Does it block everything?
-                            return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchToken(retry - 1));
-                        }
-                    }
-                    return fetchToken();
+                    return fetchToken(ctx);
                 },
                 onDone: [
                     {
@@ -224,70 +300,7 @@ const SpotifyStateMachine = Machine<SsmContext>({
                         ctx.spotifyToken = spotifyToken;
                         return raise(SsmEvent.Idle);
                     }
-
-                    // Refresh the token
-                    async function fetchRefresh(retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
-                        try {
-                            const res = await fetch(`${BACKEND_API_BASEURL}/refresh`, {
-                                method: 'POST',
-                                body: new URLSearchParams({ refresh_token: spotifyToken.refresh_token }),
-                            });
-
-                            switch (res.status) {
-                                case 200:
-                                    return res.json().then(json => {
-                                        if (!json['access_token'] || !json['expires_at']) {
-                                            Log.error('The backend returned an invalid refreshed token object (!?):', json);
-                                            return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
-                                        }
-
-                                        spotifyToken.access_token = json['access_token'];
-                                        spotifyToken.expires_at = Number(json['expires_at']);
-                                        window.localStorage.setItem(LOCALSTORAGE_SPOTIFY_TOKEN, JSON.stringify(spotifyToken));
-                                        return raise(SsmEvent.SpotifyTokenRefreshed);
-                                    });
-
-                                case 400:
-                                    return res.text().then(body => {
-                                        if (body === '') {
-                                            return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);    // refresh_token is null|undefined|''
-                                        }
-                                        Log.error('The backend returned 400:', JSON.parse(body));
-                                        return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);        // Spotify's 400: not sure what it could mean
-                                    });
-
-                                case 401: // unauthorized: the user revoked authorization
-                                    return raise(SsmEvent.SpotifyTokenRevoked);
-
-                                case 429: // rate limit (Spotify's)
-                                    return raise({
-                                        type: SsmEvent.RefreshTokenAfterSeconds,
-                                        seconds: Number(res.headers.get('Retry-After') ?? 4) + 1,
-                                        status: 429,
-                                    } as AnyEventObject);
-
-                                case 500: // internal server error (ours or Spotify's)
-                                    return raise({
-                                        type: SsmEvent.RefreshTokenAfterSeconds,
-                                        seconds: 5,
-                                        status: 500,
-                                    } as AnyEventObject);
-
-                                default:
-                                    return res.text().then(body => {
-                                        Log.error(`The backend returned ${res.status}:`, { body });
-                                        return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
-                                    });
-                            }
-                        } catch (err) {
-                            if (retry <= 0) {
-                                Log.error(err);
-                                return new Promise(resolve => setTimeout(resolve, 1000)).then(() => raise(SsmEvent.NoInternetConnection));
-                            }
-                            return fetchRefresh(retry - 1);
-                        }
-                    }
-                    return fetchRefresh();
+                    return fetchRefreshToken(spotifyToken);
                 },
                 onDone: [
                     {
@@ -347,10 +360,9 @@ const SpotifyStateMachine = Machine<SsmContext>({
             after: [
                 {
                     target: SsmState.S4CheckingAT,
-                    delay: (_ctx, event) => (event.seconds > 0 ? event.seconds : 5),
-                    actions: (_ctx, event) => {
-                        // TODO: Remove this action
-                        Log.debug('----', _.cloneDeep(event));
+                    delay: (_ctx, evt) => {
+                        const event: AnyEventObject = evt.data.event;
+                        return event.seconds > 0 ? event.seconds * 1000 : 5000;
                     },
                 },
             ],
