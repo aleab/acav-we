@@ -5,6 +5,7 @@ import React, { useCallback, useContext, useEffect, useRef, useState } from 'rea
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
+import { checkInternetConnection } from '../common/Network';
 import SpotifyStateMachine, { SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
 
@@ -22,29 +23,63 @@ export default function Spotify() {
     // ===============
     const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token }));
     useEffect(() => {
+        send(SpotifyStateMachineEvent.Init);
+
         Logc.info("Registering StateMachine's state listener...");
-        let refreshTimeoutId = 0;
-        const s = service.subscribe(newState => {
-            if (newState.value === SpotifyStateMachineState.S5HasATIdle) {
-                const expiresIn = (newState.context.spotifyToken!.expires_at - Date.now() - 10 * 1000) || 0;
-                const timeout = expiresIn >= 0 ? expiresIn : 0;
-                refreshTimeoutId = setTimeout((() => {
-                    send(SpotifyStateMachineEvent.SpotifyTokenExpired);
-                }) as TimerHandler, timeout);
-                Logc.debug(`Scheduled next token refresh in ${Math.round(timeout / 1000)}s.`);
+        const timeoutIds = new Map<string, number>();
+
+        const stateListener = service.subscribe(newState => {
+            switch (newState.value) {
+                case SpotifyStateMachineState.S5HasATIdle: {
+                    const expiresIn = (newState.context.spotifyToken!.expires_at - Date.now() - 10 * 1000) || 0;
+                    const timeout = expiresIn >= 0 ? expiresIn : 0;
+
+                    clearTimeout(timeoutIds.get('refreshTimeoutId'));
+                    const refreshTimeoutId = setTimeout((() => {
+                        timeoutIds.delete('refreshTimeoutId');
+                        send(SpotifyStateMachineEvent.SpotifyTokenExpired);
+                    }) as TimerHandler, timeout);
+                    timeoutIds.set('refreshTimeoutId', refreshTimeoutId);
+
+                    Logc.debug(`Scheduled next token refresh in ${Math.round(timeout / 1000)} seconds.`);
+                }
+                break;
+
+                case SpotifyStateMachineState.S6CantGetTokenErrorIdle:
+                    // TODO: Handle state 6
+                    break;
+
+                case SpotifyStateMachineState.S7RetryWaiting:
+                    // TODO: Handle state 7
+                    break;
+
+                case SpotifyStateMachineState.SNNoInternetConnection: {
+                    const onsuccess = () => send(SpotifyStateMachineEvent.InternetConnectionRestored);
+                    const onfail = () => {
+                        clearTimeout(timeoutIds.get('retryTimeoutId'));
+                        const retryTimeoutId = setTimeout((() => {
+                            timeoutIds.delete('retryTimeoutId');
+                            checkInternetConnection(onsuccess, onfail);
+                        }) as TimerHandler, 2 * 1000);
+                        timeoutIds.set('retryTimeoutId', retryTimeoutId);
+                    };
+                    checkInternetConnection(onsuccess, onfail);
+                }
+                break;
+
+                default: break;
             }
         });
-        send(SpotifyStateMachineEvent.Init);
+
         return () => {
-            s.unsubscribe();
-            clearTimeout(refreshTimeoutId);
+            stateListener.unsubscribe();
+            timeoutIds.forEach(tid => clearTimeout(tid));
         };
     }, [ send, service ]);
 
     // =====================
     //  PROPERTIES LISTENER
     // =====================
-    const firstUserPropertiesUpdate = useRef(true);
     useEffect(() => {
         Logc.info('Registering onUserPropertiesChanged callback...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
@@ -53,12 +88,6 @@ export default function Spotify() {
                 if (token.current) {
                     send(SpotifyStateMachineEvent.UserEnteredToken);
                 }
-            }
-
-            // Properly initialize the SM only after the user properties are applied
-            if (firstUserPropertiesUpdate.current) {
-                firstUserPropertiesUpdate.current = false;
-                send(SpotifyStateMachineEvent.Init);
             }
         };
 
@@ -71,53 +100,90 @@ export default function Spotify() {
     // =========
     //  OVERLAY
     // =========
+    // currentlyPlaying is undefined until the first refresh; it's null when no track is playing
     const [ currentlyPlaying, setCurrentlyPlaying ] = useState<SpotifyCurrentlyPlayingObject | null | undefined>(undefined);
+    const setCurrentlyPlayingAction = useCallback((prev: SpotifyCurrentlyPlayingObject | null | undefined, current: SpotifyCurrentlyPlayingObject | null) => {
+        const newUrl = (current?.item?.external_urls?.['spotify'] ?? current?.item?.uri);
+        if (newUrl !== (prev?.item?.external_urls?.['spotify'] ?? prev?.item?.uri)) {
+            Logc.debug('Currently playing:', current);
+        }
+        return current;
+    }, []);
     useEffect(() => {
         const INTERVAL = 2 * 1000;
         let timeoutId = 0;
-        if (state.value === SpotifyStateMachineState.S4CheckingAT || state.value === SpotifyStateMachineState.S5HasATIdle) {
-            Logc.info('Starting track refresh loop...');
-            const refreshLoop = () => {
+        let cancel = false;
+
+        if (state.value === SpotifyStateMachineState.S5HasATIdle) {
+            Logc.info('Currently-playing loop started.');
+            const refreshLoop = async () => {
                 if (!state.context.spotifyToken || state.context.spotifyToken.expires_at < Date.now()) {
                     send(SpotifyStateMachineEvent.SpotifyTokenExpired);
                 } else {
-                    fetch('https://api.spotify.com/v1/me/player/currently-playing?market=from_token', {
+                    // https://developer.spotify.com/documentation/web-api/reference/player/get-the-users-currently-playing-track/
+                    const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing?market=from_token', {
                         method: 'GET',
                         headers: {
+                            Accept: 'application/json',
                             Authorization: `Bearer ${state.context.spotifyToken.access_token}`,
                         },
-                    }).then(res => {
-                        if (res.status === 429) { // Rate Limiting
-                            // TODO: Display some message or informational icon about rate limiting?
-                            const retryAfterSeconds = Number(res.headers.get('Retry-After') ?? 4) + 1;
-                            Logc.warn(`Rate Limit reached; retry after ${retryAfterSeconds}s!`);
-                            clearTimeout(timeoutId);
-                            timeoutId = setTimeout(refreshLoop as TimerHandler, retryAfterSeconds * 1000);
-                        } else if (res.status !== 200 && res.status !== 204) {
-                            // TODO: Handle responses !== 20*
-                            res.json().then(json => {
-                                Log.error(`Spotify's /currently-playing returned ${res.status}:`, json);
-                            });
-                            return null;
-                        }
-                        return res.json();
-                    }).then((json: SpotifyCurrentlyPlayingObject | null) => {
-                        setCurrentlyPlaying(prev => {
-                            const newUrl = (json?.item?.external_urls?.['spotify'] ?? json?.item?.uri);
-                            if (newUrl !== (prev?.item?.external_urls?.['spotify'] ?? prev?.item?.uri)) {
-                                Logc.debug('Currently playing:', json?.item);
-                            }
-                            return json;
-                        });
+                    }).catch(err => {
+                        // TODO: No internet connection ?
+                        return null;
                     });
+
+                    if (cancel) return;
+                    if (!res) {
+                        send(SpotifyStateMachineEvent.NoInternetConnection);
+                        return;
+                    }
+
                     timeoutId = setTimeout(refreshLoop as TimerHandler, INTERVAL);
+                    switch (res.status) {
+                        case 200:
+                            res.json().then((json: SpotifyCurrentlyPlayingObject) => {
+                                setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, json));
+                            });
+                            break;
+
+                        case 204: // No track playing or private session
+                            setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, null));
+                            break;
+
+                        case 401: // The token has expired; it has NOT been revoked: generally a revoked token continues to work until expiration
+                            res.json().then(json => Logc.warn('/currently-playing returned 401:', json));
+                            clearTimeout(timeoutId);
+                            send(SpotifyStateMachineEvent.SpotifyTokenExpired);
+                            break;
+
+                        case 429: { // Rate limit
+                                // TODO: Display some message or informational icon about rate limiting?
+                                const retryAfterSeconds = Number(res.headers.get('Retry-After') ?? 4) + 1;
+                                Logc.warn(`Rate Limit reached; retry after ${retryAfterSeconds}s!`);
+                                clearTimeout(timeoutId);
+                                timeoutId = setTimeout(refreshLoop as TimerHandler, retryAfterSeconds * 1000);
+                            }
+                            break;
+
+                        default:
+                            setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, null));
+                            res.json().then(json => Log.error(`/currently-playing returned ${res.status}:`, json));
+                            break;
+                    }
                 }
             };
+
             refreshLoop();
         }
 
-        return () => clearTimeout(timeoutId);
-    }, [ send, state.value, state.context.spotifyToken ]);
+        return () => {
+            if (timeoutId !== 0) {
+                cancel = true;
+                clearTimeout(timeoutId);
+                Logc.info('Currently-playing loop stopped.');
+            }
+        };
+    }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
 
     const style = {
         bottom: 42,

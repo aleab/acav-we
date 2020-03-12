@@ -46,13 +46,26 @@ const LOCALSTORAGE_SPOTIFY_TOKEN = 'aleab.acav.spotify';
 
 enum SsmState {
     S0Unknown = 'S0Unknown',
+
+    /** (1) Waiting for the user to enter the encrypted token. */
     S1WaitingUserToken = 'S1WaitingUserToken',
+
+    /** (2) Transient state leading to (1). */
     S2HasOldToken = 'S2HasOldToken',
+
+    /** (3) The user just entered the encrypted token and and we are in the process of exchanging it with an actual AT. – (transient) */
     S3HasNewToken = 'S3HasNewToken',
+
+    /** (4) Either we received an AT from the backend and are in the process of checking its validity, or we are refreshing an expired one. – (transient) */
     S4CheckingAT = 'S4CheckingAT',
+
+    /** (5) We have a valid and non-expired access token. */
     S5HasATIdle = 'S5HasATIdle',
+
     S6CantGetTokenErrorIdle = 'S6CantGetTokenErrorIdle',
+
     S7RetryWaiting = 'S7RetryWaiting',
+
     SNNoInternetConnection = 'SNNoInternetConnection',
 }
 
@@ -222,6 +235,18 @@ const SpotifyStateMachine = Machine<SsmContext>({
         // 0)
         [SsmState.S0Unknown]: {
             entry: () => Logc.debug('~> (0)'),
+            invoke: {
+                // Transient transition for InternetConnectionRestored
+                src: async (_ctx, evt) => {
+                    return evt.type === SsmEvent.InternetConnectionRestored;
+                },
+                onDone: [
+                    { cond: (_ctx, evt) => !evt.data },
+                    { target: SsmState.S4CheckingAT, cond: 'hasLsToken' },
+                    { target: SsmState.S2HasOldToken, cond: 'hasToken' },
+                    { target: SsmState.S1WaitingUserToken },
+                ],
+            },
             on: {
                 [SsmEvent.Init]: [
                     { actions: SsmAction.LogInitializationContext, target: SsmState.S4CheckingAT, cond: 'hasLsToken' },
