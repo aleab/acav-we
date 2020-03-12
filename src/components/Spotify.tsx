@@ -25,7 +25,7 @@ export default function Spotify() {
         Logc.info("Registering StateMachine's state listener...");
         let refreshTimeoutId = 0;
         const s = service.subscribe(newState => {
-            if (newState.value === SpotifyStateMachineState.LsIdle) {
+            if (newState.value === SpotifyStateMachineState.S5HasATIdle) {
                 const expiresIn = (newState.context.spotifyToken!.expires_at - Date.now() - 10 * 1000) || 0;
                 const timeout = expiresIn >= 0 ? expiresIn : 0;
                 refreshTimeoutId = setTimeout((() => {
@@ -34,6 +34,7 @@ export default function Spotify() {
                 Logc.debug(`Scheduled next token refresh in ${Math.round(timeout / 1000)}s.`);
             }
         });
+        send(SpotifyStateMachineEvent.Init);
         return () => {
             s.unsubscribe();
             clearTimeout(refreshTimeoutId);
@@ -50,14 +51,14 @@ export default function Spotify() {
             if (args.newProps.spotify?.token !== undefined) {
                 token.current = args.newProps.spotify.token;
                 if (token.current) {
-                    send(SpotifyStateMachineEvent.EnteredToken);
+                    send(SpotifyStateMachineEvent.UserEnteredToken);
                 }
             }
 
             // Properly initialize the SM only after the user properties are applied
             if (firstUserPropertiesUpdate.current) {
                 firstUserPropertiesUpdate.current = false;
-                send(SpotifyStateMachineEvent.Initialize);
+                send(SpotifyStateMachineEvent.Init);
             }
         };
 
@@ -74,7 +75,7 @@ export default function Spotify() {
     useEffect(() => {
         const INTERVAL = 2 * 1000;
         let timeoutId = 0;
-        if (state.value === SpotifyStateMachineState.Ls || state.value === SpotifyStateMachineState.LsIdle) {
+        if (state.value === SpotifyStateMachineState.S4CheckingAT || state.value === SpotifyStateMachineState.S5HasATIdle) {
             Logc.info('Starting track refresh loop...');
             const refreshLoop = () => {
                 if (!state.context.spotifyToken || state.context.spotifyToken.expires_at < Date.now()) {
@@ -127,8 +128,8 @@ export default function Spotify() {
     };
 
     switch (state.value) {
-        case SpotifyStateMachineState.Ls:
-        case SpotifyStateMachineState.LsIdle:
+        case SpotifyStateMachineState.S4CheckingAT:
+        case SpotifyStateMachineState.S5HasATIdle:
             return currentlyPlaying !== undefined ? (
               <div id="spotify" className="overlay" style={style}>
                 <SpotifyOverlayIcon />
