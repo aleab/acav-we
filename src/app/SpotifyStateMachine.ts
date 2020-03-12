@@ -117,7 +117,7 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
             case 200:
                 return await res.json().then(json => {
                     if (!isValidTokenObject(json)) {
-                        Log.error('The backend returned an invalid token (!?):', json);
+                        Logc.error('The backend returned an invalid token (!?):', json);
                         return raise(SsmEvent.CouldntGetBackendTokenFatalError);
                     }
 
@@ -135,13 +135,13 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
 
             default:
                 return res.text().then(body => {
-                    Log.error(`The backend returned ${res.status}:`, { body });
+                    Logc.error(`The backend returned ${res.status}:`, { body });
                     return raise(SsmEvent.CouldntGetBackendTokenFatalError);
                 });
         }
     } catch (err) {
         if (retry <= 0) {
-            Log.error(err);
+            Logc.error(err);
             return raise(SsmEvent.NoInternetConnection);
         }
         // TODO: Is it fine to sleep? Does it block everything?
@@ -166,7 +166,7 @@ async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3):
             case 200:
                 return res.json().then(json => {
                     if (!json['access_token'] || !json['expires_at']) {
-                        Log.error('The backend returned an invalid refreshed token object (!?):', json);
+                        Logc.error('The backend returned an invalid refreshed token object (!?):', json);
                         return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
                     }
 
@@ -181,7 +181,7 @@ async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3):
                     if (body === '') {
                         return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);    // refresh_token is null|undefined|''
                     }
-                    Log.error('The backend returned 400:', JSON.parse(body));
+                    Logc.error('The backend returned 400:', JSON.parse(body));
                     return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);        // Spotify's 400: not sure what it could mean
                 });
 
@@ -204,13 +204,13 @@ async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3):
 
             default:
                 return res.text().then(body => {
-                    Log.error(`The backend returned ${res.status}:`, { body });
+                    Logc.error(`The backend returned ${res.status}:`, { body });
                     return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
                 });
         }
     } catch (err) {
         if (retry <= 0) {
-            Log.error(err);
+            Logc.error(err);
             return raise(SsmEvent.NoInternetConnection);
         }
         // TODO: Is it fine to sleep? Does it block everything?

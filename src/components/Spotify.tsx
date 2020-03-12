@@ -73,7 +73,10 @@ export default function Spotify() {
 
         return () => {
             stateListener.unsubscribe();
-            timeoutIds.forEach(tid => clearTimeout(tid));
+            timeoutIds.forEach((tid, tname) => {
+                clearTimeout(tid);
+                Logc.debug(`Timeout cancelled: ${tname} (#${tid})`);
+            });
         };
     }, [ send, service ]);
 
@@ -110,12 +113,15 @@ export default function Spotify() {
         return current;
     }, []);
     useEffect(() => {
+        // TODO: Implement dynamically changing interval.
+        //       - previous playing state; is it paused now? is Spotify even open?
+        //       - user is changing track; there's probably gonna be some flat/zero sample values
         const INTERVAL = 2 * 1000;
         let timeoutId = 0;
         let cancel = false;
 
         if (state.value === SpotifyStateMachineState.S5HasATIdle) {
-            Logc.info('Currently-playing loop started.');
+            Logc.debug('Currently-playing loop started.');
             const refreshLoop = async () => {
                 if (!state.context.spotifyToken || state.context.spotifyToken.expires_at < Date.now()) {
                     send(SpotifyStateMachineEvent.SpotifyTokenExpired);
@@ -167,7 +173,7 @@ export default function Spotify() {
 
                         default:
                             setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, null));
-                            res.json().then(json => Log.error(`/currently-playing returned ${res.status}:`, json));
+                            res.json().then(json => Logc.error(`/currently-playing returned ${res.status}:`, json));
                             break;
                     }
                 }
@@ -180,7 +186,7 @@ export default function Spotify() {
             if (timeoutId !== 0) {
                 cancel = true;
                 clearTimeout(timeoutId);
-                Logc.info('Currently-playing loop stopped.');
+                Logc.debug('Currently-playing loop stopped.');
             }
         };
     }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
