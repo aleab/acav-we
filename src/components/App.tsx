@@ -29,6 +29,7 @@ interface AppProps {
 export default function App(props: AppProps) {
     const O = useRef(props.options);
     const [ showStats, setShowStats ] = useState(false);
+    const [ showSpotify, setShowSpotify ] = useState(false);
 
     window.acav.getProperties = () => _.cloneDeep(O.current);
 
@@ -152,6 +153,10 @@ export default function App(props: AppProps) {
                 samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
             }
 
+            if (newProps.spotify?.showOverlay !== undefined) {
+                setShowSpotify(newProps.spotify.showOverlay);
+            }
+
             onUserPropertiesChangedSubs.forEach(callback => callback({ oldProps, newProps }));
         };
         return () => {
@@ -239,7 +244,7 @@ export default function App(props: AppProps) {
         <WallpaperContext.Provider value={wallpaperContext}>
           {showStats ? <Stats /> : null}
           <BarVisualizer />
-          <Spotify />
+          {showSpotify ? <Spotify /> : null}
         </WallpaperContext.Provider>
       </div>
     );
