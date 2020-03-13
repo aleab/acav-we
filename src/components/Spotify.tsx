@@ -1,6 +1,7 @@
 /* eslint-disable camelcase */
 
 import _ from 'lodash';
+import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useMachine } from '@xstate/react';
@@ -21,11 +22,12 @@ const Logc = Log.getLogger('Spofity', '#1DB954');
 // TODO: Refactor some shit into hooks (?)
 
 type OverlayStyle = {
-    maxWidth: number;
-    fontSize: number;
+    transform: string,
     left: number;
     top: number;
-    transform: string,
+    maxWidth: number;
+    fontSize: number;
+    color: string;
 };
 
 export default function Spotify() {
@@ -39,11 +41,12 @@ export default function Spotify() {
         if (_.isMatch(prevStyle, newStyle)) return prevStyle;
         return _.merge({}, prevStyle, newStyle);
     }, {
-        maxWidth: O.current.style.width,
-        fontSize: O.current.style.fontSize,
+        transform: calculatePivotTransform(O.current.style.pivot).transform,
         left: window.innerWidth * (O.current.style.left / 100),
         top: window.innerHeight * (O.current.style.top / 100),
-        transform: calculatePivotTransform(O.current.style.pivot).transform,
+        maxWidth: O.current.style.width,
+        fontSize: O.current.style.fontSize,
+        color: `#${ColorConvert.rgb.hex(O.current.style.textColor as RGB)}`,
     });
     const setOverlayBackgroundStyleInit = useCallback(() => {
         return generateBackgroundCss(O.current.style.background.mode, {
@@ -131,11 +134,12 @@ export default function Spotify() {
                 if (spotifyProps.artType !== undefined) setOverlayArtStyle(spotifyProps.artType);
                 if (spotifyProps.style !== undefined) {
                     const s: Partial<OverlayStyle> = {};
-                    if (spotifyProps.style.width !== undefined) s.maxWidth = spotifyProps.style.width;
-                    if (spotifyProps.style.fontSize !== undefined) s.fontSize = spotifyProps.style.fontSize;
                     if (spotifyProps.style.pivot !== undefined) s.transform = calculatePivotTransform(spotifyProps.style.pivot).transform;
                     if (spotifyProps.style.left !== undefined) s.left = window.innerWidth * (spotifyProps.style.left / 100);
                     if (spotifyProps.style.top !== undefined) s.top = window.innerHeight * (spotifyProps.style.top / 100);
+                    if (spotifyProps.style.width !== undefined) s.maxWidth = spotifyProps.style.width;
+                    if (spotifyProps.style.fontSize !== undefined) s.fontSize = spotifyProps.style.fontSize;
+                    if (spotifyProps.style.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(spotifyProps.style.textColor as RGB)}`;
                     if (spotifyProps.style.background !== undefined) setOverlayBackgroundStyle();
                     setOverlayStyle(s);
                 }
@@ -252,7 +256,7 @@ export default function Spotify() {
             const songInfoProps = {
                 currentlyPlaying,
                 width: overlayStyle.maxWidth,
-                color: '#FFFFFF',
+                color: overlayStyle.color,
             };
             switch (overlayArtStyle) {
                 case SpotifyOverlayArtType.None:

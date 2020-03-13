@@ -190,11 +190,12 @@ function getProjectJson() {
                           'let other users use your access token (<samp>AT</samp>). The <em>token</em> is encrypted and only valid for a couple of minutes ' +
                           "until it is exchanged (behind the scenes) for an actual <samp>AT</samp>, which is then saved in your device's local storage.",
                     ),
-                    ui_spotify_width: indent('Width (px)'),
-                    ui_spotify_font_size: indent('Font Size (px)'),
                     ui_spotify_pivot: indent('Pivot'),
                     ui_spotify_position_x: indent('X (%)'),
                     ui_spotify_position_y: indent('Y (%)'),
+                    ui_spotify_width: indent('Width (px)'),
+                    ui_spotify_font_size: indent('Font Size (px)'),
+                    ui_spotify_text_color: indent('Text Color'),
                     ui_spotify_art_type: indent('Art'),
 
                     // [SPOTIFY > BACKGROUND]

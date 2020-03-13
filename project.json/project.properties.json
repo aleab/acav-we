@@ -569,15 +569,22 @@
         "max": 60,
         "condition": "spotify.value"
     },
+    "spotify_text_color": {
+        "order": 5015,
+        "type": "color",
+        "text": "ui_spotify_text_color",
+        "value": "1 1 1",
+        "condition": "spotify.value"
+    },
 
     "spotify_background": {
-        "order": 5015,
+        "order": 5020,
         "type": "text",
         "text": "ui_spotify_background",
         "condition": "spotify.value"
     },
     "spotify_background_type": {
-        "order": 5016,
+        "order": 5021,
         "type": "combo",
         "text": "ui_spotify_background_type",
         "options": [
@@ -588,14 +595,14 @@
         "condition": "spotify.value"
     },
     "spotify_background_color": {
-        "order": 5017,
+        "order": 5022,
         "type": "color",
         "text": "ui_spotify_background_color",
         "value": "0.023529 0.274510 0.196078",
         "condition": "spotify.value && spotify_background_type.value === 'Color'"
     },
     "spotify_background_color_alpha": {
-        "order": 5018,
+        "order": 5023,
         "type": "slider",
         "text": "ui_spotify_background_color_alpha",
         "value": 60,
@@ -604,7 +611,7 @@
         "condition": "spotify.value && spotify_background_type.value === 'Color'"
     },
     "spotify_background_css": {
-        "order": 5017,
+        "order": 5022,
         "type": "textinput",
         "text": "ui_spotify_background_css",
         "value": "background: linear-gradient(180deg, #011911 0%,#053f2d 22%,#074f38 50%,#074f38 50%,#053f2d 78%,#011911 100%);",
@@ -612,7 +619,7 @@
     },
 
     "spotify_art_type": {
-        "order": 5020,
+        "order": 5025,
         "type": "combo",
         "text": "ui_spotify_art_type",
         "options": [

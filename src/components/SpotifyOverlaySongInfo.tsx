@@ -34,7 +34,6 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
 
     const songInfoStyle = _.merge({}, {
         width: props.width,
-        color: props.color,
     }, props.style);
     const trackStyle = {};
     const artistsStyle = {

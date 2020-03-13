@@ -47,13 +47,14 @@ export default interface Properties {
             top: number;
             width: number;
             fontSize: number;
+            textColor: RGB;
             background: {
                 mode: BackgroundMode;
                 color: RGB;
                 /** [0,100] */
                 colorAlpha: number;
                 css: string;
-            },
+            };
         };
         artType: SpotifyOverlayArtType;
     },
@@ -151,11 +152,12 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'artType', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
     // .spotify.style
-    setProperty(spotifyOptions.style!, 'width', raw.spotify_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(spotifyOptions.style!, 'fontSize', raw.spotify_font_size as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.style!, 'pivot', raw.spotify_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
     setProperty(spotifyOptions.style!, 'left', raw.spotify_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.style!, 'top', raw.spotify_position_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.style!, 'width', raw.spotify_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.style!, 'fontSize', raw.spotify_font_size as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.style!, 'textColor', raw.spotify_text_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     // .spotify.style.background
     setProperty(spotifyOptions.style!.background!, 'mode', raw.spotify_background_type as WEProperty<'combo'>, _r => parseComboProperty(_r, BackgroundMode));
     setProperty(spotifyOptions.style!.background!, 'color', raw.spotify_background_color as WEProperty<'color'>, _r => parseColorProperty(_r));
