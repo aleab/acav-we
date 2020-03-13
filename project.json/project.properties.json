@@ -400,7 +400,7 @@
         "options": [
             { "label": "None", "value": "None" },
             { "label": "<samp><u>H</u>S*</samp> - Hue", "value": "Hue" },
-            { "label": "<samp>H<u>S</u>*</samp> - Saturation", "value": "Saturation" },
+            { "label": "<samp>H<u>S</u>V</samp> - Saturation", "value": "Saturation" },
             { "label": "<samp>HS<u>V</u></samp> - Brightness", "value": "HsvBrightness" },
             { "label": "<samp>HS<u>L</u></samp> - Lightness", "value": "HslLightness" },
             { "label": "<samp><u>L</u>AB</samp> - Lightness", "value": "LabLightness" },
@@ -521,10 +521,10 @@
             { "label": "Left", "value": "Left" },
             { "label": "Bottom", "value": "Bottom" },
             { "label": "Right", "value": "Right" },
-            { "label": "Top-Left", "value": "TopLeft" },
-            { "label": "Bottom-Left", "value": "BottomLeft" },
-            { "label": "Bottom-Right", "value": "BottomRight" },
-            { "label": "Top-Right", "value": "TopRight" }
+            { "label": "Top Left", "value": "TopLeft" },
+            { "label": "Bottom Left", "value": "BottomLeft" },
+            { "label": "Bottom Right", "value": "BottomRight" },
+            { "label": "Top Right", "value": "TopRight" }
         ],
         "value": "BottomRight",
         "condition": "spotify.value"
