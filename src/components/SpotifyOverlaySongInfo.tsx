@@ -43,10 +43,10 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
 
     return (
       <div className="song-info pr-2" style={songInfoStyle}>
-        <div className="scrollable-x">
+        <div className="scrollable-x lh-0">
           <span className="song-info-field track" style={trackStyle}>{props.currentlyPlaying.item.name}</span>
         </div>
-        <div className="scrollable-x">
+        <div className="scrollable-x lh-0">
           <span className="song-info-field artists" style={artistsStyle}>{props.currentlyPlaying.item.artists[0].name}</span>
         </div>
       </div>

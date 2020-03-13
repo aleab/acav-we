@@ -7,12 +7,12 @@
 
 .spotify-icon {
   margin: .5em;
-  font-size: calc(2em + 4px);
+  font-size: 2em;
   line-height: 0;
 }
 
 #spotify .song-info {
-  padding: 1em 0;
+  padding: calc(1em - 2px) 0;
   overflow: hidden;
 }
 
