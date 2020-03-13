@@ -2,7 +2,8 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import React from 'react';
 
-function darken(cssColor: string): string {
+const BRIGHTNESS_R = 0.4;
+function darkenOrLighten(cssColor: string): string {
     let rgba: RGBA = [ 255, 255, 255, 1 ];
     if (cssColor.startsWith('#')) {
         const _rgb = ColorConvert.hex.rgb(cssColor);
@@ -11,8 +12,9 @@ function darken(cssColor: string): string {
         const _rgba = cssColor.replace(/^rgba?\((.+?)\)$/, '$1').split(',').map(v => Number(v));
         rgba = [ _rgba[0], _rgba[1], _rgba[2], _rgba[3] ?? 1 ];
     }
+
     const hsv = ColorConvert.rgb.hsv([ rgba[0], rgba[1], rgba[2] ]);
-    hsv[2] *= 0.7;
+    hsv[2] = hsv[2] > 50 ? hsv[2] * (1 - BRIGHTNESS_R) : hsv[2] * (1 + BRIGHTNESS_R);
 
     const rgb = ColorConvert.hsv.rgb(hsv);
     return rgba[3] !== 1 ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${rgba[3]})` : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
@@ -37,7 +39,7 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     }, props.style);
     const trackStyle = {};
     const artistsStyle = {
-        color: darken(props.color),
+        color: darkenOrLighten(props.color),
     };
 
     return (
