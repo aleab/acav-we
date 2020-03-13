@@ -100,7 +100,7 @@ export default function useBarVisualizerRendering(canvas: RefObject<HTMLCanvasEl
                 const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
                 const dx = spacing / 2 + index * (barWidth + spacing);
 
-                const fillColor = [barColorRgb];
+                const fillColor = [ barColorRgb, barColorRgb ];
                 if (barColorReaction !== undefined) {
                     const value = barColorReactionValueProvider([ sample[0], sample[1] ], i, { samplesBuffer: args.samplesBuffer, peak: args.peak });
                     fillColor[0] = barColorReaction(value[0]);
