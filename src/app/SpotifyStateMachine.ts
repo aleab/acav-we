@@ -92,7 +92,7 @@ enum SsmAction {
 }
 
 interface SsmContext {
-    token: { current: string | null };
+    readonly token: { readonly current: string | null };
     spotifyToken?: SpotifyToken;
 }
 
