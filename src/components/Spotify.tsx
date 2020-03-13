@@ -1,11 +1,12 @@
 /* eslint-disable camelcase */
 
 import _ from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
 import { checkInternetConnection } from '../common/Network';
+import { Pivot, calculatePivotTransform } from '../common/Pivot';
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
@@ -17,13 +18,14 @@ const Logc = Log.getLogger('Spofity', '#1DB954');
 
 // TODO: Refactor some shit into hooks (?)
 
-interface OverlayStyle {
-    bottom: number,
-    right: number,
-    maxWidth: number,
-    fontSize: number,
-    background?: string,
-    backgroundColor?: string,
+interface OverlayStyle extends CSSProperties {
+    maxWidth: number;
+    fontSize: number;
+    left: number;
+    top: number;
+    transform: string,
+    background?: string;
+    backgroundColor?: string;
 }
 
 export default function Spotify() {
@@ -36,10 +38,11 @@ export default function Spotify() {
         if (_.isMatch(prevStyle, newStyle)) return prevStyle;
         return _.merge({}, prevStyle, newStyle);
     }, {
-        bottom: 42,
-        right: 0,
         maxWidth: O.current.style.width,
         fontSize: O.current.style.fontSize,
+        left: window.innerWidth * (O.current.style.left / 100),
+        top: window.innerHeight * (O.current.style.top / 100),
+        transform: calculatePivotTransform(O.current.style.pivot).transform,
         backgroundColor: 'rgba(6,70,50,0.6)',
     });
 
@@ -121,6 +124,9 @@ export default function Spotify() {
                     const s: Partial<OverlayStyle> = {};
                     if (spotifyProps.style.width !== undefined) s.maxWidth = spotifyProps.style.width;
                     if (spotifyProps.style.fontSize !== undefined) s.fontSize = spotifyProps.style.fontSize;
+                    if (spotifyProps.style.pivot !== undefined) s.transform = calculatePivotTransform(spotifyProps.style.pivot).transform;
+                    if (spotifyProps.style.left !== undefined) s.left = window.innerWidth * (spotifyProps.style.left / 100);
+                    if (spotifyProps.style.top !== undefined) s.top = window.innerHeight * (spotifyProps.style.top / 100);
                     setOverlayStyle(s);
                 }
             }
@@ -223,39 +229,41 @@ export default function Spotify() {
         };
     }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
 
+    // RENDER
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle: {
             if (currentlyPlaying === undefined) return null;
-            const SpotifyDiv = ({ children }: any) => (
-              <div id="spotify" className="d-flex align-items-center overflow-hidden overlay" style={overlayStyle}>
-                {children}
-              </div>
-            );
-            const SongInfo = ({ style = undefined }: any) => (
-              <SpotifyOverlaySongInfo currentlyPlaying={currentlyPlaying} width={overlayStyle.maxWidth} color="#FFFFFF" style={style} />
-            );
-
+            const spotifyDivProps = {
+                id: 'spotify',
+                className: 'd-flex align-items-center overflow-hidden overlay',
+                style: overlayStyle,
+            };
+            const songInfoProps = {
+                currentlyPlaying,
+                width: overlayStyle.maxWidth,
+                color: '#FFFFFF',
+            };
             switch (overlayArtStyle) {
                 case SpotifyOverlayArtType.None:
                     return (
-                      <SpotifyDiv>
-                        <SongInfo style={{ paddingLeft: '1em' }} />
-                      </SpotifyDiv>
+                      <div {...spotifyDivProps}>
+                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ paddingLeft: '1em' }} />
+                      </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt:
                     return (
-                      <SpotifyDiv>
+                      <div {...spotifyDivProps}>
                         {/* TODO: SpotifyAlbumArt */}
-                        <SongInfo style={{ marginLeft: '.5rem', alignSelf: 'flex-start' }} />
-                      </SpotifyDiv>
+                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '.5rem', alignSelf: 'flex-start' }} />
+                      </div>
                     );
                 case SpotifyOverlayArtType.SpotifyIcon:
                     return (
-                      <SpotifyDiv>
+                      <div {...spotifyDivProps}>
                         <SpotifyOverlayIcon />
-                        <SongInfo />
-                      </SpotifyDiv>
+                        <SpotifyOverlaySongInfo {...songInfoProps} />
+                      </div>
                     );
                 default: return null;
             }

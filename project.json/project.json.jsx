@@ -192,6 +192,9 @@ function getProjectJson() {
                     ),
                     ui_spotify_width: indent('Width (px)'),
                     ui_spotify_font_size: indent('Font Size (px)'),
+                    ui_spotify_pivot: indent('Pivot'),
+                    ui_spotify_position_x: indent('X (%)'),
+                    ui_spotify_position_y: indent('Y (%)'),
                     ui_spotify_art_type: indent('Art'),
 
                     // [NOTES]

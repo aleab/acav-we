@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
 import { DeepReadonly } from 'utility-types';
 
+import { Pivot } from '../../common/Pivot';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import BackgroundMode from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
@@ -40,11 +41,14 @@ export default interface Properties {
     spotify: {
         showOverlay: boolean;
         token: string;
-        artType: SpotifyOverlayArtType;
         style: {
             width: number;
             fontSize: number;
+            pivot: Pivot;
+            left: number;
+            top: number;
         };
+        artType: SpotifyOverlayArtType;
     },
 }
 
@@ -142,6 +146,9 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .spotify.style
     setProperty(spotifyOptions.style!, 'width', raw.spotify_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.style!, 'fontSize', raw.spotify_font_size as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.style!, 'pivot', raw.spotify_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
+    setProperty(spotifyOptions.style!, 'left', raw.spotify_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.style!, 'top', raw.spotify_position_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     return _.merge(
         { ...rootOptions },

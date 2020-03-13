@@ -529,8 +529,48 @@
         "max": 60,
         "condition": "spotify.value"
     },
-    "spotify_art_type": {
+    "spotify_pivot": {
         "order": 5006,
+        "type": "combo",
+        "text": "ui_spotify_pivot",
+        "options": [
+            { "label": "Center", "value": "Center" },
+            { "label": "Top", "value": "Top" },
+            { "label": "Left", "value": "Left" },
+            { "label": "Bottom", "value": "Bottom" },
+            { "label": "Right", "value": "Right" },
+            { "label": "Top-Left", "value": "TopLeft" },
+            { "label": "Bottom-Left", "value": "BottomLeft" },
+            { "label": "Bottom-Right", "value": "BottomRight" },
+            { "label": "Top-Right", "value": "TopRight" }
+        ],
+        "value": "BottomRight",
+        "condition": "spotify.value"
+    },
+    "spotify_position_x": {
+        "order": 5007,
+        "type": "slider",
+        "text": "ui_spotify_position_x",
+        "value": 100,
+        "min": 0,
+        "max": 100,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "spotify.value"
+    },
+    "spotify_position_y": {
+        "order": 5008,
+        "type": "slider",
+        "text": "ui_spotify_position_y",
+        "value": 96,
+        "min": 0,
+        "max": 100,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "spotify.value"
+    },
+    "spotify_art_type": {
+        "order": 5009,
         "type": "combo",
         "text": "ui_spotify_art_type",
         "options": [
