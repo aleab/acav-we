@@ -197,6 +197,13 @@ function getProjectJson() {
                     ui_spotify_position_y: indent('Y (%)'),
                     ui_spotify_art_type: indent('Art'),
 
+                    // [SPOTIFY > BACKGROUND]
+                    ui_spotify_background: subSection('Background'),
+                    ui_spotify_background_type: indent('Type', { n: 3 }),
+                    ui_spotify_background_color: indent(withPropertyIcon('fas fa-palette', 'Color'), { n: 3 }),
+                    ui_spotify_background_color_alpha: indent('Alpha', { n: 3 }),
+                    ui_spotify_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS'), { n: 3 }),
+
                     // [NOTES]
                     ui_notes: section('Notes', true),
                     ui_note1: note(

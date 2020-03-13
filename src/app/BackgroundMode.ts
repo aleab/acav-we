@@ -1,18 +1,35 @@
+import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
 
 export enum BackgroundMode { Color, Image, Css, Playlist }
 
-export function generateCssStyle(mode: BackgroundMode.Color, options: { color: RGB, alpha?: number }): any;
-export function generateCssStyle(mode: BackgroundMode.Image | BackgroundMode.Playlist, options: { imagePath: string }): any;
-export function generateCssStyle(mode: BackgroundMode.Css, options: { css: string }): any;
-export function generateCssStyle(mode: BackgroundMode, options: any): any {
+type ColorOptions = { color: RGB, alpha?: number };
+type ImageOptions = { imagePath: string };
+type CssOptions = { css: string };
+type CssBackground = {
+    background?: string;
+    backgroundClip?: string;
+    backgroundColor?: string;
+    backgroundImage?: string;
+    backgroundOrigin?: string;
+    backgroundPosition?: string;
+    backgroundRepeat?: string;
+    backgroundSize?: string;
+    backgroundAttachment?: string;
+};
+
+export function generateCssStyle(mode: BackgroundMode.Color, options: ColorOptions): CssBackground;
+export function generateCssStyle(mode: BackgroundMode.Image | BackgroundMode.Playlist, options: ImageOptions): CssBackground;
+export function generateCssStyle(mode: BackgroundMode.Css, options: CssOptions): CssBackground;
+export function generateCssStyle<Mode extends BackgroundMode>(mode: Mode, options: Partial<ColorOptions & ImageOptions & CssOptions>): CssBackground;
+export function generateCssStyle(mode: BackgroundMode, options: any): CssBackground {
     switch (mode) {
         case BackgroundMode.Color:
-            return {
-                backgroundColor: options.alpha !== undefined
+            return options.color ? {
+                backgroundColor: options.alpha === undefined || options.alpha === 1
                     ? `rgb(${options.color[0]}, ${options.color[1]}, ${options.color[2]})`
                     : `rgba(${options.color[0]}, ${options.color[1]}, ${options.color[2]}, ${options.alpha})`,
-            };
+            } : {};
 
         case BackgroundMode.Playlist:
         case BackgroundMode.Image:
@@ -21,6 +38,7 @@ export function generateCssStyle(mode: BackgroundMode, options: any): any {
             };
 
         case BackgroundMode.Css: {
+            if (!options.css) return {};
             const newStyle: any = {};
             const regex = /([\w-]+)\s*:\s*((['"]).*\3|[^;]*)/g;
             let match;
@@ -30,7 +48,18 @@ export function generateCssStyle(mode: BackgroundMode, options: any): any {
                     newStyle[propertyName] = match[2];
                 }
             }
-            return newStyle;
+
+            return _.pick<CssBackground>(newStyle, [
+                'background',
+                'backgroundClip',
+                'backgroundColor',
+                'backgroundImage',
+                'backgroundOrigin',
+                'backgroundPosition',
+                'backgroundRepeat',
+                'backgroundSize',
+                'backgroundAttachment',
+            ]);
         }
 
         default: return {};

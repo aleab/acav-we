@@ -1,12 +1,14 @@
 /* eslint-disable camelcase */
 
 import _ from 'lodash';
+import { RGB } from 'color-convert/conversions';
 import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
 import { checkInternetConnection } from '../common/Network';
-import { Pivot, calculatePivotTransform } from '../common/Pivot';
+import { calculatePivotTransform } from '../common/Pivot';
+import { generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
@@ -18,21 +20,20 @@ const Logc = Log.getLogger('Spofity', '#1DB954');
 
 // TODO: Refactor some shit into hooks (?)
 
-interface OverlayStyle extends CSSProperties {
+type OverlayStyle = {
     maxWidth: number;
     fontSize: number;
     left: number;
     top: number;
     transform: string,
-    background?: string;
-    backgroundColor?: string;
-}
+};
 
 export default function Spotify() {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
     const token = useMemo(() => ({ get current() { return O.current.token; } }), []);
 
+    // Overlay states
     const [ overlayArtStyle, setOverlayArtStyle ] = useState(O.current.artType);
     const [ overlayStyle, setOverlayStyle ] = useReducer((prevStyle: OverlayStyle, newStyle: Partial<OverlayStyle>) => {
         if (_.isMatch(prevStyle, newStyle)) return prevStyle;
@@ -43,8 +44,15 @@ export default function Spotify() {
         left: window.innerWidth * (O.current.style.left / 100),
         top: window.innerHeight * (O.current.style.top / 100),
         transform: calculatePivotTransform(O.current.style.pivot).transform,
-        backgroundColor: 'rgba(6,70,50,0.6)',
     });
+    const setOverlayBackgroundStyleInit = useCallback(() => {
+        return generateBackgroundCss(O.current.style.background.mode, {
+            color: O.current.style.background.color as RGB,
+            alpha: O.current.style.background.colorAlpha / 100,
+            css: O.current.style.background.css,
+        });
+    }, []);
+    const [ overlayBackgroundStyle, setOverlayBackgroundStyle ] = useReducer(setOverlayBackgroundStyleInit, undefined, setOverlayBackgroundStyleInit);
 
     // ===============
     //  STATE MACHINE
@@ -111,6 +119,7 @@ export default function Spotify() {
     // =====================
     //  PROPERTIES LISTENER
     // =====================
+    // TODO: Simplify/generalize all this properties listening stuff
     useEffect(() => {
         Logc.info('Registering onUserPropertiesChanged callback...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
@@ -127,6 +136,7 @@ export default function Spotify() {
                     if (spotifyProps.style.pivot !== undefined) s.transform = calculatePivotTransform(spotifyProps.style.pivot).transform;
                     if (spotifyProps.style.left !== undefined) s.left = window.innerWidth * (spotifyProps.style.left / 100);
                     if (spotifyProps.style.top !== undefined) s.top = window.innerHeight * (spotifyProps.style.top / 100);
+                    if (spotifyProps.style.background !== undefined) setOverlayBackgroundStyle();
                     setOverlayStyle(s);
                 }
             }
@@ -237,7 +247,7 @@ export default function Spotify() {
             const spotifyDivProps = {
                 id: 'spotify',
                 className: 'd-flex align-items-center overflow-hidden overlay',
-                style: overlayStyle,
+                style: { ...overlayStyle, ...overlayBackgroundStyle },
             };
             const songInfoProps = {
                 currentlyPlaying,

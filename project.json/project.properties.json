@@ -511,26 +511,8 @@
         "text": "ui_$_spotify_token_note",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && spotify.value"
     },
-    "spotify_width": {
-        "order": 5004,
-        "type": "slider",
-        "text": "ui_spotify_width",
-        "value": 240,
-        "min": 200,
-        "max": 500,
-        "condition": "spotify.value"
-    },
-    "spotify_font_size": {
-        "order": 5005,
-        "type": "slider",
-        "text": "ui_spotify_font_size",
-        "value": 16,
-        "min": 14,
-        "max": 60,
-        "condition": "spotify.value"
-    },
     "spotify_pivot": {
-        "order": 5006,
+        "order": 5010,
         "type": "combo",
         "text": "ui_spotify_pivot",
         "options": [
@@ -548,7 +530,7 @@
         "condition": "spotify.value"
     },
     "spotify_position_x": {
-        "order": 5007,
+        "order": 5011,
         "type": "slider",
         "text": "ui_spotify_position_x",
         "value": 100,
@@ -559,7 +541,7 @@
         "condition": "spotify.value"
     },
     "spotify_position_y": {
-        "order": 5008,
+        "order": 5012,
         "type": "slider",
         "text": "ui_spotify_position_y",
         "value": 96,
@@ -569,8 +551,68 @@
         "step": 0.1,
         "condition": "spotify.value"
     },
+    "spotify_width": {
+        "order": 5013,
+        "type": "slider",
+        "text": "ui_spotify_width",
+        "value": 240,
+        "min": 200,
+        "max": 500,
+        "condition": "spotify.value"
+    },
+    "spotify_font_size": {
+        "order": 5014,
+        "type": "slider",
+        "text": "ui_spotify_font_size",
+        "value": 16,
+        "min": 14,
+        "max": 60,
+        "condition": "spotify.value"
+    },
+
+    "spotify_background": {
+        "order": 5015,
+        "type": "text",
+        "text": "ui_spotify_background",
+        "condition": "spotify.value"
+    },
+    "spotify_background_type": {
+        "order": 5016,
+        "type": "combo",
+        "text": "ui_spotify_background_type",
+        "options": [
+            { "label": "Solid Color", "value": "Color" },
+            { "label": "CSS", "value": "Css" }
+        ],
+        "value": "Color",
+        "condition": "spotify.value"
+    },
+    "spotify_background_color": {
+        "order": 5017,
+        "type": "color",
+        "text": "ui_spotify_background_color",
+        "value": "0.023529 0.274510 0.196078",
+        "condition": "spotify.value && spotify_background_type.value === 'Color'"
+    },
+    "spotify_background_color_alpha": {
+        "order": 5018,
+        "type": "slider",
+        "text": "ui_spotify_background_color_alpha",
+        "value": 60,
+        "min": 0,
+        "max": 100,
+        "condition": "spotify.value && spotify_background_type.value === 'Color'"
+    },
+    "spotify_background_css": {
+        "order": 5017,
+        "type": "textinput",
+        "text": "ui_spotify_background_css",
+        "value": "background: linear-gradient(180deg, #011911 0%,#053f2d 22%,#074f38 50%,#074f38 50%,#053f2d 78%,#011911 100%);",
+        "condition": "spotify.value && spotify_background_type.value === 'Css'"
+    },
+
     "spotify_art_type": {
-        "order": 5009,
+        "order": 5020,
         "type": "combo",
         "text": "ui_spotify_art_type",
         "options": [
