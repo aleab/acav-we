@@ -515,8 +515,8 @@
         "order": 5004,
         "type": "slider",
         "text": "ui_spotify_width",
-        "value": 200,
-        "min": 180,
+        "value": 240,
+        "min": 200,
         "max": 500,
         "condition": "spotify.value"
     },
@@ -524,7 +524,7 @@
         "order": 5005,
         "type": "slider",
         "text": "ui_spotify_font_size",
-        "value": 14,
+        "value": 16,
         "min": 14,
         "max": 60,
         "condition": "spotify.value"
