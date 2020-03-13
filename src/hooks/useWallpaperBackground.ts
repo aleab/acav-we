@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';
-import BackgroundMode from '../app/BackgroundMode';
+import { BackgroundMode, generateCssStyle } from '../app/BackgroundMode';
 import Properties from '../app/properties/Properties';
 
 const Logc = Log.getLogger('useWallpaperBackground', 'darkolivegreen');
@@ -33,9 +33,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
             backgroundImagePath.current = imagePath;
             window.localStorage.setItem(args.localStorageKeys.currentImage, imagePath);
 
-            setStyleBackground({
-                background: `center / cover no-repeat url("file:///${imagePath}")`,
-            });
+            setStyleBackground(generateCssStyle(BackgroundMode.Image, { imagePath }));
 
             Logc.debug(`Background image set to "${imagePath}"`);
         }
@@ -103,22 +101,11 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
 
             if (O.current.background.mode === BackgroundMode.Color) {
                 const color = O.current.background.color ?? [ 0, 0, 0 ];
-                setStyleBackground({
-                    backgroundColor: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
-                });
+                setStyleBackground(generateCssStyle(BackgroundMode.Color, { color }));
             } else if (O.current.background.mode === BackgroundMode.Image) {
                 setBackgroundImage(O.current.background.imagePath);
             } else if (O.current.background.mode === BackgroundMode.Css) {
-                const newStyle: any = {};
-                const regex = /([\w-]+)\s*:\s*((['"]).*\3|[^;]*)/g;
-                let match;
-                while ((match = regex.exec(O.current.background.css)) !== null) {
-                    const propertyName = match[1].replace(/-(.)/g, (_s, v) => v.toUpperCase());
-                    if (propertyName) {
-                        newStyle[propertyName] = match[2];
-                    }
-                }
-                setStyleBackground(newStyle);
+                setStyleBackground(generateCssStyle(BackgroundMode.Css, { css: O.current.background.css }));
             }
         }
 

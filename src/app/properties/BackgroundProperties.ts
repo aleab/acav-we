@@ -1,6 +1,6 @@
 import { RGB } from 'color-convert/conversions';
 
-import BackgroundMode from '../BackgroundMode';
+import { BackgroundMode } from '../BackgroundMode';
 
 export default interface BackgroundProperties {
     mode: BackgroundMode;

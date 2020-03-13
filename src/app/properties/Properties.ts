@@ -5,7 +5,7 @@ import { DeepReadonly } from 'utility-types';
 
 import { Pivot } from '../../common/Pivot';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
-import BackgroundMode from '../BackgroundMode';
+import { BackgroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
