@@ -511,6 +511,36 @@
         "text": "ui_$_spotify_token_note",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && spotify.value"
     },
+    "spotify_width": {
+        "order": 5004,
+        "type": "slider",
+        "text": "ui_spotify_width",
+        "value": 200,
+        "min": 180,
+        "max": 500,
+        "condition": "spotify.value"
+    },
+    "spotify_font_size": {
+        "order": 5005,
+        "type": "slider",
+        "text": "ui_spotify_font_size",
+        "value": 14,
+        "min": 14,
+        "max": 60,
+        "condition": "spotify.value"
+    },
+    "spotify_art_type": {
+        "order": 5006,
+        "type": "combo",
+        "text": "ui_spotify_art_type",
+        "options": [
+            { "label": "None", "value": "None" },
+            { "label": "Album Art", "value": "AlbumArt" },
+            { "label": "Spotify Icon", "value": "SpotifyIcon" }
+        ],
+        "value": "SpotifyIcon",
+        "condition": "spotify.value"
+    },
 
     // [NOTES]
     "notes": {

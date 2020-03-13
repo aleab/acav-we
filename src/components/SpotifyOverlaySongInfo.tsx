@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import React from 'react';
 
@@ -21,6 +22,7 @@ interface SpotifyOverlaySongInfoProps {
     currentlyPlaying: SpotifyCurrentlyPlayingObject | null;
     width: number;
     color: string;
+    style?: any;
 }
 
 export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProps) {
@@ -30,10 +32,10 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
 
     // TODO: Show all artists
 
-    const songInfoStyle = {
+    const songInfoStyle = _.merge({}, {
         width: props.width,
         color: props.color,
-    };
+    }, props.style);
     const trackStyle = {};
     const artistsStyle = {
         color: darken(props.color),

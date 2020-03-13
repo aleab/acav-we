@@ -184,12 +184,15 @@ function getProjectJson() {
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),
                     ui_spotify_token: indent('Token'),
-                    ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a token ${spotifyAuthLink('here')}.`),
+                    ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a <em>token</em> ${spotifyAuthLink('here')}.`),
                     ui_$_spotify_token_note: note(
-                        '<u>Technical note</u>: The token returned by the service linked above is encrypted and only valid for a few minutes, ' +
-                          'until the app exchanges it for the actual token and saves the latter in the local storage for future use; ' +
-                          'including it in shared presets will not leak any potentially private information.',
+                        "<b><u>Note</u></b>: Including your <em>token</em> in shared presets won't leak any potentially private information nor will it " +
+                          'let other users use your access token (<samp>AT</samp>). The <em>token</em> is encrypted and only valid for a couple of minutes ' +
+                          "until it is exchanged (behind the scenes) for an actual <samp>AT</samp>, which is then saved in your device's local storage.",
                     ),
+                    ui_spotify_width: indent('Width (px)'),
+                    ui_spotify_font_size: indent('Font Size (px)'),
+                    ui_spotify_art_type: indent('Art'),
 
                     // [NOTES]
                     ui_notes: section('Notes', true),

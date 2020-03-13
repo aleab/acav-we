@@ -11,3 +11,8 @@
 .align-items-end { align-items: flex-end !important; }
 .align-items-center { align-items: center !important; }
 .align-items-stretch { align-items: stretch !important; }
+
+.align-self-start { align-self: flex-start !important; }
+.align-self-end { align-self: flex-end !important; }
+.align-self-center { align-self: center !important; }
+.align-self-stretch { align-self: stretch !important; }

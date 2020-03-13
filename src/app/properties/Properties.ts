@@ -7,6 +7,7 @@ import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import BackgroundMode from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ScaleFunction } from '../ScaleFunction';
+import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
@@ -39,6 +40,11 @@ export default interface Properties {
     spotify: {
         showOverlay: boolean;
         token: string;
+        artType: SpotifyOverlayArtType;
+        style: {
+            width: number;
+            fontSize: number;
+        };
     },
 }
 
@@ -129,9 +135,13 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
     // .spotify
-    const spotifyOptions: MappedProperties['spotify'] = {};
+    const spotifyOptions: MappedProperties['spotify'] = { style: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
+    setProperty(spotifyOptions, 'artType', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
+    // .spotify.style
+    setProperty(spotifyOptions.style!, 'width', raw.spotify_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.style!, 'fontSize', raw.spotify_font_size as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     return _.merge(
         { ...rootOptions },
