@@ -2,16 +2,12 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import React from 'react';
 
+import { cssColorToRgba } from '../common/Css';
+
 const BRIGHTNESS_R = 0.4;
 function darkenOrLighten(cssColor: string): string {
-    let rgba: RGBA = [ 255, 255, 255, 1 ];
-    if (cssColor.startsWith('#')) {
-        const _rgb = ColorConvert.hex.rgb(cssColor);
-        rgba = [ _rgb[0], _rgb[1], _rgb[2], 255 ];
-    } else if (cssColor.startsWith('rgb')) {
-        const _rgba = cssColor.replace(/^rgba?\((.+?)\)$/, '$1').split(',').map(v => Number(v));
-        rgba = [ _rgba[0], _rgba[1], _rgba[2], _rgba[3] ?? 1 ];
-    }
+    const rgba = cssColorToRgba(cssColor);
+    if (rgba === undefined) return cssColor;
 
     const hsv = ColorConvert.rgb.hsv([ rgba[0], rgba[1], rgba[2] ]);
     hsv[2] = hsv[2] > 50 ? hsv[2] * (1 - BRIGHTNESS_R) : hsv[2] * (1 + BRIGHTNESS_R);
