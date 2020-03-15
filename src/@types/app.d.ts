@@ -4,5 +4,6 @@ interface Window {
         getProperties?: () => import('../app/properties/Properties').default;
         getSamples?: () => number[];
         togglePauseAudioListener?: () => void;
+        resetAudioListener?: () => void;
     };
 }

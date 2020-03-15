@@ -3,13 +3,13 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import React, { CSSProperties, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
 import { checkInternetConnection } from '../common/Network';
 import { calculatePivotTransform } from '../common/Pivot';
-import { generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
+import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
@@ -30,7 +30,11 @@ type OverlayStyle = {
     color: string;
 };
 
-export default function Spotify() {
+interface SpotifyProps {
+    wallpaperBackground?: CssBackground;
+}
+
+export default function Spotify(props: SpotifyProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
     const token = useMemo(() => ({ get current() { return O.current.token; } }), []);
@@ -275,7 +279,7 @@ export default function Spotify() {
                 case SpotifyOverlayArtType.SpotifyIcon:
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyOverlayIcon />
+                        <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
                         <SpotifyOverlaySongInfo {...songInfoProps} />
                       </div>
                     );

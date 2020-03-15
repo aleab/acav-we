@@ -112,7 +112,7 @@ export default function App(props: AppProps) {
             onGeneralPropertiesChangedSubs.forEach(callback => callback({ newProps }));
         };
         return () => {
-            onGeneralPropertiesChangedSubs.clear();
+            //onGeneralPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyGeneralProperties;
         };
     }, [ onGeneralPropertiesChangedSubs, renderer ]);
@@ -160,7 +160,7 @@ export default function App(props: AppProps) {
             onUserPropertiesChangedSubs.forEach(callback => callback({ oldProps, newProps }));
         };
         return () => {
-            onUserPropertiesChangedSubs.clear();
+            //onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
     }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground ]);
@@ -222,7 +222,7 @@ export default function App(props: AppProps) {
 
         // The samples array is declared outside the callback to let the previous samples pass throught if listenerIsPaused is true
         let samples: AudioSamplesArray | undefined;
-        window.wallpaperRegisterAudioListener(rawSamples => {
+        const audioListener: WEAudioListener = rawSamples => {
             if (!listenerIsPaused) {
                 samples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
                 samplesBuffer.push(samples);
@@ -230,10 +230,15 @@ export default function App(props: AppProps) {
             if (samples !== undefined) {
                 onAudioSamplesSubs.forEach(callback => callback({ samples: samples!, samplesBuffer, peak, mean }));
             }
-        });
+        };
+        window.wallpaperRegisterAudioListener(audioListener);
+
+        window.acav.resetAudioListener = () => {
+            window.wallpaperRegisterAudioListener(audioListener);
+        };
 
         return () => {
-            onAudioSamplesSubs.clear();
+            //onAudioSamplesSubs.clear();
             window.wallpaperRegisterAudioListener(null);
             delete window.acav.togglePauseAudioListener;
         };
@@ -244,7 +249,7 @@ export default function App(props: AppProps) {
         <WallpaperContext.Provider value={wallpaperContext}>
           {showStats ? <Stats /> : null}
           <BarVisualizer />
-          {showSpotify ? <Spotify /> : null}
+          {showSpotify ? <Spotify wallpaperBackground={styleBackground} /> : null}
         </WallpaperContext.Provider>
       </div>
     );

@@ -6,7 +6,7 @@ export enum BackgroundMode { Color, Image, Css, Playlist }
 type ColorOptions = { color: RGB, alpha?: number };
 type ImageOptions = { imagePath: string };
 type CssOptions = { css: string };
-type CssBackground = {
+export type CssBackground = {
     background?: string;
     backgroundClip?: string;
     backgroundColor?: string;

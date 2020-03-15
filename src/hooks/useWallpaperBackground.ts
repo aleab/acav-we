@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';
-import { BackgroundMode, generateCssStyle } from '../app/BackgroundMode';
+import { BackgroundMode, CssBackground, generateCssStyle } from '../app/BackgroundMode';
 import Properties from '../app/properties/Properties';
 
 const Logc = Log.getLogger('useWallpaperBackground', 'darkolivegreen');
@@ -18,7 +18,7 @@ interface UseWallpaperBackgroundArgs {
 export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs) {
     const O = args.options;
 
-    const [ styleBackground, setStyleBackground ] = useState({});
+    const [ styleBackground, setStyleBackground ] = useState<CssBackground>({});
     const backgroundImagePath: MutableRefObject<string | null | undefined> = useRef(undefined);
     const backgroundPlaylistTimer = useRef(0);
 
@@ -29,7 +29,9 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
     }, []);
 
     const setBackgroundImage = useCallback((imagePath: string) => {
-        if (imagePath && imagePath !== backgroundImagePath.current) {
+        if (!imagePath) {
+            setStyleBackground({});
+        } else if (imagePath !== backgroundImagePath.current) {
             backgroundImagePath.current = imagePath;
             window.localStorage.setItem(args.localStorageKeys.currentImage, imagePath);
 
@@ -67,23 +69,22 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
         }
     }, [ O, args.localStorageKeys.playlistTimer, scheduleBackgroundImageChange, setBackgroundImage ]);
 
-    const updateBackgroundFirst = useRef(true);
+    const firstBackgroundUpdate = useRef(true);
     const updateBackground = useCallback(() => {
-        Logc.debug('Updating background...', { firstUpdate: updateBackgroundFirst.current, background: _.cloneDeep(O.current.background) });
+        Logc.debug('Updating background...', { firstUpdate: firstBackgroundUpdate.current, background: _.cloneDeep(O.current.background) });
 
         function clearPlaylistState() {
             backgroundImagePath.current = null;
             window.localStorage.removeItem(args.localStorageKeys.currentImage);
             window.localStorage.removeItem(args.localStorageKeys.playlistTimer);
             clearTimeout(backgroundPlaylistTimer.current);
-            setStyleBackground({});
         }
 
         if (O.current.background.mode === BackgroundMode.Playlist) {
             // If the wallpaper app just started and the local storage has a LOCALSTORAGE_BG_PLAYLIST_TIMER set
             // from a previous execution, then use that to determine when we need to request a new wallpaper.
             const prevChangeTime = window.localStorage.getItem(args.localStorageKeys.playlistTimer);
-            if (prevChangeTime && updateBackgroundFirst.current) {
+            if (prevChangeTime && firstBackgroundUpdate.current) {
                 const timeElapsed = Date.now() - Number(prevChangeTime);
                 if (timeElapsed >= O.current.background.playlistTimerMinutes * 60 * 1000) {
                     applyNewRandomImage();
@@ -95,6 +96,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
                 applyNewRandomImage();
             } else {
                 clearPlaylistState();
+                setStyleBackground({});
             }
         } else {
             clearPlaylistState();
@@ -109,7 +111,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
             }
         }
 
-        updateBackgroundFirst.current = false;
+        firstBackgroundUpdate.current = false;
     }, [ O, applyNewRandomImage, args.localStorageKeys.currentImage, args.localStorageKeys.playlistTimer, scheduleBackgroundImageChange, setBackgroundImage ]);
 
     // init background
