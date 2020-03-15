@@ -29,6 +29,7 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     }
 
     // TODO: Show all artists
+    // TODO: Auto scroll text fields
 
     const songInfoStyle = _.merge({}, {
         width: props.width,
@@ -38,13 +39,15 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         color: darkenOrLighten(props.color),
     };
 
+    const artists = props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
+
     return (
       <div className="song-info pr-2" style={songInfoStyle}>
         <div className="scrollable-x lh-0">
           <span className="song-info-field track" style={trackStyle}>{props.currentlyPlaying.item.name}</span>
         </div>
         <div className="scrollable-x lh-0">
-          <span className="song-info-field artists" style={artistsStyle}>{props.currentlyPlaying.item.artists[0].name}</span>
+          <span className="song-info-field artists" style={artistsStyle}>{artists}</span>
         </div>
       </div>
     );
