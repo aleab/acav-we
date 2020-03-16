@@ -4,7 +4,7 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { LAB, RGB } from 'color-convert/conversions';
 import html2canvas from 'html2canvas';
-import React, { RefObject, useCallback, useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 

@@ -1,8 +1,12 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
-import React from 'react';
+import React, { RefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import Log from '../common/Log';
 import { cssColorToRgba } from '../common/Css';
+import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
+import useAutoScrollHTMLElement, { UseAutoScrollHTMLElementOptions } from '../hooks/useAutoScrollHTMLElement';
+import useScrollHTMLElement from '../hooks/useScrollHTMLElement';
 
 const BRIGHTNESS_R = 0.4;
 function darkenOrLighten(cssColor: string): string {
@@ -17,19 +21,119 @@ function darkenOrLighten(cssColor: string): string {
 }
 
 interface SpotifyOverlaySongInfoProps {
-    currentlyPlaying: SpotifyCurrentlyPlayingObject | null;
+    currentlyPlaying: SpotifyCurrentlyPlayingObject;
     width: number;
     color: string;
+    fontSize: number;
     style?: any;
 }
 
-export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProps) {
-    if (props.currentlyPlaying === null || props.currentlyPlaying.item === null) {
-        return null;
-    }
+function getComputedFontSize(el: HTMLElement) {
+    return Number(getComputedStyle(el).fontSize.slice(0, -2));
+}
 
-    // TODO: Show all artists
-    // TODO: Auto scroll text fields
+// ==============
+//  Scroll Hooks
+// ==============
+// TODO: Refactor into separate files
+
+function useFieldScrollWidthState<TField extends HTMLElement, TScroll extends HTMLElement>(
+    fieldRef: RefObject<TField>,
+    scrollRef: RefObject<TScroll>,
+    fieldText: string,
+    containerWidth: number, fontSize: number,
+) {
+    const [ fieldScrollWidth, setfieldScrollWidth ] = useState<number | undefined>(fieldRef.current?.scrollWidth ?? 0);
+    useEffect(() => {
+        // Update scroll width when any of the following changes
+        ((..._deps: any[]) => {})(containerWidth, fontSize, fieldText);
+
+        if (fieldRef.current !== null && scrollRef.current !== null) {
+            const fieldComputedFontSize = getComputedFontSize(fieldRef.current);
+            fieldRef.current.innerHTML = fieldText;
+            if (fieldComputedFontSize > 0) {
+                const paddingPx = 1.5 * fieldComputedFontSize;
+                setfieldScrollWidth(fieldRef.current.scrollWidth + paddingPx + scrollRef.current.offsetWidth);
+                if (scrollRef.current.scrollWidth > scrollRef.current.offsetWidth) {
+                    fieldRef.current.innerHTML = `${fieldText}<span style="margin-left: ${paddingPx}px;">${fieldText}</span>`;
+                }
+            } else {
+                setfieldScrollWidth(undefined);
+            }
+        } else {
+            setfieldScrollWidth(undefined);
+        }
+    }, [ containerWidth, fieldRef, fieldText, fontSize, scrollRef ]);
+
+    return fieldScrollWidth;
+}
+
+function useSongFieldAutoScroll<TField extends HTMLElement, TScroll extends HTMLElement>(
+    currentlyPlayingObject: SpotifyCurrentlyPlayingObject,
+    fieldTextFactory: (spotifyTrack: SpotifyTrack | null) => string,
+    scrollOptions: Partial<UseAutoScrollHTMLElementOptions>,
+    render: (callback: () => void) => void,
+    containerWidth: number, fontSize: number,
+): [
+    string,
+    RefObject<TField>,
+    RefObject<TScroll>,
+] {
+    const fieldRef = useRef<TField>(null);
+    const scrollRef = useRef<TScroll>(null);
+    const fieldText = useMemo(() => fieldTextFactory(currentlyPlayingObject.item), [ currentlyPlayingObject.item, fieldTextFactory ]);
+    const fieldScrollWidth = useFieldScrollWidthState(fieldRef, scrollRef, fieldText, containerWidth, fontSize);
+
+    useAutoScrollHTMLElement(scrollRef, 50, { ...scrollOptions, render, axis: 'x', scrollWidth: fieldScrollWidth });
+
+    return [ fieldText, fieldRef, scrollRef ];
+}
+
+function useSongFieldManualScroll<TField extends HTMLElement, TScroll extends HTMLElement>(
+    currentlyPlayingObject: SpotifyCurrentlyPlayingObject,
+    fieldTextFactory: (spotifyTrack: SpotifyTrack | null) => string,
+    render: (callback: () => void) => void,
+    containerWidth: number, fontSize: number,
+): [
+    string,
+    RefObject<TField>,
+    RefObject<TScroll>,
+    (ondone?: () => void) => void,
+    () => void,
+] {
+    const fieldRef = useRef<TField>(null);
+    const scrollRef = useRef<TScroll>(null);
+    const fieldText = useMemo(() => fieldTextFactory(currentlyPlayingObject.item), [ currentlyPlayingObject.item, fieldTextFactory ]);
+    const fieldScrollWidth = useFieldScrollWidthState(fieldRef, scrollRef, fieldText, containerWidth, fontSize);
+
+    const [ scrollX, stopScrollX ] = useScrollHTMLElement(scrollRef, 50, { render, axis: 'x', scrollWidth: fieldScrollWidth, thresholdPx: 3, resetDelayMs: 0 });
+
+    return [ fieldText, fieldRef, scrollRef, scrollX, stopScrollX ];
+}
+
+export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProps) {
+    const context = useContext(WallpaperContext);
+
+    // =============
+    //  Auto scroll
+    // =============
+    const scrollTrackRenderCallback = useCallback((callback: () => void) => context?.renderer.queue('SpotifyOverlaySongInfo-ScrollTrack', callback), [context]);
+    const scrollArtistsRenderCallback = useCallback((callback: () => void) => context?.renderer.queue('SpotifyOverlaySongInfo-ScrollArtists', callback), [context]);
+    const scrollOptions: Partial<UseAutoScrollHTMLElementOptions> = { msDelayStart: 3000, msDelayReset: 0 };
+    const [ track, trackFieldRef, trackScrollRef ] = useSongFieldAutoScroll<HTMLSpanElement, HTMLDivElement>(
+        props.currentlyPlaying,
+        spotifyTrack => (spotifyTrack?.name ?? ''),
+        scrollOptions,
+        scrollTrackRenderCallback,
+        props.width, props.fontSize,
+    );
+    const [ artists, artistsFieldRef, artistsScrollRef ] = useSongFieldAutoScroll<HTMLSpanElement, HTMLDivElement>(
+        props.currentlyPlaying,
+        spotifyTrack => (spotifyTrack === null ? '' : spotifyTrack.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '')),
+        scrollOptions,
+        scrollArtistsRenderCallback,
+        props.width, props.fontSize,
+    );
 
     const songInfoStyle = _.merge({}, {
         width: props.width,
@@ -39,15 +143,13 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         color: darkenOrLighten(props.color),
     };
 
-    const artists = props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
-
     return (
       <div className="song-info pr-2" style={songInfoStyle}>
-        <div className="scrollable-x lh-0">
-          <span className="song-info-field track" style={trackStyle}>{props.currentlyPlaying.item.name}</span>
+        <div className="scrollable-x lh-0" ref={trackScrollRef}>
+          <span className="song-info-field track" style={trackStyle} ref={trackFieldRef}>{track}</span>
         </div>
-        <div className="scrollable-x lh-0">
-          <span className="song-info-field artists" style={artistsStyle}>{artists}</span>
+        <div className="scrollable-x lh-0" ref={artistsScrollRef}>
+          <span className="song-info-field artists" style={artistsStyle} ref={artistsFieldRef}>{artists}</span>
         </div>
       </div>
     );

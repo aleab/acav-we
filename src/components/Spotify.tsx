@@ -258,29 +258,30 @@ export default function Spotify(props: SpotifyProps) {
                 style: { ...overlayStyle, ...overlayBackgroundStyle },
             };
             const songInfoProps = {
-                currentlyPlaying,
+                currentlyPlaying: currentlyPlaying!,
                 width: overlayStyle.maxWidth,
                 color: overlayStyle.color,
+                fontSize: overlayStyle.fontSize,
             };
             switch (overlayArtStyle) {
                 case SpotifyOverlayArtType.None:
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ paddingLeft: '1em' }} />
+                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} style={{ paddingLeft: '1em' }} /> : null}
                       </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt:
                     return (
                       <div {...spotifyDivProps}>
                         {/* TODO: SpotifyAlbumArt */}
-                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '.5rem', alignSelf: 'flex-start' }} />
+                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '.5rem', alignSelf: 'flex-start' }} /> : null}
                       </div>
                     );
                 case SpotifyOverlayArtType.SpotifyIcon:
                     return (
                       <div {...spotifyDivProps}>
                         <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
-                        <SpotifyOverlaySongInfo {...songInfoProps} />
+                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} /> : null}
                       </div>
                     );
                 default: return null;
