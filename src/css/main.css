@@ -32,7 +32,6 @@ body {
 .overlay { position: absolute; }
 
 .scrollable-x {
-  overflow: hidden;
   overflow-x: scroll;
   white-space: nowrap;
 }
