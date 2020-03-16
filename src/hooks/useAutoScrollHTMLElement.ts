@@ -79,14 +79,18 @@ export default function useAutoScrollHTMLElement<T extends HTMLElement>(
     const scrollIntervalId = useRef(0);
     useEffect(() => {
         ((..._deps) => {})(options.axis);
+        const prevAxis = options.axis;
+
         if (ref.current !== null) {
             if (isScrollable && scrollIntervalId.current <= 0) {
-                console.log(
-                    'setInterval | currentScroll.current: %s, delayStartPx: %s, delayResetPx: %s',
-                    currentScroll.current,
-                    delayStartPx,
-                    delayResetPx,
-                );
+                // Log.debug(
+                //     '[useAutoScrollHTMLElement]\n' +
+                //     'setInterval | currentScroll.current: %s, delayStartPx: %s, delayResetPx: %s\n' +
+                //     '            | isScrollable: %s, maxScroll: %s, options.axis: %s',
+                //     currentScroll.current, delayStartPx, delayResetPx,
+                //     isScrollable, maxScroll, options.axis,
+                // );
+
                 scrollIntervalId.current = setInterval((() => {
                     if (currentScroll.current < maxScroll + delayResetPx) {
                         currentScroll.current++;
@@ -98,19 +102,12 @@ export default function useAutoScrollHTMLElement<T extends HTMLElement>(
                 }) as TimerHandler, msPerPixelScroll);
             }
         }
-    }, [ _renderScrollTo, delayResetPx, delayStartPx, isScrollable, maxScroll, msPerPixelScroll, options.axis, ref ]);
 
-    // =====================
-    //  Reset scroll effect
-    // =====================
-    useEffect(() => {
-        ((..._deps) => {})(options.axis, maxScroll, isScrollable, delayStartPx, delayResetPx);
-        const prevAxis = options.axis;
         return () => {
             clearInterval(scrollIntervalId.current);
             _renderResetScrollPosition(prevAxis);
             currentScroll.current = -delayStartPx;
             scrollIntervalId.current = 0;
         };
-    }, [ _renderResetScrollPosition, delayResetPx, delayStartPx, isScrollable, maxScroll, options.axis ]);
+    }, [ _renderResetScrollPosition, _renderScrollTo, delayResetPx, delayStartPx, isScrollable, maxScroll, msPerPixelScroll, options.axis, ref ]);
 }
