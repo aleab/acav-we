@@ -69,7 +69,7 @@ export default function Stats() {
             frameTimeCount += frameTime.current;
             prevAnimationTimestamp = timestamp;
         };
-        context?.renderer.subscribe(frameRendererCallback);
+        context?.renderer.renderedEvent.subscribe(frameRendererCallback);
 
         // ========================
         //  AUDIO SAMPLES CALLBACK
@@ -106,7 +106,7 @@ export default function Stats() {
         return () => {
             clearInterval(perSecondIntervalId);
             clearInterval(audioDataStateIntervalId);
-            context?.renderer.unsubscribe(frameRendererCallback);
+            context?.renderer.renderedEvent.unsubscribe(frameRendererCallback);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesCallback);
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
             context?.wallpaperEvents.onGeneralPropertiesChanged.unsubscribe(generalPropertiesChangedCallback);

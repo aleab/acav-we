@@ -9,8 +9,14 @@ interface Renderer {
     readonly queue: (id: string, callback: (timestamp: number) => void) => void;
     readonly cancel: (id: string) => void;
 
-    readonly subscribe: (callback: (timestamp: number) => void) => void;
-    readonly unsubscribe: (callback: (timestamp: number) => void) => void;
+    readonly renderingEvent: {
+        readonly subscribe: (callback: (timestamp: number) => void) => void;
+        readonly unsubscribe: (callback: (timestamp: number) => void) => void;
+    };
+    readonly renderedEvent: {
+        readonly subscribe: (callback: (timestamp: number) => void) => void;
+        readonly unsubscribe: (callback: (timestamp: number) => void) => void;
+    };
 }
 
 export default function Renderer(fps: number = 0): Renderer {
@@ -20,18 +26,24 @@ export default function Renderer(fps: number = 0): Renderer {
     const renderQueue: Map<string, (timestamp: number) => void> = new Map();
     let _animationFrameId = 0;
 
-    const eventSubscribers: Set<(timestamp: number) => void> = new Set();
+    const renderingEventSubscribers: Set<(timestamp: number) => void> = new Set();
+    const renderedEventSubscribers: Set<(timestamp: number) => void> = new Set();
 
+    /**
+     * Execute all queued render jobs.
+     * @param timestamp
+     */
     function flushRenderQueue(timestamp: number) {
         if (!_isRunning) return;
+        renderingEventSubscribers.forEach(callback => callback(timestamp));
         renderQueue.forEach((renderCallback, k, m) => {
             m.delete(k);
             renderCallback(timestamp);
         });
 
-        if (eventSubscribers.size > 0) {
+        if (renderedEventSubscribers.size > 0) {
             setTimeout(((ts: number) => {
-                eventSubscribers.forEach(callback => callback(ts));
+                renderedEventSubscribers.forEach(callback => callback(ts));
             }) as TimerHandler, 0, timestamp);
         }
     }
@@ -75,7 +87,13 @@ export default function Renderer(fps: number = 0): Renderer {
                 renderQueue.delete(id);
             }
         },
-        subscribe(callback) { eventSubscribers.add(callback); },
-        unsubscribe(callback) { eventSubscribers.delete(callback); },
+        renderingEvent: {
+            subscribe(callback) { renderingEventSubscribers.add(callback); },
+            unsubscribe(callback) { renderingEventSubscribers.delete(callback); },
+        },
+        renderedEvent: {
+            subscribe(callback) { renderedEventSubscribers.add(callback); },
+            unsubscribe(callback) { renderedEventSubscribers.delete(callback); },
+        },
     };
 }
