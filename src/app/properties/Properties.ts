@@ -9,6 +9,7 @@ import { BackgroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
+import { TextScrollingType } from '../TextScrollingType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
@@ -57,6 +58,10 @@ export default interface Properties {
             };
         };
         artType: SpotifyOverlayArtType;
+        scroll: {
+            type: TextScrollingType;
+            autoDelay: number;
+        };
     },
 }
 
@@ -147,7 +152,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
     // .spotify
-    const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} } };
+    const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, scroll: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'artType', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
@@ -163,6 +168,9 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.style!.background!, 'color', raw.spotify_background_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     setProperty(spotifyOptions.style!.background!, 'colorAlpha', raw.spotify_background_color_alpha as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.style!.background!, 'css', raw.spotify_background_css as WEProperty<'textinput'>, _r => _r.value);
+    // .spotify.scroll
+    setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
+    setProperty(spotifyOptions.scroll!, 'autoDelay', raw.spotify_scroll_auto_delay as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     return _.merge(
         { ...rootOptions },

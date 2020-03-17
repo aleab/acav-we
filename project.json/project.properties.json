@@ -630,6 +630,29 @@
         "value": "SpotifyIcon",
         "condition": "spotify.value"
     },
+    "spotify_scroll": {
+        "order": 5026,
+        "type": "combo",
+        "text": "ui_spotify_scroll",
+        "options": [
+            { "label": "None", "value": "None" },
+            { "label": "Automatic", "value": "Automatic" },
+            { "label": "On Mouse Over", "value": "OnMouseOver" }
+        ],
+        "value": "OnMouseOver",
+        "condition": "spotify.value"
+    },
+    "spotify_scroll_auto_delay": {
+        "order": 5027,
+        "type": "slider",
+        "text": "ui_spotify_scroll_auto_delay",
+        "value": 3,
+        "min": 2,
+        "max": 10,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "spotify.value && spotify_scroll.value === 'Automatic'"
+    },
 
     // [NOTES]
     "notes": {

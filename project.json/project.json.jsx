@@ -197,6 +197,8 @@ function getProjectJson() {
                     ui_spotify_font_size: indent('Font Size (px)'),
                     ui_spotify_text_color: indent('Text Color'),
                     ui_spotify_art_type: indent('Art'),
+                    ui_spotify_scroll: indent('Text Scrolling'),
+                    ui_spotify_scroll_auto_delay: indent('Delay (s)', { n: 3 }),
 
                     // [SPOTIFY > BACKGROUND]
                     ui_spotify_background: subSection('Background'),

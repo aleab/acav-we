@@ -126,7 +126,7 @@ export default function Spotify(props: SpotifyProps) {
     // =====================
     //  PROPERTIES LISTENER
     // =====================
-    // TODO: Simplify/generalize all this properties listening stuff
+    // TODO: Simplify/generalize all this properties listening stuff (ACROSS ALL THE APP!)
     useEffect(() => {
         Logc.info('Registering onUserPropertiesChanged callback...');
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
