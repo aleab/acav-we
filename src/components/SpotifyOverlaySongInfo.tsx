@@ -1,9 +1,7 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
-import { DeepReadonly } from 'utility-types';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import Log from '../common/Log';
 import { cssColorToRgba } from '../common/Css';
 import WallpaperContext from '../app/WallpaperContext';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
@@ -60,11 +58,14 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
 
     const scrollTrackRenderCallback = useCallback((callback: () => void) => context.renderer.queue('SpotifyOverlaySongInfo-ScrollTrack', callback), [context]);
     const scrollTrackCancelRender = useCallback(() => context.renderer.cancel('SpotifyOverlaySongInfo-ScrollTrack'), [context]);
-    const track = props.currentlyPlaying.item?.name ?? '';
+    const track = useMemo(() => (props.currentlyPlaying.item?.name ?? ''), [props.currentlyPlaying.item]);
 
     const scrollArtistsRenderCallback = useCallback((callback: () => void) => context.renderer.queue('SpotifyOverlaySongInfo-ScrollArtists', callback), [context]);
     const scrollArtistsCancelRender = useCallback(() => context.renderer.cancel('SpotifyOverlaySongInfo-ScrollArtists'), [context]);
-    const artists = props.currentlyPlaying.item === null ? '' : props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
+    const artists = useMemo(() => {
+        if (props.currentlyPlaying.item === null) return '';
+        return props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
+    }, [props.currentlyPlaying.item]);
 
     return (
       <div className="song-info pr-2" style={songInfoStyle}>
