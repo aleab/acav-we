@@ -60,6 +60,7 @@ export default interface Properties {
         artType: SpotifyOverlayArtType;
         scroll: {
             type: TextScrollingType;
+            speed: number;
             autoDelay: number;
         };
     },
@@ -170,6 +171,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.style!.background!, 'css', raw.spotify_background_css as WEProperty<'textinput'>, _r => _r.value);
     // .spotify.scroll
     setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
+    setProperty(spotifyOptions.scroll!, 'speed', raw.spotify_scroll_speed as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.scroll!, 'autoDelay', raw.spotify_scroll_auto_delay as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     return _.merge(

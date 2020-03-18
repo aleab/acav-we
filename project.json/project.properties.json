@@ -642,8 +642,17 @@
         "value": "OnMouseOver",
         "condition": "spotify.value"
     },
-    "spotify_scroll_auto_delay": {
+    "spotify_scroll_speed": {
         "order": 5027,
+        "type": "slider",
+        "text": "ui_spotify_scroll_speed",
+        "value": 30,
+        "min": 15,
+        "max": 75,
+        "condition": "spotify.value && spotify_scroll.value !== 'None'"
+    },
+    "spotify_scroll_auto_delay": {
+        "order": 5028,
         "type": "slider",
         "text": "ui_spotify_scroll_auto_delay",
         "value": 3,

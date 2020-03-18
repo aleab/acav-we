@@ -13,6 +13,7 @@ export type UseScrollHTMLElementOptions = {
     resetDelayMs?: number;
     thresholdPx?: number;
     render?: (scrollCallback: () => void) => void;
+    cancelRender?: () => void;
 };
 
 const DEFAULT_OPTIONS: PickRequiredOptional<UseScrollHTMLElementOptions> = {
@@ -23,6 +24,7 @@ const DEFAULT_OPTIONS: PickRequiredOptional<UseScrollHTMLElementOptions> = {
     resetDelayMs: 2000,
     thresholdPx: 0,
     render: scrollCallback => scrollCallback(),
+    cancelRender: () => {},
 };
 
 export default function useScrollHTMLElement<T extends HTMLElement>(
@@ -33,24 +35,6 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
     () => void,
 ] {
     const options: Required<UseScrollHTMLElementOptions> = _.merge({}, DEFAULT_OPTIONS, opt);
-
-    // ==================
-    //  Render callbacks
-    // ==================
-    const _render = options.render;
-    const _renderScrollTo = useCallback((px: number, behavior: 'smooth' | 'auto' = 'smooth') => {
-        const axis = options.axis;
-        _render(() => {
-            ref.current?.scrollTo(axis === 'x' ? { left: px, behavior } : { top: px, behavior });
-        });
-    }, [ _render, options.axis, ref ]);
-    const _renderResetScrollPosition = useCallback((axis: 'x' | 'y') => {
-        if (axis === 'x') {
-            _render(() => { if (ref.current !== null) ref.current.scrollLeft = 0; });
-        } else {
-            _render(() => { if (ref.current !== null) ref.current.scrollTop = 0; });
-        }
-    }, [ _render, ref ]);
 
     // =======
     //  State
@@ -66,13 +50,59 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
     const isScrollable = useMemo(() => {
         const computedStyle = ref.current !== null ? getComputedStyle(ref.current) : undefined;
         return options.axis === 'x'
-        ? computedStyle?.overflowX === 'scroll' && maxScroll > options.thresholdPx
-        : computedStyle?.overflowY === 'scroll' && maxScroll > options.thresholdPx;
+            ? computedStyle?.overflowX === 'scroll' && maxScroll > options.thresholdPx
+            : computedStyle?.overflowY === 'scroll' && maxScroll > options.thresholdPx;
     }, [ maxScroll, options.axis, options.thresholdPx, ref ]);
 
-    const delayStartPx = useMemo(() => options.startDelayMs / options.msPerPixelScroll, [ options.msPerPixelScroll, options.startDelayMs ]);
-    const delayResetPx = useMemo(() => options.resetDelayMs / options.msPerPixelScroll, [ options.msPerPixelScroll, options.resetDelayMs ]);
-    const currentScroll = useRef(options.type === 'auto' ? -delayStartPx : 0);
+    const msPerPixelScroll = useRef(options.msPerPixelScroll);
+    const startDelayMs = useRef(options.startDelayMs);
+    const resetDelayMs = useRef(options.resetDelayMs);
+    const currentScroll = useRef(options.type === 'auto' ? -(startDelayMs.current / msPerPixelScroll.current) : 0);
+
+    // ==============
+    //  Update state
+    // ==============
+    // Keep state updates seamless, so that the animation doesn't restart every time
+    useEffect(() => { msPerPixelScroll.current = options.msPerPixelScroll; }, [options.msPerPixelScroll]);
+    useEffect(() => { startDelayMs.current = options.startDelayMs; }, [options.startDelayMs]);
+    useEffect(() => { resetDelayMs.current = options.resetDelayMs; }, [options.resetDelayMs]);
+
+    // ==================
+    //  Render callbacks
+    // ==================
+    const _renderScrollLock = useRef(false);
+    const _render = options.render;
+    const _cancelRender = options.cancelRender;
+
+    const _renderScrollTo = useCallback((px: number) => {
+        if (_renderScrollLock.current) return;
+        const axis = options.axis;
+        _render(() => {
+            if (ref.current === null || _renderScrollLock.current) return;
+            ref.current.scrollTo(axis === 'x' ? { left: px, behavior: 'auto' } : { top: px, behavior: 'auto' });
+            //console.log('Scrolling to %s', px);
+        });
+    }, [ _render, options.axis, ref ]);
+
+    const _renderResetScrollPosition = useCallback((axis: 'x' | 'y') => {
+        if (ref.current === null) return;
+        const startPx = options.type === 'auto' ? -(startDelayMs.current / msPerPixelScroll.current) : 0;
+
+        _renderScrollLock.current = true;
+        _cancelRender();
+        _render(() => {
+            if (ref.current !== null) {
+                if (axis === 'x') {
+                    ref.current.scrollLeft = startPx;
+                } else {
+                    ref.current.scrollTop = startPx;
+                }
+                //console.log('%cReset scroll position to %s', 'font-weight:bolder', startPx);
+            }
+            _renderScrollLock.current = false;
+        });
+        currentScroll.current = startPx;
+    }, [ _cancelRender, _render, options.type, ref ]);
 
     // =================
     //  Scroll callback
@@ -88,18 +118,16 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
                 // MANUAL SCROLL
                 const timeoutHandler: TimerHandler = () => {
                     if (currentScroll.current < maxScroll) {
-                        scrollTimeoutId.current = setTimeout(timeoutHandler, options.msPerPixelScroll);
-                        currentScroll.current++;
-                        _renderScrollTo(currentScroll.current);
+                        scrollTimeoutId.current = setTimeout(timeoutHandler, msPerPixelScroll.current);
+                        _renderScrollTo(++currentScroll.current);
                     } else {
                         const doneHandler: TimerHandler = () => {
-                            currentScroll.current = 0;
-                            _renderScrollTo(currentScroll.current, 'auto');
+                            _renderResetScrollPosition(options.axis);
                             if (ondone !== undefined) ondone();
                             scrollTimeoutId.current = 0;
                         };
-                        if (options.resetDelayMs > 0) {
-                            scrollTimeoutId.current = setTimeout(doneHandler, options.resetDelayMs);
+                        if (resetDelayMs.current > 0) {
+                            scrollTimeoutId.current = setTimeout(doneHandler, resetDelayMs.current);
                         } else {
                             doneHandler();
                         }
@@ -108,58 +136,50 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
                 timeoutHandler();
             } else if (options.type === 'auto') {
                 // AUTO SCROLL
-                scrollTimeoutId.current = setInterval((() => {
-                    if (currentScroll.current < maxScroll + delayResetPx) {
-                        currentScroll.current++;
-                        _renderScrollTo(currentScroll.current);
+                const timeoutHandler: TimerHandler = () => {
+                    scrollTimeoutId.current = setTimeout(timeoutHandler, msPerPixelScroll.current);
+                    if (currentScroll.current < maxScroll + (resetDelayMs.current / msPerPixelScroll.current)) {
+                        _renderScrollTo(++currentScroll.current);
                     } else {
-                        currentScroll.current = -delayStartPx;
-                        _renderScrollTo(currentScroll.current, 'auto');
+                        _renderResetScrollPosition(options.axis);
                     }
-                }) as TimerHandler, options.msPerPixelScroll);
+                };
+                timeoutHandler();
             }
         }
-    }, [ _renderScrollTo, delayResetPx, delayStartPx, isScrollable, maxScroll, options.axis, options.msPerPixelScroll, options.resetDelayMs, options.type ]);
+    }, [ _renderResetScrollPosition, _renderScrollTo, isScrollable, maxScroll, options.axis, options.type ]);
 
+    // NOTE: This is probably useless
     const stopScroll = useCallback(() => {
-        if (options.type === 'manual') {
-            clearTimeout(scrollTimeoutId.current);
-        } else if (options.type === 'auto') {
-            clearInterval(scrollTimeoutId.current);
-        }
+        clearTimeout(scrollTimeoutId.current);
         _renderResetScrollPosition(options.axis);
-        currentScroll.current = options.type === 'auto' ? -delayStartPx : 0;
+        _renderScrollLock.current = false;
         scrollTimeoutId.current = 0;
-    }, [ _renderResetScrollPosition, delayStartPx, options.axis, options.type ]);
+    }, [ _renderResetScrollPosition, options.axis ]);
 
     // ==============
     //  Reset scroll
     // ==============
     useEffect(() => {
+        ((..._deps) => {})(maxScroll, isScrollable);
+
         // Reset current
-        if (options.type === 'manual') {
-            clearTimeout(scrollTimeoutId.current);
-        } else if (options.type === 'auto') {
-            clearInterval(scrollTimeoutId.current);
-        }
+        clearTimeout(scrollTimeoutId.current);
+        _renderScrollLock.current = false;
         _renderResetScrollPosition(options.axis);
-        currentScroll.current = options.type === 'auto' ? -delayStartPx : 0;
         scrollTimeoutId.current = 0;
 
         // Reset previous
-        const prevType = options.type;
         const prevAxis = options.axis;
         return () => {
-            // NOTE: prevType and options.type are exactly the same in here regardless of the *current* value of options.type (same for prevAxis);
+            // NOTE: prevAxis and options.axis are exactly the same in here regardless of the *current* value of options.axis;
             //       I'm just using named variables for clarity.
-            if (prevType === 'manual') {
-                clearTimeout(scrollTimeoutId.current);
-            } else if (prevType === 'auto') {
-                clearInterval(scrollTimeoutId.current);
-            }
+            clearTimeout(scrollTimeoutId.current);
+            _renderScrollLock.current = false;
             _renderResetScrollPosition(prevAxis);
+            scrollTimeoutId.current = 0;
         };
-    }, [ _renderResetScrollPosition, delayStartPx, options.axis, options.type ]);
+    }, [ _renderResetScrollPosition, isScrollable, maxScroll, options.axis ]);
 
     return [ startScroll, stopScroll ];
 }
