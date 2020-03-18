@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
@@ -23,20 +23,6 @@ export default function BarVisualizer() {
         canvas.current!.width = window.innerWidth;
         canvas.current!.height = window.innerHeight;
     }, []); // just once
-
-    // =====================
-    //  PROPERTIES LISTENER
-    // =====================
-    useEffect(() => {
-        Logc.info('Registering on*PropertiesChanged callbacks...');
-        const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
-        };
-
-        context?.wallpaperEvents.onUserPropertiesChanged.subscribe(userPropertiesChangedCallback);
-        return () => {
-            context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
-        };
-    }, [context]);
 
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER

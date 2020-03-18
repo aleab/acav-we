@@ -13,6 +13,7 @@ import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
+import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
@@ -126,35 +127,23 @@ export default function Spotify(props: SpotifyProps) {
     // =====================
     //  PROPERTIES LISTENER
     // =====================
-    // TODO: Simplify/generalize all this properties listening stuff (ACROSS ALL THE APP!)
-    useEffect(() => {
-        Logc.info('Registering onUserPropertiesChanged callback...');
-        const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
-            const spotifyProps = args.newProps.spotify;
-            if (spotifyProps !== undefined) {
-                if (spotifyProps.token !== undefined && spotifyProps.token) {
-                    send(SpotifyStateMachineEvent.UserEnteredToken);
-                }
-                if (spotifyProps.artType !== undefined) setOverlayArtStyle(spotifyProps.artType);
-                if (spotifyProps.style !== undefined) {
-                    const s: Partial<OverlayStyle> = {};
-                    if (spotifyProps.style.pivot !== undefined) s.transform = calculatePivotTransform(spotifyProps.style.pivot).transform;
-                    if (spotifyProps.style.left !== undefined) s.left = window.innerWidth * (spotifyProps.style.left / 100);
-                    if (spotifyProps.style.top !== undefined) s.top = window.innerHeight * (spotifyProps.style.top / 100);
-                    if (spotifyProps.style.width !== undefined) s.maxWidth = spotifyProps.style.width;
-                    if (spotifyProps.style.fontSize !== undefined) s.fontSize = spotifyProps.style.fontSize;
-                    if (spotifyProps.style.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(spotifyProps.style.textColor as RGB)}`;
-                    if (spotifyProps.style.background !== undefined) setOverlayBackgroundStyle();
-                    setOverlayStyle(s);
-                }
-            }
-        };
-
-        context?.wallpaperEvents.onUserPropertiesChanged.subscribe(userPropertiesChangedCallback);
-        return () => {
-            context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
-        };
-    }, [ context, send ]);
+    useUserPropertiesListener(p => p.spotify, spotifyProps => {
+        if (spotifyProps.token !== undefined && spotifyProps.token) {
+            send(SpotifyStateMachineEvent.UserEnteredToken);
+        }
+        if (spotifyProps.artType !== undefined) setOverlayArtStyle(spotifyProps.artType);
+        if (spotifyProps.style !== undefined) {
+            const s: Partial<OverlayStyle> = {};
+            if (spotifyProps.style.pivot !== undefined) s.transform = calculatePivotTransform(spotifyProps.style.pivot).transform;
+            if (spotifyProps.style.left !== undefined) s.left = window.innerWidth * (spotifyProps.style.left / 100);
+            if (spotifyProps.style.top !== undefined) s.top = window.innerHeight * (spotifyProps.style.top / 100);
+            if (spotifyProps.style.width !== undefined) s.maxWidth = spotifyProps.style.width;
+            if (spotifyProps.style.fontSize !== undefined) s.fontSize = spotifyProps.style.fontSize;
+            if (spotifyProps.style.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(spotifyProps.style.textColor as RGB)}`;
+            if (spotifyProps.style.background !== undefined) setOverlayBackgroundStyle();
+            setOverlayStyle(s);
+        }
+    }, [send]);
 
     // =========
     //  OVERLAY

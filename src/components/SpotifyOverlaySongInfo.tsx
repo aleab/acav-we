@@ -1,10 +1,13 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { DeepReadonly } from 'utility-types';
 
 import Log from '../common/Log';
 import { cssColorToRgba } from '../common/Css';
 import WallpaperContext from '../app/WallpaperContext';
+import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
+
 import ScrollableLoopingText from './ScrollableLoopingText';
 
 const BRIGHTNESS_R = 0.4;
@@ -41,22 +44,11 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     // =====================
     //  PROPERTIES LISTENER
     // =====================
-    // TODO: Simplify/generalize all this properties listening stuff (ACROSS ALL THE APP!)
-    useEffect(() => {
-        const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
-            const scrollProps = args.newProps.spotify?.scroll;
-            if (scrollProps !== undefined) {
-                if (scrollProps.type !== undefined) setScrollType(scrollProps.type);
-                if (scrollProps.speed !== undefined) setScrollSpeed(scrollProps.speed);
-                if (scrollProps.autoDelay !== undefined) setScrollStartDelay(scrollProps.autoDelay);
-            }
-        };
-
-        context?.wallpaperEvents.onUserPropertiesChanged.subscribe(userPropertiesChangedCallback);
-        return () => {
-            context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
-        };
-    }, [context]);
+    useUserPropertiesListener(p => p.spotify?.scroll, scrollProps => {
+        if (scrollProps.type !== undefined) setScrollType(scrollProps.type);
+        if (scrollProps.speed !== undefined) setScrollSpeed(scrollProps.speed);
+        if (scrollProps.autoDelay !== undefined) setScrollStartDelay(scrollProps.autoDelay);
+    }, []);
 
     const songInfoStyle = _.merge({}, {
         width: props.width,
