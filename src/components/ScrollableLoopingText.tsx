@@ -27,6 +27,9 @@ interface ScrollableLoopingTextProps {
 function getComputedFontSize(el: HTMLElement) {
     return Number(getComputedStyle(el).fontSize.slice(0, -2));
 }
+function getComputedHorizontalMargin(el: HTMLElement) {
+    return Number(getComputedStyle(el).marginLeft.slice(0, -2)) + Number(getComputedStyle(el).marginRight.slice(0, -2));
+}
 
 // ==============
 //  Scroll Hooks
@@ -46,13 +49,15 @@ function useLoopingText<TField extends HTMLElement, TScroll extends HTMLElement>
         ((..._deps: any[]) => {})(containerWidth, fontSize, fieldText);
 
         if (fieldRef.current !== null && scrollRef.current !== null) {
-            const fieldComputedFontSize = getComputedFontSize(fieldRef.current);
+            const computedFontSize = getComputedFontSize(fieldRef.current);
+            const computedXMargin = getComputedHorizontalMargin(fieldRef.current);
+
             fieldRef.current.innerHTML = fieldText;
-            if (fieldComputedFontSize > 0) {
-                const paddingPx = loopMarginEm * fieldComputedFontSize;
+            if (computedFontSize > 0) {
+                const loopPaddingPx = loopMarginEm * computedFontSize;
                 if (scrollRef.current.scrollWidth > scrollRef.current.offsetWidth) {
-                    setFieldScrollWidth(scrollRef.current.scrollWidth + paddingPx + scrollRef.current.offsetWidth);
-                    fieldRef.current.innerHTML = `${fieldText}<span style="margin-left: ${paddingPx}px;">${fieldText}</span>`;
+                    setFieldScrollWidth(scrollRef.current.scrollWidth - computedXMargin + loopPaddingPx + scrollRef.current.offsetWidth);
+                    fieldRef.current.innerHTML = `${fieldText}<span style="margin-left: ${loopPaddingPx}px;">${fieldText}</span>`;
                 } else {
                     setFieldScrollWidth(scrollRef.current.scrollWidth);
                 }

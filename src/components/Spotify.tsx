@@ -256,14 +256,14 @@ export default function Spotify(props: SpotifyProps) {
                 case SpotifyOverlayArtType.None:
                     return (
                       <div {...spotifyDivProps}>
-                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} style={{ paddingLeft: '1em' }} /> : null}
+                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: 'calc(1em - .25rem)' }} /> : null}
                       </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt:
                     return (
                       <div {...spotifyDivProps}>
                         {/* TODO: SpotifyAlbumArt */}
-                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '.5rem', alignSelf: 'flex-start' }} /> : null}
+                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} className="ml-2 align-self-start" /> : null}
                       </div>
                     );
                 case SpotifyOverlayArtType.SpotifyIcon:

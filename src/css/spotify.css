@@ -12,8 +12,11 @@
 }
 
 #spotify .song-info {
-  padding: calc(1em - 2px) 0;
+  padding-top: calc(1em - 2px);
+  padding-bottom: calc(1em - 2px);
   overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 .25rem, #000 calc(100% - .25rem - .5rem), transparent calc(100% - .25rem));
+  mask-image: linear-gradient(to right, transparent, #000 .25rem, #000 calc(100% - .25rem - .5rem), transparent calc(100% - .25rem));
 }
 
 .song-info {

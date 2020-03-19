@@ -26,6 +26,7 @@ interface SpotifyOverlaySongInfoProps {
     color: string;
     fontSize: number;
     style?: any;
+    className?: string;
 }
 
 // ===========
@@ -68,15 +69,15 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     }, [props.currentlyPlaying.item]);
 
     return (
-      <div className="song-info pr-2" style={songInfoStyle}>
+      <div className={_.join([ 'song-info', props.className ], ' ').trim()} style={songInfoStyle}>
         <ScrollableLoopingText
-          className="scrollable-x lh-0" textClassName="song-info-field track" textStyle={trackStyle}
+          className="scrollable-x lh-0" textClassName="song-info-field track ml-1" textStyle={trackStyle}
           scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={track} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollTrackRenderCallback} cancelRender={scrollTrackCancelRender}
         />
         <ScrollableLoopingText
-          className="scrollable-x lh-0" textClassName="song-info-field artists" textStyle={artistsStyle}
+          className="scrollable-x lh-0" textClassName="song-info-field artists ml-1" textStyle={artistsStyle}
           scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={artists} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollArtistsRenderCallback} cancelRender={scrollArtistsCancelRender}
