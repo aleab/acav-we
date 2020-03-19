@@ -236,7 +236,9 @@ export default function Spotify(props: SpotifyProps) {
         };
     }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
 
-    // RENDER
+    // ========
+    //  RENDER
+    // ========
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle: {
@@ -252,25 +254,33 @@ export default function Spotify(props: SpotifyProps) {
                 color: overlayStyle.color,
                 fontSize: overlayStyle.fontSize,
             };
+            if (currentlyPlaying?.item === null || currentlyPlaying?.item === undefined) {
+                // Only show Spotify's icon when no song is playing
+                return (
+                  <div {...spotifyDivProps}>
+                    <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                  </div>
+                );
+            }
             switch (overlayArtStyle) {
                 case SpotifyOverlayArtType.None:
                     return (
                       <div {...spotifyDivProps}>
-                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: 'calc(1em - .25rem)' }} /> : null}
+                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: 'calc(1em - .25rem)' }} />
                       </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt:
                     return (
                       <div {...spotifyDivProps}>
                         {/* TODO: SpotifyAlbumArt */}
-                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} className="ml-2 align-self-start" /> : null}
+                        <SpotifyOverlaySongInfo {...songInfoProps} className="ml-2 align-self-start" />
                       </div>
                     );
                 case SpotifyOverlayArtType.SpotifyIcon:
                     return (
                       <div {...spotifyDivProps}>
                         <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
-                        {currentlyPlaying?.item ? <SpotifyOverlaySongInfo {...songInfoProps} /> : null}
+                        <SpotifyOverlaySongInfo {...songInfoProps} />
                       </div>
                     );
                 default: return null;
