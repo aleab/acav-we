@@ -503,13 +503,13 @@
         "order": 5002,
         "type": "text",
         "text": "ui_$_spotify_token",
-        "condition": "showDescriptions.value && spotify.value"
+        "condition": "spotify.value"
     },
     "$_spotify_token_note": {
         "order": 5003,
         "type": "text",
         "text": "ui_$_spotify_token_note",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && spotify.value"
+        "condition": "(showDescriptions.value && showAdvancedOptions.value) && spotify.value"
     },
     "spotify_pivot": {
         "order": 5010,
