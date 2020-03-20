@@ -42,8 +42,9 @@ function useLoopingText<TField extends HTMLElement, TScroll extends HTMLElement>
     fieldText: string,
     loopMarginEm: number,
     containerWidth: number, fontSize: number,
-) {
-    const [ fieldScrollWidth, setFieldScrollWidth ] = useState<number | undefined>(scrollRef.current?.scrollWidth ?? 0);
+): [ number | undefined, number ] {
+    const loopMarginPx = useRef(0);
+    const [ maxScrollWidth, setMaxScrollWidth ] = useState<number | undefined>(scrollRef.current?.scrollWidth ?? 0);
     useEffect(() => {
         // Update scroll width when any of the following changes
         ((..._deps: any[]) => {})(containerWidth, fontSize, fieldText);
@@ -54,22 +55,22 @@ function useLoopingText<TField extends HTMLElement, TScroll extends HTMLElement>
 
             fieldRef.current.innerHTML = fieldText;
             if (computedFontSize > 0) {
-                const loopPaddingPx = loopMarginEm * computedFontSize;
+                loopMarginPx.current = loopMarginEm * computedFontSize;
                 if (scrollRef.current.scrollWidth > scrollRef.current.offsetWidth) {
-                    setFieldScrollWidth(scrollRef.current.scrollWidth - computedXMargin + loopPaddingPx + scrollRef.current.offsetWidth);
-                    fieldRef.current.innerHTML = `${fieldText}<span style="margin-left: ${loopPaddingPx}px;">${fieldText}</span>`;
+                    setMaxScrollWidth(scrollRef.current.scrollWidth - computedXMargin + loopMarginPx.current);
+                    fieldRef.current.innerHTML = `${fieldText}<span style="margin-left: ${loopMarginPx.current}px;">${fieldText}</span>`;
                 } else {
-                    setFieldScrollWidth(scrollRef.current.scrollWidth);
+                    setMaxScrollWidth(scrollRef.current.scrollWidth);
                 }
             } else {
-                setFieldScrollWidth(undefined);
+                setMaxScrollWidth(undefined);
             }
         } else {
-            setFieldScrollWidth(undefined);
+            setMaxScrollWidth(undefined);
         }
     }, [ containerWidth, fieldRef, fieldText, fontSize, loopMarginEm, scrollRef ]);
 
-    return fieldScrollWidth;
+    return [ maxScrollWidth, loopMarginPx.current ];
 }
 
 function useTextScroll<TField extends HTMLElement, TScroll extends HTMLElement>(
@@ -85,14 +86,18 @@ function useTextScroll<TField extends HTMLElement, TScroll extends HTMLElement>(
     RefObject<TScroll>,
     (ondone?: () => void) => void,
     () => void,
+    boolean,
 ] {
     const fieldRef = useRef<TField>(null);
     const scrollRef = useRef<TScroll>(null);
-    const fieldScrollWidth = useLoopingText(fieldRef, scrollRef, text, loopMarginEm, containerWidth, fontSize);
+    const [ fieldScrollWidth, loopMarginPx ] = useLoopingText(fieldRef, scrollRef, text, loopMarginEm, containerWidth, fontSize);
 
-    const [ scrollX, stopScrollX ] = useScrollHTMLElement(scrollRef, { scrollWidth: fieldScrollWidth, render, cancelRender, ...scrollOptions });
+    const isScrollingCallback = useCallback((currentScroll: number) => {
+        return currentScroll > 0 && currentScroll < (fieldScrollWidth ?? 0) - loopMarginPx / 2;
+    }, [ fieldScrollWidth, loopMarginPx ]);
+    const [ scrollX, stopScrollX, isScrolling ] = useScrollHTMLElement(scrollRef, { maxScroll: fieldScrollWidth, render, cancelRender, isScrolling: isScrollingCallback, ...scrollOptions });
 
-    return [ text, fieldRef, scrollRef, scrollX, stopScrollX ];
+    return [ text, fieldRef, scrollRef, scrollX, stopScrollX, isScrolling ];
 }
 
 export default function ScrollableLoopingText(props: ScrollableLoopingTextProps) {
@@ -107,7 +112,7 @@ export default function ScrollableLoopingText(props: ScrollableLoopingTextProps)
         };
     }, [ props.scrollSpeed, props.scrollStartDelayMs, props.scrollType ]);
 
-    const [ text, textRef, scrollRef, startScrolling, stopScrolling ] = useTextScroll<HTMLSpanElement, HTMLDivElement>(
+    const [ text, textRef, scrollRef, startScrolling, stopScrolling, isScrolling ] = useTextScroll<HTMLSpanElement, HTMLDivElement>(
         props.text,
         props.render,
         props.cancelRender,
@@ -124,8 +129,9 @@ export default function ScrollableLoopingText(props: ScrollableLoopingTextProps)
         if (props.scrollType === TextScrollingType.OnMouseOver) startScrolling();
     }, [ props.scrollType, startScrolling ]);
 
+    const className = isScrolling ? `${props.className} scrolling` : props.className;
     return (
-      <div className={props.className} style={props.style} ref={scrollRef} onMouseOver={onMouseOver} onFocus={onMouseOver}>
+      <div className={className} style={props.style} ref={scrollRef} onMouseOver={onMouseOver} onFocus={onMouseOver}>
         <span className={props.textClassName} style={props.textStyle} ref={textRef}>{text}</span>
       </div>
     );

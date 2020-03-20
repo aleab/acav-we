@@ -49,14 +49,6 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         if (scrollProps.autoDelay !== undefined) setScrollStartDelay(scrollProps.autoDelay);
     }, []);
 
-    const songInfoStyle = _.merge({}, {
-        width: props.width,
-    }, props.style);
-    const trackStyle = {};
-    const artistsStyle = {
-        color: darkenOrLighten(props.color),
-    };
-
     const scrollTrackRenderCallback = useCallback((callback: () => void) => context.renderer.queue('SpotifyOverlaySongInfo-ScrollTrack', callback), [context]);
     const scrollTrackCancelRender = useCallback(() => context.renderer.cancel('SpotifyOverlaySongInfo-ScrollTrack'), [context]);
     const track = useMemo(() => (props.currentlyPlaying.item?.name ?? ''), [props.currentlyPlaying.item]);
@@ -68,16 +60,20 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         return props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
     }, [props.currentlyPlaying.item]);
 
+    const songInfoStyle = _.merge({}, {
+        width: props.width,
+    }, props.style);
+
     return (
       <div className={_.join([ 'song-info', props.className ], ' ').trim()} style={songInfoStyle}>
         <ScrollableLoopingText
-          className="scrollable-x lh-0" textClassName="song-info-field track ml-1" textStyle={trackStyle}
+          className="lh-0 scrollable-x song-info-mask" textClassName="song-info-field track"
           scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={track} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollTrackRenderCallback} cancelRender={scrollTrackCancelRender}
         />
         <ScrollableLoopingText
-          className="scrollable-x lh-0" textClassName="song-info-field artists ml-1" textStyle={artistsStyle}
+          className="lh-0 scrollable-x song-info-mask" textClassName="song-info-field artists" textStyle={{ color: darkenOrLighten(props.color) }}
           scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={artists} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollArtistsRenderCallback} cancelRender={scrollArtistsCancelRender}

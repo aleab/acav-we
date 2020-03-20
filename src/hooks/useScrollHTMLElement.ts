@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { RefObject, useCallback, useEffect, useMemo, useRef } from 'react';
+import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { PickRequiredOptional } from '../@types/types';
 
@@ -7,24 +7,26 @@ export type UseScrollHTMLElementOptions = {
     msPerPixelScroll?: number;
     type: 'auto' | 'manual' | 'none';
     axis: 'x' | 'y';
-    scrollWidth?: number;
-    scrollHeight?: number;
+    maxScroll?: number;
     startDelayMs?: number;
     resetDelayMs?: number;
     thresholdPx?: number;
+
     render?: (scrollCallback: () => void) => void;
     cancelRender?: () => void;
+    isScrolling?: (currentScroll: number) => boolean;
 };
 
 const DEFAULT_OPTIONS: PickRequiredOptional<UseScrollHTMLElementOptions> = {
+    maxScroll: -1,
     msPerPixelScroll: 50,
-    scrollWidth: 0,
-    scrollHeight: 0,
     startDelayMs: 4000,
     resetDelayMs: 2000,
     thresholdPx: 0,
+
     render: scrollCallback => scrollCallback(),
     cancelRender: () => {},
+    isScrolling: currentScroll => currentScroll > 0,
 };
 
 export default function useScrollHTMLElement<T extends HTMLElement>(
@@ -33,20 +35,25 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
 ): [
     (ondone?: () => void) => void,
     () => void,
+    boolean,
 ] {
     const options: Required<UseScrollHTMLElementOptions> = _.merge({}, DEFAULT_OPTIONS, opt);
+    const _isScrolling = options.isScrolling;
 
     // =======
     //  State
     // =======
-    const _scrollWidth = options.scrollWidth > 0 ? options.scrollWidth : (ref.current?.scrollWidth ?? 0);
-    const _scrollHeight = options.scrollHeight > 0 ? options.scrollHeight : (ref.current?.scrollHeight ?? 0);
+    const _scrollWidth = ref.current?.scrollWidth ?? 0;
+    const _scrollHeight = ref.current?.scrollHeight ?? 0;
     const _offsetWidth = ref.current?.offsetWidth ?? 0;
     const _offsetHeight = ref.current?.scrollHeight ?? 0;
 
+    const [ isScrolling, setIsScrolling ] = useState(false);
+
     const maxScroll = useMemo(() => {
+        if (options.maxScroll >= 0) return options.maxScroll;
         return options.axis === 'x' ? (_scrollWidth - _offsetWidth) : (_scrollHeight - _offsetHeight);
-    }, [ _offsetHeight, _offsetWidth, _scrollHeight, _scrollWidth, options.axis ]);
+    }, [ _offsetHeight, _offsetWidth, _scrollHeight, _scrollWidth, options.axis, options.maxScroll ]);
     const isScrollable = useMemo(() => {
         const computedStyle = ref.current !== null ? getComputedStyle(ref.current) : undefined;
         return options.axis === 'x'
@@ -88,6 +95,7 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
         if (ref.current === null) return;
         const startPx = options.type === 'auto' ? -(startDelayMs.current / msPerPixelScroll.current) : 0;
 
+        setIsScrolling(false);
         _renderScrollLock.current = true;
         _cancelRender();
         _render(() => {
@@ -117,6 +125,7 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
             if (options.type === 'manual') {
                 // MANUAL SCROLL
                 const timeoutHandler: TimerHandler = () => {
+                    setIsScrolling(_isScrolling(currentScroll.current));
                     if (currentScroll.current < maxScroll) {
                         scrollTimeoutId.current = setTimeout(timeoutHandler, msPerPixelScroll.current);
                         _renderScrollTo(++currentScroll.current);
@@ -137,6 +146,7 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
             } else if (options.type === 'auto') {
                 // AUTO SCROLL
                 const timeoutHandler: TimerHandler = () => {
+                    setIsScrolling(_isScrolling(currentScroll.current));
                     scrollTimeoutId.current = setTimeout(timeoutHandler, msPerPixelScroll.current);
                     if (currentScroll.current < maxScroll + (resetDelayMs.current / msPerPixelScroll.current)) {
                         _renderScrollTo(++currentScroll.current);
@@ -147,7 +157,7 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
                 timeoutHandler();
             }
         }
-    }, [ _renderResetScrollPosition, _renderScrollTo, isScrollable, maxScroll, options.axis, options.type ]);
+    }, [ _isScrolling, _renderResetScrollPosition, _renderScrollTo, isScrollable, maxScroll, options.axis, options.type ]);
 
     // NOTE: This is probably useless
     const stopScroll = useCallback(() => {
@@ -181,5 +191,5 @@ export default function useScrollHTMLElement<T extends HTMLElement>(
         };
     }, [ _renderResetScrollPosition, isScrollable, maxScroll, options.axis ]);
 
-    return [ startScroll, stopScroll ];
+    return [ startScroll, stopScroll, isScrolling ];
 }
