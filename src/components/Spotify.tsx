@@ -15,6 +15,7 @@ import SpotifyStateMachine, { SpotifyStateMachineEvent, SpotifyStateMachineState
 import WallpaperContext from '../app/WallpaperContext';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 
+import SpotifyAlbumArt from './SpotifyAlbumArt';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
 
@@ -245,7 +246,7 @@ export default function Spotify(props: SpotifyProps) {
             if (currentlyPlaying === undefined) return null;
             const spotifyDivProps = {
                 id: 'spotify',
-                className: 'd-flex align-items-center overflow-hidden overlay',
+                className: 'd-flex flex-nowrap align-items-center overflow-hidden overlay',
                 style: { ...overlayStyle, ...overlayBackgroundStyle },
             };
             const songInfoProps = {
@@ -272,8 +273,8 @@ export default function Spotify(props: SpotifyProps) {
                 case SpotifyOverlayArtType.AlbumArt:
                     return (
                       <div {...spotifyDivProps}>
-                        {/* TODO: SpotifyAlbumArt */}
-                        <SpotifyOverlaySongInfo {...songInfoProps} className="ml-2 align-self-start" />
+                        <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.2em' }} width="calc(4em - .4em)" />
+                        <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" />
                       </div>
                     );
                 case SpotifyOverlayArtType.SpotifyIcon:

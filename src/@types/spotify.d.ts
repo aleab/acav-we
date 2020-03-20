@@ -68,7 +68,7 @@ type SpotifyAlbum = {
     external_urls: { [name: string]: string; };
     href: string;
     id: string;
-    images: Array<string>;
+    images: Array<SpotifyImage>;
     name: string;
     release_date: string;
     release_date_precision: 'year' | 'month' | 'day';
@@ -82,4 +82,11 @@ type SpotifyArtist = {
     id: string;
     name: string;
     uri: string;
+};
+
+// image object
+type SpotifyImage = {
+    height: number | null;
+    width: number | null;
+    url: string;
 };

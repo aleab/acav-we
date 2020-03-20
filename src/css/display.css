@@ -1,5 +1,13 @@
+.d-flex { display: flex; }
+
 .flex-row { flex-direction: row !important; }
 .flex-column { flex-direction: column !important; }
+.flex-wrap { flex-wrap: wrap; }
+.flex-nowrap { flex-wrap: nowrap; }
+.flex-grow-0 { flex-grow: 0; }
+.flex-grow-1 { flex-grow: 1; }
+.flex-shrink-0 { flex-shrink: 0; }
+.flex-shrink-1 { flex-shrink: 1; }
 
 .justify-content-start { justify-content: flex-start !important; }
 .justify-content-end { justify-content: flex-end !important; }

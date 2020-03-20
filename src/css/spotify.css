@@ -1,10 +1,5 @@
 /* https://developer.spotify.com/branding-guidelines/ */
 
-#spotify {
-  display: flex;
-  flex-flow: row nowrap;
-}
-
 .spotify-icon {
   margin: .5em;
   font-size: 2em;
