@@ -36,3 +36,19 @@
   line-height: calc(1em + 2px);
   font-size: calc(1em - 2px);
 }
+
+#spotify > .state-icons {
+  position: absolute;
+  right: 0;
+  top: 0;
+  display: flex;
+  flex-flow: row-reverse nowrap;
+  padding: .25em;
+  border-radius: .5em;
+  font-size: .75em;
+  line-height: 0;
+  background-color: hsla(0, 0%, 0%, 0.4);
+}
+#spotify > .state-icons > :not(:first-child) {
+  margin-right: .25em;
+}

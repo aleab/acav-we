@@ -258,12 +258,13 @@ export default function Spotify(props: SpotifyProps) {
     // ========
     //  RENDER
     // ========
-    const RefreshingTokenIcon = useCallback(() => {
-        return isRefreshingToken ? (
-          <span className="lh-0" style={{ position: 'absolute', right: 0, top: 0, padding: '.25em', borderRadius: '.5em', fontSize: '.75em', backgroundColor: 'hsla(0, 0%, 0%, 0.4)' }}>
-            <FontAwesomeIcon icon={faCircleNotch} color="hsla(0, 0%, 100%, 0.69)" spin  />
+    const StateIcons = useCallback(() => {
+        const stateIconOverlay = (
+          <span className="state-icons">
+            {isRefreshingToken ? <span><FontAwesomeIcon icon={faCircleNotch} color="hsla(0, 0%, 100%, 0.69)" spin /></span> : null}
           </span>
-        ) : null;
+        );
+        return stateIconOverlay.props.children !== null ? stateIconOverlay : null;
     }, [isRefreshingToken]);
 
     switch (state.value) {
@@ -287,7 +288,6 @@ export default function Spotify(props: SpotifyProps) {
                 return (
                   <div {...spotifyDivProps}>
                     <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
-                    <RefreshingTokenIcon />
                   </div>
                 );
             }
@@ -297,7 +297,7 @@ export default function Spotify(props: SpotifyProps) {
                     return (
                       <div {...spotifyDivProps}>
                         <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
-                        <RefreshingTokenIcon />
+                        <StateIcons />
                       </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt: {
@@ -306,7 +306,7 @@ export default function Spotify(props: SpotifyProps) {
                       <div {...spotifyDivProps}>
                         <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth} />
                         <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" />
-                        <RefreshingTokenIcon />
+                        <StateIcons />
                       </div>
                     );
                 }
@@ -315,7 +315,7 @@ export default function Spotify(props: SpotifyProps) {
                       <div {...spotifyDivProps}>
                         <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
                         <SpotifyOverlaySongInfo {...songInfoProps} />
-                        <RefreshingTokenIcon />
+                        <StateIcons />
                       </div>
                     );
                 default: return null;
