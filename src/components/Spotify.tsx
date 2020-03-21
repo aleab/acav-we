@@ -10,13 +10,11 @@ import { AnyEventObject, State } from 'xstate';
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
-import { darkenOrLightenRgbColor } from '../common/Colors';
-import { cssColorToRgba } from '../common/Css';
 import { checkInternetConnection } from '../common/Network';
 import { calculatePivotTransform } from '../common/Pivot';
 import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
-import SpotifyStateMachine, { LOCALSTORAGE_SPOTIFY_TOKEN, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
+import SpotifyStateMachine, { LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 
@@ -116,7 +114,6 @@ export default function Spotify(props: SpotifyProps) {
                     break;
 
                 case SpotifyStateMachineState.S7RetryWaiting:
-                    // TODO: Handle state 7
                     break;
 
                 case SpotifyStateMachineState.SNNoInternetConnection: {
@@ -342,10 +339,11 @@ export default function Spotify(props: SpotifyProps) {
 
         case SpotifyStateMachineState.S7RetryWaiting: {
             const errorMsg = "Couldn't refresh token; retrying shortly...";
+            const event: RefreshTokenAfterSecondsEventObject | undefined = state.event.data?.event;
             return (
               <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
                 <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
-                <SpotifyOverlayError message={errorMsg} secondaryMessages={state.event.data?.event?.error ? [state.event.data?.event?.error] : undefined} color={overlayStyle.color} />
+                <SpotifyOverlayError message={errorMsg} secondaryMessages={event?.error ? [event?.error] : undefined} color={overlayStyle.color} />
                 <StateIcons />
               </div>
             );

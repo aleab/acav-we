@@ -96,6 +96,13 @@ interface SsmContext {
     spotifyToken?: SpotifyToken;
 }
 
+export interface RefreshTokenAfterSecondsEventObject extends EventObject {
+    type: SsmEvent.RefreshTokenAfterSeconds;
+    seconds: number;
+    status: number;
+    error?: string;
+}
+
 function isValidTokenObject(token: any): boolean {
     return _.isObjectLike(token) && token['access_token'] && token['refresh_token'] && token['expires_at'];
 }
@@ -193,14 +200,20 @@ async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3):
                     type: SsmEvent.RefreshTokenAfterSeconds,
                     seconds: Number(res.headers.get('Retry-After') ?? 4) + 1,
                     status: 429,
-                } as AnyEventObject);
+                } as RefreshTokenAfterSecondsEventObject as AnyEventObject);
 
-            case 500: // internal server error (ours or Spotify's)
-                return raise({
+            case 500: { // internal server error (ours or Spotify's)
+                const evt: RefreshTokenAfterSecondsEventObject = {
                     type: SsmEvent.RefreshTokenAfterSeconds,
                     seconds: 5,
                     status: 500,
-                } as AnyEventObject);
+                };
+                return res.json().then(json => {
+                    return raise({ ...evt, error: json['message'] } as EventObject);
+                }).catch(() => {
+                    return raise(evt as EventObject);
+                });
+            }
 
             default:
                 return res.text().then(body => {
