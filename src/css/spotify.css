@@ -52,3 +52,17 @@
 #spotify > .state-icons > :not(:first-child) {
   margin-right: .25em;
 }
+
+#spotify .error {
+  padding-top: calc(1em - 2px);
+  padding-bottom: calc(1em - 2px);
+  letter-spacing: .015em;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+#spotify .error > :first-child {
+  line-height: calc(1em + 4px);
+}
+#spotify .error > :not(:first-child) {
+  line-height: calc(1em + 2px);
+  font-size: calc(1em - 2px);
+}

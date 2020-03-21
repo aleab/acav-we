@@ -4,11 +4,14 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleNotch } from '@fortawesome/free-solid-svg-icons';
+import { faCircleNotch, faFilter } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import { AnyEventObject, State } from 'xstate';
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
+import { darkenOrLightenRgbColor } from '../common/Colors';
+import { cssColorToRgba } from '../common/Css';
 import { checkInternetConnection } from '../common/Network';
 import { calculatePivotTransform } from '../common/Pivot';
 import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
@@ -18,6 +21,7 @@ import WallpaperContext from '../app/WallpaperContext';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 
 import SpotifyAlbumArt from './SpotifyAlbumArt';
+import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
 
@@ -92,6 +96,7 @@ export default function Spotify(props: SpotifyProps) {
         const stateListener = service.subscribe(newState => {
             switch (newState.value) {
                 case SpotifyStateMachineState.S5HasATIdle: {
+                    // Schedule next token refresh
                     const expiresIn = (newState.context.spotifyToken!.expires_at - Date.now() - 10 * 1000) || 0;
                     const timeout = expiresIn >= 0 ? expiresIn : 0;
 
@@ -115,6 +120,7 @@ export default function Spotify(props: SpotifyProps) {
                     break;
 
                 case SpotifyStateMachineState.SNNoInternetConnection: {
+                    // Check internet connection loop
                     const onsuccess = () => send(SpotifyStateMachineEvent.InternetConnectionRestored);
                     const onfail = () => {
                         clearTimeout(timeoutIds.get('retryTimeoutId'));
@@ -140,8 +146,6 @@ export default function Spotify(props: SpotifyProps) {
             });
         };
     }, [ send, service ]);
-
-    const isRefreshingToken = useMemo(() => state.value === SpotifyStateMachineState.S4CheckingAT, [state.value]);
 
     // =====================
     //  PROPERTIES LISTENER
@@ -169,6 +173,7 @@ export default function Spotify(props: SpotifyProps) {
     // =========
     // currentlyPlaying is undefined until the first refresh; it's null when no track is playing
     const [ currentlyPlaying, setCurrentlyPlaying ] = useState<SpotifyCurrentlyPlayingObject | null | undefined>(undefined);
+    const [ lastResponseCode, setLastResponseCode ] = useState(0);
     const setCurrentlyPlayingAction = useCallback((prev: SpotifyCurrentlyPlayingObject | null | undefined, current: SpotifyCurrentlyPlayingObject | null) => {
         const newUrl = (current?.item?.external_urls?.['spotify'] ?? current?.item?.uri);
         if (newUrl !== (prev?.item?.external_urls?.['spotify'] ?? prev?.item?.uri)) {
@@ -208,6 +213,8 @@ export default function Spotify(props: SpotifyProps) {
                         return;
                     }
 
+                    setLastResponseCode(res.status);
+
                     timeoutId = setTimeout(refreshLoop as TimerHandler, INTERVAL);
                     switch (res.status) {
                         case 200:
@@ -227,7 +234,6 @@ export default function Spotify(props: SpotifyProps) {
                             break;
 
                         case 429: { // Rate limit
-                                // TODO: Display some message or informational icon about rate limiting?
                                 const retryAfterSeconds = Number(res.headers.get('Retry-After') ?? 4) + 1;
                                 Logc.warn(`Rate Limit reached; retry after ${retryAfterSeconds}s!`);
                                 clearTimeout(timeoutId);
@@ -255,6 +261,14 @@ export default function Spotify(props: SpotifyProps) {
         };
     }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
 
+    const isRefreshingToken = useMemo(() => state.value === SpotifyStateMachineState.S4CheckingAT, [state.value]);
+    const isRateLimited = useMemo(() => {
+        if (lastResponseCode === 429) return true;
+        if (state.value !== SpotifyStateMachineState.S7RetryWaiting) return false;
+        const stateEvent: AnyEventObject | null | undefined = state.event.data?.event;
+        return stateEvent && stateEvent.status === 429;
+    }, [ lastResponseCode, state.event.data, state.value ]);
+
     // ========
     //  RENDER
     // ========
@@ -262,10 +276,13 @@ export default function Spotify(props: SpotifyProps) {
         const stateIconOverlay = (
           <span className="state-icons">
             {isRefreshingToken ? <span><FontAwesomeIcon icon={faCircleNotch} color="hsla(0, 0%, 100%, 0.69)" spin /></span> : null}
+            {isRateLimited ? <span><FontAwesomeIcon icon={faFilter} color="hsla(45, 100%, 50%, 0.69)" /></span> : null}
           </span>
         );
-        return stateIconOverlay.props.children !== null ? stateIconOverlay : null;
-    }, [isRefreshingToken]);
+        return Array.isArray(stateIconOverlay.props.children)
+            ? (stateIconOverlay.props.children as Array<any>).filter(x => x !== null && x !== undefined).length > 0 ? stateIconOverlay : null
+            : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
+    }, [ isRateLimited, isRefreshingToken ]);
 
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
@@ -288,6 +305,7 @@ export default function Spotify(props: SpotifyProps) {
                 return (
                   <div {...spotifyDivProps}>
                     <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                    <StateIcons />
                   </div>
                 );
             }
@@ -320,6 +338,17 @@ export default function Spotify(props: SpotifyProps) {
                     );
                 default: return null;
             }
+        }
+
+        case SpotifyStateMachineState.S7RetryWaiting: {
+            const errorMsg = "Couldn't refresh token; retrying shortly...";
+            return (
+              <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
+                <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                <SpotifyOverlayError message={errorMsg} secondaryMessages={state.event.data?.event?.error ? [state.event.data?.event?.error] : undefined} color={overlayStyle.color} />
+                <StateIcons />
+              </div>
+            );
         }
 
         default: return null;
