@@ -255,25 +255,27 @@ export default function Spotify(props: SpotifyProps) {
                 color: overlayStyle.color,
                 fontSize: overlayStyle.fontSize,
             };
+
             if (currentlyPlaying?.item === null || currentlyPlaying?.item === undefined) {
-                // Only show Spotify's icon when no song is playing
+                // Show only Spotify's icon when no song is playing
                 return (
                   <div {...spotifyDivProps}>
                     <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
                   </div>
                 );
             }
+
             switch (overlayArtStyle) {
                 case SpotifyOverlayArtType.None:
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: 'calc(1em - .25rem)' }} />
+                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
                       </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt:
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.2em' }} width="calc(4em - .4em)" />
+                        <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width="calc(4em - 2 * .25em)" />
                         <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" />
                       </div>
                     );
