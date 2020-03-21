@@ -60,7 +60,7 @@ function useLoopingText<TField extends HTMLElement, TScroll extends HTMLElement>
                     setMaxScrollWidth(scrollRef.current.scrollWidth - computedXMargin + loopMarginPx.current);
                     fieldRef.current.innerHTML = `${fieldText}<span style="margin-left: ${loopMarginPx.current}px;">${fieldText}</span>`;
                 } else {
-                    setMaxScrollWidth(scrollRef.current.scrollWidth);
+                    setMaxScrollWidth(0);
                 }
             } else {
                 setMaxScrollWidth(undefined);
