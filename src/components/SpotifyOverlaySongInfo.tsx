@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import ColorConvert from 'color-convert';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 
+import { darkenOrLightenRgbColor } from '../common/Colors';
 import { cssColorToRgba } from '../common/Css';
 import WallpaperContext from '../app/WallpaperContext';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
@@ -12,11 +12,7 @@ const BRIGHTNESS_R = 0.4;
 function darkenOrLighten(cssColor: string): string {
     const rgba = cssColorToRgba(cssColor);
     if (rgba === undefined) return cssColor;
-
-    const hsv = ColorConvert.rgb.hsv([ rgba[0], rgba[1], rgba[2] ]);
-    hsv[2] = hsv[2] > 50 ? hsv[2] * (1 - BRIGHTNESS_R) : hsv[2] * (1 + BRIGHTNESS_R);
-
-    const rgb = ColorConvert.hsv.rgb(hsv);
+    const rgb = darkenOrLightenRgbColor([ rgba[0], rgba[1], rgba[2] ], BRIGHTNESS_R);
     return rgba[3] !== 1 ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${rgba[3]})` : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
 }
 
