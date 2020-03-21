@@ -1,23 +1,21 @@
 import _ from 'lodash';
-import React, { CSSProperties, useMemo } from 'react';
+import React, { CSSProperties, useMemo, useRef } from 'react';
 
 interface SpotifyAlbumArtProps {
     style?: CSSProperties;
     className?: string;
-    width: string;
+    width: number;
     album: SpotifyAlbum;
 }
 
 export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
-    const srcset = useMemo(() => {
-        return  _.reduceRight<SpotifyImage, string[]>(props.album.images, (acc, curr) => {
-            if (curr.url && curr.width) {
-                acc.push(`${curr.url} ${curr.width}w`);
-            }
-            return acc;
-        }, []).join(', ');
+    const ref = useRef<HTMLImageElement>(null);
+
+    const src = useMemo(() => {
+        const img: SpotifyImage | undefined = _.findLast(props.album.images, x => x.width !== null && x.width >= props.width) ?? props.album.images[0];
+        return img?.url ?? '';
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [props.album.id]);
+    }, [ props.album.id, props.width ]);
 
     const style: CSSProperties = {
         width: props.width,
@@ -27,6 +25,6 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     };
 
     return (
-      <img className={props.className} style={style} srcSet={srcset} sizes={props.width} alt="" />
+      <img ref={ref} className={props.className} style={style} src={src} alt="" />
     );
 }

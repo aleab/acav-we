@@ -272,13 +272,15 @@ export default function Spotify(props: SpotifyProps) {
                         <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
                       </div>
                     );
-                case SpotifyOverlayArtType.AlbumArt:
+                case SpotifyOverlayArtType.AlbumArt: {
+                    const artWidth = 4 * overlayStyle.fontSize - 2 * 0.25 * overlayStyle.fontSize; // calc(4em - 2 * .25em)
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width="calc(4em - 2 * .25em)" />
+                        <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth} />
                         <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" />
                       </div>
                     );
+                }
                 case SpotifyOverlayArtType.SpotifyIcon:
                     return (
                       <div {...spotifyDivProps}>
