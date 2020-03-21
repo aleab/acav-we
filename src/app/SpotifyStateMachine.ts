@@ -319,7 +319,8 @@ const SpotifyStateMachine = Machine<SsmContext>({
                 id: '4',
                 src: async ctx => {
                     Logc.debug('~> (4)');
-                    const spotifyToken: SpotifyToken = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_SPOTIFY_TOKEN)!);
+                    const spotifyToken: SpotifyToken | null = JSON.parse(window.localStorage.getItem(LOCALSTORAGE_SPOTIFY_TOKEN)!);
+                    if (!spotifyToken) return raise(SsmEvent.ErrorWhileRefreshingSpotifyToken);
                     if (spotifyToken.expires_at - 10 * 1000 > Date.now()) {
                         // All good, we can idle
                         ctx.spotifyToken = spotifyToken;
