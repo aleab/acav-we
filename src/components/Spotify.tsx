@@ -25,8 +25,6 @@ import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
 
 const Logc = Log.getLogger('Spofity', '#1DB954');
 
-// TODO: Refactor some shit into hooks (?)
-
 type OverlayStyle = {
     transform: string,
     left: number;

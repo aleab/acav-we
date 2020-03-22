@@ -38,9 +38,6 @@ function isDark(rgb: RGB) {
     return lab[0] <= 45;
 }
 
-// TODO: Refactor some shit into separate hooks (?)
-//       like the whole dinamically-changing icon color logic
-
 export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
     // Spotify's Branding Guidelines: https://developer.spotify.com/branding-guidelines/
     const [ iconColor, setIconColor ] = useState(SPOTIFY_LIGHT_GREEN);
