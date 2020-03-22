@@ -35,3 +35,10 @@ body {
   overflow-x: scroll;
   white-space: nowrap;
 }
+
+.blink {
+  animation: blink-animation 1.2s step-start infinite;
+}
+@keyframes blink-animation {
+  50% { opacity: .25; }
+}

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleNotch, faFilter, faSkull } from '@fortawesome/free-solid-svg-icons';
+import { faCircleNotch, faFilter, faPlug, faSkull } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AnyEventObject, State } from 'xstate';
 import { useMachine } from '@xstate/react';
@@ -199,7 +199,6 @@ export default function Spotify(props: SpotifyProps) {
                             Authorization: `Bearer ${state.context.spotifyToken.access_token}`,
                         },
                     }).catch(err => {
-                        // TODO: No internet connection ?
                         return null;
                     });
 
@@ -257,6 +256,7 @@ export default function Spotify(props: SpotifyProps) {
         };
     }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
 
+    // States
     const isRefreshingToken = useMemo(() => state.value === SpotifyStateMachineState.S4CheckingAT, [state.value]);
     const isRateLimited = useMemo(() => {
         if (lastResponseCode === 429) return true;
@@ -265,6 +265,7 @@ export default function Spotify(props: SpotifyProps) {
         return stateEvent && stateEvent.status === 429;
     }, [ lastResponseCode, state.event.data, state.value ]);
     const isFatalErrorGettingToken = useMemo(() => state.value === SpotifyStateMachineState.S6CantGetTokenErrorIdle, [state.value]);
+    const hasNoInternetConnection = useMemo(() => state.value === SpotifyStateMachineState.SNNoInternetConnection, [state.value]);
 
     // ========
     //  RENDER
@@ -275,12 +276,13 @@ export default function Spotify(props: SpotifyProps) {
             {isRefreshingToken ? <span><FontAwesomeIcon icon={faCircleNotch} color="hsla(0, 0%, 100%, 0.69)" spin /></span> : null}
             {isRateLimited ? <span><FontAwesomeIcon icon={faFilter} color="hsla(45, 100%, 50%, 0.69)" /></span> : null}
             {isFatalErrorGettingToken ? <span><FontAwesomeIcon icon={faSkull} color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
+            {hasNoInternetConnection ? <span><FontAwesomeIcon className="blink" icon={faPlug} color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
           </span>
         );
         return Array.isArray(stateIconOverlay.props.children)
             ? (stateIconOverlay.props.children as Array<any>).filter(x => x !== null && x !== undefined).length > 0 ? stateIconOverlay : null
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
-    }, [ isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
+    }, [ hasNoInternetConnection, isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
