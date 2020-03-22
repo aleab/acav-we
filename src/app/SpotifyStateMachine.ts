@@ -137,6 +137,9 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
             case 403: // token is old
                 return raise(SsmEvent.BackendTokenBadRequestOrForbidden);
 
+            case 404: // server is down
+                return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+
             case 500: // internal server error
                 return raise(SsmEvent.CouldntGetBackendTokenFatalError);
 
@@ -194,6 +197,14 @@ async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3):
 
             case 401: // unauthorized: the user revoked authorization
                 return raise(SsmEvent.SpotifyTokenRevoked);
+
+            case 404: // server is down (either our backend or Spotify)
+                return raise({
+                    type: SsmEvent.RefreshTokenAfterSeconds,
+                    seconds: 5,
+                    status: 404,
+                    error: 'Server is down!',
+                } as RefreshTokenAfterSecondsEventObject as AnyEventObject);
 
             case 429: // rate limit (Spotify's)
                 return raise({
