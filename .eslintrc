@@ -24,7 +24,14 @@
         "import/extensions": "off",
         "import/no-unresolved": "off",
         "import/prefer-default-export": "off",
-        "indent": "off",
+        "indent": [
+            "error",
+            4,
+            {
+                "SwitchCase": 1,
+                "ignoredNodes": ["JSXAttribute", "JSXElement", "JSXFragment"]
+            }
+        ],
         "linebreak-style": "off",
         "lines-between-class-members": "off",
         "max-len": "off",

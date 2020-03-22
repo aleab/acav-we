@@ -36,8 +36,8 @@ const compiler = webpack(config);
 
 const watcher = compiler.watch({}, async (err, stats) => {
     if (err) {
-      console.error(err);
-      return;
+        console.error(err);
+        return;
     }
 
     console.log();

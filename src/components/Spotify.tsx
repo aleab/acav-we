@@ -106,8 +106,8 @@ export default function Spotify(props: SpotifyProps) {
                     timeoutIds.set('refreshTimeoutId', refreshTimeoutId);
 
                     Logc.debug(`Scheduled next token refresh in ${Math.round(timeout / 1000)} seconds.`);
+                    break;
                 }
-                break;
 
                 case SpotifyStateMachineState.S6CantGetTokenErrorIdle:
                     break;
@@ -127,8 +127,8 @@ export default function Spotify(props: SpotifyProps) {
                         timeoutIds.set('retryTimeoutId', retryTimeoutId);
                     };
                     checkInternetConnection(onsuccess, onfail);
+                    break;
                 }
-                break;
 
                 default: break;
             }
@@ -230,12 +230,12 @@ export default function Spotify(props: SpotifyProps) {
                             break;
 
                         case 429: { // Rate limit
-                                const retryAfterSeconds = Number(res.headers.get('Retry-After') ?? 4) + 1;
-                                Logc.warn(`Rate Limit reached; retry after ${retryAfterSeconds}s!`);
-                                clearTimeout(timeoutId);
-                                timeoutId = setTimeout(refreshLoop as TimerHandler, retryAfterSeconds * 1000);
-                            }
+                            const retryAfterSeconds = Number(res.headers.get('Retry-After') ?? 4) + 1;
+                            Logc.warn(`Rate Limit reached; retry after ${retryAfterSeconds}s!`);
+                            clearTimeout(timeoutId);
+                            timeoutId = setTimeout(refreshLoop as TimerHandler, retryAfterSeconds * 1000);
                             break;
+                        }
 
                         default:
                             setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, null));
