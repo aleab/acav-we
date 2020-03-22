@@ -6,8 +6,8 @@ import Log from '../common/Log';
 
 const Logc = Log.getLogger('SpofitySM', '#1DB954', 'background-color: #191414;');
 
-const BACKEND_API_BASEURL = 'https://localhost:8080/api';
-const LOCALSTORAGE_SPOTIFY_TOKEN = 'aleab.acav.spotify';
+const BACKEND_API_BASEURL = process.env.BACKEND_API_BASEURL;
+export const LOCALSTORAGE_SPOTIFY_TOKEN = 'aleab.acav.spotify';
 
 // ======================
 //  FINITE STATE MACHINE

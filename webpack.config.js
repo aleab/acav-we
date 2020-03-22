@@ -12,6 +12,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { LicenseWebpackPlugin } = require('license-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const RequireVarsDotenvPlugin = require('./build-scripts/require-vars-dotenv-webpack');
 
 const SRC_PATH = path.resolve(__dirname, 'src');
 const DIST_PATH = path.resolve(__dirname, 'dist');
@@ -103,6 +104,7 @@ function getWebpackConfig(env, argv) {
             ],
         },
         plugins: [
+            new RequireVarsDotenvPlugin(['BACKEND_API_BASEURL']),
             new webpack.ProgressPlugin(),
             new LicenseWebpackPlugin({
                 outputFilename: 'LICENSES.3RD-PARTY.txt',

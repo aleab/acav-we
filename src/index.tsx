@@ -29,10 +29,11 @@ function run(Component: typeof App) {
     window.acav.reload = () => {
         console.info(
             '%c' +
-            '=========================================\n' +
+            '======================================================================\n' +
             ' LOADING WALLPAPER\n' +
             `   NODE_ENV: "${process.env['NODE_ENV']}"\n` +
-            '=========================================\n',
+            `   BACKEND_API_BASEURL: "${process.env['BACKEND_API_BASEURL']}"\n` +
+            '======================================================================\n',
             'color: #350E23; font-weight:bold',
         );
 
