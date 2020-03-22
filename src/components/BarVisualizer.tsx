@@ -2,8 +2,8 @@ import _ from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 
 import Log from '../common/Log';
+import CircularBuffer from '../common/CircularBuffer';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
 import WallpaperContext from '../app/WallpaperContext';
 import useBarVisualizerRendering from '../hooks/useBarVisualizerRendering';
 
@@ -52,7 +52,7 @@ export default function BarVisualizer() {
             return _samples.raw.map((v, i) => Math.lerp(_prevRaw[i], v, 1 - s));
         };
 
-        let samplesBuffer: AudioSamplesBuffer | undefined;
+        let samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined;
         let samples: AudioSamplesArray | undefined;
         let peak = 1;
 
@@ -77,7 +77,7 @@ export default function BarVisualizer() {
             //   fᵢ: weighted mean of frequency i samples
             const smoothFactor = O.current.smoothing / 100;
             const smoothSamples = samplesBuffer.size > 1
-                ? reduxSamplesWeightedMean(samplesBuffer.samples, smoothFactor)
+                ? reduxSamplesWeightedMean(samplesBuffer.raw, smoothFactor)
                 : prevSamples !== undefined && samplesBuffer.size === 1
                     ? lerpSamples(args.samples, prevSamples, smoothFactor)
                     : args.samples.raw;

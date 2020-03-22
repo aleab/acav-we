@@ -1,8 +1,6 @@
-import AudioSamplesArray from './AudioSamplesArray';
-
-export default class AudioSamplesBuffer {
-    private readonly _samples: AudioSamplesArray[] = [];
-    get samples(): AudioSamplesArray[] { return this._samples.slice(); }
+export default class CurcularBuffer<T extends any> {
+    private readonly _raw: T[] = [];
+    get raw(): T[] { return this._raw.slice(); }
 
     private _size: number;
     get size(): number { return this._size; }
@@ -14,9 +12,16 @@ export default class AudioSamplesBuffer {
         this._size = size;
     }
 
-    get(i: number): AudioSamplesArray {
+    get(i: number): T {
         if (i >= this.size) throw new Error('Index is out of range.');
-        return this._samples[i];
+        return this._raw[i];
+    }
+
+    push(samples: T) {
+        while (this._raw.length >= this._size) {
+            this.shift();
+        }
+        this._raw.push(samples);
     }
 
     resize(size: number) {
@@ -29,18 +34,11 @@ export default class AudioSamplesBuffer {
         this._size = size;
     }
 
-    push(samples: AudioSamplesArray) {
-        while (this._samples.length >= this._size) {
-            this.shift();
-        }
-        this._samples.push(samples);
-    }
-
-    peak(n: number = 1): AudioSamplesArray[] {
-        return this._samples.slice(this._size - n - 1);
+    peak(n: number = 1): T[] {
+        return this._raw.slice(this._size - n - 1);
     }
 
     private shift() {
-        this._samples.shift();
+        this._raw.shift();
     }
 }

@@ -1,9 +1,10 @@
 import Log from '../common/Log';
-import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
+import CircularBuffer from '../common/CircularBuffer';
+import AudioSamplesArray from '../common/AudioSamplesArray';
 
 export enum AudioResponsiveValueProvider { Value, ValueNormalized, Change, ChangeAbsolute }
 
-type AudioResponsiveValueProviderFunctionArgs = { samplesBuffer?: AudioSamplesBuffer, peak?: number };
+type AudioResponsiveValueProviderFunctionArgs = { samplesBuffer?: CircularBuffer<AudioSamplesArray>, peak?: number };
 type AudioResponsiveValueProviderFunction = (sample: [ number, number ], i: number, gain: number, args: AudioResponsiveValueProviderFunctionArgs) => [ number, number ];
 
 const AudioResponsiveValueProviders: {

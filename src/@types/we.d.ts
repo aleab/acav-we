@@ -63,7 +63,7 @@ type UserPropertiesChangedEventArgs = {
 type GeneralPropertiesChangedEventArgs = { newProps: Partial<import('utility-types').DeepReadonly<WEGeneralProperties>>; };
 type AudioSamplesEventArgs = {
     samples: import('../common/AudioSamplesArray').default;
-    samplesBuffer: import('../common/AudioSamplesBuffer').default;
+    samplesBuffer: import('../common/CircularBuffer').default<import('../common/AudioSamplesArray').default>;
     peak: number;
     mean: number;
 };

@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
+import CircularBuffer from '../common/CircularBuffer';
 import Properties, { applyUserProperties } from '../app/properties/Properties';
 import { PINK_NOISE } from '../app/noise';
 import Renderer from '../app/Renderer';
@@ -71,7 +71,7 @@ export default function App(props: AppProps) {
 
     // Shared state
     const targetFps = useRef(0);
-    const samplesBuffer = useMemo(() => new AudioSamplesBuffer(1 + O.current.audioSamples.bufferLength ?? 0), []);
+    const samplesBuffer = useMemo(() => new CircularBuffer<AudioSamplesArray>(1 + O.current.audioSamples.bufferLength ?? 0), []);
 
     useEffect(() => {
         window.wallpaperPropertyListener = {};
@@ -197,7 +197,7 @@ export default function App(props: AppProps) {
 
             if (O.current.audioSamples.normalize) {
                 let totalWeight = 1;
-                const peaks = samplesBuffer.samples.map((v, i, arr) => {
+                const peaks = samplesBuffer.raw.map((v, i, arr) => {
                     const w = 6 ** (i / arr.length - 1);
                     totalWeight += w;
                     return v.max() * w;
@@ -228,7 +228,8 @@ export default function App(props: AppProps) {
                 samplesBuffer.push(samples);
             }
             if (samples !== undefined) {
-                onAudioSamplesSubs.forEach(callback => callback({ samples: samples!, samplesBuffer, peak, mean }));
+                const _rawSamples = new AudioSamplesArray(rawSamples, 2);
+                onAudioSamplesSubs.forEach(callback => callback({ rawSamples: _rawSamples, samples: samples!, samplesBuffer, peak, mean }));
             }
         };
         window.wallpaperRegisterAudioListener(audioListener);

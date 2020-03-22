@@ -2,15 +2,15 @@ import { RefObject, useCallback, useContext, useRef } from 'react';
 import { RGB } from 'color-convert/conversions';
 
 import Log from '../common/Log';
+import CircularBuffer from '../common/CircularBuffer';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import AudioSamplesBuffer from '../common/AudioSamplesBuffer';
 import { AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../app/ColorReactionType';
 import WallpaperContext from '../app/WallpaperContext';
 
 interface RenderArgs {
     readonly samples: AudioSamplesArray | undefined;
-    readonly samplesBuffer: AudioSamplesBuffer | undefined;
+    readonly samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined;
     readonly peak: number;
 }
 
