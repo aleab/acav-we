@@ -4,7 +4,7 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleNotch, faFilter } from '@fortawesome/free-solid-svg-icons';
+import { faCircleNotch, faFilter, faSkull } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AnyEventObject, State } from 'xstate';
 import { useMachine } from '@xstate/react';
@@ -14,7 +14,7 @@ import { checkInternetConnection } from '../common/Network';
 import { calculatePivotTransform } from '../common/Pivot';
 import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
-import SpotifyStateMachine, { LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
+import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 
@@ -110,7 +110,6 @@ export default function Spotify(props: SpotifyProps) {
                 break;
 
                 case SpotifyStateMachineState.S6CantGetTokenErrorIdle:
-                    // TODO: Handle state 6
                     break;
 
                 case SpotifyStateMachineState.S7RetryWaiting:
@@ -265,6 +264,7 @@ export default function Spotify(props: SpotifyProps) {
         const stateEvent: AnyEventObject | null | undefined = state.event.data?.event;
         return stateEvent && stateEvent.status === 429;
     }, [ lastResponseCode, state.event.data, state.value ]);
+    const isFatalErrorGettingToken = useMemo(() => state.value === SpotifyStateMachineState.S6CantGetTokenErrorIdle, [state.value]);
 
     // ========
     //  RENDER
@@ -274,12 +274,13 @@ export default function Spotify(props: SpotifyProps) {
           <span className="state-icons">
             {isRefreshingToken ? <span><FontAwesomeIcon icon={faCircleNotch} color="hsla(0, 0%, 100%, 0.69)" spin /></span> : null}
             {isRateLimited ? <span><FontAwesomeIcon icon={faFilter} color="hsla(45, 100%, 50%, 0.69)" /></span> : null}
+            {isFatalErrorGettingToken ? <span><FontAwesomeIcon icon={faSkull} color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
           </span>
         );
         return Array.isArray(stateIconOverlay.props.children)
             ? (stateIconOverlay.props.children as Array<any>).filter(x => x !== null && x !== undefined).length > 0 ? stateIconOverlay : null
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
-    }, [ isRateLimited, isRefreshingToken ]);
+    }, [ isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
@@ -335,6 +336,20 @@ export default function Spotify(props: SpotifyProps) {
                     );
                 default: return null;
             }
+        }
+
+        case SpotifyStateMachineState.S6CantGetTokenErrorIdle: {
+            const errorMsg = 'Fatal error while exchanging token!';
+            const event: CouldntGetBackendTokenFatalErrorEventObject | undefined = state.event.data?.event;
+            const secondaryMessages = event?.error ? [event?.error] : [];
+            secondaryMessages.push('Enter a new token');
+            return (
+              <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
+                <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                <SpotifyOverlayError message={errorMsg} secondaryMessages={secondaryMessages} color={overlayStyle.color} />
+                <StateIcons />
+              </div>
+            );
         }
 
         case SpotifyStateMachineState.S7RetryWaiting: {

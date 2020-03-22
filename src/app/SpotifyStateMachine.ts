@@ -96,6 +96,10 @@ interface SsmContext {
     spotifyToken?: SpotifyToken;
 }
 
+export interface CouldntGetBackendTokenFatalErrorEventObject extends EventObject {
+    type: SsmEvent.CouldntGetBackendTokenFatalError;
+    error: string;
+}
 export interface RefreshTokenAfterSecondsEventObject extends EventObject {
     type: SsmEvent.RefreshTokenAfterSeconds;
     seconds: number;
@@ -125,7 +129,10 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
                 return await res.json().then(json => {
                     if (!isValidTokenObject(json)) {
                         Logc.error('The backend returned an invalid token (!?):', json);
-                        return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+                        return raise({
+                            type: SsmEvent.CouldntGetBackendTokenFatalError,
+                            error: 'Token server returned an invalid token!',
+                        } as CouldntGetBackendTokenFatalErrorEventObject as AnyEventObject);
                     }
 
                     Logc.debug('Received a valid token:', json);
@@ -138,15 +145,24 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
                 return raise(SsmEvent.BackendTokenBadRequestOrForbidden);
 
             case 404: // server is down
-                return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+                return raise({
+                    type: SsmEvent.CouldntGetBackendTokenFatalError,
+                    error: 'Server is down! Retry later.',
+                } as CouldntGetBackendTokenFatalErrorEventObject as AnyEventObject);
 
             case 500: // internal server error
-                return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+                return raise({
+                    type: SsmEvent.CouldntGetBackendTokenFatalError,
+                    error: 'Unexpected internal server error',
+                } as CouldntGetBackendTokenFatalErrorEventObject as AnyEventObject);
 
             default:
                 return res.text().then(body => {
                     Logc.error(`The backend returned ${res.status}:`, { body });
-                    return raise(SsmEvent.CouldntGetBackendTokenFatalError);
+                    return raise({
+                        type: SsmEvent.CouldntGetBackendTokenFatalError,
+                        error: `Unexpected response from token server (${res.status})`,
+                    } as CouldntGetBackendTokenFatalErrorEventObject as AnyEventObject);
                 });
         }
     } catch (err) {
