@@ -321,7 +321,7 @@ export default function Spotify(props: SpotifyProps) {
                     return (
                       <div {...spotifyDivProps}>
                         <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth} />
-                        <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" />
+                        <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
                         <StateIcons />
                       </div>
                     );
