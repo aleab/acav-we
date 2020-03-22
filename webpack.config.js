@@ -14,6 +14,8 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const RequireVarsDotenvPlugin = require('./build-scripts/require-vars-dotenv-webpack');
 
+const packageJson = require('./package.json');
+
 const SRC_PATH = path.resolve(__dirname, 'src');
 const DIST_PATH = path.resolve(__dirname, 'dist');
 
@@ -27,9 +29,85 @@ function getWebpackConfig(env, argv) {
     const isProduction = argv.mode !== 'development';
     const hot = argv.hot;
 
+    // Plugins
+    const progressPlugin = new webpack.ProgressPlugin();
+    const dotenvPlugin = new RequireVarsDotenvPlugin(['BACKEND_API_BASEURL']);
+    const licensePlugin = new LicenseWebpackPlugin({
+        outputFilename: 'LICENSES.3RD-PARTY.txt',
+        perChunkOutput: false,
+        preferredLicenseTypes: ['MIT'],
+        unacceptableLicenseTest: licenseType => /(CC-BY(-NC)?-(SA|ND))|(CECILL)|(EPL)|(EUPL)|(GPL)|(MS-RL)|(OSL)|(UNLICENSED)/i.test(licenseType),
+        excludedPackageTest: packageName => {
+            // Do not include license texts of transitive dependencies
+            if (!packageJson.dependencies) return false;
+            return packageJson.dependencies[packageName] === undefined;
+        },
+        renderLicenses: modules => {
+            let text = '';
+            const M = _.sortBy(modules, m => m.name);
+            for (let i = 0; i < M.length; ++i) {
+                text += '/**\n' +
+                        ` * ${M[i].name}\n` +
+                        ' *\n' +
+                        ` * ${M[i].licenseId}\n` +
+                        (M[i].licenseText !== null ? M[i].licenseText.split(/\r?\n/).map(s => ` * ${s}`).join('\n') : ' * null') + '\n' +
+                        ' */\n' +
+                        '\n';
+            }
+            return text;
+        },
+        licenseTextOverrides: {
+            '@xstate/react': '<missing license text>',
+            xstate: '<missing license text>',
+        },
+    });
+    const copyPlugin = new CopyWebpackPlugin([
+        { from: './LICENSE.txt' },
+        {
+            from: './static/**/*',
+            transformPath(targetPath) { return path.relative('./static', targetPath); },
+            transform(content, filePath) {
+                if (isProduction) {
+                    // Minify css
+                    if (path.extname(filePath) === '.css') {
+                        return cssnano.process(content).then(v => v.css);
+                    }
+                }
+                return content;
+            },
+        },
+    ]);
+    const miniCssExtractPlugin = new MiniCssExtractPlugin({
+        filename: '[name].css',
+        chunkFilename: '[id].css',
+    });
+
+    const terserPlugin = new TerserPlugin({
+        terserOptions: {
+            parse: { ecma: 8 },
+            compress: { ecma: 5 },
+            output: {
+                ecma: 5,
+                comments: false,
+                // comments: /^\**!|@preserve/i,
+            },
+        },
+        extractComments: false,
+    });
+    const bannerPlugin = new webpack.BannerPlugin({
+        raw: true,
+        banner: '/*!\n' +
+                ' * This Source Code Form is subject to the terms of the Mozilla Public\n' +
+                ' * License, v. 2.0. If a copy of the MPL was not distributed with this\n' +
+                ' * file, You can obtain one at http://mozilla.org/MPL/2.0/.\n' +
+                ' */\n',
+    });
+
+    // ===============
+    //  COMMON CONFIG
+    // ===============
     /** @type {import('webpack').Configuration} */
-    const prodConfig = {
-        mode: 'production',
+    const config = {
         entry: ['./src/index.tsx'],
         output: {
             path: DIST_PATH,
@@ -92,73 +170,14 @@ function getWebpackConfig(env, argv) {
         },
         optimization: {
             minimize: true,
-            minimizer: [
-                new TerserPlugin({
-                    terserOptions: {
-                        parse: { ecma: 8 },
-                        compress: { ecma: 5 },
-                        output: { ecma: 5, comments: /^\**!|@preserve/i },
-                    },
-                    extractComments: false,
-                }),
-            ],
+            minimizer: [ terserPlugin, bannerPlugin ],
         },
         plugins: [
-            new RequireVarsDotenvPlugin(['BACKEND_API_BASEURL']),
-            new webpack.ProgressPlugin(),
-            new LicenseWebpackPlugin({
-                outputFilename: 'LICENSES.3RD-PARTY.txt',
-                perChunkOutput: false,
-                renderLicenses: modules => {
-                    let text = '';
-                    const M = _.sortBy(modules, m => m.name);
-                    for (let i = 0; i < M.length; ++i) {
-                        text += '/**\n' +
-                                ` * ${M[i].name}\n` +
-                                ' *\n' +
-                                ` * ${M[i].licenseId}\n` +
-                                (M[i].licenseText !== null ? M[i].licenseText.split(/\r?\n/).map(s => ` * ${s}`).join('\n') : ' * null') + '\n' +
-                                ' */\n' +
-                                '\n';
-                    }
-                    return text;
-                },
-                licenseTextOverrides: {
-                    '@xstate/react': '<missing license text>',
-                    xstate: '<missing license text>',
-                },
-            }),
-            new webpack.BannerPlugin({
-                raw: true,
-                banner: '/*!\n' +
-                        ' * This Source Code Form is subject to the terms of the Mozilla Public\n' +
-                        ' * License, v. 2.0. If a copy of the MPL was not distributed with this\n' +
-                        ' * file, You can obtain one at http://mozilla.org/MPL/2.0/.\n' +
-                        ' */\n',
-            }),
-            new CopyWebpackPlugin([
-                { from: './LICENSE.txt' },
-                {
-                    from: './static/**/*',
-                    transformPath(targetPath) { return path.relative('./static', targetPath); },
-                    transform(content, filePath) {
-                        if (isProduction) {
-                            // Minify css
-                            if (path.extname(filePath) === '.css') {
-                                return cssnano.process(content).then(v => v.css);
-                            }
-                        }
-                        return content;
-                    },
-                },
-            ]),
-
-            // This plugin extracts CSS into separate files.
-            // It creates a CSS file per JS file which imports CSS.
-            new MiniCssExtractPlugin({
-                filename: '[name].css',
-                chunkFilename: '[id].css',
-            }),
+            progressPlugin,         // Report compilation progress
+            dotenvPlugin,           // Dotenv plugin + Fail build if required variables are not defined
+            licensePlugin,          // Output third party licenses to a file
+            copyPlugin,             // Copy static files to build directory
+            miniCssExtractPlugin,   // Extract CSS into separate files; one .css file per .js
         ],
         performance: {
             hints: false,
@@ -168,16 +187,27 @@ function getWebpackConfig(env, argv) {
         },
     };
 
+    // ============
+    //  PRODUCTION
+    // ============
     /** @type {import('webpack').Configuration} */
-    const devConfigPatch = {
+    const prodConfig = _.merge({}, config, {
+        mode: 'production',
+        optimization: {
+            minimize: true,
+            minimizer: [ terserPlugin, bannerPlugin ],
+        },
+    });
+
+    // =============
+    //  DEVELOPMENT
+    // =============
+    /** @type {import('webpack').Configuration} */
+    const devConfig = _.merge({}, config, {
         mode: 'development',
-        entry: [...prodConfig.entry],
         output: { publicPath: '/' },
         optimization: { minimize: false },
-        plugins: [
-            ...prodConfig.plugins,
-            new webpack.NamedModulesPlugin(),
-        ],
+        plugins: [ ...config.plugins, bannerPlugin ],
         devServer: {
             port: 3000,
             hot: true,
@@ -186,18 +216,21 @@ function getWebpackConfig(env, argv) {
             publicPath: '/',
         },
         devtool: 'inline-source-map',
-    };
+    });
+
     if (hot) {
-        devConfigPatch.entry = [
+        devConfig.entry = [
             'webpack-dev-server/client?http://localhost:3000',
             'webpack/hot/only-dev-server',
-            ...devConfigPatch.entry,
+            ...devConfig.entry,
         ];
-        devConfigPatch.plugins.push(new webpack.HotModuleReplacementPlugin());
+        devConfig.plugins = [
+            ...devConfig.plugins,
+            new webpack.HotModuleReplacementPlugin(),
+        ];
     }
 
-    const config = isProduction ? prodConfig : _.merge(prodConfig, devConfigPatch);
-    return config;
+    return isProduction ? prodConfig : devConfig;
 }
 
 module.exports = getWebpackConfig;
