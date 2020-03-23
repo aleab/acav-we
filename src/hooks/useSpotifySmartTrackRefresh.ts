@@ -10,6 +10,8 @@ import { WallpaperContextType } from '../app/WallpaperContext';
 
 const BUFFER_SIZE = 5;
 const SILENCE_THRESHOLD = 7.315e-7;
+const NOTHINGS_PLAYING_IDLE_MILLISECONDS = 2 * 60 * 1000;
+const NOTHINGS_PLAYING_IDLE_DUMB_INTERVAL_MULTIPIER = 2;
 
 export default function useSpotifySmartTrackRefresh(
     context: WallpaperContextType | undefined,
@@ -36,6 +38,7 @@ export default function useSpotifySmartTrackRefresh(
     const lastIntervalBasedRefreshTimestamp = useRef(0);
     const lastSmartRefreshTimestamp = useRef(0);
     const rateLimitEndTime = useRef(0);
+    const nothingsPlayingTimestamp = useRef(0);
 
     useEffect(() => {
         if (context === undefined) return undefined;
@@ -69,6 +72,7 @@ export default function useSpotifySmartTrackRefresh(
                 }
 
                 setLastResponseCode(res.status);
+                let _nothingsPlayingTimestamp = 0;
 
                 switch (res.status) {
                     case 200:
@@ -79,6 +83,7 @@ export default function useSpotifySmartTrackRefresh(
 
                     case 204: // No track playing or private session
                         setCurrentlyPlaying(prev => setCurrentlyPlayingStateAction(prev, null));
+                        _nothingsPlayingTimestamp = nothingsPlayingTimestamp.current === 0 ? Date.now() : nothingsPlayingTimestamp.current;
                         break;
 
                     case 401: // The token has expired; it has NOT been revoked: generally a revoked token continues to work until expiration
@@ -98,21 +103,33 @@ export default function useSpotifySmartTrackRefresh(
                         res.json().then(json => Logc.error(`/currently-playing returned ${res.status}:`, json));
                         break;
                 }
+
+                nothingsPlayingTimestamp.current = _nothingsPlayingTimestamp;
             }
         };
 
         // ---
-        const tryDumbRefresh = (ts: number) => {
-            if (ts >= lastIntervalBasedRefreshTimestamp.current + regularRefreshIntervalMs) {
+        const tryDumbRefresh = (ts: number, fallbackFromSmart: boolean = false) => {
+            let interval = regularRefreshIntervalMs;
+            if (nothingsPlayingTimestamp.current > 0 && Date.now() >= nothingsPlayingTimestamp.current + NOTHINGS_PLAYING_IDLE_MILLISECONDS) {
+                // If nothing has been playing for some time, increase interval for regular dumb updates
+                if (!fallbackFromSmart) interval *= NOTHINGS_PLAYING_IDLE_DUMB_INTERVAL_MULTIPIER;
+            }
+            if (ts >= lastIntervalBasedRefreshTimestamp.current + interval) {
                 lastIntervalBasedRefreshTimestamp.current = ts;
                 refreshTrack();
             }
         };
         const trySmartRefresh = (ts: number) => {
-            if (ts >= lastSmartRefreshTimestamp.current + smartRefreshMaxRefreshRateMs) {
-                lastSmartRefreshTimestamp.current = ts;
-                lastIntervalBasedRefreshTimestamp.current = ts; // Smart refresh also resets the regular interval
-                setTimeout(() => refreshTrack(), 100); // Wait a bit before refresh since the track may not have actually changed yet
+            if (nothingsPlayingTimestamp.current > 0 && Date.now() >= nothingsPlayingTimestamp.current + NOTHINGS_PLAYING_IDLE_MILLISECONDS) {
+                // If nothing has been playing for some time, default back to "dumb" update logic
+                tryDumbRefresh(ts);
+            } else {
+                if (ts >= lastSmartRefreshTimestamp.current + smartRefreshMaxRefreshRateMs) {
+                    lastSmartRefreshTimestamp.current = ts;
+                    lastIntervalBasedRefreshTimestamp.current = ts; // Smart refresh also resets the regular interval
+                    setTimeout(() => refreshTrack(), 100); // Wait a bit before refresh since the track may not have actually changed yet
+                }
             }
         };
 
