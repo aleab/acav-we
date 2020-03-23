@@ -22,5 +22,8 @@
     // [eslint]
     "eslint.alwaysShowStatus": false,
     "eslint.enable": true,
-    "eslint.format.enable": true
+    "eslint.format.enable": true,
+    //
+    // [markdown]
+    "markdown.styles": ["./.vscode/markdown-github.css"]
 }
