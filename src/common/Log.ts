@@ -1,10 +1,17 @@
+export type Logger = {
+    debug: (...args: any[]) => void;
+    info: (...args: any[]) => void;
+    warn: (...args: any[]) => void;
+    error: (...args: any[]) => void;
+};
+
 export default class Log {
     static readonly debug = console.debug;
     static readonly info = console.info;
     static readonly warn = console.warn;
     static readonly error = console.error;
 
-    static getLogger(caller: string | null, color: string, extraStyles?: string) {
+    static getLogger(caller: string | null, color: string, extraStyles?: string): Logger {
         const style = `color:${color}` + (extraStyles ? `;${extraStyles}` : '');
         const args: any[] = caller ? [
             `%c[${caller}] %c%s`,

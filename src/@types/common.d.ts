@@ -15,6 +15,7 @@ interface Math {
     readonly PI_2: number;
     clamp(x: number, min: number, max: number): number;
     lerp(from: number, to: number, k: number): number;
+    median(array: readonly number[], isSorted?: boolean): number;
 }
 
 interface CanvasRenderingContext2D {

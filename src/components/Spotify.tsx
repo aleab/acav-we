@@ -6,7 +6,7 @@ import { RGB } from 'color-convert/conversions';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircleNotch, faFilter, faPlug, faSkull } from '@fortawesome/free-solid-svg-icons';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { AnyEventObject, State } from 'xstate';
+import { AnyEventObject } from 'xstate';
 import { useMachine } from '@xstate/react';
 
 import Log from '../common/Log';
@@ -16,6 +16,7 @@ import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
+import useSpotifySmartTrackRefresh from '../hooks/useSpotifySmartTrackRefresh';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 
 import SpotifyAlbumArt from './SpotifyAlbumArt';
@@ -168,91 +169,23 @@ export default function Spotify(props: SpotifyProps) {
     // currentlyPlaying is undefined until the first refresh; it's null when no track is playing
     const [ currentlyPlaying, setCurrentlyPlaying ] = useState<SpotifyCurrentlyPlayingObject | null | undefined>(undefined);
     const [ lastResponseCode, setLastResponseCode ] = useState(0);
-    const setCurrentlyPlayingAction = useCallback((prev: SpotifyCurrentlyPlayingObject | null | undefined, current: SpotifyCurrentlyPlayingObject | null) => {
-        const newUrl = (current?.item?.external_urls?.['spotify'] ?? current?.item?.uri);
-        if (newUrl !== (prev?.item?.external_urls?.['spotify'] ?? prev?.item?.uri)) {
-            Logc.debug('Currently playing:', current);
-        }
-        return current;
-    }, []);
-    useEffect(() => {
-        // TODO: Implement dynamically changing interval.
-        //       - previous playing state; is it paused now? is Spotify even open?
-        //       - user is changing track; there's probably gonna be some flat/zero sample values
-        const INTERVAL = 2 * 1000;
-        let timeoutId = 0;
-        let cancel = false;
 
-        if (state.value === SpotifyStateMachineState.S5HasATIdle) {
-            Logc.debug('Currently-playing loop started.');
-            const refreshLoop = async () => {
-                if (!state.context.spotifyToken || state.context.spotifyToken.expires_at < Date.now()) {
-                    send(SpotifyStateMachineEvent.SpotifyTokenExpired);
-                } else {
-                    // https://developer.spotify.com/documentation/web-api/reference/player/get-the-users-currently-playing-track/
-                    const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing?market=from_token', {
-                        method: 'GET',
-                        headers: {
-                            Accept: 'application/json',
-                            Authorization: `Bearer ${state.context.spotifyToken.access_token}`,
-                        },
-                    }).catch(err => {
-                        return null;
-                    });
+    const canRefreshTrack = useCallback(() => state.value === SpotifyStateMachineState.S5HasATIdle, [state.value]);
+    const tokenHasExpiredCallback = useCallback(() => send(SpotifyStateMachineEvent.SpotifyTokenExpired), [send]);
+    const noInternetConnectionCallback = useCallback(() => send(SpotifyStateMachineEvent.NoInternetConnection), [send]);
 
-                    if (cancel) return;
-                    if (!res) {
-                        send(SpotifyStateMachineEvent.NoInternetConnection);
-                        return;
-                    }
-
-                    setLastResponseCode(res.status);
-
-                    timeoutId = setTimeout(refreshLoop as TimerHandler, INTERVAL);
-                    switch (res.status) {
-                        case 200:
-                            res.json().then((json: SpotifyCurrentlyPlayingObject) => {
-                                setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, json));
-                            });
-                            break;
-
-                        case 204: // No track playing or private session
-                            setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, null));
-                            break;
-
-                        case 401: // The token has expired; it has NOT been revoked: generally a revoked token continues to work until expiration
-                            res.json().then(json => Logc.warn('/currently-playing returned 401:', json));
-                            clearTimeout(timeoutId);
-                            send(SpotifyStateMachineEvent.SpotifyTokenExpired);
-                            break;
-
-                        case 429: { // Rate limit
-                            const retryAfterSeconds = Number(res.headers.get('Retry-After') ?? 4) + 1;
-                            Logc.warn(`Rate Limit reached; retry after ${retryAfterSeconds}s!`);
-                            clearTimeout(timeoutId);
-                            timeoutId = setTimeout(refreshLoop as TimerHandler, retryAfterSeconds * 1000);
-                            break;
-                        }
-
-                        default:
-                            setCurrentlyPlaying(prev => setCurrentlyPlayingAction(prev, null));
-                            res.json().then(json => Logc.error(`/currently-playing returned ${res.status}:`, json));
-                            break;
-                    }
-                }
-            };
-
-            refreshLoop();
-        }
-
-        return () => {
-            if (timeoutId !== 0) {
-                cancel = true;
-                clearTimeout(timeoutId);
-                Logc.debug('Currently-playing loop stopped.');
-            }
-        };
-    }, [ send, setCurrentlyPlayingAction, state.context.spotifyToken, state.value ]);
+    useSpotifySmartTrackRefresh(
+        context,
+        750, // smartRefreshMaxRefreshRateMs
+        5 * 1000, // regularRefreshIntervalMs
+        state.context.spotifyToken,
+        canRefreshTrack,
+        setCurrentlyPlaying,
+        setLastResponseCode,
+        tokenHasExpiredCallback,
+        noInternetConnectionCallback,
+        Logc,
+    );
 
     // States
     const isRefreshingToken = useMemo(() => state.value === SpotifyStateMachineState.S4CheckingAT, [state.value]);

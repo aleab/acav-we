@@ -1,9 +1,12 @@
 export default class CurcularBuffer<T extends any> {
     private readonly _raw: T[] = [];
+    /** Returns a copy of the wrapped array.  */
     get raw(): T[] { return this._raw.slice(); }
 
     private _size: number;
     get size(): number { return this._size; }
+
+    get length(): number { return this._raw.length; }
 
     constructor(size: number) {
         if (!Number.isFinite(size)) throw new Error('Size must be finite');
