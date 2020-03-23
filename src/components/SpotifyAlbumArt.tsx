@@ -8,6 +8,8 @@ interface SpotifyAlbumArtProps {
     album: SpotifyAlbum;
 }
 
+// TODO: (OPTIONAL) Fetch album arts for local files from some external provider.
+
 export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     const ref = useRef<HTMLImageElement>(null);
 

@@ -39,6 +39,8 @@ interface SpotifyProps {
     wallpaperBackground?: CssBackground;
 }
 
+// TODO: Add optional track time progress bar
+
 export default function Spotify(props: SpotifyProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
