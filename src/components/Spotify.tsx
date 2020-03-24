@@ -12,6 +12,7 @@ import { useMachine } from '@xstate/react';
 import Log from '../common/Log';
 import { checkInternetConnection } from '../common/Network';
 import { calculatePivotTransform } from '../common/Pivot';
+import { Position } from '../common/Position';
 import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
 import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
@@ -22,6 +23,7 @@ import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
 import SpotifyAlbumArt from './SpotifyAlbumArt';
 import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
+import SpotifyOverlayProgressBar, { SpotifyOverlayProgressBarProps } from './SpotifyOverlayProgressBar';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
 
 const Logc = Log.getLogger('Spofity', '#1DB954');
@@ -39,15 +41,18 @@ interface SpotifyProps {
     wallpaperBackground?: CssBackground;
 }
 
-// TODO: Add optional track time progress bar
-
 export default function Spotify(props: SpotifyProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
     const token = useMemo(() => ({ get current() { return O.current.token; } }), []);
 
-    // Overlay states
-    const [ overlayArtStyle, setOverlayArtStyle ] = useState(O.current.artType);
+    // ========
+    //  STYLES
+    // ========
+    //--art
+    const [ overlayArtType, setOverlayArtType ] = useState(O.current.artType);
+
+    //--overlay
     const [ overlayStyle, setOverlayStyle ] = useReducer((prevStyle: OverlayStyle, newStyle: Partial<OverlayStyle>) => {
         if (_.isMatch(prevStyle, newStyle)) return prevStyle;
         return _.merge({}, prevStyle, newStyle);
@@ -59,6 +64,8 @@ export default function Spotify(props: SpotifyProps) {
         fontSize: O.current.style.fontSize,
         color: `#${ColorConvert.rgb.hex(O.current.style.textColor as RGB)}`,
     });
+
+    //--background
     const setOverlayBackgroundStyleInit = useCallback(() => {
         return generateBackgroundCss(O.current.style.background.mode, {
             color: O.current.style.background.color as RGB,
@@ -67,6 +74,11 @@ export default function Spotify(props: SpotifyProps) {
         });
     }, []);
     const [ overlayBackgroundStyle, setOverlayBackgroundStyle ] = useReducer(setOverlayBackgroundStyleInit, undefined, setOverlayBackgroundStyleInit);
+
+    //--progressBar
+    const [ showProgressBar, setShowProgressBar ] = useState(O.current.progressBar.enabled);
+    const [ progressBarColor, setProgressBarColor ] = useState(`#${ColorConvert.rgb.hex(O.current.progressBar.color as RGB)}`);
+    const [ progressBarPosition, setProgressBarPosition ] = useState(O.current.progressBar.position);
 
     // ===============
     //  STATE MACHINE
@@ -151,7 +163,7 @@ export default function Spotify(props: SpotifyProps) {
         if (spotifyProps.token !== undefined && spotifyProps.token) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
-        if (spotifyProps.artType !== undefined) setOverlayArtStyle(spotifyProps.artType);
+        if (spotifyProps.artType !== undefined) setOverlayArtType(spotifyProps.artType);
         if (spotifyProps.style !== undefined) {
             const s: Partial<OverlayStyle> = {};
             if (spotifyProps.style.pivot !== undefined) s.transform = calculatePivotTransform(spotifyProps.style.pivot).transform;
@@ -162,6 +174,11 @@ export default function Spotify(props: SpotifyProps) {
             if (spotifyProps.style.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(spotifyProps.style.textColor as RGB)}`;
             if (spotifyProps.style.background !== undefined) setOverlayBackgroundStyle();
             setOverlayStyle(s);
+        }
+        if (spotifyProps.progressBar !== undefined) {
+            if (spotifyProps.progressBar.enabled !== undefined) setShowProgressBar(spotifyProps.progressBar.enabled);
+            if (spotifyProps.progressBar.color !== undefined) setProgressBarColor(`#${ColorConvert.rgb.hex(spotifyProps.progressBar.color as RGB)}`);
+            if (spotifyProps.progressBar.position !== undefined) setProgressBarPosition(spotifyProps.progressBar.position);
         }
     }, [send]);
 
@@ -189,7 +206,7 @@ export default function Spotify(props: SpotifyProps) {
         Logc,
     );
 
-    // States
+    // SM and network states
     const isRefreshingToken = useMemo(() => state.value === SpotifyStateMachineState.S4CheckingAT, [state.value]);
     const isRateLimited = useMemo(() => {
         if (lastResponseCode === 429) return true;
@@ -223,14 +240,25 @@ export default function Spotify(props: SpotifyProps) {
             if (currentlyPlaying === undefined) return null;
             const spotifyDivProps = {
                 id: 'spotify',
-                className: 'd-flex flex-nowrap align-items-center overflow-hidden overlay',
+                className: 'overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden',
                 style: { ...overlayStyle, ...overlayBackgroundStyle },
+            };
+            const songInfoRowProps = {
+                className: 'main d-flex flex-row flex-nowrap align-items-center overflow-hidden',
+                style: { maxWidth: overlayStyle.maxWidth },
             };
             const songInfoProps = {
                 currentlyPlaying: currentlyPlaying!,
                 width: overlayStyle.maxWidth,
                 color: overlayStyle.color,
                 fontSize: overlayStyle.fontSize,
+            };
+            const progressBarProps: SpotifyOverlayProgressBarProps = {
+                color: progressBarColor,
+                isPlaying: currentlyPlaying?.is_playing ?? false,
+                durationMs: currentlyPlaying?.item?.duration_ms ?? 0,
+                progressMs: currentlyPlaying?.progress_ms ?? 0,
+                className: `${progressBarPosition === Position.Top ? 'top' : 'bottom'}`,
             };
 
             if (currentlyPlaying?.item === null || currentlyPlaying?.item === undefined) {
@@ -243,30 +271,39 @@ export default function Spotify(props: SpotifyProps) {
                 );
             }
 
-            switch (overlayArtStyle) {
+            switch (overlayArtType) {
                 case SpotifyOverlayArtType.None:
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
                         <StateIcons />
+                        {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
+                        <div {...songInfoRowProps}>
+                          <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
+                        </div>
                       </div>
                     );
                 case SpotifyOverlayArtType.AlbumArt: {
                     const artWidth = 4 * overlayStyle.fontSize - 2 * 0.25 * overlayStyle.fontSize; // calc(4em - 2 * .25em)
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth} />
-                        <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
                         <StateIcons />
+                        {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
+                        <div {...songInfoRowProps}>
+                          <SpotifyAlbumArt album={currentlyPlaying.item.album} className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth} />
+                          <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
+                        </div>
                       </div>
                     );
                 }
                 case SpotifyOverlayArtType.SpotifyIcon:
                     return (
                       <div {...spotifyDivProps}>
-                        <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
-                        <SpotifyOverlaySongInfo {...songInfoProps} />
                         <StateIcons />
+                        {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
+                        <div {...songInfoRowProps}>
+                          <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                          <SpotifyOverlaySongInfo {...songInfoProps} />
+                        </div>
                       </div>
                     );
                 default: return null;

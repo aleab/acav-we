@@ -663,6 +663,33 @@
         "condition": "spotify.value && spotify_scroll.value === 'Automatic'"
     },
 
+    // [SPOTIFY > PROGRESS BAR]
+    "spotify_progressbar": {
+        "order": 5100,
+        "type": "bool",
+        "text": "ui_spotify_progressbar",
+        "value": false,
+        "condition": "spotify.value"
+    },
+    "spotify_progressbar_color": {
+        "order": 5101,
+        "type": "color",
+        "text": "ui_spotify_progressbar_color",
+        "value": "1 1 1",
+        "condition": "spotify.value && spotify_progressbar.value"
+    },
+    "spotify_progressbar_position": {
+        "order": 5102,
+        "type": "combo",
+        "text": "ui_spotify_progressbar_position",
+        "options": [
+            { "label": "Top", "value": "Top" },
+            { "label": "Bottom", "value": "Bottom" }
+        ],
+        "value": "Bottom",
+        "condition": "spotify.value && spotify_progressbar.value"
+    },
+
     // [NOTES]
     "notes": {
         "order": 9000,

@@ -1,11 +1,17 @@
 /* https://developer.spotify.com/branding-guidelines/ */
 
+/* ==============
+ *  SPOTIFY ICON
+ * ============== */
 .spotify-icon {
   margin: .5em;
   font-size: 2em;
   line-height: 0;
 }
 
+/* ===========
+ *  SONG INFO
+ * =========== */
 #spotify .song-info {
   padding-top: calc(1em - 2px);
   padding-bottom: calc(1em - 2px);
@@ -18,11 +24,11 @@
 
 .song-info > .song-info-mask {
   -webkit-mask-image: linear-gradient(to right, #000, #000 calc(100% - .25em - .5em), transparent calc(100% - .25em));
-  mask-image: linear-gradient(to right, #000, #000 calc(100% - .25em - .5em), transparent calc(100% - .25em));
+          mask-image: linear-gradient(to right, #000, #000 calc(100% - .25em - .5em), transparent calc(100% - .25em));
 }
 .song-info > .song-info-mask.scrolling {
   -webkit-mask-image: linear-gradient(to right, transparent, #000 .25em, #000 calc(100% - .25em - .5em), transparent calc(100% - .25em));
-  mask-image: linear-gradient(to right, transparent, #000 .25em, #000 calc(100% - .25em - .5em), transparent calc(100% - .25em));
+          mask-image: linear-gradient(to right, transparent, #000 .25em, #000 calc(100% - .25em - .5em), transparent calc(100% - .25em));
 }
 
 .song-info .song-info-field {
@@ -37,6 +43,48 @@
   font-size: calc(1em - 2px);
 }
 
+/* ====================
+ *  TRACK PROGRESS BAR
+ * ==================== */
+#spotify progress[value].progress-bar {
+  position: absolute;
+  margin: .1em;
+  width: calc(100% - 2 * .1em);
+  width: -webkit-fill-available;
+  width: -moz-available;
+  height: .07em;
+
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+
+  /* vars */
+  --bar-color: unset;
+  --value-color: unset;
+}
+#spotify progress[value].progress-bar::-webkit-progress-bar {
+  overflow: hidden;
+  border-radius: .35em;
+  background-color: var(--bar-color);
+}
+#spotify progress[value].progress-bar::-moz-progress-bar {
+  overflow: hidden;
+  border-radius: .35em;
+  background-color: var(--bar-color);
+}
+#spotify progress[value].progress-bar::-webkit-progress-value {
+  border-radius: .35em;
+  background-color: var(--value-color);
+}
+
+#spotify progress[value].progress-bar.top { top: 0; }
+#spotify progress[value].progress-bar.bottom { bottom: 0; }
+#spotify progress[value].progress-bar.top ~ .main { margin-top: .1em; }
+#spotify progress[value].progress-bar.bottom ~ .main { margin-bottom: .1em; }
+
+/* =============
+ *  STATE ICONS
+ * ============= */
 #spotify > .state-icons {
   position: absolute;
   right: 0;
@@ -53,6 +101,9 @@
   margin-right: .25em;
 }
 
+/* ============
+ *  ERROR INFO
+ * ============ */
 #spotify .error {
   padding-top: calc(1em - 2px);
   padding-bottom: calc(1em - 2px);
@@ -66,3 +117,4 @@
   line-height: calc(1em + 2px);
   font-size: calc(1em - 2px);
 }
+

@@ -4,6 +4,7 @@ import { RGB } from 'color-convert/conversions';
 import { DeepReadonly } from 'utility-types';
 
 import { Pivot } from '../../common/Pivot';
+import { Position } from '../../common/Position';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { BackgroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
@@ -62,6 +63,11 @@ export default interface Properties {
             type: TextScrollingType;
             speed: number;
             autoDelay: number;
+        };
+        progressBar: {
+            enabled: boolean;
+            color: RGB;
+            position: Position;
         };
     },
 }
@@ -153,7 +159,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
     // .spotify
-    const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, scroll: {} };
+    const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, scroll: {}, progressBar: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'artType', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
@@ -173,6 +179,10 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
     setProperty(spotifyOptions.scroll!, 'speed', raw.spotify_scroll_speed as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.scroll!, 'autoDelay', raw.spotify_scroll_auto_delay as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    // .spotify.progressBar
+    setProperty(spotifyOptions.progressBar!, 'enabled', raw.spotify_progressbar as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions.progressBar!, 'color', raw.spotify_progressbar_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(spotifyOptions.progressBar!, 'position', raw.spotify_progressbar_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
 
     return _.merge(
         { ...rootOptions },

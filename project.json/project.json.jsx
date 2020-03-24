@@ -208,6 +208,11 @@ function getProjectJson() {
                     ui_spotify_background_color_alpha: indent('Alpha', { n: 3 }),
                     ui_spotify_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS'), { n: 3 }),
 
+                    // [SPOTIFY > PROGRESS BAR]
+                    ui_spotify_progressbar: subSection('Progress Bar'),
+                    ui_spotify_progressbar_color: indent('Color', { n: 3 }),
+                    ui_spotify_progressbar_position: indent('Position', { n: 3 }),
+
                     // [NOTES]
                     ui_notes: section('Notes', true),
                     ui_note1: note(
