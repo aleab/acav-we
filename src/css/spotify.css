@@ -9,6 +9,7 @@
   line-height: 0;
 }
 
+
 /* ===========
  *  SONG INFO
  * =========== */
@@ -42,6 +43,7 @@
   line-height: calc(1em + 2px);
   font-size: calc(1em - 2px);
 }
+
 
 /* ====================
  *  TRACK PROGRESS BAR
@@ -82,6 +84,7 @@
 #spotify progress[value].progress-bar.top ~ .main { margin-top: .1em; }
 #spotify progress[value].progress-bar.bottom ~ .main { margin-bottom: .1em; }
 
+
 /* =============
  *  STATE ICONS
  * ============= */
@@ -100,6 +103,7 @@
 #spotify > .state-icons > :not(:first-child) {
   margin-right: .25em;
 }
+
 
 /* ============
  *  ERROR INFO

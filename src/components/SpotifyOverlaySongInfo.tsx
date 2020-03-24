@@ -45,12 +45,14 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         if (scrollProps.autoDelay !== undefined) setScrollStartDelay(scrollProps.autoDelay);
     }, []);
 
-    const scrollTrackRenderCallback = useCallback((callback: () => void) => context.renderer.queue('SpotifyOverlaySongInfo-ScrollTrack', callback), [context]);
-    const scrollTrackCancelRender = useCallback(() => context.renderer.cancel('SpotifyOverlaySongInfo-ScrollTrack'), [context]);
+    const TRACK_RENDER_ID = useMemo(() => `SpotifyOverlaySongInfo-ScrollTrack-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
+    const scrollTrackRenderCallback = useCallback((callback: () => void) => context.renderer.queue(TRACK_RENDER_ID, callback), [ TRACK_RENDER_ID, context.renderer ]);
+    const scrollTrackCancelRender = useCallback(() => context.renderer.cancel(TRACK_RENDER_ID), [ TRACK_RENDER_ID, context.renderer ]);
     const track = useMemo(() => (props.currentlyPlaying.item?.name ?? ''), [props.currentlyPlaying.item]);
 
-    const scrollArtistsRenderCallback = useCallback((callback: () => void) => context.renderer.queue('SpotifyOverlaySongInfo-ScrollArtists', callback), [context]);
-    const scrollArtistsCancelRender = useCallback(() => context.renderer.cancel('SpotifyOverlaySongInfo-ScrollArtists'), [context]);
+    const ARTISTS_RENDER_ID = useMemo(() => `SpotifyOverlaySongInfo-ScrollArtists-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
+    const scrollArtistsRenderCallback = useCallback((callback: () => void) => context.renderer.queue(ARTISTS_RENDER_ID, callback), [ ARTISTS_RENDER_ID, context.renderer ]);
+    const scrollArtistsCancelRender = useCallback(() => context.renderer.cancel(ARTISTS_RENDER_ID), [ ARTISTS_RENDER_ID, context.renderer ]);
     const artists = useMemo(() => {
         if (props.currentlyPlaying.item === null) return '';
         return props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
