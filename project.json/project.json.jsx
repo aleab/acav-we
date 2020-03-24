@@ -39,7 +39,7 @@ function section(name, muted = false, propertyIcon = null) {
 }
 
 function subSection(name) {
-    return renderToStaticMarkup(<h4><ins>{name}</ins></h4>);
+    return renderToStaticMarkup(<h5><ins><b>{name}</b></ins></h5>);
 }
 
 function note(...textLines) {
