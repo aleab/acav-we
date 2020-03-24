@@ -13,7 +13,7 @@
 Wallpaper Engine, npm (_or other package manager_), git
 
 ### Getting Started and more
-1. **Fork** this repo, **clone** your fork and create a new **branch** (`git checkout -b mybranch`).
+1. **Fork** this repo, **clone** your fork and create a new **branch** (`git checkout -b mybranch master`).
 2. Install the project's **dependencies** with `npm install --no-package-lock`.
 3. Create a file named **`.env`** in the root folder and add the following environment variables in the form `NAME=VALUE`:
 
