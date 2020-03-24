@@ -1,1 +1,1 @@
-export enum TextScrollingType { None, Automatic, OnMouseOver }
+export enum TextScrollingType { Automatic, OnMouseOver }

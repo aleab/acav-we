@@ -588,48 +588,16 @@
         "value": "SpotifyIcon",
         "condition": "spotify.value"
     },
-    "spotify_scroll": {
-        "order": 5017,
-        "type": "combo",
-        "text": "ui_spotify_scroll",
-        "options": [
-            { "label": "None", "value": "None" },
-            { "label": "Automatic", "value": "Automatic" },
-            { "label": "On Mouse Over", "value": "OnMouseOver" }
-        ],
-        "value": "OnMouseOver",
-        "condition": "spotify.value"
-    },
-    "spotify_scroll_speed": {
-        "order": 5018,
-        "type": "slider",
-        "text": "ui_spotify_scroll_speed",
-        "value": 30,
-        "min": 15,
-        "max": 75,
-        "condition": "spotify.value && spotify_scroll.value !== 'None'"
-    },
-    "spotify_scroll_auto_delay": {
-        "order": 5019,
-        "type": "slider",
-        "text": "ui_spotify_scroll_auto_delay",
-        "value": 3,
-        "min": 2,
-        "max": 10,
-        "fraction": true,
-        "step": 0.1,
-        "condition": "spotify.value && spotify_scroll.value === 'Automatic'"
-    },
     //
     // [SPOTIFY > BACKGROUND]
     "spotify_background": {
-        "order": 5050,
+        "order": 5020,
         "type": "text",
         "text": "ui_spotify_background",
         "condition": "spotify.value"
     },
     "spotify_background_type": {
-        "order": 5051,
+        "order": 5021,
         "type": "combo",
         "text": "ui_spotify_background_type",
         "options": [
@@ -640,14 +608,14 @@
         "condition": "spotify.value"
     },
     "spotify_background_color": {
-        "order": 5052,
+        "order": 5022,
         "type": "color",
         "text": "ui_spotify_background_color",
         "value": "0.023529 0.274510 0.196078",
         "condition": "spotify.value && spotify_background_type.value === 'Color'"
     },
     "spotify_background_color_alpha": {
-        "order": 5053,
+        "order": 5023,
         "type": "slider",
         "text": "ui_spotify_background_color_alpha",
         "value": 60,
@@ -656,11 +624,51 @@
         "condition": "spotify.value && spotify_background_type.value === 'Color'"
     },
     "spotify_background_css": {
-        "order": 5052,
+        "order": 5022,
         "type": "textinput",
         "text": "ui_spotify_background_css",
         "value": "background: linear-gradient(180deg, #011911 0%,#053f2d 22%,#074f38 50%,#074f38 50%,#053f2d 78%,#011911 100%);",
         "condition": "spotify.value && spotify_background_type.value === 'Css'"
+    },
+    //
+    // [SPOTIFY > TEXT SCROLLING]
+    "spotify_scroll": {
+        "order": 5030,
+        "type": "bool",
+        "text": "ui_spotify_scroll",
+        "value": true,
+        "condition": "spotify.value"
+    },
+    "spotify_scroll_type": {
+        "order": 5031,
+        "type": "combo",
+        "text": "ui_spotify_scroll_type",
+        "options": [
+            { "label": "Automatic", "value": "Automatic" },
+            { "label": "On Mouse Over", "value": "OnMouseOver" }
+        ],
+        "value": "OnMouseOver",
+        "condition": "spotify.value && spotify_scroll.value"
+    },
+    "spotify_scroll_speed": {
+        "order": 5032,
+        "type": "slider",
+        "text": "ui_spotify_scroll_speed",
+        "value": 30,
+        "min": 15,
+        "max": 75,
+        "condition": "spotify.value && spotify_scroll.value"
+    },
+    "spotify_scroll_auto_delay": {
+        "order": 5033,
+        "type": "slider",
+        "text": "ui_spotify_scroll_auto_delay",
+        "value": 3,
+        "min": 2,
+        "max": 10,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "(spotify.value && spotify_scroll.value) && spotify_scroll_type.value === 'Automatic'"
     },
     //
     // [SPOTIFY > PROGRESS BAR]

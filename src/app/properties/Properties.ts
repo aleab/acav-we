@@ -60,6 +60,7 @@ export default interface Properties {
         };
         artType: SpotifyOverlayArtType;
         scroll: {
+            enabled: boolean;
             type: TextScrollingType;
             speed: number;
             autoDelay: number;
@@ -176,7 +177,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.style!.background!, 'colorAlpha', raw.spotify_background_color_alpha as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.style!.background!, 'css', raw.spotify_background_css as WEProperty<'textinput'>, _r => _r.value);
     // .spotify.scroll
-    setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
+    setProperty(spotifyOptions.scroll!, 'enabled', raw.spotify_scroll as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll_type as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
     setProperty(spotifyOptions.scroll!, 'speed', raw.spotify_scroll_speed as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.scroll!, 'autoDelay', raw.spotify_scroll_auto_delay as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     // .spotify.progressBar

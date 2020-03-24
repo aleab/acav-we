@@ -5,7 +5,7 @@ import useLoopingTextScroll from '../hooks/useLoopingTextScroll';
 import { UseScrollHTMLElementOptions } from '../hooks/useScrollHTMLElement';
 
 interface ScrollableLoopingTextProps {
-    scrollType: TextScrollingType;
+    scrollType: TextScrollingType | false;
     scrollSpeed: number;
     scrollStartDelayMs: number;
     loopMarginEm: number;
