@@ -1,8 +1,15 @@
 {
-    "name": "acav",
-    "version": "1.0.0",
-    "description": "",
+    "name": "acav-we",
+    "displayName": "aCAV-WE",
+    "version": "0.1.0",
+    "description": "A highly customizable audio visualizer for Wallpaper Engine",
+    "author": "aleab (https://github.com/aleab)",
     "private": true,
+    "license": "MPL-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/aleab/acav-we"
+    },
     "scripts": {
         "clean": "run-script-os",
         "clean:windows": "if exist dist (del /S /Q dist\\* && for /D %d in (dist\\*) do rmdir /S /Q \"%d\")",
@@ -14,8 +21,6 @@
         "start:we": "npm run pre-build && babel-node ./webpack-start-we.js",
         "lint": "eslint ."
     },
-    "author": "Sp3l",
-    "license": "MPL-2.0",
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.27",
         "@fortawesome/free-brands-svg-icons": "^5.12.1",
