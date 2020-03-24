@@ -135,7 +135,7 @@
         "step": 0.1,
         "editable": false
     },
-
+    //
     // [AUDIO SAMPLES > SCALE]
     "audioSamples_scale": {
         "order": 110,
@@ -272,7 +272,7 @@
         "editable": true,
         "condition": "showAdvancedOptions.value && audioSamples_scale.value == 'Gaussian'"
     },
-
+    //
     // --[AUDIO SAMPLES]
     "audioSamples_buffer": {
         "order": 120,
@@ -341,7 +341,7 @@
         "max": 100,
         "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
     },
-
+    //
     // [BAR VISUALIZER > BARS]
     "barVisualizer_bars": {
         "order": 1020,
@@ -620,7 +620,7 @@
         "step": 0.1,
         "condition": "spotify.value && spotify_scroll.value === 'Automatic'"
     },
-
+    //
     // [SPOTIFY > BACKGROUND]
     "spotify_background": {
         "order": 5050,
@@ -662,7 +662,7 @@
         "value": "background: linear-gradient(180deg, #011911 0%,#053f2d 22%,#074f38 50%,#074f38 50%,#053f2d 78%,#011911 100%);",
         "condition": "spotify.value && spotify_background_type.value === 'Css'"
     },
-
+    //
     // [SPOTIFY > PROGRESS BAR]
     "spotify_progressbar": {
         "order": 5100,

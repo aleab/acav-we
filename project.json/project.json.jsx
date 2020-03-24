@@ -103,7 +103,7 @@ function getProjectJson() {
                     ui_audioSamples_freqThreshold: withPropertyIcon('far fa-tachometer-slowest', 'Threshold'),
                     ui_audioSamples_buffer: withPropertyIcon('fas fa-stream', 'Buffer Length (s)') + asterisk(),
                     ui_audioSamples_normalize: withPropertyIcon('far fa-balance-scale', 'Normalize') + asterisk(),
-
+                    //
                     // [AUDIO SAMPLES > SCALE]
                     ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;<sup>${scalingFunctionsLink('[1]')}</sup>`,
                     ui_audioSamples_scale_Linear: 'x',
@@ -121,7 +121,7 @@ function getProjectJson() {
                     ui_audioSamples_scale_Logarithm$Power_exponent: indent('<var>n</var>', { n: 2 }),
                     ui_audioSamples_scale_Gaussian_deviation: indent('<samp>&#120590;</samp>', { n: 2 }),
                     ui_audioSamples_scale_Gaussian_mean: indent('<samp>&#120583;</samp>', { n: 2 }),
-
+                    //
                     // $[AUDIO SAMPLES]
                     ui_$_audioSamples: note('The following filters are applied sequentially in the order they are listed here.'),
                     ui_$_audioSamples_buffer: note('How many seconds of samples to buffer for normalization and smoothing purposes.'),
@@ -153,7 +153,7 @@ function getProjectJson() {
                     ui_barVisualizer_width: indent('Width (%)'),
                     ui_barVisualizer_flipFrequencies: indent('Flip Frequencies'),
                     ui_barVisualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
-
+                    //
                     // [BAR VISUALIZER > BARS]
                     ui_barVisualizer_bars: subSection('Bars'),
                     ui_barVisualizer_bars_width: indent('Width (%)'),
@@ -167,7 +167,7 @@ function getProjectJson() {
                     ui_barVisualizer_bars_responseRange: indent('Range', { n: 3 }),
                     ui_barVisualizer_bars_responseDegree: indent('Degree', { n: 3 }) + asterisk(),
                     ui_barVisualizer_bars_response_toHue: indent('Max Color (Hue)', { n: 3 }),
-
+                    //
                     // $[BAR VISUALIZER]
                     ui_$_barVisualizer_bars_responseType: note('This option controls what kind of transformation to apply to the color of each bar.'),
                     ui_$_barVisualizer_bars_responseProvider: note(
@@ -200,14 +200,14 @@ function getProjectJson() {
                     ui_spotify_scroll: indent('Text Scrolling'),
                     ui_spotify_scroll_speed: indent('Speed (px/s)', { n: 3 }),
                     ui_spotify_scroll_auto_delay: indent('Delay (s)', { n: 3 }),
-
+                    //
                     // [SPOTIFY > BACKGROUND]
                     ui_spotify_background: subSection('Background'),
                     ui_spotify_background_type: indent('Type', { n: 3 }),
                     ui_spotify_background_color: indent(withPropertyIcon('fas fa-palette', 'Color'), { n: 3 }),
                     ui_spotify_background_color_alpha: indent('Alpha', { n: 3 }),
                     ui_spotify_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS'), { n: 3 }),
-
+                    //
                     // [SPOTIFY > PROGRESS BAR]
                     ui_spotify_progressbar: subSection('Progress Bar'),
                     ui_spotify_progressbar_position: indent('Position', { n: 3 }),
