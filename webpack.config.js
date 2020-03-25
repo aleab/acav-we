@@ -108,10 +108,12 @@ function getWebpackConfig(env, argv) {
     // ===============
     /** @type {import('webpack').Configuration} */
     const config = {
-        entry: ['./src/index.tsx'],
+        entry: {
+            main: './src/index.tsx',
+        },
         output: {
             path: DIST_PATH,
-            filename: 'main.js',
+            filename: '[name].js',
         },
         resolve: {
             extensions: [ '.css', '.ts', '.tsx', '.js', '.jsx' ],
@@ -171,6 +173,20 @@ function getWebpackConfig(env, argv) {
         optimization: {
             minimize: true,
             minimizer: [ terserPlugin, bannerPlugin ],
+            splitChunks: {
+                cacheGroups: {
+                    lib: {
+                        test: /[\\/]node_modules[\\/](html2canvas|@?xstate)[\\/]/,
+                        name: 'lib',
+                        chunks: 'all',
+                    },
+                    shared: {
+                        test: /[\\/]node_modules[\\/](@fortawesome|color-convert|lodash|react|react-dom|webpack)[\\/]/,
+                        name: 'shared',
+                        chunks: 'all',
+                    },
+                },
+            },
         },
         plugins: [
             progressPlugin,         // Report compilation progress
@@ -191,19 +207,16 @@ function getWebpackConfig(env, argv) {
     //  PRODUCTION
     // ============
     /** @type {import('webpack').Configuration} */
-    const prodConfig = _.merge({}, config, {
+    const _prodConf = {
         mode: 'production',
-        optimization: {
-            minimize: true,
-            minimizer: [ terserPlugin, bannerPlugin ],
-        },
-    });
+    };
+    const prodConfig = _.merge({}, config, _prodConf);
 
     // =============
     //  DEVELOPMENT
     // =============
     /** @type {import('webpack').Configuration} */
-    const devConfig = _.merge({}, config, {
+    const _devConfig = {
         mode: 'development',
         output: { publicPath: '/' },
         optimization: { minimize: false },
@@ -216,13 +229,18 @@ function getWebpackConfig(env, argv) {
             publicPath: '/',
         },
         devtool: 'inline-source-map',
-    });
+    };
+    const devConfig = _.merge({}, config, _devConfig);
 
     if (hot) {
-        devConfig.entry = [
+        devConfig.entry.main = typeof devConfig.entry.main === 'string' ? [
             'webpack-dev-server/client?http://localhost:3000',
             'webpack/hot/only-dev-server',
-            ...devConfig.entry,
+            devConfig.entry.main,
+        ] : [
+            'webpack-dev-server/client?http://localhost:3000',
+            'webpack/hot/only-dev-server',
+            ...devConfig.entry.main,
         ];
         devConfig.plugins = [
             ...devConfig.plugins,
