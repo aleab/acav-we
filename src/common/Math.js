@@ -11,3 +11,11 @@ Math.median = (array, isSorted = false) => {
     const half = Math.floor(values.length / 2);
     return values.length % 2 ? values[half] : (values[half - 1] + values[half]) / 2;
 };
+
+Math.formatBytes = (bytes, decimals = 2) => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = [ 'B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB' ];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / (k ** i)).toFixed(decimals < 0 ? 0 : decimals)) + ' ' + sizes[i];
+};

@@ -1,3 +1,3 @@
-enum SpotifyOverlayArtType { None, AlbumArt, SpotifyIcon }
+enum SpotifyOverlayArtType { AlbumArt, SpotifyIcon }
 
 export default SpotifyOverlayArtType;

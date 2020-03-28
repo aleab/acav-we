@@ -19,10 +19,11 @@
     "typescript.preferences.quoteStyle": "single",
     "typescript.updateImportsOnFileMove.enabled": "always",
     //
-    // [eslint]
+    // [lint]
     "eslint.alwaysShowStatus": false,
     "eslint.enable": true,
     "eslint.format.enable": true,
+    "tslint.enable": false,
     //
     // [markdown]
     "markdown.styles": ["./.vscode/markdown-github.css"]

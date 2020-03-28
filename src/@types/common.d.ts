@@ -16,6 +16,7 @@ interface Math {
     clamp(x: number, min: number, max: number): number;
     lerp(from: number, to: number, k: number): number;
     median(array: readonly number[], isSorted?: boolean): number;
+    formatBytes(bytes: number, decimals?: number): string;
 }
 
 interface CanvasRenderingContext2D {

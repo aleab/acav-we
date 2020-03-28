@@ -576,18 +576,6 @@
         "value": "1 1 1",
         "condition": "spotify.value"
     },
-    "spotify_art_type": {
-        "order": 5016,
-        "type": "combo",
-        "text": "ui_spotify_art_type",
-        "options": [
-            { "label": "None", "value": "None" },
-            { "label": "Album Art", "value": "AlbumArt" },
-            { "label": "Spotify Icon", "value": "SpotifyIcon" }
-        ],
-        "value": "SpotifyIcon",
-        "condition": "spotify.value"
-    },
     //
     // [SPOTIFY > BACKGROUND]
     "spotify_background": {
@@ -631,16 +619,55 @@
         "condition": "spotify.value && spotify_background_type.value === 'Css'"
     },
     //
+    // [SPOTIFY > ART]
+    "spotify_art": {
+        "order": 5030,
+        "type": "bool",
+        "text": "ui_spotify_art",
+        "value": true,
+        "condition": "spotify.value"
+    },
+    "spotify_art_type": {
+        "order": 5031,
+        "type": "combo",
+        "text": "ui_spotify_art_type",
+        "options": [
+            { "label": "Album Art", "value": "AlbumArt" },
+            { "label": "Spotify Icon", "value": "SpotifyIcon" }
+        ],
+        "value": "SpotifyIcon",
+        "condition": "spotify.value && spotify_art.value"
+    },
+    "spotify_art_fetch_local": {
+        "order": 5032,
+        "type": "bool",
+        "text": "ui_spotify_art_fetch_local",
+        "value": false,
+        "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
+    },
+    "$_spotify_art_fetch_local": {
+        "order": 5033,
+        "type": "text",
+        "text": "ui_$_spotify_art_fetch_local",
+        "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
+    },
+    "$_spotify_art_fetch_local_note": {
+        "order": 5034,
+        "type": "text",
+        "text": "ui_$_spotify_art_fetch_local_note",
+        "condition": "showDescriptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
+    },
+    //
     // [SPOTIFY > TEXT SCROLLING]
     "spotify_scroll": {
-        "order": 5030,
+        "order": 5040,
         "type": "bool",
         "text": "ui_spotify_scroll",
         "value": true,
         "condition": "spotify.value"
     },
     "spotify_scroll_type": {
-        "order": 5031,
+        "order": 5041,
         "type": "combo",
         "text": "ui_spotify_scroll_type",
         "options": [
@@ -651,7 +678,7 @@
         "condition": "spotify.value && spotify_scroll.value"
     },
     "spotify_scroll_speed": {
-        "order": 5032,
+        "order": 5042,
         "type": "slider",
         "text": "ui_spotify_scroll_speed",
         "value": 30,
@@ -660,7 +687,7 @@
         "condition": "spotify.value && spotify_scroll.value"
     },
     "spotify_scroll_auto_delay": {
-        "order": 5033,
+        "order": 5043,
         "type": "slider",
         "text": "ui_spotify_scroll_auto_delay",
         "value": 3,

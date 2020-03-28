@@ -2,6 +2,10 @@
 
 type SpotifyToken = { access_token: string; refresh_token: string; expires_at: number; };
 
+// ======================
+//  Spotify Object Model
+// ======================
+
 type SpotifyContext = {
     /** The uri of the context. */
     uri: string;
@@ -68,6 +72,7 @@ type SpotifyAlbum = {
     external_urls: { [name: string]: string; };
     href: string;
     id: string;
+    /** The cover art for the album in various sizes, widest first. */
     images: Array<SpotifyImage>;
     name: string;
     release_date: string;
@@ -89,4 +94,21 @@ type SpotifyImage = {
     height: number | null;
     width: number | null;
     url: string;
+};
+
+// ---
+
+type SpotifyLocalTrack = SpotifyTrack & {
+    album: SpotifyAlbum &{
+        href: null;
+        id: null;
+        images: [];
+    };
+    artist: Array<SpotifyArtist &{
+        href: null;
+        id: null;
+    }>;
+    href: null;
+    id: null;
+    is_local: true;
 };

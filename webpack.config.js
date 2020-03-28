@@ -30,7 +30,7 @@ function getWebpackConfig(env, argv) {
     const hot = argv.hot;
 
     // Plugins
-    const progressPlugin = new webpack.ProgressPlugin();
+    const progressPlugin = new webpack.ProgressPlugin({ profile: true });
     const dotenvPlugin = new RequireVarsDotenvPlugin(['BACKEND_API_BASEURL']);
     const licensePlugin = new LicenseWebpackPlugin({
         outputFilename: 'LICENSES.3RD-PARTY.txt',
@@ -57,6 +57,7 @@ function getWebpackConfig(env, argv) {
             return text;
         },
         licenseTextOverrides: {
+            'musicbrainz-api': '<missing license text>',
             '@xstate/react': '<missing license text>',
             xstate: '<missing license text>',
         },
@@ -176,14 +177,24 @@ function getWebpackConfig(env, argv) {
             splitChunks: {
                 cacheGroups: {
                     lib: {
-                        test: /[\\/]node_modules[\\/](html2canvas|@?xstate)[\\/]/,
+                        test: module => {
+                            if (!module.resource) return false;
+                            return /[\\/]node_modules[\\/](fuse.js|html2canvas|idb|musicbrainz-api|@?xstate)[\\/]/.test(module.resource)
+                                || /[\\/]node_modules[\\/](axios|https-proxy-agent)[\\/]/.test(module.resource); // transitive dependencies
+                        },
                         name: 'lib',
                         chunks: 'all',
+                        priority: 1,
                     },
                     shared: {
-                        test: /[\\/]node_modules[\\/](@fortawesome|color-convert|lodash|react|react-dom|webpack)[\\/]/,
+                        test: module => {
+                            if (!module.resource) return false;
+                            return /[\\/]node_modules[\\/](@fortawesome|color-convert|lodash|react|react-dom|webpack)[\\/]/.test(module.resource)
+                                || /[\\/]node_modules[\\/](assert|buffer)[\\/]/.test(module.resource); // transitive dependencies
+                        },
                         name: 'shared',
                         chunks: 'all',
+                        priority: 10,
                     },
                 },
             },
@@ -200,6 +211,10 @@ function getWebpackConfig(env, argv) {
             assetFilter: assetFilename => {
                 return !(/^preview\.gif$/.test(assetFilename));
             },
+        },
+        node: {
+            net: 'empty',
+            tls: 'empty',
         },
     };
 

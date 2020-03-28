@@ -68,7 +68,8 @@ const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/mz2cdi4qlf">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
-const spotifyAuthLink = text => `<a href="">${text}</a>`;
+const spotifyAuthLink = text => `<a href="">${text}</a>`; // TODO:
+const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -196,7 +197,6 @@ function getProjectJson() {
                     ui_spotify_width: indent('Width (px)'),
                     ui_spotify_font_size: indent('Font Size (px)'),
                     ui_spotify_text_color: indent('Text Color'),
-                    ui_spotify_art_type: indent('Art'),
                     //
                     // [SPOTIFY > BACKGROUND]
                     ui_spotify_background: subSection('Background'),
@@ -204,6 +204,24 @@ function getProjectJson() {
                     ui_spotify_background_color: indent(withPropertyIcon('fas fa-palette', 'Color'), { n: 3 }),
                     ui_spotify_background_color_alpha: indent('Alpha', { n: 3 }),
                     ui_spotify_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS'), { n: 3 }),
+                    //
+                    // [SPOTIFY > ART]
+                    ui_spotify_art: subSection('Cover Art / Icon'),
+                    ui_spotify_art_type: indent('Type', { n: 3 }),
+                    ui_spotify_art_fetch_local: indent('Fetch Local', { n: 3 }),
+                    ui_$_spotify_art_fetch_local: note(
+                        '<b><u>Experimental</u></b>',
+                        `Use an external provider (${musicbrainzLink('musicbrainz.com')}) to fetch cover arts of local files.`,
+                    ),
+                    ui_$_spotify_art_fetch_local_note: note(
+                        'Local files must contain album and artist(s) metadata, which should match as closely as possible the information ' +
+                          `provided by ${musicbrainzLink('musicbrainz.com')}, especially in regard to romanized<sup>[4]</sup> names and titles; ` +
+                          'proximity, fuzzy and partial searches will be performed nonetheless in order to always find the best match.',
+                        "<u>MusicBrainz's terminology</u>",
+                        '- <em>recording</em>: a song',
+                        '- <em>release-group</em>: an album, single, etc.',
+                        '- <em>release</em>: a specific version/issuing of an album, single, etc.',
+                    ),
                     //
                     // [SPOTIFY > TEXT SCROLLING]
                     ui_spotify_scroll: subSection('Text Scrolling'),
@@ -224,7 +242,7 @@ function getProjectJson() {
                     ),
                     ui_note2: note(
                         `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
-                        null,
+                        '<sup>[4]</sup> <a href="https://en.wikipedia.org/wiki/Romanization">https://en.wikipedia.org/wiki/Romanization</a>',
                     ),
                 },
             },

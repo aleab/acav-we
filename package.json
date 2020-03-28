@@ -19,7 +19,10 @@
         "build:dev": "npm run pre-build && cross-env NODE_ENV=development webpack --mode development",
         "start:dev": "npm run build:dev && webpack-dev-server --mode development",
         "start:we": "npm run pre-build && babel-node ./webpack-start-we.js",
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "fi": "run-script-os && npm install && npm dedupe",
+        "fi:windows": "(rmdir /S /Q node_modules & del /S /Q package-lock.json) 2>NUL",
+        "fi:nix": "rm -rf node_modules package-lock.json"
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.27",
@@ -28,8 +31,11 @@
         "@fortawesome/react-fontawesome": "^0.1.9",
         "@xstate/react": "^0.8.1",
         "color-convert": "^2.0.1",
+        "fuse.js": "^5.0.10-beta",
         "html2canvas": "^1.0.0-rc.5",
+        "idb": "^5.0.1",
         "lodash": "^4.17.15",
+        "musicbrainz-api": "github:aleab/musicbrainz-api#acav-we",
         "react": "^16.12.0",
         "react-dom": "^16.12.0",
         "xstate": "^4.8.0"
