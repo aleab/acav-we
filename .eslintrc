@@ -1,0 +1,103 @@
+{
+    "root": true,
+    "extends": ["airbnb", "airbnb/hooks", "plugin:react/recommended"],
+    "plugins": ["react", "react-hooks"],
+    "rules": {
+        "array-bracket-spacing": ["error", "always", { "singleValue": false }],
+        "arrow-body-style": "off",
+        "arrow-parens": ["error", "as-needed"],
+        "class-methods-use-this": "off",
+        "dot-notation": "off",
+        "import/extensions": "off",
+        "import/no-unresolved": "off",
+        "import/prefer-default-export": "off",
+        "indent": [
+            "error",
+            4,
+            {
+                "SwitchCase": 1,
+                "ignoredNodes": ["JSXAttribute", "JSXElement", "JSXFragment"]
+            }
+        ],
+        "linebreak-style": "off",
+        "lines-between-class-members": "off",
+        "max-len": "off",
+        "no-bitwise": "off",
+        "no-cond-assign": "off",
+        "no-console": "off",
+        "no-multi-spaces": "off",
+        "no-nested-ternary": "off",
+        "no-param-reassign": ["error", { "props": false }],
+        "no-plusplus": "off",
+        "no-underscore-dangle": "off",
+        "no-unreachable": "warn",
+        "no-unused-expressions": "off",
+        "no-unused-labels": "off",
+        "no-unused-vars": "off",
+        "object-curly-newline": "off",
+        "object-curly-spacing": ["error", "always"],
+        "operator-linebreak": "off",
+        "prefer-destructuring": "off",
+        "prefer-template": "off",
+        "react/destructuring-assignment": "off",
+        "react/jsx-indent": [
+            "error",
+            2,
+            {
+                "checkAttributes": true,
+                "indentLogicalExpressions": true
+            }
+        ],
+        "react/jsx-key": ["warn", { "checkFragmentShorthand": true }],
+        "react/jsx-filename-extension": [1, { "extensions": [".jsx", ".tsx"] }],
+        "react/jsx-max-props-per-line": [1, { "maximum": 4, "when": "multiline" }],
+        "react/jsx-props-no-spreading": "off",
+        "react/jsx-wrap-multilines": [
+            "error",
+            {
+                "declaration": "parens-new-line",
+                "assignment": "parens-new-line",
+                "return": "parens-new-line",
+                "arrow": "parens-new-line",
+                "condition": "parens-new-line",
+                "logical": "parens-new-line",
+                "prop": "parens-new-line"
+            }
+        ],
+        "react/no-unused-state": "off",
+        "react/sort-comp": [
+            "warn",
+            {
+                "order": [
+                    "component-static",
+                    "context",
+                    "instance-variables",
+                    "getset",
+                    "constructor",
+                    "lifecycle",
+                    "everything-else",
+                    "/^on.+$/",
+                    "rendering",
+                    "static-methods"
+                ],
+                "groups": {
+                    "component-static": ["displayName", "contextType", "contextTypes", "childContextTypes", "propTypes", "defaultProps"],
+                    "rendering": ["/^render.+$/", "render"],
+                    "getset": ["getters", "setters"]
+                }
+            }
+        ],
+        "react/static-property-placement": [
+            "warn",
+            "static public field",
+            {
+                "contextType": "property assignment"
+            }
+        ],
+        "react-hooks/exhaustive-deps": "warn",
+        "react-hooks/rules-of-hooks": "error",
+        "semi": "off",
+        "sort-imports": ["error", { "ignoreDeclarationSort": true }],
+        "spaced-comment": "off"
+    }
+}
