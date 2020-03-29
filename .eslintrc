@@ -1,8 +1,13 @@
 {
     "root": true,
     "extends": ["airbnb", "airbnb/hooks", "plugin:react/recommended"],
-    "plugins": ["react", "react-hooks"],
+    "plugins": ["@typescript-eslint", "react", "react-hooks"],
+    "parser": "@typescript-eslint/parser",
+    "env": {
+        "browser": true
+    },
     "rules": {
+        "@typescript-eslint/semi": ["error"],
         "array-bracket-spacing": ["error", "always", { "singleValue": false }],
         "arrow-body-style": "off",
         "arrow-parens": ["error", "as-needed"],
