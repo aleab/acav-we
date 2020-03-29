@@ -1,0 +1,17 @@
+dist/
+
+# Dependency directories
+node_modules/
+
+# dotenv environment variables file
+.env
+.env.test
+
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+!.vscode/markdown-github.css
