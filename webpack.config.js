@@ -17,7 +17,6 @@ const DIST_PATH = path.resolve(__dirname, 'dist');
  */
 function getWebpackConfig(env, argv) {
     const isProduction = argv.mode !== 'development';
-    const hot = argv.hot;
 
     // Plugins
     const progressPlugin = new webpack.ProgressPlugin({ profile: true });
@@ -47,9 +46,6 @@ function getWebpackConfig(env, argv) {
         },
         resolve: {
             extensions: [ '.ts', '.tsx', '.js', '.css' ],
-            alias: {
-                'react-dom': '@hot-loader/react-dom',
-            },
         },
         module: {
             rules: [
@@ -107,21 +103,18 @@ function getWebpackConfig(env, argv) {
                     react: {
                         test: module => {
                             if (!module.resource) return false;
-                            return /[\\/]node_modules[\\/](@hot-loader|react(-.+)?)[\\/]/.test(module.resource)
-                                || /[\\/]node_modules[\\/](prop-types|.*react.*)[\\/]/.test(module.resource); // transitive dependencies
+                            return /[\\/]node_modules[\\/](react(-.+)?)[\\/]/.test(module.resource)
+                                || /[\\/]node_modules[\\/](prop-types|.*react.*|scheduler)[\\/]/.test(module.resource); // transitive dependencies
                         },
                         name: 'react',
                         chunks: 'all',
-                        priority: 1,
+                        priority: 10,
                     },
                     lib: {
-                        test: module => {
-                            if (!module.resource) return false;
-                            return /[\\/]node_modules[\\/](@babel|@fortawesome|lodash|webpack)[\\/]/.test(module.resource);
-                        },
+                        test: /[\\/]node_modules[\\/]/,
                         name: 'lib',
                         chunks: 'all',
-                        priority: 10,
+                        priority: 1,
                     },
                 },
             },
@@ -130,6 +123,26 @@ function getWebpackConfig(env, argv) {
             progressPlugin,         // Report compilation progress
             copyPlugin,             // Copy static files to build directory
         ],
+        stats: {
+            all: false,
+            assets: true,
+            assetsSort: '!size',
+            builtAt: true,
+            chunks: true,
+            chunkGroups: true,
+            chunkModules: true,
+            chunksSort: '!size',
+            colors: true,
+            entrypoints: true,
+            errors: true,
+            errorDetails: true,
+            excludeModules: false,
+            modules: true,
+            modulesSort: '!size',
+            performance: true,
+            version: true,
+            warnings: true,
+        },
     };
 
     // ============
@@ -159,22 +172,6 @@ function getWebpackConfig(env, argv) {
         devtool: 'inline-source-map',
     };
     const devConfig = _.merge({}, config, _devConfig);
-
-    if (hot) {
-        devConfig.entry.main = typeof devConfig.entry.main === 'string' ? [
-            'webpack-dev-server/client?http://localhost:3000',
-            'webpack/hot/only-dev-server',
-            devConfig.entry.main,
-        ] : [
-            'webpack-dev-server/client?http://localhost:3000',
-            'webpack/hot/only-dev-server',
-            ...devConfig.entry.main,
-        ];
-        devConfig.plugins = [
-            ...devConfig.plugins,
-            new webpack.HotModuleReplacementPlugin(),
-        ];
-    }
 
     return isProduction ? prodConfig : devConfig;
 }

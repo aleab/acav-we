@@ -12,19 +12,17 @@
     "scripts": {
         "type-check": "tsc --noEmit",
         "clean": "rimraf ./dist",
-        "build": "npm run clean && npm run type-check && cross-env NODE_ENV=production webpack -p",
-        "build:dev": "npm run clean && cross-env NODE_ENV=development webpack --mode development",
+        "build": "npm run clean && npm run type-check && cross-env NODE_ENV=production webpack -p --mode production --display-modules",
+        "build:dev": "npm run clean && cross-env NODE_ENV=development webpack --mode development --display-modules",
         "start": "webpack-dev-server --mode development",
         "test": "npm run type-check",
         "predeploy": "npm run build",
         "deploy": "gh-pages -d dist --dotfiles"
     },
     "dependencies": {
-        "@hot-loader/react-dom": "^16.13.0",
         "lodash": "^4.17.15",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
-        "react-hot-loader": "^4.12.20",
         "react-router": "^5.1.2",
         "react-router-dom": "^5.1.2"
     },

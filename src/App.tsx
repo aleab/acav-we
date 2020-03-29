@@ -1,17 +1,17 @@
 import React from 'react';
-import { hot } from 'react-hot-loader/root';
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom';
 
-function App() {
+import Home from './pages/Home';
+
+export default function App() {
     return (
-      <div className="content">
-        <Router>
+      <Router>
+        <nav />
+        <div className="content">
           <Switch>
-            <Route />
+            <Route exact path="/" component={Home} />
           </Switch>
-        </Router>
-      </div>
+        </div>
+      </Router>
     );
 }
-
-export default hot(App);
