@@ -95,11 +95,11 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
   .my-80-auto, .mb-80-auto { margin-bottom: auto; }
 }
 
-.order-0 { order: 0; }
-.order-1 { order: 1; }
-.order-2 { order: 2; }
+.order-0 { -webkit-order: 0; -ms-flex-order: 0; order: 0; }
+.order-1 { -webkit-order: 1; -ms-flex-order: 1; order: 1; }
+.order-2 { -webkit-order: 2; -ms-flex-order: 2; order: 2; }
 @media (min-width: 80rem) {
-  .order-80-none { order: inherit; }
+  .order-80-none { -webkit-order: inherit; -ms-flex-order: inherit; order: inherit; }
 }
 
 
@@ -134,19 +134,31 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
  * ======== */
 
 .navbar {
-  align-items: center;
   background: var(--accent-dark);
-  display: flex;
-  box-shadow: 0 .25rem .5rem hsla(0, 0%, 0%, .12), inset 0 0 .5rem 0 hsla(0, 0%, 0%, .1);
-  flex-flow: column nowrap;
-  justify-content: center;
+  border-collapse: separate; /* https://caniuse.com/#feat=mdn-css_properties_box-shadow_inset */
+  box-shadow: 0 .25rem .5rem hsla(0, 0%, 0%, .12), 0 0 .5rem 0 hsla(0, 0%, 0%, .1) inset;
   padding: .5rem 1rem;
   width: 100%;
+
+  /* flexbox */
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-align-items: center;
+          align-items: center;
+  -ms-flex-flow: column nowrap;
+      flex-flow: column nowrap;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+          justify-content: center;
 }
 @media (min-width: 80rem) {
   .navbar {
-    flex-flow: row nowrap;
-    justify-content: flex-start;
+    -ms-flex-flow: row nowrap;
+        flex-flow: row nowrap;
+    -ms-flex-pack: start;
+    -webkit-justify-content: flex-start;
+            justify-content: flex-start;
+    position: relative;
     position: -webkit-sticky;
     position: sticky;
     top: 0;
@@ -156,10 +168,15 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 
 /* .navbar > .container */
 .navbar > .container {
-  align-items: center;
+  display: -ms-flexbox;
   display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
+  -webkit-align-items: center;
+          align-items: center;
+  -ms-flex-flow: row wrap;
+      flex-flow: row wrap;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+          justify-content: center;
 }
 @media (max-width: 80rem) {
   .navbar > .container {
@@ -170,8 +187,11 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 }
 @media (min-width: 80rem) {
   .navbar > .container {
-    flex-flow: row nowrap;
-    justify-content: flex-start;
+    -ms-flex-flow: row nowrap;
+        flex-flow: row nowrap;
+    -ms-flex-pack: start;
+    -webkit-justify-content: flex-start;
+            justify-content: flex-start;
   }
 }
 
@@ -201,6 +221,7 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 /* .navbar-toggle */
 .navbar .navbar-toggle {
   color: var(--white-bright);
+  display: -ms-flexbox;
   display: flex;
 }
 @media (min-width: 80rem) {
@@ -215,16 +236,23 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 .navbar .navbar-nav { display: none; }
 @media (max-width: 80rem) { /* (mobile) - this is the navbar-toggle target */
   .navbar .navbar-nav.active {
-    align-self: stretch;
-    display: flex;
-    flex-flow: column nowrap;
     margin-top: .5rem;
     text-align: center;
     width: 100%;
+
+    display: -ms-flexbox;
+    display: flex;
+    align-self: stretch;
+    -ms-flex-flow: column nowrap;
+        flex-flow: column nowrap;
   }
 }
 @media (min-width: 80rem) { /* (desktop) */
-  .navbar .navbar-nav { display: flex; margin-right: 1rem; }
+  .navbar .navbar-nav {
+    display: -ms-flexbox;
+    display: flex;
+    margin-right: 1rem;
+  }
   .navbar .navbar-nav:last-child { margin-right: 4rem; }
 }
 
