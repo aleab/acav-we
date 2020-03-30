@@ -3,7 +3,6 @@ const path = require('path');
 const webpack = require('webpack');
 
 const cssnano = require('cssnano');
-const purgecss = require('@fullhuman/postcss-purgecss');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -26,6 +25,10 @@ function getWebpackConfig(env, argv) {
             transformPath(targetPath) { return path.relative('./public', targetPath); },
         },
     ]);
+    const miniCssExtractPlugin = new MiniCssExtractPlugin({
+        filename: '[name].css',
+        chunkFilename: '[id].css',
+    });
     const terserPlugin = new TerserPlugin({
         terserOptions: {
             parse: { ecma: 8 },
@@ -43,6 +46,7 @@ function getWebpackConfig(env, argv) {
         output: {
             path: DIST_PATH,
             filename: '[name].js',
+            publicPath: '/',
         },
         resolve: {
             extensions: [ '.ts', '.tsx', '.js', '.css' ],
@@ -76,9 +80,6 @@ function getWebpackConfig(env, argv) {
                                     options: {
                                         plugins: [
                                             cssnano({ preset: 'default' }),
-                                            purgecss({
-                                                content: [ './public/**/*.html', './src/**/*.tsx' ],
-                                            }),
                                         ],
                                     },
                                 },
@@ -103,6 +104,7 @@ function getWebpackConfig(env, argv) {
                     react: {
                         test: module => {
                             if (!module.resource) return false;
+                            if (/\.css$/.test(module.resource)) return false;
                             return /[\\/]node_modules[\\/](react(-.+)?)[\\/]/.test(module.resource)
                                 || /[\\/]node_modules[\\/](prop-types|.*react.*|scheduler)[\\/]/.test(module.resource); // transitive dependencies
                         },
@@ -111,7 +113,11 @@ function getWebpackConfig(env, argv) {
                         priority: 10,
                     },
                     lib: {
-                        test: /[\\/]node_modules[\\/]/,
+                        test: module => {
+                            if (!module.resource) return false;
+                            if (/\.css$/.test(module.resource)) return false;
+                            return /[\\/]node_modules[\\/]/.test(module.resource);
+                        },
                         name: 'lib',
                         chunks: 'all',
                         priority: 1,
@@ -122,6 +128,7 @@ function getWebpackConfig(env, argv) {
         plugins: [
             progressPlugin,         // Report compilation progress
             copyPlugin,             // Copy static files to build directory
+            miniCssExtractPlugin,
         ],
         stats: {
             all: false,
@@ -168,6 +175,7 @@ function getWebpackConfig(env, argv) {
             open: true,
             contentBase: SRC_PATH,
             publicPath: '/',
+            historyApiFallback: true,
         },
         devtool: 'inline-source-map',
     };
