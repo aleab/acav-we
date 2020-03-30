@@ -15,18 +15,14 @@ export default function App() {
     return (
       <Router>
         <header className="navbar">
-          <section className="container">
-            <nav>
-              <ul className="navbar-list">
-                <li className="navbar-item">
-                  <NavLink exact to="/" className="navbar-link" activeClassName="active">Home</NavLink>
-                </li>
-                <li className="navbar-item">
-                  <NavLink to="/token" className="navbar-link" activeClassName="active">Token</NavLink>
-                </li>
-              </ul>
-            </nav>
-          </section>
+          <div className="container">
+            <div className="navbar-item">
+              <nav className="navbar-nav">
+                <NavLink exact to="/" className="nav-item nav-link" activeClassName="active">Home</NavLink>
+                <NavLink to="/token" className="nav-item nav-link" activeClassName="active">Token</NavLink>
+              </nav>
+            </div>
+          </div>
         </header>
         <main className="container">
           <Switch>

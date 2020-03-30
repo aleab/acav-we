@@ -1,5 +1,9 @@
 /*! aCAV-WE gh-pages | UNLICENSED | github:aleab/acav-we */
 
+/*  40rem =  640px  -- larger than mobile */
+/*  80rem = 1280px  -- larger than tablet */
+/* 120rem = 1920px  -- larger than desktop */
+
 :root {
   font-size: 16px;
   --primary: #9b4dca;
@@ -35,7 +39,8 @@ a {
 .navbar {
   background: var(--primary-dark);
   border-bottom: 1px solid #d1d1d1;
-  height: 3.4rem;
+  padding: 1rem;
+  min-height: 3.4rem;
   width: 100%;
 }
 @media (min-width: 80rem) {
@@ -48,11 +53,8 @@ a {
 }
 
 .navbar > .container {
-  -ms-flex-flow: column nowrap;
   flex-flow: column nowrap;
-  -ms-flex-align: center;
   align-items: center;
-  -ms-flex-pack: center;
   justify-content: center;
   display: -ms-flexbox;
   display: flex;
@@ -60,35 +62,37 @@ a {
 }
 @media (min-width: 80rem) {
   .navbar > .container {
-    -ms-flex-flow: row nowrap;
     flex-flow: row nowrap;
-    -ms-flex-pack: start;
     justify-content: flex-start;
   }
 }
 
-.navbar .navbar-list {
-  display: -ms-flexbox;
+@media (min-width: 80rem) {
+  .navbar .navbar-item { margin-right: 1rem; }
+  .navbar .navbar-item:last-child { margin-right: 0; }
+}
+
+/* .navbar-nav */
+.navbar .navbar-nav {
   display: flex;
-  list-style: none;
   margin: 0 -.5rem;
-  padding: 0;
 }
 
-/* .navbar-item */
-.navbar .navbar-item { margin: 0; }
-.navbar .navbar-list > .navbar-item { margin: 0 .5rem; }
-
-/* .navbar-link */
-.navbar .navbar-list .navbar-link {
-  color: white;
+/* .nav-item */
+.navbar .navbar-nav .nav-item {
   display: block;
-  opacity: .65;
-  padding: .5rem 0;
+  margin: 0 .5rem;
 }
-.navbar .navbar-list .navbar-link.active,
-.navbar .navbar-list .navbar-link:hover,
-.navbar .navbar-list .navbar-link:focus {
+
+/* .nav-link */
+.navbar .navbar-nav .nav-link {
+  color: white;
+  opacity: .65;
+}
+.navbar .navbar-nav .nav-link.active,
+.navbar .navbar-nav .nav-link:hover,
+.navbar .navbar-nav .nav-link:focus {
+  color: white;
   opacity: 1;
 }
-.navbar .navbar-list .navbar-link.active { font-weight: 600; }
+.navbar .navbar-nav .nav-link.active { font-weight: 600; }
