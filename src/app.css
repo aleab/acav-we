@@ -1,0 +1,94 @@
+/*! aCAV-WE gh-pages | UNLICENSED | github:aleab/acav-we */
+
+:root {
+  font-size: 16px;
+  --primary: #9b4dca;
+  --secondary: #606c76;
+  --primary-dark: #57396a;
+}
+
+body {
+  background-color: white;
+  color: #212529;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+}
+
+
+/* milligram */
+.container {
+  max-width: 52rem;
+  padding: 0 1.25rem;
+}
+
+
+/* ========
+ *  NAVBAR
+ * ======== */
+
+.navbar {
+  background: var(--primary-dark);
+  border-bottom: 1px solid #d1d1d1;
+  height: 3.4rem;
+  width: 100%;
+}
+@media (min-width: 80rem) {
+  .navbar {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+}
+
+.navbar > .container {
+  -ms-flex-flow: column nowrap;
+  flex-flow: column nowrap;
+  -ms-flex-align: center;
+  align-items: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  display: -ms-flexbox;
+  display: flex;
+  height: 100%;
+}
+@media (min-width: 80rem) {
+  .navbar > .container {
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+    -ms-flex-pack: start;
+    justify-content: flex-start;
+  }
+}
+
+.navbar .navbar-list {
+  display: -ms-flexbox;
+  display: flex;
+  list-style: none;
+  margin: 0 -.5rem;
+  padding: 0;
+}
+
+/* .navbar-item */
+.navbar .navbar-item { margin: 0; }
+.navbar .navbar-list > .navbar-item { margin: 0 .5rem; }
+
+/* .navbar-link */
+.navbar .navbar-list .navbar-link {
+  color: white;
+  display: block;
+  opacity: .65;
+  padding: .5rem 0;
+}
+.navbar .navbar-list .navbar-link.active,
+.navbar .navbar-list .navbar-link:hover,
+.navbar .navbar-list .navbar-link:focus {
+  opacity: 1;
+}
+.navbar .navbar-list .navbar-link.active { font-weight: 600; }

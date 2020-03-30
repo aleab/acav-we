@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom';
 
 import App from './App';
 
-const render = (Component: () => JSX.Element) => {
-    ReactDOM.render(React.createElement(Component, null), document.getElementById('root'));
-};
+ReactDOM.render(React.createElement(App, null), document.getElementById('root'));
 
-render(App);
+const noscripts =  document.getElementsByTagName('noscript');
+for (let i = 0; i < noscripts.length; ++i) {
+    noscripts.item(i)?.remove();
+}
