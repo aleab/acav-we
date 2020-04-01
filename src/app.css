@@ -93,6 +93,12 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
  *  SPACING
  * ========= */
 
+.m-0 { margin: 0 !important; }
+.mx-0, .ml-0 { margin-left: 0 !important; }
+.mx-0, .mr-0 { margin-right: 0 !important; }
+.my-0, .mt-0 { margin-top: 0 !important; }
+.my-0, .mb-0 { margin-bottom: 0 !important; }
+
 .m-auto { margin: auto; }
 .mx-auto, .ml-auto { margin-left: auto; }
 .mx-auto, .mr-auto { margin-right: auto; }
@@ -152,6 +158,10 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 .text-accent { color: var(--text-accent); }
 .text-error { color: var(--text-error); }
 .text-muted { color: var(--text-muted); }
+
+.text-align-start { text-align: start; }
+.text-align-center { text-align: center; }
+.text-align-end { text-align: end; }
 
 
 /* --- */
@@ -484,4 +494,4 @@ input[type='submit']:not(:disabled):focus {
 
 /* --- */
 
-.navbar + * { padding-top: 1.25rem; }
+.navbar + * { padding-top: 1.5rem; }
