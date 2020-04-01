@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
-import { DeepReadonly } from 'utility-types';
 
 import { Pivot } from '../../common/Pivot';
 import { Position } from '../../common/Position';

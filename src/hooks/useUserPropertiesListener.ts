@@ -1,5 +1,4 @@
 import { DependencyList, useContext, useEffect } from 'react';
-import { DeepReadonly } from 'utility-types';
 
 import WallpaperContext from '../app/WallpaperContext';
 

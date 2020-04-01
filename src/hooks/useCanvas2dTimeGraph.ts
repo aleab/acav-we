@@ -1,7 +1,6 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
 import { useCallback, useEffect, useRef } from 'react';
-import { OptionalKeys } from 'utility-types';
 
 export interface UseCanvas2dTimeGraphOptions {
     width: number;

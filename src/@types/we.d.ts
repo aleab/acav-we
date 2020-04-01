@@ -1,6 +1,6 @@
 type ProjectJsonProperties = typeof import('../../project.json/project.properties.json');
 type RawWallpaperProperties = Partial<ProjectJsonProperties & WEUserProperties>;
-type MappedProperties = import('utility-types').DeepPartial<import('../app/properties/Properties').default>;
+type MappedProperties = DeepPartial<import('../app/properties/Properties').default>;
 
 // PROPERTIES
 
@@ -57,10 +57,10 @@ type WEPropertyListener = {
 type WEAudioListener = (audioArray: number[]) => void;
 
 type UserPropertiesChangedEventArgs = {
-    oldProps: import('utility-types').DeepReadonly<import('../app/properties/Properties').default>;
-    newProps: import('utility-types').DeepReadonly<MappedProperties>;
+    oldProps: DeepReadonly<import('../app/properties/Properties').default>;
+    newProps: DeepReadonly<MappedProperties>;
 };
-type GeneralPropertiesChangedEventArgs = { newProps: Partial<import('utility-types').DeepReadonly<WEGeneralProperties>>; };
+type GeneralPropertiesChangedEventArgs = { newProps: Partial<DeepReadonly<WEGeneralProperties>>; };
 type AudioSamplesEventArgs = {
     rawSamples: import('../common/AudioSamplesArray').default;
     samples: import('../common/AudioSamplesArray').default;

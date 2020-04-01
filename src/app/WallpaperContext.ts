@@ -1,5 +1,4 @@
 import { createContext } from 'react';
-import { DeepReadonly } from 'utility-types';
 
 import Properties from './properties/Properties';
 import Renderer from './Renderer';

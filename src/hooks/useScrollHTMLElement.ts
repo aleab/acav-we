@@ -1,8 +1,6 @@
 import _ from 'lodash';
 import { RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { PickRequiredOptional } from '../@types/types';
-
 export type UseScrollHTMLElementOptions = {
     msPerPixelScroll?: number;
     type: 'auto' | 'manual' | 'none';
