@@ -1,6 +1,8 @@
 import React, { useReducer, useRef } from 'react';
 import { Link, NavLink, Route, BrowserRouter as Router, Switch } from 'react-router-dom';
-import Octicon, { MarkGithub, ThreeBars } from '@primer/octicons-react';
+
+import OcticonMarkGithub from '@primer/octicons/build/svg/mark-github.svg';
+import OcticonThreeBars from '@primer/octicons/build/svg/three-bars.svg';
 
 // Components
 import Home from './pages/Home';
@@ -22,12 +24,12 @@ export default function App() {
       <Router>
         <header className="navbar">
           <div className="container">
-            <button ref={toggleRef} type="button" className="button-link navbar-toggle" onClick={toggleIsNavActive}>
-              <Octicon icon={ThreeBars} width={24} height={24} verticalAlign="middle" ariaLabel="Toggle Menu" />
+            <button ref={toggleRef} type="button" className="button-link navbar-toggle" onClick={toggleIsNavActive} aria-label="Toggle Menu">
+              <OcticonThreeBars className="octicon" width={24} height={24} />
             </button>
             <Link to="/" className="navbar-title">aCAV-WE</Link>
-            <a href="//github.com/aleab/acav-we" rel="external" className="navbar-link order-1" style={{ display: 'flex' }}>
-              <Octicon icon={MarkGithub} width={22} height={22} verticalAlign="middle" ariaLabel="View on Github" />
+            <a href="//github.com/aleab/acav-we" rel="external" className="navbar-link order-1" style={{ display: 'flex' }} aria-label="View on Github">
+              <OcticonMarkGithub className="octicon" width={22} height={22} />
             </a>
             <nav className={`${navbarNavClass} ml-80-auto order-2 order-80-none`}>
               <NavLink to="/token" className="nav-item nav-link" activeClassName="active">Token</NavLink>

@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -98,6 +97,10 @@ function getWebpackConfig(env, argv) {
                                 name: '[path][name].[ext]',
                             },
                         },
+                        {
+                            test: /\.svg$/,
+                            loader: 'svg-react-loader',
+                        },
                     ],
                 },
             ],
@@ -121,7 +124,7 @@ function getWebpackConfig(env, argv) {
                     lib: {
                         test: module => {
                             if (!module.resource) return false;
-                            if (/\.css$/.test(module.resource)) return false;
+                            if (/\.(css|svg)$/.test(module.resource)) return false;
                             return /[\\/]node_modules[\\/]/.test(module.resource);
                         },
                         name: 'lib',
@@ -157,25 +160,29 @@ function getWebpackConfig(env, argv) {
             version: true,
             warnings: true,
         },
+        devtool: false,
     };
 
     // ============
     //  PRODUCTION
     // ============
     /** @type {import('webpack').Configuration} */
-    const _prodConf = {
+    const prodConfig = {
+        ...config,
         mode: 'production',
     };
-    const prodConfig = _.merge({}, config, _prodConf);
 
     // =============
     //  DEVELOPMENT
     // =============
     /** @type {import('webpack').Configuration} */
-    const _devConfig = {
+    const devConfig = {
+        ...config,
         mode: 'development',
-        output: { publicPath: '/' },
-        optimization: { minimize: false },
+        optimization: {
+            ...config.optimization,
+            minimize: false,
+        },
         devServer: {
             port: 3000,
             hot: true,
@@ -186,7 +193,6 @@ function getWebpackConfig(env, argv) {
         },
         devtool: 'inline-source-map',
     };
-    const devConfig = _.merge({}, config, _devConfig);
 
     return isProduction ? prodConfig : devConfig;
 }

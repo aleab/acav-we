@@ -495,3 +495,9 @@ input[type='submit']:not(:disabled):focus {
 /* --- */
 
 .navbar + * { padding-top: 1.5rem; }
+
+.octicon {
+  display: inline-block;
+  vertical-align: text-top;
+  fill: currentColor;
+}

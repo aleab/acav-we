@@ -1,10 +1,12 @@
 import 'whatwg-fetch';
-import Octicon, { Clippy } from '@primer/octicons-react';
 import qs from 'qs';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RouteProps } from 'react-router';
 
+import OcticonClippy from '@primer/octicons/build/svg/clippy.svg';
+
 import Spinner from '../components/Spinner';
+
 
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_REDIRECT_URI = encodeURIComponent((process.env.NODE_ENV === 'development' ? process.env.SPOTIFY_REDIRECT_URI_DEV : process.env.SPOTIFY_REDIRECT_URI) ?? '');
@@ -111,13 +113,13 @@ export default function Token(props: { location: RouteProps['location'] }) {
           <div className="d-flex flex-row-nowrap gap-x-2">
             <div className="input-group">
               <input ref={inputRef} type="text" value={token ?? ''} disabled={!token} readOnly={!!token} />
-              <button type="button" className="d-flex button-outline" title={token ? 'Copy' : undefined} disabled={!token} onClick={onClipboardButtonClick}>
-                <Octicon icon={Clippy} width={22} height={22} />
+              <button type="button" className="d-flex button-outline" title={token ? 'Copy' : undefined} disabled={!token} onClick={onClipboardButtonClick} aria-label="Copy to Clipboard">
+                <OcticonClippy className="octicon" width={22} height={22} />
               </button>
             </div>
             {
                 isWaitingToken ? (
-                  <button type="button" style={{ width: '8.5rem' }} disabled>
+                  <button type="button" style={{ width: '8.5rem' }} disabled aria-label="Loading...">
                     <Spinner color="var(--white-bright)" size=".5rem" gap=".35em" />
                   </button>
                 ) : (
