@@ -31,3 +31,4 @@ yarn-error.log*
 !.vscode/extensions.json
 
 !.vscode/markdown-github.css
+.env.gh-pages

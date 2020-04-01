@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const cssnano = require('cssnano');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const DotenvPlugin = require('webpack-dotenv-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
@@ -19,6 +20,11 @@ function getWebpackConfig(env, argv) {
 
     // Plugins
     const progressPlugin = new webpack.ProgressPlugin({ profile: true });
+    const dotenvPlugin = new DotenvPlugin({
+        sample: './.env.example',
+        path: './.env.gh-pages',
+        allowEmptyValues: false,
+    });
     const copyPlugin = new CopyWebpackPlugin([
         {
             from: './public/**/*',
@@ -127,6 +133,7 @@ function getWebpackConfig(env, argv) {
         },
         plugins: [
             progressPlugin,         // Report compilation progress
+            dotenvPlugin,
             copyPlugin,             // Copy static files to build directory
             miniCssExtractPlugin,
         ],

@@ -26,5 +26,15 @@
     "tslint.enable": false,
     //
     // [markdown]
-    "markdown.styles": ["./.vscode/markdown-github.css"]
+    "markdown.styles": ["./.vscode/markdown-github.css"],
+    //
+    // [vscode-icons]
+    "vsicons.associations.files": [
+        {
+            "icon": "config",
+            "extensions": ["env.gh-pages"],
+            "languages": ["dotenv"],
+            "format": "svg"
+        }
+    ],
 }
