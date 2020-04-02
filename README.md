@@ -21,7 +21,7 @@ Wallpaper Engine, `npm` (_or other package manager_), `git`
 
 Variable name         | Description
 --------------------- | ---------------------
-`BACKEND_API_BASEURL` | URL to local server handling Spotify's token requests (sample server code available [here]()).<br>Only needed if working on the Spotify overlay feature; leave an empty value otherwise.
+`BACKEND_API_BASEURL` | URL to local server handling Spotify's token requests, e.g. `http://localhost:4000`.<br>Only needed if working on the Spotify overlay; leave an empty value otherwise.<br>(Minimal server code is available [here](https://github.com/aleab/acav-we-server-example))
 
 4. **Code** your awesome new feature or fix a bug or whatever.
 5. **Build** the project with `npm run build:dev` or `npm run build:dev -- --watch`.
