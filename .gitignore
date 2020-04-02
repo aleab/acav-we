@@ -121,3 +121,7 @@ temp/
 # End of https://www.gitignore.io/api/node,VisualStudioCode
 
 !.vscode/markdown-github.css
+
+.env.*
+!.env.sample
+!.env.example
