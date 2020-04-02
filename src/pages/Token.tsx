@@ -114,7 +114,7 @@ export default function Token(props: { location: RouteProps['location'] }) {
             <div className="input-group">
               <input ref={inputRef} type="text" value={token ?? ''} disabled={!token} readOnly={!!token} />
               <button type="button" className="d-flex button-outline" title={token ? 'Copy' : undefined} disabled={!token} onClick={onClipboardButtonClick} aria-label="Copy to Clipboard">
-                <OcticonClippy className="octicon" style={{ fontSize: '1.375rem' }} />
+                <OcticonClippy className="octicon" style={{ fontSize: '1.125rem' }} />
               </button>
             </div>
             {
