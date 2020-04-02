@@ -1,2 +1,3 @@
 TODO: Remove, replace or do whatever is necessary to reduce the bundle size of @fortawesome/*
 TODO: Remove, replace or do whatever is necessary to reduce the bundle size of lodash
+TODO: Add `spotify.art.fetchLocalCacheMaxAge` property (in days, [0.1, 28])
