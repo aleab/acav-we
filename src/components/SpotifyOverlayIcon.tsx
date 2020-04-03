@@ -1,6 +1,5 @@
 /* eslint-disable no-continue */
 
-import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { LAB, RGB } from 'color-convert/conversions';
 import html2canvas from 'html2canvas';
@@ -10,6 +9,7 @@ import { faSpotify } from '@fortawesome/free-brands-svg-icons';
 
 import Log from '../common/Log';
 import { CssBackground } from '../app/BackgroundMode';
+import { colorEquals } from '../common/Colors';
 import { cssColorToRgba } from '../common/Css';
 
 const SPOTIFY_LIGHT_GREEN = { hex: '#1ED760', rgb: [ 30, 215, 96 ] };
@@ -222,7 +222,7 @@ export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
 
                 // Use green icon if the color is black or white
                 const hsl = ColorConvert.rgb.hsl(rgb);
-                if ((hsl[2] <= 3 || _.every(rgb, (v, i) => v === SPOTIFY_BLACK.rgb[i])) || (hsl[2] > 95)) {
+                if ((hsl[2] <= 3 || colorEquals(rgb, SPOTIFY_BLACK.rgb)) || (hsl[2] > 95)) {
                     setIconColor(SPOTIFY_LIGHT_GREEN);
                 } else {
                     setIconColor(isDark(rgb) ? SPOTIFY_WHITE : SPOTIFY_BLACK);

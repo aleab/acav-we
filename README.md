@@ -16,7 +16,7 @@ Wallpaper Engine, `npm` (_or other package manager_), `git`
 1. Set up your local copy.
    - **Fork** this repo and **clone** it: `git clone https://github.com/USERNAME/acav-we`.
    - Create a new **branch**: `git checkout -b BRANCH_NAME master`.
-2. Install the project's **dependencies** with `npm install --no-package-lock`.
+2. Install the project's **dependencies** with `npm install`.
 3. Create a file named **`.env`** in the root folder and add the following environment variables in the form `NAME=VALUE`:
 
 Variable name         | Description

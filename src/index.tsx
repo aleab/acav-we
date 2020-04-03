@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 
 import './common/index';
 import './app/index';
+import './tests/tests';
 
 import App from './components/App';
 import Properties, { mapProperties } from './app/properties/Properties';

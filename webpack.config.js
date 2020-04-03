@@ -10,6 +10,7 @@ const purgecss = require('@fullhuman/postcss-purgecss');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const { LicenseWebpackPlugin } = require('license-webpack-plugin');
+const LodashPlugin = require('lodash-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const RequireVarsDotenvPlugin = require('./build-scripts/require-vars-dotenv-webpack');
@@ -61,6 +62,10 @@ function getWebpackConfig(env, argv) {
             '@xstate/react': '<missing license text>',
             xstate: '<missing license text>',
         },
+    });
+    const lodashPlugin = new LodashPlugin({
+        cloning: true,
+        exotics: true,
     });
     const copyPlugin = new CopyWebpackPlugin([
         { from: './LICENSE.txt' },
@@ -126,7 +131,7 @@ function getWebpackConfig(env, argv) {
                     enforce: 'pre',
                     loader: 'eslint-loader',
                     include: SRC_PATH,
-                    exclude: [path.resolve(__dirname, 'node_modules')],
+                    exclude: [/node_modules/],
                     options: {
                         configFile: './.eslintrc',
                     },
@@ -134,9 +139,9 @@ function getWebpackConfig(env, argv) {
                 {
                     oneOf: [
                         {
-                            test: /\.(ts|tsx)$/,
-                            loader: 'ts-loader',
-                            exclude: [path.resolve(__dirname, 'node_modules')],
+                            test: /\.(js|ts)x?$/,
+                            loader: 'babel-loader',
+                            exclude: [/node_modules/],
                         },
                         {
                             test: /\.css$/,
@@ -203,6 +208,7 @@ function getWebpackConfig(env, argv) {
             progressPlugin,         // Report compilation progress
             dotenvPlugin,           // Dotenv plugin + Fail build if required variables are not defined
             licensePlugin,          // Output third party licenses to a file
+            lodashPlugin,
             copyPlugin,             // Copy static files to build directory
             miniCssExtractPlugin,   // Extract CSS into separate files; one .css file per .js
         ],
@@ -244,6 +250,10 @@ function getWebpackConfig(env, argv) {
     /** @type {import('webpack').Configuration} */
     const _prodConf = {
         mode: 'production',
+        plugins: [
+            ...config.plugins,
+            new webpack.NormalModuleReplacementPlugin(/[\\/]tests[\\/]tests\.ts/, './noop.ts'),
+        ],
     };
     const prodConfig = _.merge({}, config, _prodConf);
 
