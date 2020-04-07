@@ -9,7 +9,7 @@ const cssnano = require('cssnano');
 const purgecss = require('@fullhuman/postcss-purgecss');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { LicenseWebpackPlugin } = require('license-webpack-plugin');
+const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
 const LodashPlugin = require('lodash-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
