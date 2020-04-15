@@ -14,3 +14,11 @@ export function colorEquals(color1: number[], color2: number[]): boolean {
     }
     return true;
 }
+
+export function lerp(color1: RGB, color2: RGB, k: number): RGB {
+    return [
+        Math.round(Math.lerp(color1[0], color2[0], k)),
+        Math.round(Math.lerp(color1[1], color2[1], k)),
+        Math.round(Math.lerp(color1[2], color2[2], k)),
+    ] as RGB;
+}

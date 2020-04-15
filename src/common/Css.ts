@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { HSL, KEYWORD } from 'color-convert/conversions';
 
@@ -43,4 +44,30 @@ export function cssColorToRgba(cssColor: string): RGBA | undefined {
     }
 
     return rgba;
+}
+
+function isFilteredIn(propertyName: string, filter?: Array<string | RegExp>) {
+    return _.some(filter, v => {
+        return typeof v === 'string' ? (v.toLowerCase() === propertyName.toLowerCase()) : v.test(propertyName);
+    });
+}
+export function parseCustomCss(css: string, filter?: Array<string | RegExp>) {
+    const regex = /([\w-]+)\s*:\s*((['"]).*\3|[^;]*)/g;
+    const custom: any = {};
+    let match: RegExpExecArray | null;
+    while ((match = regex.exec(css)) !== null) {
+        if (isFilteredIn(match[1], filter)) {
+            const propertyName = match[1].replace(/-(.)/g, (_s, v) => v.toUpperCase()); // background-image  =>  backgroundImage
+            if (propertyName) {
+                custom[propertyName] = match[2];
+            }
+        }
+    }
+    return custom;
+}
+
+export function getComputedBackgroundProperties(htmlElement: HTMLElement | null) {
+    if (htmlElement === null) return null;
+    const { backgroundClip, backgroundColor, backgroundImage, backgroundOrigin, backgroundPosition, backgroundRepeat, backgroundSize } = getComputedStyle(htmlElement);
+    return { backgroundClip, backgroundColor, backgroundImage, backgroundOrigin, backgroundPosition, backgroundRepeat, backgroundSize };
 }

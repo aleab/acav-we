@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
 
+import { parseCustomCss } from '../common/Css';
+
 export enum BackgroundMode { Color, Image, Css, Playlist }
 
 type ColorOptions = { color: RGB, alpha?: number };
@@ -39,27 +41,7 @@ export function generateCssStyle(mode: BackgroundMode, options: any): CssBackgro
 
         case BackgroundMode.Css: {
             if (!options.css) return {};
-            const newStyle: any = {};
-            const regex = /([\w-]+)\s*:\s*((['"]).*\3|[^;]*)/g;
-            let match;
-            while ((match = regex.exec(options.css)) !== null) {
-                const propertyName = match[1].replace(/-(.)/g, (_s, v) => v.toUpperCase());
-                if (propertyName) {
-                    newStyle[propertyName] = match[2];
-                }
-            }
-
-            return _.pick<CssBackground>(newStyle, [
-                'background',
-                'backgroundClip',
-                'backgroundColor',
-                'backgroundImage',
-                'backgroundOrigin',
-                'backgroundPosition',
-                'backgroundRepeat',
-                'backgroundSize',
-                'backgroundAttachment',
-            ]);
+            return parseCustomCss(options.css, [/^background(-[a-z]+)?/]);
         }
 
         default: return {};

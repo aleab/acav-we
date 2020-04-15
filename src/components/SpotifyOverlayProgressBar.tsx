@@ -78,7 +78,7 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
     return (
       <progress
         className={_.join([ 'progress-bar', props.className ], ' ').trim()} style={{ ...style, ...props.style }}
-        max={100} value={progressPercent} data-html2canvas-ignore
+        max={100} value={progressPercent}
       />
     );
 }

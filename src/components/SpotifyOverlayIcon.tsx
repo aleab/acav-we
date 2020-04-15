@@ -1,36 +1,50 @@
+/* eslint-disable object-property-newline */
 /* eslint-disable no-continue */
 
+import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { LAB, RGB } from 'color-convert/conversions';
-import html2canvas from 'html2canvas';
-import React, { useCallback, useEffect, useReducer, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpotify } from '@fortawesome/free-brands-svg-icons';
+import React, { RefObject, useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
+import {
+    BACKGROUND_CLIP,
+    BACKGROUND_ORIGIN,
+    BackgroundParser,
+    CacheStorage,
+    Color,
+    Gradient,
+    ICSSImage,
+    LengthPercentage,
+    Logger,
+    PropertyDescriptors,
+    calculateBackgroundSize,
+    isLinearGradient,
+    isRadialGradient,
+    isUrlImage,
+} from 'html2canvas/background-parser';
+
+import { FaSpotify } from '../fa';
 import Log from '../common/Log';
-import { CssBackground } from '../app/BackgroundMode';
-import { colorEquals } from '../common/Colors';
-import { cssColorToRgba } from '../common/Css';
+import Bounds from '../common/Bounds';
+import { CancellationToken, CancellationTokenSource } from '../common/CancellationToken';
+import { colorEquals, lerp as colorLerp } from '../common/Colors';
+import { cssColorToRgba, getComputedBackgroundProperties } from '../common/Css';
 
 const SPOTIFY_LIGHT_GREEN = { hex: '#1ED760', rgb: [ 30, 215, 96 ] };
 const SPOTIFY_WHITE = { hex: '#FFFFFF', rgb: [ 255, 255, 255 ] };
 const SPOTIFY_BLACK = { hex: '#191414', rgb: [ 25, 20, 20 ] };
 
+type ComputedBackgroundProperties = ReturnType<typeof getComputedBackgroundProperties>;
+type DrawDimensions = {
+    sx: number; sy: number; sw: number; sh: number; // source coordinates and size
+    dx: number; dy: number; dw: number; dh: number; // destination coordinates and size
+};
+
 interface SpotifyOverlayIconProps {
     style?: any;
-    background?: CssBackground;
-    backgroundBeneath?: CssBackground;
+    overlayHtmlRef: RefObject<HTMLElement>;
+    backgroundHtmlRef: RefObject<HTMLElement>;
 }
-
-interface H2CAlphaState {
-    iconRect?: { x: number, y: number, width: number, height: number };
-    backgroundBeneathProperty?: { name: string, value: string };
-
-    alpha: number;
-    rgb: RGB;
-    averageColor: RGB;
-}
-type H2CAlphaStateS = Omit<H2CAlphaState, 'alpha' | 'averageColor' | 'rgb'>;
 
 // Lightness: https://en.wikipedia.org/wiki/Lightness#Lightness_and_human_perception
 function isDark(rgb: RGB) {
@@ -38,211 +52,457 @@ function isDark(rgb: RGB) {
     return lab[0] <= 45;
 }
 
+// =========================
+//  RENDER CANVAS FUNCTIONS
+// =========================
+
+function setCanvasSize(canvas: OffscreenCanvas | HTMLCanvasElement, width: number, height: number) {
+    canvas.height = height;
+    canvas.width = width;
+}
+
+function renderToCanvas(
+    canvas: HTMLCanvasElement | OffscreenCanvas,
+    backgroundImage: ICSSImage[],
+    props: NonNullable<ComputedBackgroundProperties>,
+    elementRect: DOMRect,
+    border: { top: number, right: number, bottom: number, left: number },
+    padding: { top: number, right: number, bottom: number, left: number },
+    fontSize: number,
+    ct: CancellationToken,
+): Promise<void> {
+    const ctx = canvas.getContext('2d');
+    if (ctx === null) return Promise.reject();
+
+    if (props.backgroundColor !== PropertyDescriptors.backgroundColor.initialValue) {
+        ctx.save();
+        ctx.fillStyle = props.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+    }
+
+    if (backgroundImage.length === 0) {
+        return Promise.resolve();
+    }
+
+    const backgroundClip = BackgroundParser.parseBackgroundClip(props.backgroundClip);
+    const backgroundOrigin = BackgroundParser.parseBackgroundOrigin(props.backgroundOrigin);
+    const backgroundPosition = BackgroundParser.parseBackgroundPosition(props.backgroundPosition);
+    const backgroundRepeat = BackgroundParser.parseBackgroundRepeat(props.backgroundRepeat);
+    const backgroundSize = BackgroundParser.parseBackgroundSize(props.backgroundSize);
+
+    //  Apply background-* properties
+    // ===============================
+    // background-origin
+    function applyOrigin(i: number, containerRect: DOMRect, drawDimensions: DrawDimensions) {
+        const origin = backgroundOrigin.length === 1 ? backgroundOrigin[0] : backgroundOrigin[i];
+
+        let w = containerRect.width;
+        let h = containerRect.height;
+
+        if (origin !== undefined) {
+            switch (origin) {
+                case BACKGROUND_ORIGIN.BORDER_BOX: break;
+                case BACKGROUND_ORIGIN.PADDING_BOX:
+                    drawDimensions.dx += border.left;
+                    drawDimensions.dy += border.top;
+                    w -= border.left + border.right;
+                    h -= border.top + border.bottom;
+                    break;
+                case BACKGROUND_ORIGIN.CONTENT_BOX:
+                    drawDimensions.dx += border.left + padding.left;
+                    drawDimensions.dy += border.top + padding.top;
+                    w -= (border.left + padding.left) + (border.right + padding.right);
+                    h -= (border.top + padding.top) + (border.bottom + padding.bottom);
+                    break;
+                default: break;
+            }
+        }
+
+        return new Bounds(drawDimensions.dx, drawDimensions.dy, w, h);
+    }
+    // background-size
+    function applySize(i: number, bounds: Bounds, imgWidth: number, imgHeight: number, drawDimensions: DrawDimensions) {
+        const size = backgroundSize.length === 1 ? backgroundSize[0] : backgroundSize[i];
+        if (size === undefined) return;
+
+        const [ width, height ] = calculateBackgroundSize(backgroundSize[i], [ imgWidth, imgHeight, imgWidth / imgHeight ], bounds);
+        drawDimensions.dw = width;
+        drawDimensions.dh = height;
+    }
+    // background-position
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/background-position
+    function applyPosition(i: number, containerWidth: number, containerHeight: number, imgWidth: number, imgHeight: number, drawDimensions: DrawDimensions) {
+        const position = backgroundPosition.length === 1 ? backgroundPosition[0] : backgroundPosition[i];
+        if (position === undefined) return;
+
+        const [ xOffset, yOffset ] = LengthPercentage.getAbsoluteValueForTuple(backgroundPosition[i], containerWidth - imgWidth, containerHeight - imgHeight, fontSize);
+        drawDimensions.dx += xOffset;
+        drawDimensions.dy += yOffset;
+    }
+
+    function fixDimensions(containerRect: DOMRect, [ imgNaturalWidth, imgNaturalHeight ]: [number, number], drawDimensions: DrawDimensions) {
+        if (drawDimensions.dx < containerRect.left) {
+            const outOfBoundsSegmentWidth = containerRect.left - drawDimensions.dx;
+            drawDimensions.sx = outOfBoundsSegmentWidth * (imgNaturalWidth / drawDimensions.dw);
+            drawDimensions.sw = imgNaturalWidth - drawDimensions.sx;
+            drawDimensions.dw -= outOfBoundsSegmentWidth;
+            drawDimensions.dx = containerRect.left;
+        } else if (drawDimensions.dx >= containerRect.right) {
+            drawDimensions.sw = 0;
+        }
+
+        if (drawDimensions.dy < containerRect.top) {
+            const outOFBoundsSegmentHeight = containerRect.top - drawDimensions.dy;
+            drawDimensions.sy = outOFBoundsSegmentHeight * (imgNaturalHeight / drawDimensions.dh);
+            drawDimensions.sh = imgNaturalHeight - drawDimensions.sy;
+            drawDimensions.sw -= outOFBoundsSegmentHeight;
+            drawDimensions.dy = containerRect.top;
+        } else if (drawDimensions.dy >= containerRect.bottom) {
+            drawDimensions.sh = 0;
+        }
+    }
+
+    let i = 0;
+    function nextOrResolve(resolve: () => void, reject: (reason?: any) => void, _loop: (resolve: () => void, reject: (reason?: any) => void) => void) {
+        if (i < backgroundImage.length) {
+            _loop(resolve, reject);
+        } else {
+            resolve();
+        }
+    }
+    function loop(resolve: () => void, reject: (reason?: any) => void) {
+        if (ct.isCancelled()) { reject(); return; }
+        if (ctx === null) { reject(); return; }
+        const j = i;
+        i++;
+
+        const image = backgroundImage[j];
+        if (isUrlImage(image)) {
+            const img = new Image();
+            img.onload = () => {
+                if (ct.isCancelled()) { reject(); return; }
+                if (ctx === null) { reject(); return; }
+
+                // https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+                const drawDimensions: DrawDimensions = {
+                    sx: 0, sy: 0, sw: img.naturalWidth, sh: img.naturalHeight,
+                    dx: elementRect.left, dy: elementRect.top, dw: img.naturalWidth, dh: img.naturalHeight,
+                };
+
+                // origin -> size -> position -> repeat -> clip
+
+                const bounds = applyOrigin(j, elementRect, drawDimensions);
+                applySize(j, bounds, img.naturalWidth, img.naturalHeight, drawDimensions);
+                applyPosition(j, elementRect.width, elementRect.height, img.naturalWidth, img.naturalHeight, drawDimensions);
+                fixDimensions(elementRect, [ img.naturalWidth, img.naturalHeight ], drawDimensions);
+
+                // TODO: background-repeat
+
+                const clip = (backgroundClip.length === 1 ? backgroundClip[0] : backgroundClip[i]) ?? BACKGROUND_CLIP.BORDER_BOX;
+                if (clip === BACKGROUND_CLIP.BORDER_BOX) {
+                    if (ct.isCancelled()) { reject(); return; }
+                    ctx.drawImage(
+                        img,
+                        drawDimensions.sx, drawDimensions.sy, drawDimensions.sw, drawDimensions.sh,
+                        drawDimensions.dx, drawDimensions.dy, drawDimensions.dw, drawDimensions.dh,
+                    );
+                } else if (clip === BACKGROUND_CLIP.PADDING_BOX || clip === BACKGROUND_CLIP.CONTENT_BOX) {
+                    // background-clip -- use temp canvas to clip this background layer only
+                    const tempCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+                    const tempCtx = tempCanvas.getContext('2d');
+                    if (tempCtx !== null) {
+                        tempCtx.drawImage(
+                            img,
+                            drawDimensions.sx, drawDimensions.sy, drawDimensions.sw, drawDimensions.sh,
+                            drawDimensions.dx, drawDimensions.dy, drawDimensions.dw, drawDimensions.dh,
+                        );
+                        if (clip === BACKGROUND_CLIP.PADDING_BOX) {
+                            tempCtx.rect(
+                                elementRect.left + border.left,
+                                elementRect.top + border.top,
+                                elementRect.width - border.left - border.right,
+                                elementRect.height - border.top - border.bottom,
+                            );
+                        } else {
+                            tempCtx.rect(
+                                elementRect.left + border.left + padding.left,
+                                elementRect.top + border.top + padding.top,
+                                elementRect.width - (border.left + padding.left) - (border.right + padding.right),
+                                elementRect.height - (border.top + padding.top) - (border.bottom + padding.bottom),
+                            );
+                        }
+                        tempCtx.clip();
+
+                        // Copy the clipped background over to the working canvas
+                        if (ct.isCancelled()) { reject(); return; }
+                        ctx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height, 0, 0, canvas.width, canvas.height);
+                    }
+                }
+
+                nextOrResolve(resolve, reject, loop);
+            };
+            img.onerror = () => {
+                if (ct.isCancelled()) { reject(); return; }
+                nextOrResolve(resolve, reject, loop);
+            };
+            img.src = image.url;
+        } else if (isLinearGradient(image)) {
+            const [ length, x0, x1, y0, y1 ] = Gradient.calculateGradientDirection(image.angle, elementRect.width, elementRect.height);
+            const gradient = ctx.createLinearGradient(elementRect.left + x0, elementRect.top + y0, elementRect.left + x1, elementRect.top + y1);
+            Gradient.processColorStops(image.stops, length).forEach(colorStop => {
+                gradient.addColorStop(colorStop.stop, Color.asString(colorStop.color));
+            });
+
+            ctx.save();
+            ctx.fillStyle = gradient;
+            ctx.fillRect(elementRect.left, elementRect.top, elementRect.width, elementRect.height);
+            ctx.restore();
+
+            nextOrResolve(resolve, reject, loop);
+        } else if (isRadialGradient(image)) {
+            const position = image.position.length !== 0 ? image.position : [{
+                type: 16,
+                number: 50,
+                flags: 1 << 2,
+            }];
+            const x = LengthPercentage.getAbsoluteValue(position[0], elementRect.width, fontSize);
+            const y = LengthPercentage.getAbsoluteValue(position[position.length - 1], elementRect.height, fontSize);
+
+            const [ rx, ry ] = Gradient.calculateRadius(image, x, y, elementRect.width, elementRect.height);
+            if (rx > 0 && ry > 0) {
+                const gradient = ctx.createRadialGradient(elementRect.left + x, elementRect.top + y, 0, elementRect.left + x, elementRect.top + y, rx);
+
+                Gradient.processColorStops(image.stops, rx * 2).forEach(colorStop => {
+                    gradient.addColorStop(colorStop.stop, Color.asString(colorStop.color));
+                });
+
+                ctx.save();
+                ctx.fillStyle = gradient;
+                ctx.rect(elementRect.left, elementRect.top, elementRect.width, elementRect.height);
+                if (rx !== ry) {
+                    // Elliptical radial gradient
+                    const midX = elementRect.left + 0.5 * elementRect.width;
+                    const midY = elementRect.top + 0.5 * elementRect.height;
+                    const f = ry / rx;
+
+                    ctx.translate(midX, midY);
+                    ctx.transform(1, 0, 0, f, 0, 0);
+                    ctx.translate(-midX, -midY);
+                    ctx.fillRect(elementRect.left, (elementRect.top - midY) / f + midY, elementRect.width, elementRect.height / f);
+                } else {
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+            nextOrResolve(resolve, reject, loop);
+        }
+    }
+
+    return new Promise((resolve, reject) => {
+        if (ct.isCancelled()) {
+            reject();
+        } else {
+            loop(resolve, reject);
+        }
+    });
+}
+
+function getComputedBorderPaddingAndFontSize(element: HTMLElement) {
+    const {
+        borderTop, borderRight, borderBottom, borderLeft,
+        paddingTop, paddingRight, paddingBottom, paddingLeft,
+        fontSize,
+    } = getComputedStyle(element);
+    const border = {
+        top: Number(borderTop.slice(0, -2)),
+        right: Number(borderRight.slice(0, -2)),
+        bottom: Number(borderBottom.slice(0, -2)),
+        left: Number(borderLeft.slice(0, -2)),
+    };
+    const padding = {
+        top: Number(paddingTop.slice(0, -2)),
+        right: Number(paddingRight.slice(0, -2)),
+        bottom: Number(paddingBottom.slice(0, -2)),
+        left: Number(paddingLeft.slice(0, -2)),
+    };
+    return { border, padding, fontSize: Number(fontSize.slice(0, -2)) };
+}
+
+// ===========
+//  COMPONENT
+// ===========
+
 export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
     // Spotify's Branding Guidelines: https://developer.spotify.com/branding-guidelines/
     const [ iconColor, setIconColor ] = useState(SPOTIFY_LIGHT_GREEN);
     const iconRef = useRef<HTMLElement>(null);
 
-    const html2canvasTimeoutId = useRef(0);
-    const stateWhenLastUsedHtml2CanvasDueToTransparentBackground = useRef<H2CAlphaState>({
-        alpha: 0,
-        rgb: [ 0, 0, 0 ],
-        averageColor: [ 0, 0, 0 ],
-    });
-    const hasStateWhenLastUsedHtml2CanvasDueToTransparentBackgroundChanged = useCallback((newState: H2CAlphaStateS) => {
-        const prev = stateWhenLastUsedHtml2CanvasDueToTransparentBackground.current;
-        const current = newState;
-        return prev.iconRect?.x === current.iconRect?.x && prev.iconRect?.y === current.iconRect?.y &&
-               prev.iconRect?.width === current.iconRect?.width && prev.iconRect?.height === current.iconRect?.height &&
-               prev.backgroundBeneathProperty?.name === current.backgroundBeneathProperty?.name &&
-               prev.backgroundBeneathProperty?.value === current.backgroundBeneathProperty?.value;
+    const html2canvasCache = useRef<ReturnType<typeof CacheStorage.create>>();
+    useEffect(() => {
+        const instanceName = (Math.round(Math.random() * 1000) + Date.now()).toString(16);
+        html2canvasCache.current = CacheStorage.create(instanceName, {
+            allowTaint: false,
+            imageTimeout: 15000,
+            proxy: undefined,
+            useCORS: false,
+        });
+        Logger.create({ id: instanceName, enabled: false });
+
+        return () => {
+            CacheStorage.destroy(instanceName);
+            Logger.destroy(instanceName);
+            html2canvasCache.current = undefined;
+        };
     }, []);
 
-    /**
-     * Takes a "screenshot" of the whole document turning it into a canvas, and then decides which color to use
-     * for the Spotify's icon based on the average color of the portion of screen where the icon would be placed.
-     *
-     * This solves all the cases where calculating the icon's background color manually would be a pita:
-     * gradients, images, semi-transparent color on top of non-solid backgrounds.
-     *
-     * THIS METHOD SHOULD BE USED SPARINGLY SINCE IT'S BUGGY AND COULD HANG OR FREEZE THE WHOLE APP!
-     *
-     * @see https://developer.spotify.com/branding-guidelines/
-     */
-    const setIconColorUsingHtml2Canvas = useCallback((then?: (averageColor: RGB) => void) => {
-        clearTimeout(html2canvasTimeoutId.current);
-        html2canvasTimeoutId.current = setTimeout((() => {
-            Log.warn('html2canvas');
-            if (iconRef.current === null) {
-                setIconColor(SPOTIFY_LIGHT_GREEN);
-            } else {
-                const rect = iconRef.current.getBoundingClientRect();
-                html2canvas(document.body, {
-                    logging: false,
-                    backgroundColor: null,
-                    x: rect.x,
-                    y: rect.y,
-                    width: rect.width,
-                    height: rect.height,
-                    ignoreElements: element => {
-                        return element.tagName === 'CANVAS';
-                    },
-                    onclone: doc => {
-                        // Make all text transparent
-                        const treeWalker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT, null, false);
-                        let n: Node | null;
-                        while (n = treeWalker.nextNode()) {
-                            if (n.parentElement) {
-                                n.parentElement.style.color = 'transparent';
-                            }
-                        }
-                    },
-                }).then(canvas => {
-                    html2canvasTimeoutId.current = 0;
-                    if (window.acav.resetAudioListener !== undefined) {
-                        // For some reason the registered audio listener gets removed once html2canvas is done
-                        window.acav.resetAudioListener();
-                    }
-
-                    const ctx = canvas.getContext('2d');
-                    if (ctx !== null) {
-                        // Calculate average color
-                        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                        const rgb: RGB = [ 0, 0, 0 ];
-                        for (let i = 0; i < imageData.width; ++i) {
-                            for (let j = 0; j < imageData.height; ++j) {
-                                const ipx = j * (imageData.width * 4) + i * 4;
-                                rgb.forEach((_v, _i, _a) => {
-                                    _a[_i] += imageData.data[ipx + _i];
-                                });
-                            }
-                        }
-
-                        const npx = imageData.width * imageData.height;
-                        rgb.forEach((_v, _i, _a) => { _a[_i] /= npx; });
-                        setIconColor(isDark(rgb) ? SPOTIFY_WHITE : SPOTIFY_BLACK);
-                        then?.(rgb);
-                    } else {
-                        setIconColor(SPOTIFY_LIGHT_GREEN);
-                    }
-                });
-            }
-        }) as TimerHandler, 100);
+    const computedBackgroundPropertiesReducer = useCallback((prevProps: ComputedBackgroundProperties, newProps: ComputedBackgroundProperties) => {
+        if (prevProps !== null && newProps !== null && _.isMatch(prevProps, newProps)) return prevProps;
+        return newProps;
     }, []);
+    const [ overlayBackgroundProperties, setOverlayBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(props.overlayHtmlRef.current));
+    const [ wallpaperBackgroundProperties, setWallpaperBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(props.backgroundHtmlRef.current));
 
-    const getLastBackgroundProperty = useCallback((cssBackground: CssBackground) => {
-        let lastBackgroundProperty: { k: string, v: string } | undefined;
-        const ownProps = Object.getOwnPropertyNames(cssBackground);
-        for (let i = ownProps.length - 1; i >= 0; --i) {
-            const backgroundPropName = ownProps[i];
-            const backgroundPropValue: string = (cssBackground as any)[backgroundPropName];
-            if (backgroundPropValue === undefined) continue;
-            if (backgroundPropName === 'backgroundColor' || backgroundPropName === 'backgroundImage' || backgroundPropName === 'background') {
-                lastBackgroundProperty = { k: backgroundPropName, v: backgroundPropValue };
-                break;
-            }
+    const decideIconColor = useCallback((rgb: RGB, isBackgroundImage: boolean = false) => {
+        // Use green icon if the color is black'ish or white'ish
+        const hsl = ColorConvert.rgb.hsl(rgb);
+        if (!isBackgroundImage && ((hsl[2] <= 3 || colorEquals(rgb, SPOTIFY_BLACK.rgb)) || (hsl[2] > 95))) {
+            setIconColor(SPOTIFY_LIGHT_GREEN);
+        } else {
+            setIconColor(isDark(rgb) ? SPOTIFY_WHITE : SPOTIFY_BLACK);
         }
-        return lastBackgroundProperty;
     }, []);
+
+    const offscreenCanvas = useMemo(() => new OffscreenCanvas(0, 0), []);
+    const getAverageColorOfBackgrounds = useCallback(async (
+        wallpaperBgProps: ComputedBackgroundProperties,
+        overlayBgProps: ComputedBackgroundProperties,
+        ct: CancellationToken,
+    ): Promise<RGB> => {
+        if (ct.isCancelled()) return Promise.reject();
+        if (wallpaperBgProps === null || overlayBgProps === null) return Promise.reject();
+        if (props.backgroundHtmlRef.current === null || props.overlayHtmlRef.current === null) return Promise.reject();
+        if (iconRef.current === null) return Promise.reject();
+
+        const ctx = offscreenCanvas.getContext('2d');
+        if (ctx !== null) {
+            const canvasRect = props.backgroundHtmlRef.current.getBoundingClientRect();
+            setCanvasSize(offscreenCanvas, canvasRect.width, canvasRect.height);
+            ctx.clearRect(0, 0, canvasRect.width, canvasRect.height);
+
+            try {
+                // Render the wallpaper
+                const wallpaperBackgroundImage = BackgroundParser.parseBackgroundImage(wallpaperBgProps.backgroundImage);
+                const { border: wBorder, padding: wPadding, fontSize: wFontSize } = getComputedBorderPaddingAndFontSize(props.backgroundHtmlRef.current);
+                await renderToCanvas(offscreenCanvas, wallpaperBackgroundImage, wallpaperBgProps, canvasRect, wBorder, wPadding, wFontSize, ct);
+                if (ct.isCancelled()) return Promise.reject();
+
+                // Render the overlay
+                const overlayBackgroundImage = BackgroundParser.parseBackgroundImage(overlayBgProps.backgroundImage);
+                const { border: oBorder, padding: oPadding, fontSize: oFontSize } = getComputedBorderPaddingAndFontSize(props.overlayHtmlRef.current);
+                await renderToCanvas(offscreenCanvas, overlayBackgroundImage, overlayBgProps, props.overlayHtmlRef.current.getBoundingClientRect(), oBorder, oPadding, oFontSize, ct);
+                if (ct.isCancelled()) return Promise.reject();
+            } catch (err) {
+                Log.error(err);
+                return Promise.reject();
+            }
+
+            const spotifyIconRect = iconRef.current.getBoundingClientRect();
+            const { marginTop, marginRight, marginBottom, marginLeft } = getComputedStyle(iconRef.current);
+            const margin = {
+                top: Number(marginTop.slice(0, -2)),
+                right: Number(marginRight.slice(0, -2)),
+                bottom: Number(marginBottom.slice(0, -2)),
+                left: Number(marginLeft.slice(0, -2)),
+            };
+
+            const imageData = ctx.getImageData(
+                spotifyIconRect.left - margin.left,
+                spotifyIconRect.top - margin.top,
+                spotifyIconRect.width + margin.left + margin.right,
+                spotifyIconRect.height + margin.top + margin.bottom,
+            );
+            const rgb: RGB = [ 0, 0, 0 ];
+            for (let i = 0; i < imageData.width; ++i) {
+                for (let j = 0; j < imageData.height; ++j) {
+                    const ipx = j * (imageData.width * 4) + i * 4;
+                    rgb[0] += imageData.data[ipx + 0];
+                    rgb[1] += imageData.data[ipx + 1];
+                    rgb[2] += imageData.data[ipx + 2];
+                }
+            }
+            const npx = imageData.width * imageData.height;
+            rgb[0] /= npx;
+            rgb[1] /= npx;
+            rgb[2] /= npx;
+
+            return rgb;
+        }
+
+        return [ 0, 0, 0 ] as RGB;
+    }, [ offscreenCanvas, props.backgroundHtmlRef, props.overlayHtmlRef ]);
 
     // Change the icon's color based on the background to respect Spotify's guidelines
+    const cts = useRef(new CancellationTokenSource());
     useEffect(() => {
-        if (!props.background) return;
+        /* 1) check if overlay has a solid background color
+         *    2) check if it's semi-transparent
+         *       3) check if the wallpaper has a solid background color
+         *          4) blend overlay color with wallpaper color (and with black if wallpaper color is semi-transparent)
+         *        4b) ELSE render on offscreen canvas and compute average color
+         *     3b) ELSE use `overlayBackgroundProperties.backgroundColor`
+         *  2b) ELSE render on offscreen canvas and compute average color
+         */
+        if (html2canvasCache.current === undefined) return;
+        if (overlayBackgroundProperties === null || wallpaperBackgroundProperties === null) return;
+        cts.current.cancel();
+        cts.current = new CancellationTokenSource();
 
-        const lastBackgroundProperty = getLastBackgroundProperty(props.background);
-        if (!lastBackgroundProperty) {
-            setIconColor(SPOTIFY_LIGHT_GREEN);
-            return;
-        }
-
-        switch (lastBackgroundProperty.k) {
-            case 'backgroundColor': {
-                // NOTE: Use html2canvas SPARINGLY here because when the color changes too fast html2canvas tends to hang and then freeze the whole app!
-
-                const rgba = cssColorToRgba(lastBackgroundProperty.v);
-                if (rgba === undefined) break;
-
-                const rgb = rgba.slice(0, 3) as RGB;
-
-                if (rgba[3] < 1) {
-                    // Semi-transparent; if the background beneath this overlay is a solid color then lerp
-                    const bbRgb: RGB = [ 0, 0, 0 ];
-                    const bbLastBackgroundProperty = props.backgroundBeneath !== undefined ? getLastBackgroundProperty(props.backgroundBeneath) : undefined;
-                    if (bbLastBackgroundProperty !== undefined) {
-                        if (bbLastBackgroundProperty.k === 'backgroundColor') {
-                            // Solid background
-                            const _bbRgba = cssColorToRgba(bbLastBackgroundProperty.v);
-                            if (_bbRgba !== undefined) {
-                                bbRgb[0] = _bbRgba[0];
-                                bbRgb[1] = _bbRgba[1];
-                                bbRgb[2] = _bbRgba[2];
-                            }
-                        } else {
-                            // Non-solid-color background: check if it's actually necessary to use html2canvas
-                            // e.g. if only the RGB values of the overlay's background changed then it's not necessary to use html2canvas
-                            //      if we store the average color we calculated previously.
-                            const h2cAlphaState: H2CAlphaStateS = {
-                                iconRect: iconRef.current?.getBoundingClientRect(),
-                                backgroundBeneathProperty: { name: bbLastBackgroundProperty.k, value: bbLastBackgroundProperty.v },
-                            };
-
-                            if (hasStateWhenLastUsedHtml2CanvasDueToTransparentBackgroundChanged(h2cAlphaState)) {
-                                // Use html2canvas only if one of the following changes:
-                                // - the overlay position
-                                // - the background beneath
-                                setIconColorUsingHtml2Canvas(averageColor => {
-                                    stateWhenLastUsedHtml2CanvasDueToTransparentBackground.current = {
-                                        ...h2cAlphaState,
-                                        alpha: rgba[3],
-                                        rgb: rgb.slice() as RGB,
-                                        averageColor: averageColor.slice() as RGB,
-                                    };
-                                });
-                                break;
-                            } else {
-                                // PrevAverageColor = (1 - alpha) * PrevAverageColorBB + alpha * PrevRGB
-                                const prev = stateWhenLastUsedHtml2CanvasDueToTransparentBackground.current;
-                                const prevAverageColorBB = [
-                                    Math.round((prev.averageColor[0] - prev.alpha * prev.rgb[0]) / (1 - prev.alpha)),
-                                    Math.round((prev.averageColor[1] - prev.alpha * prev.rgb[1]) / (1 - prev.alpha)),
-                                    Math.round((prev.averageColor[2] - prev.alpha * prev.rgb[2]) / (1 - prev.alpha)),
-                                ];
-
-                                bbRgb[0] = prevAverageColorBB[0];
-                                bbRgb[1] = prevAverageColorBB[1];
-                                bbRgb[2] = prevAverageColorBB[2];
-                            }
-                        }
+        // 1)
+        // `background-image` has always higher priority than `background-color` in CSS
+        if (overlayBackgroundProperties.backgroundImage.toLowerCase() === PropertyDescriptors.backgroundImage.initialValue) {
+            // 2)
+            const overlayBackgroundColor = cssColorToRgba(overlayBackgroundProperties.backgroundColor) ?? [ 0, 0, 0, 0 ];
+            if (overlayBackgroundColor[3] < 1) {
+                // 3)
+                if (wallpaperBackgroundProperties.backgroundImage.toLowerCase() === PropertyDescriptors.backgroundImage.initialValue) {
+                    // 4)
+                    const wallpaperBackgroundColor = cssColorToRgba(wallpaperBackgroundProperties.backgroundColor) ?? [ 0, 0, 0, 0 ];
+                    let rgb = wallpaperBackgroundColor.slice(0, 3) as RGB;
+                    if (wallpaperBackgroundColor[3] < 1) {
+                        rgb = colorLerp([ 0, 0, 0 ], rgb, wallpaperBackgroundColor[3]);
                     }
-
-                    rgb[0] = Math.round(Math.lerp(bbRgb[0], rgb[0], rgba[3]));
-                    rgb[1] = Math.round(Math.lerp(bbRgb[1], rgb[1], rgba[3]));
-                    rgb[2] = Math.round(Math.lerp(bbRgb[2], rgb[2], rgba[3]));
-                }
-
-                // Use green icon if the color is black or white
-                const hsl = ColorConvert.rgb.hsl(rgb);
-                if ((hsl[2] <= 3 || colorEquals(rgb, SPOTIFY_BLACK.rgb)) || (hsl[2] > 95)) {
-                    setIconColor(SPOTIFY_LIGHT_GREEN);
+                    rgb = colorLerp(rgb, overlayBackgroundColor as unknown as RGB, overlayBackgroundColor[3]);
+                    decideIconColor(rgb);
                 } else {
-                    setIconColor(isDark(rgb) ? SPOTIFY_WHITE : SPOTIFY_BLACK);
+                    // 4b)
+                    CacheStorage.attachInstance(html2canvasCache.current);
+                    getAverageColorOfBackgrounds(wallpaperBackgroundProperties, overlayBackgroundProperties, cts.current.token).then(rgb => {
+                        decideIconColor(rgb);
+                    }).catch(() => {}).finally(() => CacheStorage.detachInstance());
                 }
-
-                break;
+            } else {
+                // 3b)
+                decideIconColor(overlayBackgroundColor as unknown as RGB);
             }
-
-            case 'background':
-            case 'backgroundImage':
-                setIconColorUsingHtml2Canvas();
-                break;
-
-            default: break;
+        } else {
+            // 2b)
+            CacheStorage.attachInstance(html2canvasCache.current);
+            getAverageColorOfBackgrounds(wallpaperBackgroundProperties, overlayBackgroundProperties, cts.current.token).then(rgb => {
+                decideIconColor(rgb);
+            }).catch(() => {}).finally(() => CacheStorage.detachInstance());
         }
-    }, [ getLastBackgroundProperty, hasStateWhenLastUsedHtml2CanvasDueToTransparentBackgroundChanged, props.background, props.backgroundBeneath, setIconColorUsingHtml2Canvas ]);
+    }, [ html2canvasCache, decideIconColor, overlayBackgroundProperties, getAverageColorOfBackgrounds, wallpaperBackgroundProperties, offscreenCanvas ]);
+
+    useEffect(() => {
+        setOverlayBackgroundProperties(getComputedBackgroundProperties(props.overlayHtmlRef.current));
+        setWallpaperBackgroundProperties(getComputedBackgroundProperties(props.backgroundHtmlRef.current));
+    });
 
     return (
-      <span className="spotify-icon" style={props.style} ref={iconRef} data-html2canvas-ignore>
-        <FontAwesomeIcon icon={faSpotify} color={iconColor.hex} />
+      <span className="spotify-icon" style={props.style} ref={iconRef}>
+        <FaSpotify color={iconColor.hex} />
       </span>
     );
 }

@@ -245,12 +245,13 @@ export default function App(props: AppProps) {
         };
     }, [ onAudioSamplesSubs, samplesBuffer ]);
 
+    const wallpaperRef = useRef<HTMLDivElement>(null);
     return (
-      <div style={style}>
+      <div ref={wallpaperRef} style={style}>
         <WallpaperContext.Provider value={wallpaperContext}>
           {showStats ? <Stats /> : null}
           <BarVisualizer />
-          {showSpotify ? <Spotify wallpaperBackground={styleBackground} /> : null}
+          {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
         </WallpaperContext.Provider>
       </div>
     );

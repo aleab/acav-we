@@ -6,8 +6,10 @@ const path = require('path');
 const webpack = require('webpack');
 
 const cssnano = require('cssnano');
+const postcssImport = require('postcss-import');
 const purgecss = require('@fullhuman/postcss-purgecss');
 
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
 const LodashPlugin = require('lodash-webpack-plugin');
@@ -20,6 +22,11 @@ const packageJson = require('./package.json');
 const SRC_PATH = path.resolve(__dirname, 'src');
 const DIST_PATH = path.resolve(__dirname, 'dist');
 
+/** @param {string} string */
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // ========
 //  CONFIG
 // ========
@@ -28,9 +35,18 @@ const DIST_PATH = path.resolve(__dirname, 'dist');
  */
 function getWebpackConfig(env, argv) {
     const isProduction = argv.mode !== 'development';
-    const hot = argv.hot;
+    const hot = !!argv.hot;
+    const buildTests = !!argv.buildTests || !isProduction; // --build-tests to include tests in production for ultimate test
 
     // Plugins
+    const bundleAnalyzerPlugin = new BundleAnalyzerPlugin({
+        analyzerMode: 'static',
+        reportFilename: '../bundle-report.html',
+        defaultSizes: 'parsed',
+        openAnalyzer: false,
+        generateStatsFile: true,
+        statsFilename: '../bundle-stats.json', // http://webpack.github.io/analyse/#modules
+    });
     const progressPlugin = new webpack.ProgressPlugin({ profile: true });
     const dotenvPlugin = new RequireVarsDotenvPlugin(['BACKEND_API_BASEURL']);
     const licensePlugin = new LicenseWebpackPlugin({
@@ -63,10 +79,7 @@ function getWebpackConfig(env, argv) {
             xstate: '<missing license text>',
         },
     });
-    const lodashPlugin = new LodashPlugin({
-        cloning: true,
-        exotics: true,
-    });
+    const lodashPlugin = new LodashPlugin({ cloning: true, exotics: true });
     const copyPlugin = new CopyWebpackPlugin([
         { from: './LICENSE.txt' },
         {
@@ -83,10 +96,7 @@ function getWebpackConfig(env, argv) {
             },
         },
     ]);
-    const miniCssExtractPlugin = new MiniCssExtractPlugin({
-        filename: '[name].css',
-        chunkFilename: '[id].css',
-    });
+    const miniCssExtractPlugin = new MiniCssExtractPlugin({ filename: '[name].css' });
 
     const terserPlugin = new TerserPlugin({
         terserOptions: {
@@ -101,6 +111,7 @@ function getWebpackConfig(env, argv) {
         extractComments: false,
     });
     const bannerPlugin = new webpack.BannerPlugin({
+        exclude: /\.css$/,
         raw: true,
         banner: '/*!\n' +
                 ' * This Source Code Form is subject to the terms of the Mozilla Public\n' +
@@ -109,11 +120,24 @@ function getWebpackConfig(env, argv) {
                 ' */\n',
     });
 
+    const postcssPlugins = [postcssImport()];
+    if (isProduction) {
+        postcssPlugins.push(
+            cssnano({ preset: 'default' }),
+            purgecss({
+                content: [ './static/**/*.html', './src/**/*.tsx' ],
+                fontFace: true,
+                keyframes: true,
+                variables: true,
+            }),
+        );
+    }
+
     // ===============
     //  COMMON CONFIG
     // ===============
     /** @type {import('webpack').Configuration} */
-    const config = {
+    const baseConfig = {
         entry: {
             main: './src/index.tsx',
         },
@@ -151,12 +175,7 @@ function getWebpackConfig(env, argv) {
                                 {
                                     loader: 'postcss-loader',
                                     options: {
-                                        plugins: [
-                                            cssnano({ preset: 'default' }),
-                                            purgecss({
-                                                content: [ './static/**/*.html', './src/**/*.tsx' ],
-                                            }),
-                                        ],
+                                        plugins: postcssPlugins,
                                     },
                                 },
                             ],
@@ -164,6 +183,10 @@ function getWebpackConfig(env, argv) {
                         {
                             test: /\.(json|jsonc)$/,
                             loader: path.resolve(__dirname, 'build-scripts', 'jsonc-loader.js'),
+                        },
+                        {
+                            test: /\.svg$/,
+                            loader: 'svg-react-loader',
                         },
                         {
                             loader: 'file-loader',
@@ -180,26 +203,40 @@ function getWebpackConfig(env, argv) {
             minimize: true,
             minimizer: [ terserPlugin, bannerPlugin ],
             splitChunks: {
+                chunks: 'all',
+                name: (_module, _chunks, cacheGroupKey) => cacheGroupKey,
                 cacheGroups: {
-                    lib: {
+                    'lib-a': { // modules that are less likely to be updated
                         test: module => {
-                            if (!module.resource) return false;
-                            return /[\\/]node_modules[\\/](fuse.js|html2canvas|idb|musicbrainz-api|@?xstate)[\\/]/.test(module.resource)
-                                || /[\\/]node_modules[\\/](axios|https-proxy-agent)[\\/]/.test(module.resource); // transitive dependencies
+                            if (/\.css$/.test(module.resource)) return false;
+                            const p = escapeRegExp(path.resolve(__dirname, '..'));
+                            return /[\\/]node_modules[\\/](@fortawesome|color-convert|html2canvas|musicbrainz-api)[\\/]/.test(module.resource)
+                                || RegExp(`${p}[\\/](html2canvas|musicbrainz-api)[\\/]`).test(module.resource);
                         },
-                        name: 'lib',
-                        chunks: 'all',
+                        priority: 10,
+                    },
+                    'lib-b': { // modules that are more likely to be updated
+                        test: module => {
+                            return !(/\.css$/.test(module.resource))
+                                && /[\\/]node_modules[\\/](fuse.js|idb|lodash|@?xstate)[\\/]/.test(module.resource);
+                        },
+                        priority: 10,
+                    },
+                    react: {
+                        test: module => {
+                            if (/\.css$/.test(module.resource)) return false;
+                            return /[\\/]node_modules[\\/](react(-.+)?)[\\/]/.test(module.resource)
+                                || /[\\/]node_modules[\\/](prop-types|.*react.*|scheduler)[\\/]/.test(module.resource); // transitive dependencies
+                        },
+                        enforce: true,
                         priority: 1,
                     },
-                    shared: {
+                    vendors: {
                         test: module => {
-                            if (!module.resource) return false;
-                            return /[\\/]node_modules[\\/](@fortawesome|color-convert|lodash|react|react-dom|webpack)[\\/]/.test(module.resource)
-                                || /[\\/]node_modules[\\/](assert|buffer)[\\/]/.test(module.resource); // transitive dependencies
+                            return !(/\.css$/.test(module.resource))
+                                && /[\\/]node_modules[\\/]/.test(module.resource);
                         },
-                        name: 'shared',
-                        chunks: 'all',
-                        priority: 10,
+                        enforce: true,
                     },
                 },
             },
@@ -251,11 +288,11 @@ function getWebpackConfig(env, argv) {
     const _prodConf = {
         mode: 'production',
         plugins: [
-            ...config.plugins,
-            new webpack.NormalModuleReplacementPlugin(/[\\/]tests[\\/]tests\.ts/, './noop.ts'),
+            bundleAnalyzerPlugin,
+            ...baseConfig.plugins,
         ],
     };
-    const prodConfig = _.merge({}, config, _prodConf);
+    const prodConfig = _.merge({}, baseConfig, _prodConf);
 
     // =============
     //  DEVELOPMENT
@@ -265,7 +302,7 @@ function getWebpackConfig(env, argv) {
         mode: 'development',
         output: { publicPath: '/' },
         optimization: { minimize: false },
-        plugins: [ ...config.plugins, bannerPlugin ],
+        plugins: [ ...baseConfig.plugins, bannerPlugin ],
         devServer: {
             port: 3000,
             hot: true,
@@ -275,25 +312,35 @@ function getWebpackConfig(env, argv) {
         },
         devtool: 'inline-source-map',
     };
-    const devConfig = _.merge({}, config, _devConfig);
+    const devConfig = _.merge({}, baseConfig, _devConfig);
 
     if (hot) {
-        devConfig.entry.main = typeof devConfig.entry.main === 'string' ? [
+        const hotDevEntry = [
             'webpack-dev-server/client?http://localhost:3000',
             'webpack/hot/only-dev-server',
-            devConfig.entry.main,
-        ] : [
-            'webpack-dev-server/client?http://localhost:3000',
-            'webpack/hot/only-dev-server',
-            ...devConfig.entry.main,
         ];
+        devConfig.entry.main = typeof devConfig.entry.main === 'string' ? [ ...hotDevEntry, devConfig.entry.main ] : [ ...hotDevEntry, ...devConfig.entry.main ];
         devConfig.plugins = [
             ...devConfig.plugins,
             new webpack.HotModuleReplacementPlugin(),
         ];
     }
 
-    return isProduction ? prodConfig : devConfig;
+    const config = isProduction ? prodConfig : devConfig;
+
+    if (!buildTests) {
+        config.plugins = [
+            new webpack.NormalModuleReplacementPlugin(/[\\/]tests[\\/]tests\.ts/, resource => {
+                if (resource.request.endsWith(path.resolve(__dirname, 'src/tests/tests.ts'))) {
+                    resource.request = resource.request.replace(/tests\.ts$/, 'noop.ts');
+                    resource.resource = resource.resource.replace(/tests\.ts$/, 'noop.ts');
+                }
+            }),
+            ...config.plugins,
+        ];
+    }
+
+    return config;
 }
 
 module.exports = getWebpackConfig;

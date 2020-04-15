@@ -3,11 +3,11 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleNotch, faFilter, faPlug, faSkull } from '@fortawesome/free-solid-svg-icons';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { RefObject, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AnyEventObject } from 'xstate';
 import { useMachine } from '@xstate/react';
+
+import { FaCircleNotch, FaFilter, FaPlug, FaSkull } from '../fa';
 
 import Log from '../common/Log';
 import { checkInternetConnection } from '../common/Network';
@@ -40,7 +40,7 @@ type OverlayStyle = {
 };
 
 interface SpotifyProps {
-    wallpaperBackground?: CssBackground;
+    backgroundElement: RefObject<HTMLElement>;
 }
 
 export default function Spotify(props: SpotifyProps) {
@@ -246,10 +246,10 @@ export default function Spotify(props: SpotifyProps) {
     const StateIcons = useCallback(() => {
         const stateIconOverlay = (
           <span className="state-icons">
-            {isRefreshingToken ? <span><FontAwesomeIcon icon={faCircleNotch} color="hsla(0, 0%, 100%, 0.69)" spin /></span> : null}
-            {isRateLimited ? <span><FontAwesomeIcon icon={faFilter} color="hsla(45, 100%, 50%, 0.69)" /></span> : null}
-            {isFatalErrorGettingToken ? <span><FontAwesomeIcon icon={faSkull} color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
-            {hasNoInternetConnection ? <span><FontAwesomeIcon className="blink" icon={faPlug} color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
+            {isRefreshingToken ? <span><FaCircleNotch className="fa-spin" color="hsla(0, 0%, 100%, 0.69)" /></span> : null}
+            {isRateLimited ? <span><FaFilter color="hsla(45, 100%, 50%, 0.69)" /></span> : null}
+            {isFatalErrorGettingToken ? <span><FaSkull color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
+            {hasNoInternetConnection ? <span><FaPlug className="blink" color="hsla(0, 100%, 32%, 0.69)" /></span> : null}
           </span>
         );
         return Array.isArray(stateIconOverlay.props.children)
@@ -257,11 +257,13 @@ export default function Spotify(props: SpotifyProps) {
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
     }, [ hasNoInternetConnection, isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
+    const spotifyDivRef = useRef<HTMLDivElement>(null);
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle: {
             if (currentlyPlaying === undefined) return null;
             const spotifyDivProps = {
+                ref: spotifyDivRef,
                 id: 'spotify',
                 className: 'overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden',
                 style: { ...overlayStyle, ...overlayBackgroundStyle },
@@ -288,7 +290,7 @@ export default function Spotify(props: SpotifyProps) {
                 // Show only Spotify's icon when no song is playing
                 return (
                   <div {...spotifyDivProps}>
-                    <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                    <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
                     <StateIcons />
                   </div>
                 );
@@ -330,7 +332,7 @@ export default function Spotify(props: SpotifyProps) {
                         <StateIcons />
                         {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
                         <div {...songInfoRowProps}>
-                          <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                          <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
                           <SpotifyOverlaySongInfo {...songInfoProps} />
                         </div>
                       </div>
@@ -346,7 +348,7 @@ export default function Spotify(props: SpotifyProps) {
             secondaryMessages.push('Enter a new token');
             return (
               <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
-                <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
                 <SpotifyOverlayError message={errorMsg} secondaryMessages={secondaryMessages} color={overlayStyle.color} />
                 <StateIcons />
               </div>
@@ -358,7 +360,7 @@ export default function Spotify(props: SpotifyProps) {
             const event: RefreshTokenAfterSecondsEventObject | undefined = state.event.data?.event;
             return (
               <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
-                <SpotifyOverlayIcon background={overlayBackgroundStyle} backgroundBeneath={props.wallpaperBackground} />
+                <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
                 <SpotifyOverlayError message={errorMsg} secondaryMessages={event?.error ? [event?.error] : undefined} color={overlayStyle.color} />
                 <StateIcons />
               </div>

@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
+/* eslint-disable import/no-extraneous-dependencies */
 const chalk = require('chalk');
 const DotenvPlugin = require('dotenv-webpack');
 

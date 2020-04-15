@@ -125,3 +125,6 @@ temp/
 .env.*
 !.env.sample
 !.env.example
+
+bundle-report.html
+bundle-stats.json

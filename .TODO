@@ -1,2 +1,3 @@
-TODO: Remove, replace or do whatever is necessary to reduce the bundle size of @fortawesome/*
 TODO: Add `spotify.art.fetchLocalCacheMaxAge` property (in days, [0.1, 28])
+TODO: Cache MusicBrainz's cover images
+TODO: Remove unnecesary parts of `project.json` from the bundle if possible

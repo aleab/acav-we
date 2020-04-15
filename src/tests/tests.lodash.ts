@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { expect } from 'chai';
 
-// NOTE: Test lodash because of `lodash-webpack-plugin` which could replace
+// NOTE: Test lodash because of `lodash-webpack-plugin'
 
 function success(name: string) { console.log(`%c[TEST] ${name} %c✓`, 'color: #3A62C1', 'color: green; font-weight: bold'); }
 function fail(name: string, err: any) {
@@ -140,6 +140,8 @@ function merge() {
         new: 'new',
     });
 }
+
+// TODO: _.some
 
 export default function test() {
     const tests: { [k: string]: () => void } = { cloneDeep, isEmpty, isEqual, merge, pick };

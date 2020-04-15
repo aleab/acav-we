@@ -1,15 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import './polyfills/index';
 import './common/index';
 import './app/index';
 import './tests/tests';
 
 import App from './components/App';
 import Properties, { mapProperties } from './app/properties/Properties';
-
-import './css/main.css';
 import projectProperties from '../project.json/project.properties.json';
+
+import '@fortawesome/fontawesome-free/css/svg-with-js.css';
+import './css/main.css';
 
 function run(Component: typeof App) {
     const onresizeEventSubs = new Set<(args: {}) => void>();
