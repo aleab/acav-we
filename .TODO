@@ -1,2 +1,1 @@
-TODO: Add `spotify.art.fetchLocalCacheMaxAge` property (in days, [0.1, 28])
 TODO: Remove unnecesary parts of `project.json` from the bundle if possible

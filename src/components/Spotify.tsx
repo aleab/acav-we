@@ -53,10 +53,11 @@ export default function Spotify(props: SpotifyProps) {
     useEffect(() => {
         mbClient.current = new MusicbrainzClientCacheDecorator(new MusicbrainzClient(process.env.NODE_ENV === 'development'), {
             cacheName: 'aleab.acav',
-            ttlMs: 1000 * 60 * 60 * 24 * 5,
+            ttlMs: Math.round(1000 * 60 * 60 * 24 * O.current.art.fetchLocalCacheMaxAge),
             cacheMaintenanceInterval: 1000 * 60 * 30,
         });
         mbClient.current.init();
+
         return () => {
             mbClient.current?.dispose();
             mbClient.current = undefined;
@@ -186,6 +187,11 @@ export default function Spotify(props: SpotifyProps) {
             if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
             if (spotifyProps.art.fetchLocalCovers !== undefined) setOverlayArtFetchLocalCovers(spotifyProps.art.fetchLocalCovers);
+            if (spotifyProps.art.fetchLocalCacheMaxAge !== undefined) {
+                if (mbClient.current !== undefined) {
+                    mbClient.current.ttl = Math.round(1000 * 60 * 60 * 24 * spotifyProps.art.fetchLocalCacheMaxAge);
+                }
+            }
         }
         if (spotifyProps.style !== undefined) {
             const s: Partial<OverlayStyle> = {};

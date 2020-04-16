@@ -50,11 +50,16 @@ export interface IMusicbrainzClientCache {
 export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClient, IMusicbrainzClientCache {
     private readonly mbClient: IMusicbrainzClient;
     private readonly cacheName: string;
-    private readonly ttl: number;
+    private _ttl: number = TTL_DEFAULT;
     private db: IDBPDatabase<MusicbrainzDB> | undefined;
 
     private readonly cacheMaintenanceInterval: number;
     private cacheMaintenanceTimeoutId = 0;
+
+    get ttl() { return this._ttl; }
+    set ttl(value: number) {
+        this._ttl = value > TTL_MIN ? value : TTL_MIN;
+    }
 
     constructor(mbClient: IMusicbrainzClient, options: MusicbrainzClientCacheDecoratorOptions) {
         if (options.cacheName === null || options.cacheName === undefined || !(/[a-z]/i).test(options.cacheName)) {
@@ -63,9 +68,7 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
 
         this.mbClient = mbClient;
         this.cacheName = options.cacheName;
-        this.ttl = options.ttlMs !== undefined
-            ? options.ttlMs > TTL_MIN ? options.ttlMs : TTL_MIN
-            : TTL_DEFAULT;
+        this.ttl = options.ttlMs ?? TTL_DEFAULT;
 
         this.cacheMaintenanceInterval = options.cacheMaintenanceInterval !== undefined
             ? options.cacheMaintenanceInterval > CACHE_MAINTENANCE_MIN_INTERVAL ? options.cacheMaintenanceInterval : CACHE_MAINTENANCE_MIN_INTERVAL

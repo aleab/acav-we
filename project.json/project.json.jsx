@@ -222,6 +222,7 @@ function getProjectJson() {
                         '- <em>release-group</em>: an album, single, etc.',
                         '- <em>release</em>: a specific version/issuing of an album, single, etc.',
                     ),
+                    ui_spotify_art_fetch_local_cache_age: indent('Cache (days)', { n: 3 }) + asterisk(),
                     //
                     // [SPOTIFY > TEXT SCROLLING]
                     ui_spotify_scroll: subSection('Text Scrolling'),

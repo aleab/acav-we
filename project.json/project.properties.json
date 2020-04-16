@@ -657,6 +657,15 @@
         "text": "ui_$_spotify_art_fetch_local_note",
         "condition": "showDescriptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
     },
+    "spotify_art_fetch_local_cache_age": {
+        "order": 5035,
+        "type": "slider",
+        "text": "ui_spotify_art_fetch_local_cache_age",
+        "value": 5,
+        "min": 1,
+        "max": 28,
+        "condition": "showAdvancedOptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
+    },
     //
     // [SPOTIFY > TEXT SCROLLING]
     "spotify_scroll": {
