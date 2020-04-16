@@ -87,12 +87,12 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
         this.coverArtArchiveApi = new CoverArtArchiveApi();
 
         this.verbose = verboseLogging;
+        this.logVerbose = verboseLogging ? Logc.debug : (() => {});
+
         Logc.info('Initialized!');
     }
 
-    private logVerbose(...args: any[]) {
-        Logc.debug(...args);
-    }
+    private logVerbose() {}
 
     // NOTE: Resources:
     // Musicbrainz search: https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2/Search
@@ -180,7 +180,6 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
         if (queryTerms.length === 0) return null;
         Logc.debug('findCoverArt', track);
         this.logVerbose('--> queryTerms', queryTerms);
-        this.logVerbose('--> query', query);
 
         //  Search for MB recording
         // =========================

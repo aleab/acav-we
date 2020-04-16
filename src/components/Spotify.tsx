@@ -51,7 +51,7 @@ export default function Spotify(props: SpotifyProps) {
     // TODO: Should this be somewhere else? Singleton service?
     const mbClient = useRef<MusicbrainzClientCacheDecorator | undefined>(undefined);
     useEffect(() => {
-        mbClient.current = new MusicbrainzClientCacheDecorator(new MusicbrainzClient(false), {
+        mbClient.current = new MusicbrainzClientCacheDecorator(new MusicbrainzClient(process.env.NODE_ENV === 'development'), {
             cacheName: 'aleab.acav',
             ttlMs: 1000 * 60 * 60 * 24 * 5,
             cacheMaintenanceInterval: 1000 * 60 * 30,
@@ -319,7 +319,7 @@ export default function Spotify(props: SpotifyProps) {
                         <div {...songInfoRowProps}>
                           <SpotifyAlbumArt
                             className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth}
-                            track={currentlyPlaying.item} mbClient={mbClient.current} fetchLocalCovers={overlayArtFetchLocalCovers}
+                            track={currentlyPlaying.item} mbClient={mbClient.current} mbClientCache={mbClient.current} fetchLocalCovers={overlayArtFetchLocalCovers}
                           />
                           <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
                         </div>

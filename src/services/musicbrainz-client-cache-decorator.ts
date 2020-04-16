@@ -18,6 +18,17 @@ interface MusicbrainzDB extends DBSchema {
             'by-updatedDate': number;
         };
     };
+    'musicbrainz-cover-urls': {
+        key: string;
+        value: {
+            readonly updatedAt: string;
+            timestamp: number;
+            url: string;
+        }
+        indexes: {
+            'by-updatedDate': number;
+        };
+    };
 }
 
 interface MusicbrainzClientCacheDecoratorOptions {
@@ -31,7 +42,12 @@ const TTL_DEFAULT = 1000 * 60 * 60 * 24;
 const CACHE_MAINTENANCE_MIN_INTERVAL = 1000 * 60 * 5;
 const CACHE_MAINTENANCE_DEFAULT_INTERVAL = 1000 * 60 * 30;
 
-export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClient {
+export interface IMusicbrainzClientCache {
+    cacheRealUrl(key: string, url: string): Promise<void>;
+    getCachedRealUrl(key: string): Promise<string | undefined>
+}
+
+export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClient, IMusicbrainzClientCache {
     private readonly mbClient: IMusicbrainzClient;
     private readonly cacheName: string;
     private readonly ttl: number;
@@ -65,15 +81,18 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
 
         this.db = await openDB<MusicbrainzDB>(this.cacheName, 1, {
             upgrade(db) {
-                const store = db.createObjectStore('musicbrainz-covers');
-                store.createIndex('by-updatedDate', 'timestamp');
+                const coversStore = db.createObjectStore('musicbrainz-covers');
+                coversStore.createIndex('by-updatedDate', 'timestamp');
+
+                const urlsStore = db.createObjectStore('musicbrainz-cover-urls');
+                urlsStore.createIndex('by-updatedDate', 'timestamp');
             },
         });
 
         if (!this.db) return;
         Logc.info('Initialized!');
 
-        this.cacheMaintenanceTimeoutId = setTimeout(this.cacheMaintenanceLoop.bind(this) as TimerHandler, 1000 * 5);
+        this.cacheMaintenanceTimeoutId = setTimeout(this.doCacheMaintenanceLoop.bind(this) as TimerHandler, 1000 * 5);
     }
 
     async findCoverArtByReleaseGroup(track: MusicbrainzClientSearchTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
@@ -89,7 +108,7 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
                     Logc.debug('Pulled cover art from cache:', { key: albumHashCode });
                 } else {
                     covers = await this.mbClient.findCoverArtByReleaseGroup(track);
-                    this.db.put('musicbrainz-covers', {
+                    await this.db.put('musicbrainz-covers', {
                         get updatedAt() { return new Date(this.timestamp).toISOString(); },
                         timestamp: Date.now(),
                         album: {
@@ -106,34 +125,71 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
         return this.mbClient.findCoverArtByReleaseGroup(track);
     }
 
-    private async cacheMaintenanceLoop() {
+    async cacheRealUrl(key: string, url: string) {
+        if (key && url) {
+            if (this.db === undefined) await this.init();
+            if (this.db) {
+                const cachedValue = await this.db.get('musicbrainz-cover-urls', key);
+                if (cachedValue === undefined || url !== cachedValue.url) {
+                    await this.db.put('musicbrainz-cover-urls', {
+                        get updatedAt() { return new Date(this.timestamp).toISOString(); },
+                        timestamp: Date.now(),
+                        url,
+                    }, key);
+                }
+            }
+        }
+    }
+
+    async getCachedRealUrl(key: string): Promise<string | undefined> {
+        if (key) {
+            if (this.db === undefined) await this.init();
+            if (this.db) {
+                const cachedValue = await this.db.get('musicbrainz-cover-urls', key);
+                if (cachedValue !== undefined && !this.hasExpired(cachedValue.timestamp)) {
+                    Logc.debug('Pulled cover art url from cache:', { key });
+                    return cachedValue.url;
+                }
+            }
+        }
+        return undefined;
+    }
+
+    private async doCacheMaintenanceLoop() {
         if (!this.db) {
-            this.cacheMaintenanceTimeoutId = setTimeout(this.cacheMaintenanceLoop.bind(this) as TimerHandler, this.cacheMaintenanceInterval);
+            this.cacheMaintenanceTimeoutId = setTimeout(this.doCacheMaintenanceLoop.bind(this) as TimerHandler, this.cacheMaintenanceInterval);
             return;
         }
 
         const db = this.db;
 
-        let entriesCount = await db.count('musicbrainz-covers');
+        let entriesCount = (await db.count('musicbrainz-covers')) + (await db.count('musicbrainz-cover-urls'));
         let storageUsage = (await navigator.storage.estimate()).usage ?? 0;
         Logc.debug(`Cache maintenance started   — Entries: ${entriesCount.toString().padEnd(4, ' ')} | Total Storage Used: ${Math.formatBytes(storageUsage, 1)}`);
 
-        const promises: Array<Promise<number | undefined>> = [];
-        const keysToDelete = await db.getAllKeysFromIndex('musicbrainz-covers', 'by-updatedDate', IDBKeyRange.upperBound(Date.now() - this.ttl));
+        const promises: Array<Promise<number | string | undefined>> = [];
 
-        keysToDelete.forEach(key => {
+        const coversKeysToDelete = await db.getAllKeysFromIndex('musicbrainz-covers', 'by-updatedDate', IDBKeyRange.upperBound(Date.now() - this.ttl));
+        coversKeysToDelete.forEach(key => {
             promises.push(new Promise(resolve => {
                 db.delete('musicbrainz-covers', key).then(() => resolve(key));
             }));
         });
 
+        const urlsKeysToDelete = await db.getAllKeysFromIndex('musicbrainz-cover-urls', 'by-updatedDate', IDBKeyRange.upperBound(Date.now() - this.ttl));
+        urlsKeysToDelete.forEach(key => {
+            promises.push(new Promise(resolve => {
+                db.delete('musicbrainz-cover-urls', key).then(() => resolve(key));
+            }));
+        });
+
         await Promise.all(promises);
 
-        entriesCount = await db.count('musicbrainz-covers');
+        entriesCount = (await db.count('musicbrainz-covers')) + (await db.count('musicbrainz-cover-urls'));
         storageUsage = (await navigator.storage.estimate()).usage ?? 0;
         Logc.info(`Cache maintenance completed — Entries: ${entriesCount.toString().padEnd(4, ' ')} | Total Storage Used: ${Math.formatBytes(storageUsage, 1)}`);
 
-        this.cacheMaintenanceTimeoutId = setTimeout(this.cacheMaintenanceLoop.bind(this) as TimerHandler, this.cacheMaintenanceInterval);
+        this.cacheMaintenanceTimeoutId = setTimeout(this.doCacheMaintenanceLoop.bind(this) as TimerHandler, this.cacheMaintenanceInterval);
     }
 
     private hasExpired(timestamp: number) { return Date.now() - this.ttl > timestamp; }
