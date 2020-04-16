@@ -68,7 +68,7 @@ const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/mz2cdi4qlf">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
-const spotifyAuthLink = text => `<a href="">${text}</a>`; // TODO:
+const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
 
 function getProjectJson() {
