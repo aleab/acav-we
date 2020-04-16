@@ -184,6 +184,7 @@ function getProjectJson() {
 
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),
+                    ui_spotify_backend_url: indent('Backend URL') + asterisk(),
                     ui_spotify_token: indent('Token'),
                     ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a <em>token</em> ${spotifyAuthLink('here')}.`),
                     ui_$_spotify_token_note: note(

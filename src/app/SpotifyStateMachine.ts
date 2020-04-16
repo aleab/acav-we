@@ -6,7 +6,6 @@ import Log from '../common/Log';
 
 const Logc = Log.getLogger('SpofitySM', '#1DB954', 'background-color: #191414;');
 
-const BACKEND_API_BASEURL = process.env.BACKEND_API_BASEURL;
 export const LOCALSTORAGE_SPOTIFY_TOKEN = 'aleab.acav.spotify';
 
 // ======================
@@ -92,6 +91,7 @@ enum SsmAction {
 }
 
 interface SsmContext {
+    backendUrl: string;
     readonly token: { readonly current: string | null };
     spotifyToken?: SpotifyToken;
 }
@@ -119,7 +119,7 @@ function isValidTokenObject(token: any): boolean {
  */
 async function fetchToken(context: SsmContext, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
     try {
-        const res = await fetch(`${BACKEND_API_BASEURL}/token`, {
+        const res = await fetch(`${context.backendUrl}/token`, {
             method: 'POST',
             body: new URLSearchParams({ token: context.token.current! }),
         });
@@ -181,9 +181,9 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
  * @param retry
  * @returns A RaiseAction for the state machine
  */
-async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
+async function fetchRefreshToken(context: SsmContext, spotifyToken: SpotifyToken, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
     try {
-        const res = await fetch(`${BACKEND_API_BASEURL}/refresh`, {
+        const res = await fetch(`${context.backendUrl}/refresh`, {
             method: 'POST',
             body: new URLSearchParams({ refresh_token: spotifyToken.refresh_token }),
         });
@@ -254,7 +254,7 @@ async function fetchRefreshToken(spotifyToken: SpotifyToken, retry: number = 3):
             return raise(SsmEvent.NoInternetConnection);
         }
         // TODO: Is it fine to sleep? Does it block everything?
-        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRefreshToken(spotifyToken, retry - 1));
+        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRefreshToken(context, spotifyToken, retry - 1));
     }
 }
 
@@ -366,7 +366,7 @@ const SpotifyStateMachine = Machine<SsmContext>({
                         ctx.spotifyToken = spotifyToken;
                         return raise(SsmEvent.Idle);
                     }
-                    return fetchRefreshToken(spotifyToken);
+                    return fetchRefreshToken(ctx, spotifyToken);
                 },
                 onDone: [
                     {

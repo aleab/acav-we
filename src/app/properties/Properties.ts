@@ -41,6 +41,7 @@ export default interface Properties {
     },
     spotify: {
         showOverlay: boolean;
+        backendURL: string;
         token: string;
         style: {
             pivot: Pivot;
@@ -166,6 +167,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions, 'backendURL', raw.spotify_backend_url as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
     // .spotify.style
     setProperty(spotifyOptions.style!, 'pivot', raw.spotify_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));

@@ -492,24 +492,31 @@
         "text": "ui_spotify",
         "value": false
     },
-    "spotify_token": {
+    "spotify_backend_url": {
         "order": 5001,
+        "type": "textinput",
+        "text": "ui_spotify_backend_url",
+        "value": "",
+        "condition": "showAdvancedOptions.value && spotify.value"
+    },
+    "spotify_token": {
+        "order": 5002,
         "type": "textinput",
         "text": "ui_spotify_token",
         "value": "",
         "condition": "spotify.value"
     },
     "$_spotify_token": {
-        "order": 5002,
-        "type": "text",
-        "text": "ui_$_spotify_token",
-        "condition": "spotify.value"
-    },
-    "$_spotify_token_note": {
         "order": 5003,
         "type": "text",
+        "text": "ui_$_spotify_token",
+        "condition": "spotify.value && !spotify_backend_url.value"
+    },
+    "$_spotify_token_note": {
+        "order": 5004,
+        "type": "text",
         "text": "ui_$_spotify_token_note",
-        "condition": "(showDescriptions.value && showAdvancedOptions.value) && spotify.value"
+        "condition": "(showDescriptions.value && showAdvancedOptions.value) && spotify.value && !spotify_backend_url.value"
     },
     "spotify_pivot": {
         "order": 5010,

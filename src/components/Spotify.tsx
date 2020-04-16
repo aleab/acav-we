@@ -103,7 +103,7 @@ export default function Spotify(props: SpotifyProps) {
     // ===============
     //  STATE MACHINE
     // ===============
-    const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token }));
+    const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token, backendUrl: process.env.BACKEND_API_BASEURL! }));
     useEffect(() => { // window.acav.refreshSpotifyToken()
         window.acav.refreshSpotifyToken = () => {
             const lsSpotifyToken = localStorage.getItem(LOCALSTORAGE_SPOTIFY_TOKEN);
@@ -180,6 +180,19 @@ export default function Spotify(props: SpotifyProps) {
     //  PROPERTIES LISTENER
     // =====================
     useUserPropertiesListener(p => p.spotify, spotifyProps => {
+        if (spotifyProps.backendURL !== undefined) {
+            if (spotifyProps.backendURL) {
+                // Check if the entered URL is a valid URL
+                try {
+                    const _dummy = new URL(spotifyProps.backendURL);
+                    state.context.backendUrl = spotifyProps.backendURL;
+                } catch {
+                    state.context.backendUrl = process.env.BACKEND_API_BASEURL!;
+                }
+            } else {
+                state.context.backendUrl = process.env.BACKEND_API_BASEURL!;
+            }
+        }
         if (spotifyProps.token !== undefined && spotifyProps.token) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
