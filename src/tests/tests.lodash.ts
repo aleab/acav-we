@@ -141,10 +141,15 @@ function merge() {
     });
 }
 
-// TODO: _.some
+function some() {
+    const array: Array<string> = [ 'abc', 'cde', 'fgh', 'adh' ];
+
+    expect(_.some(array, s => /^a/.test(s))).to.be.true;
+    expect(_.some(array, s => /g$/.test(s))).to.be.false;
+}
 
 export default function test() {
-    const tests: { [k: string]: () => void } = { cloneDeep, isEmpty, isEqual, merge, pick };
+    const tests: { [k: string]: () => void } = { cloneDeep, isEmpty, isEqual, merge, pick, some };
     Object.getOwnPropertyNames(tests).forEach(k => {
         try {
             tests[k]();
