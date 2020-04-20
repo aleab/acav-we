@@ -181,6 +181,10 @@ function getWebpackConfig(env, argv) {
                             ],
                         },
                         {
+                            test: /project(\.properties)?\.json$/,
+                            loader: path.resolve(__dirname, 'build-scripts', 'project-json-loader.js'),
+                        },
+                        {
                             test: /\.(json|jsonc)$/,
                             loader: path.resolve(__dirname, 'build-scripts', 'jsonc-loader.js'),
                         },
