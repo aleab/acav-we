@@ -3,15 +3,10 @@ import Fuse, { IFuseOptions } from 'fuse.js';
 import { IRecording, IRecordingList, IRecordingMatch, IReleaseGroup, IReleaseGroupList, IReleaseGroupMatch, MusicBrainzApi } from 'musicbrainz-api';
 
 import Log from '../common/Log';
+import MusicTrack from '../app/MusicTrack';
 import CoverArtArchiveApi from './coverartarchive-api';
 
 const Logc = Log.getLogger('MusicBrainzClient', '#BA478F');
-
-export type MusicbrainzClientSearchTrack = {
-    title: string | undefined;
-    album: string | undefined;
-    artists: string[] | undefined;
-};
 
 export type MusicbrainzCoverArt = { size: number; url: string; };
 export type MusicbrainzReleaseCoverArt = { release: string; cover: MusicbrainzCoverArt[]; };
@@ -37,7 +32,7 @@ const MUSICBRAINZ_SEARCH_LIMIT = 20;
 const MIN_COMBINED_SEARCH_SCORE = 75; // [0..100]
 
 export interface IMusicbrainzClient {
-    findCoverArtByReleaseGroup(track: MusicbrainzClientSearchTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null>;
+    findCoverArtByReleaseGroup(track: MusicTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null>;
 }
 
 export default class MusicbrainzClient implements IMusicbrainzClient {
@@ -92,7 +87,7 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
         Logc.info('Initialized!');
     }
 
-    private logVerbose() {}
+    private logVerbose(...args: any[]) {}
 
     // NOTE: Resources:
     // Musicbrainz search: https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2/Search
@@ -104,7 +99,7 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
      *          undefined if the specified track doesn't have enough information,
      *          null if the service couldn't find a cover art.
      */
-    async findCoverArtByReleaseGroup(track: MusicbrainzClientSearchTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
+    async findCoverArtByReleaseGroup(track: MusicTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
         if (isNullUndefinedOrEmpty(track.album)) return undefined;
 
         const _album = luceneEscape(track.album);
@@ -259,7 +254,7 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
     }
 
     // NOTE: Unused
-    async findCoverArtByRecording(track: MusicbrainzClientSearchTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
+    async findCoverArtByRecording(track: MusicTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
         if (isNullUndefinedOrEmpty(track.title)) return undefined;
 
         const _title = luceneEscape(track.title);

@@ -1,7 +1,8 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 
 import Log from '../common/Log';
-import { IMusicbrainzClient, MusicbrainzClientSearchTrack, MusicbrainzReleaseCoverArt } from './musicbrainz-client';
+import MusicTrack, { getAlbumHashCode } from '../app/MusicTrack';
+import { IMusicbrainzClient, MusicbrainzReleaseCoverArt } from './musicbrainz-client';
 
 const Logc = Log.getLogger('MusicbrainzClientCache', '#EC74C0', 'background-color: #1E1A23');
 
@@ -12,7 +13,7 @@ interface MusicbrainzDB extends DBSchema {
             readonly updatedAt: string;
             timestamp: number;
             covers: MusicbrainzReleaseCoverArt[] | undefined | null;
-            album: { name: MusicbrainzClientSearchTrack['album'], artists: string[] }
+            album: { name: MusicTrack['album']; artists: string[]; };
         };
         indexes: {
             'by-updatedDate': number;
@@ -44,7 +45,7 @@ const CACHE_MAINTENANCE_DEFAULT_INTERVAL = 1000 * 60 * 30;
 
 export interface IMusicbrainzClientCache {
     cacheRealUrl(key: string, url: string): Promise<void>;
-    getCachedRealUrl(key: string): Promise<string | undefined>
+    getCachedRealUrl(key: string): Promise<string | undefined>;
 }
 
 export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClient, IMusicbrainzClientCache {
@@ -98,14 +99,14 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
         this.cacheMaintenanceTimeoutId = setTimeout(this.doCacheMaintenanceLoop.bind(this) as TimerHandler, 1000 * 5);
     }
 
-    async findCoverArtByReleaseGroup(track: MusicbrainzClientSearchTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
+    async findCoverArtByReleaseGroup(track: MusicTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
         if (track.album && track.artists?.[0]) {
             if (this.db === undefined) await this.init();
             if (this.db) {
-                const albumHashCode = this.getTrackHashCode(track);
+                const albumHashCode = getAlbumHashCode(track);
                 const cachedValue = await this.db.get('musicbrainz-covers', albumHashCode);
 
-                let covers: MusicbrainzReleaseCoverArt[] | null | undefined;
+                let covers: MusicbrainzDB['musicbrainz-covers']['value']['covers'];
                 if (cachedValue !== undefined && !this.hasExpired(cachedValue.timestamp)) {
                     covers = cachedValue.covers;
                     Logc.debug('Pulled cover art from cache:', { key: albumHashCode });
@@ -114,11 +115,11 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
                     await this.db.put('musicbrainz-covers', {
                         get updatedAt() { return new Date(this.timestamp).toISOString(); },
                         timestamp: Date.now(),
+                        covers,
                         album: {
                             name: track.album,
                             artists: track.artists,
                         },
-                        covers,
                     }, albumHashCode);
                 }
                 return covers;
@@ -196,20 +197,6 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
     }
 
     private hasExpired(timestamp: number) { return Date.now() - this.ttl > timestamp; }
-
-    getTrackHashCode(track: MusicbrainzClientSearchTrack) {
-        const _album = track.album ?? '';
-        const _artist = track.artists !== undefined && track.artists.length > 0 ? track.artists[0] : '';
-        const s = `${_album}.${_artist}`;
-
-        let hash = 0;
-        for (let i = 0; i < s.length; i++) {
-            const character = s.charCodeAt(i);
-            hash = ((hash << 5) - hash) + character;
-            hash &= hash; // Convert to 32bit integer
-        }
-        return hash;
-    }
 
     dispose() {
         clearTimeout(this.cacheMaintenanceTimeoutId);

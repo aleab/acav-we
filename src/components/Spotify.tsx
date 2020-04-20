@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import React, { RefObject, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { CSSProperties, RefObject, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AnyEventObject } from 'xstate';
 import { useMachine } from '@xstate/react';
 
@@ -19,7 +19,7 @@ import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCAL
 import WallpaperContext from '../app/WallpaperContext';
 import useSpotifySmartTrackRefresh from '../hooks/useSpotifySmartTrackRefresh';
 import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
-import MusicbrainzClient from '../services/musicbrainz-client';
+import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../services/musicbrainz-client';
 import MusicbrainzClientCacheDecorator from '../services/musicbrainz-client-cache-decorator';
 
 import SpotifyAlbumArt from './SpotifyAlbumArt';
@@ -27,6 +27,7 @@ import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlayProgressBar, { SpotifyOverlayProgressBarProps } from './SpotifyOverlayProgressBar';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
+import useClientRect from '../hooks/useClientRect';
 
 const Logc = Log.getLogger('Spofity', '#1DB954');
 
@@ -52,7 +53,7 @@ export default function Spotify(props: SpotifyProps) {
     const mbClient = useRef<MusicbrainzClientCacheDecorator | undefined>(undefined);
     useEffect(() => {
         mbClient.current = new MusicbrainzClientCacheDecorator(new MusicbrainzClient(process.env.NODE_ENV === 'development'), {
-            cacheName: 'aleab.acav',
+            cacheName: 'aleab.acav.mb-cache',
             ttlMs: Math.round(1000 * 60 * 60 * 24 * O.current.art.fetchLocalCacheMaxAge),
             cacheMaintenanceInterval: 1000 * 60 * 30,
         });
@@ -259,6 +260,33 @@ export default function Spotify(props: SpotifyProps) {
     const isFatalErrorGettingToken = useMemo(() => state.value === SpotifyStateMachineState.S6CantGetTokenErrorIdle, [state.value]);
     const hasNoInternetConnection = useMemo(() => state.value === SpotifyStateMachineState.SNNoInternetConnection, [state.value]);
 
+    // ========================================
+    //  SpotifyOverlayPreferredLocalArtChooser
+    // ========================================
+    const preferredLocalArtChooserRef = useRef<HTMLDivElement>(null);
+    const [ preferredLocalArtChooserPosition, setPreferredLocalArtChooserPosition ] = useState<Pick<CSSProperties, 'left' | 'top' | 'transform'>>({ left: 0, top: 0 });
+    const preferredLocalArtChooserStyle = useMemo(() => ({ width: 224, maxHeight: 152 }), []);
+    const [ spotifyOverlayClientRect, spotifyDivRef, spotifyOverlayClientRectCallbackRef ] = useClientRect<HTMLDivElement>();
+    useEffect(() => {
+        ((..._args: any[]) => {})(overlayStyle.left, overlayStyle.top, overlayStyle.maxWidth, overlayStyle.fontSize, overlayStyle.transform);
+        if (spotifyOverlayClientRect !== null) {
+            let left = spotifyOverlayClientRect.left;
+            let top = spotifyOverlayClientRect.bottom;
+            const transform: string[] = [];
+
+            if (spotifyOverlayClientRect.left + preferredLocalArtChooserStyle.width >= window.innerWidth - 20) {
+                left = spotifyOverlayClientRect.right;
+                transform.push('translateX(-100%)');
+            }
+            if (spotifyOverlayClientRect.bottom + preferredLocalArtChooserStyle.maxHeight >= window.innerHeight - 20) {
+                top = spotifyOverlayClientRect.top;
+                transform.push('translateY(-100%)');
+            }
+
+            setPreferredLocalArtChooserPosition(prev => ({ ...prev, left, top, transform: transform.join(' ') }));
+        }
+    }, [ overlayStyle.fontSize, overlayStyle.left, overlayStyle.maxWidth, overlayStyle.top, overlayStyle.transform, preferredLocalArtChooserStyle.maxHeight, preferredLocalArtChooserStyle.width, spotifyOverlayClientRect ]);
+
     // ========
     //  RENDER
     // ========
@@ -276,13 +304,12 @@ export default function Spotify(props: SpotifyProps) {
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
     }, [ hasNoInternetConnection, isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
-    const spotifyDivRef = useRef<HTMLDivElement>(null);
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle: {
             if (currentlyPlaying === undefined) return null;
             const spotifyDivProps = {
-                ref: spotifyDivRef,
+                ref: spotifyOverlayClientRectCallbackRef,
                 id: 'spotify',
                 className: 'overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden',
                 style: { ...overlayStyle, ...overlayBackgroundStyle },
@@ -332,17 +359,23 @@ export default function Spotify(props: SpotifyProps) {
                 case SpotifyOverlayArtType.AlbumArt: {
                     const artWidth = 4 * overlayStyle.fontSize - 2 * 0.25 * overlayStyle.fontSize; // calc(4em - 2 * .25em)
                     return (
-                      <div {...spotifyDivProps}>
-                        <StateIcons />
-                        {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
-                        <div {...songInfoRowProps}>
-                          <SpotifyAlbumArt
-                            className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth}
-                            track={currentlyPlaying.item} mbClient={mbClient.current} mbClientCache={mbClient.current} fetchLocalCovers={overlayArtFetchLocalCovers}
-                          />
-                          <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
+                      <>
+                        <div {...spotifyDivProps}>
+                          <StateIcons />
+                          {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
+                          <div {...songInfoRowProps}>
+                            <SpotifyAlbumArt
+                              className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth}
+                              track={currentlyPlaying.item} fetchLocalCovers={overlayArtFetchLocalCovers}
+                              mbClient={mbClient.current} mbClientCache={mbClient.current}
+                              preferrectLocalArtChooserElementRef={preferredLocalArtChooserRef}
+                              preferrectLocalArtChooserSize={{ width: preferredLocalArtChooserStyle.width, height: preferredLocalArtChooserStyle.maxHeight }}
+                            />
+                            <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
+                          </div>
                         </div>
-                      </div>
+                        <div ref={preferredLocalArtChooserRef} style={{ position: 'absolute', ...preferredLocalArtChooserStyle, ...preferredLocalArtChooserPosition }} />
+                      </>
                     );
                 }
                 case SpotifyOverlayArtType.SpotifyIcon:

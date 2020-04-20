@@ -9,6 +9,28 @@
   line-height: 0;
 }
 
+#spotify .has-alt-covers:hover { position: relative; }
+#spotify .has-alt-covers:hover > img { filter: opacity(80%); }
+#spotify .has-alt-covers > .chevron {
+  background-color: #FFF;
+  opacity: 0.85;
+  border-radius: 50%;
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 16px;
+  line-height: 0;
+}
+#spotify .has-alt-covers > .chevron > svg {
+  color: #000;
+  stroke: #000;
+  stroke-width: 2.5em;
+}
+#spotify .has-alt-covers:hover > .chevron { display: block; }
+
+.chevron.up { transform: rotateZ(180deg); }
+
 
 /* ===========
  *  SONG INFO
@@ -122,3 +144,44 @@
   font-size: calc(1em - 2px);
 }
 
+
+/* ========================================
+ *  SpotifyOverlayPreferredLocalArtChooser
+ * ======================================== */
+#mb-plac [data-simplebar] { transition: max-height .5s ease-in-out 0s; }
+#mb-plac .simplebar-scrollbar:before { background: white; }
+
+#mb-plac .mb-plac-title {
+  color: white
+}
+
+#mb-plac .mb-plac-content:not(:empty) {
+  padding: 8px 0 0 8px;
+  display: flex;
+  flex-flow: row wrap;
+  align-content: flex-start;
+  align-items: center;
+  justify-content: flex-start;
+  overflow-x: hidden;
+  background-color: hsla(220, 5%, 30%, 0.8);
+}
+
+#mb-plac .mb-plac-content .mb-cover {
+  position: relative;
+  margin: 0 8px 8px 0;
+  line-height: 0;
+}
+#mb-plac .mb-plac-content .mb-cover:not(.selected):hover { filter: opacity(75%); }
+#mb-plac .mb-plac-content .mb-cover .selected-mark {
+  background-color: #222;
+  border-radius: 50%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  font-size: 16px;
+  line-height: 0;
+}
+#mb-plac .mb-plac-content .mb-cover .selected-mark > svg {
+  stroke: #222;
+  stroke-width: 1em;
+}

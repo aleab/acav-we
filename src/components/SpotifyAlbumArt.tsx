@@ -1,9 +1,18 @@
-import _ from 'lodash';
-import React, { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
+/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 
+import _ from 'lodash';
+import React, { CSSProperties, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { FaChevronCircleDown } from '../fa';
+import MusicTrack, { getAlbumHashCode } from '../app/MusicTrack';
+import PreferredLocalArtStore from '../app/PreferredLocalArtStore';
 import { CancellationTokenSource } from '../common/CancellationToken';
-import { IMusicbrainzClient } from '../services/musicbrainz-client';
+import { IMusicbrainzClient, MusicbrainzReleaseCoverArt } from '../services/musicbrainz-client';
 import { IMusicbrainzClientCache } from '../services/musicbrainz-client-cache-decorator';
+
+import SpotifyOverlayPreferredLocalArtChooser, { SpotifyOverlayPreferredLocalArtChooserProps } from './SpotifyOverlayPreferredLocalArtChooser';
 
 interface SpotifyAlbumArtProps {
     style?: CSSProperties;
@@ -14,9 +23,16 @@ interface SpotifyAlbumArtProps {
     mbClient: IMusicbrainzClient | undefined;
     mbClientCache: IMusicbrainzClientCache | undefined;
     fetchLocalCovers: boolean;
+
+    preferrectLocalArtChooserElementRef: RefObject<HTMLElement>;
+    preferrectLocalArtChooserSize: { width: number; height: number };
 }
 
 export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
+    const { mbClient, mbClientCache, fetchLocalCovers, preferrectLocalArtChooserElementRef, preferrectLocalArtChooserSize } = props;
+
+    const preferredLocalArtStore = useMemo(() => new PreferredLocalArtStore('aleab.acav.preferred-covers', 1), []);
+
     const spotifySrc = useMemo(() => {
         if (props.track.is_local) return '';
         // NOTE: Widest image is always first
@@ -30,7 +46,10 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     // ==================================================
     const _artists = props.track.artists.join(', ');
     const [ localSrc, setLocalSrc ] = useState<string>('');
-    const localTrack = useMemo(() => {
+
+    const [ mbReleaseCoverArts, setMbReleaseCoverArts ] = useState<MusicbrainzReleaseCoverArt[] | null>(null);
+    const [ currentMbReleaseCoverArt, setCurrentMbReleaseCoverArt ] = useState<string | null>(null);
+    const localTrack = useMemo<MusicTrack | undefined>(() => {
         if (!props.track.is_local) return undefined;
         return {
             title: props.track.name,
@@ -41,43 +60,58 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     }, [ _artists, props.track.album.name, props.track.is_local, props.track.name ]);
 
     const cts = useRef(new CancellationTokenSource());
+    const setLocalCoverArt = useCallback((mbReleaseCoverArt: MusicbrainzReleaseCoverArt | null) => {
+        if (mbReleaseCoverArt === null) {
+            setLocalSrc('');
+            setCurrentMbReleaseCoverArt(null);
+        } else {
+            const images = mbReleaseCoverArt.cover.slice().sort((a, b) => b.size - a.size); // Sort in descending order by size
+            const img = _.findLast(images, x => x.size !== null && x.size >= props.width) ?? images[0];
+
+            if (mbClientCache !== undefined) {
+                mbClientCache.getCachedRealUrl(img.url).then(cachedRedirectedUrl => {
+                    if (cts.current.token.isCancelled()) return;
+                    if (cachedRedirectedUrl !== undefined) {
+                        setLocalSrc(cachedRedirectedUrl);
+                    } else {
+                        // Get the real redirected url and cache it
+                        fetch(img.url).then(res => {
+                            if (cts.current.token.isCancelled()) return;
+                            if (mbClientCache !== undefined) {
+                                mbClientCache.cacheRealUrl(img.url, res.url);
+                                setLocalSrc(res.url);
+                            }
+                        });
+                    }
+                });
+            } else {
+                setLocalSrc(img.url);
+            }
+
+            setCurrentMbReleaseCoverArt(mbReleaseCoverArt.release);
+        }
+    }, [ mbClientCache, props.width ]);
+
     useEffect(() => {
         cts.current.cancel();
         cts.current = new CancellationTokenSource();
 
-        if (props.fetchLocalCovers && props.track.is_local && localTrack !== undefined) {
-            props.mbClient?.findCoverArtByReleaseGroup(localTrack).then(mbReleaseCoverArts => {
-                if (mbReleaseCoverArts === null || mbReleaseCoverArts === undefined || mbReleaseCoverArts.length === 0) {
-                    setLocalSrc('');
+        if (fetchLocalCovers && props.track.is_local && localTrack !== undefined) {
+            mbClient?.findCoverArtByReleaseGroup(localTrack).then(_mbReleaseCoverArts => {
+                if (_mbReleaseCoverArts === null || _mbReleaseCoverArts === undefined || _mbReleaseCoverArts.length === 0) {
+                    setLocalCoverArt(null);
+                    setMbReleaseCoverArts(null);
                 } else {
-                    // Choose first release for now. TODO: Implement interface to select the preferred release for this album
-                    const images = mbReleaseCoverArts[0].cover.slice().sort((a, b) => b.size - a.size); // Sort in descending order by size
-                    const img = _.findLast(images, x => x.size !== null && x.size >= props.width) ?? images[0];
-
-                    if (props.mbClientCache !== undefined) {
-                        props.mbClientCache.getCachedRealUrl(img.url).then(cachedRedirectedUrl => {
-                            if (cts.current.token.isCancelled()) return;
-                            if (cachedRedirectedUrl !== undefined) {
-                                setLocalSrc(cachedRedirectedUrl);
-                            } else {
-                                // Get the real redirected url and cache it
-                                fetch(img.url).then(res => {
-                                    if (cts.current.token.isCancelled()) return;
-                                    if (props.mbClientCache !== undefined) {
-                                        props.mbClientCache.cacheRealUrl(img.url, res.url);
-                                        setLocalSrc(res.url);
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        setLocalSrc(img.url);
-                    }
+                    preferredLocalArtStore.get(getAlbumHashCode(localTrack)).then(release => {
+                        const mbReleaseCoverArt = release === undefined ? _mbReleaseCoverArts[0] : _mbReleaseCoverArts.find(v => v.release === release);
+                        setLocalCoverArt(mbReleaseCoverArt ?? _mbReleaseCoverArts[0]);
+                        setMbReleaseCoverArts(_mbReleaseCoverArts);
+                    });
                 }
             });
         }
         return () => { setLocalSrc(''); };
-    }, [ localTrack, props.fetchLocalCovers, props.mbClient, props.mbClientCache, props.track.is_local, props.width ]);
+    }, [ fetchLocalCovers, localTrack, mbClient, preferredLocalArtStore, props.track.is_local, setLocalCoverArt ]);
 
     const src = useMemo(() => (props.track.is_local ? localSrc : spotifySrc), [ localSrc, props.track.is_local, spotifySrc ]);
     const imgStyle: CSSProperties = {
@@ -85,10 +119,50 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
         height: props.width,
         objectFit: 'contain',
         backgroundColor: !src ? 'rgba(0, 0, 0, 0.1)' : undefined,
-        ...props.style,
     };
 
+    // ========================================
+    //  SpotifyOverlayPreferredLocalArtChooser
+    // ========================================
+    const [ showPreferredCoverArtChooser, setShowPreferredCoverArtChooser ] = useState(false);
+    const choosePreferredArtCallback = useCallback((mbReleaseCoverArt: MusicbrainzReleaseCoverArt) => setLocalCoverArt(mbReleaseCoverArt), [setLocalCoverArt]);
+
+    const canShowPreferredLocalArtChooser = useMemo(() => localTrack !== undefined && mbReleaseCoverArts !== null && mbReleaseCoverArts.length > 1, [ localTrack, mbReleaseCoverArts ]);
+    const preferredLocalArtChooserProps = useMemo<SpotifyOverlayPreferredLocalArtChooserProps>(() => ({
+        track: localTrack,
+        mbReleaseCoverArts,
+        currentMbReleaseCoverArt,
+        store: preferredLocalArtStore,
+        choosePreferredArtCallback,
+
+        width: preferrectLocalArtChooserSize.width,
+        maxHeight: preferrectLocalArtChooserSize.height,
+        hidden: !showPreferredCoverArtChooser,
+        portalElementRef: preferrectLocalArtChooserElementRef,
+    }), [ choosePreferredArtCallback, currentMbReleaseCoverArt, localTrack, mbReleaseCoverArts, preferrectLocalArtChooserElementRef, preferrectLocalArtChooserSize.height, preferrectLocalArtChooserSize.width, preferredLocalArtStore, showPreferredCoverArtChooser ]);
+
+    useEffect(() => {
+        // Keep the window open (if it was open to begin with) when the track changes and its cover art can be changed; close it when it cannot be changed.
+        if (!canShowPreferredLocalArtChooser) setShowPreferredCoverArtChooser(false);
+    }, [canShowPreferredLocalArtChooser]);
+
+    const onClick = useCallback(() => setShowPreferredCoverArtChooser(canShowPreferredLocalArtChooser ? (prev => !prev) : false), [canShowPreferredLocalArtChooser]);
+
+    const classNames: string[] = [];
+    if (canShowPreferredLocalArtChooser) classNames.push('has-alt-covers');
+    if (props.className) classNames.push(props.className);
+
     return (
-      <img className={props.className} style={imgStyle} src={src} alt="" />
+      <>
+        <div className={classNames.join(' ')} style={{ ...props.style, lineHeight: 0 }} onClick={onClick}>
+          <img style={imgStyle} src={src} alt="" />
+          {canShowPreferredLocalArtChooser ? (
+            <span className={showPreferredCoverArtChooser ? 'chevron up' : 'chevron'}>
+              <FaChevronCircleDown />
+            </span>
+          ) : null}
+        </div>
+        <SpotifyOverlayPreferredLocalArtChooser {...preferredLocalArtChooserProps} />
+      </>
     );
 }

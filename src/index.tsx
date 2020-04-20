@@ -11,6 +11,7 @@ import Properties, { mapProperties } from './app/properties/Properties';
 import projectProperties from '../project.json/project.properties.json';
 
 import '@fortawesome/fontawesome-free/css/svg-with-js.css';
+import 'simplebar/dist/simplebar.css';
 import './css/main.css';
 
 function run(Component: typeof App) {

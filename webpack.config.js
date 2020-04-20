@@ -210,7 +210,7 @@ function getWebpackConfig(env, argv) {
                         test: module => {
                             if (/\.css$/.test(module.resource)) return false;
                             const p = escapeRegExp(path.resolve(__dirname, '..'));
-                            return /[\\/]node_modules[\\/](@fortawesome|color-convert|html2canvas|musicbrainz-api)[\\/]/.test(module.resource)
+                            return /[\\/]node_modules[\\/](@fortawesome|color-convert|html2canvas|musicbrainz-api|simplebar(-.*)?)[\\/]/.test(module.resource)
                                 || RegExp(`${p}[\\/](html2canvas|musicbrainz-api)[\\/]`).test(module.resource);
                         },
                         priority: 10,

@@ -33,6 +33,8 @@
         "musicbrainz-api": "github:aleab/musicbrainz-api#acav-we",
         "react": "^16.13.1",
         "react-dom": "^16.13.1",
+        "simplebar": "^5.1.0",
+        "simplebar-react": "^2.1.0",
         "xstate": "^4.8.0"
     },
     "devDependencies": {
