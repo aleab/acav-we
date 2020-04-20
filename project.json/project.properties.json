@@ -329,8 +329,7 @@
         "order": 1003,
         "type": "bool",
         "text": "ui_barVisualizer_flipFrequencies",
-        "value": false,
-        "condition": "showAdvancedOptions.value"
+        "value": false
     },
     "barVisualizer_smoothing": {
         "order": 1004,

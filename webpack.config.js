@@ -111,7 +111,7 @@ function getWebpackConfig(env, argv) {
         extractComments: false,
     });
     const bannerPlugin = new webpack.BannerPlugin({
-        exclude: /\.css$/,
+        test: /(main\.js)$/,
         raw: true,
         banner: '/*!\n' +
                 ' * This Source Code Form is subject to the terms of the Mozilla Public\n' +

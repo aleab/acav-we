@@ -216,7 +216,7 @@ function getProjectJson() {
                     ),
                     ui_$_spotify_art_fetch_local_note: note(
                         'Local files must contain album and artist(s) metadata, which should match as closely as possible the information ' +
-                          `provided by ${musicbrainzLink('musicbrainz.com')}, especially in regard to romanized<sup>[4]</sup> names and titles; ` +
+                          `provided by ${musicbrainzLink('musicbrainz.com')}, especially in regard to romanized names and titles; ` +
                           'proximity, fuzzy and partial searches will be performed nonetheless in order to always find the best match.',
                         "<u>MusicBrainz's terminology</u>",
                         '- <em>recording</em>: a song',
@@ -244,7 +244,7 @@ function getProjectJson() {
                     ),
                     ui_note2: note(
                         `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
-                        '<sup>[4]</sup> <a href="https://en.wikipedia.org/wiki/Romanization">https://en.wikipedia.org/wiki/Romanization</a>',
+                        null,
                     ),
                 },
             },
