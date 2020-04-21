@@ -5,8 +5,6 @@
 [![GitHub license](https://img.shields.io/github/license/aleab/acav-we?cacheSeconds=86400)][license]
 [![Steam subscribers](https://img.shields.io/steam/subscriptions/FILE_ID?label=subscribers&color=1C3F56&logo=steam)][steam-workshop]
 
-> TODO: Add preview gif here, show the wallpaper's customizability in particular.
-
 ## Contributing
 
 ### Requirements
