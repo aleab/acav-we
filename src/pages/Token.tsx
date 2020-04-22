@@ -8,9 +8,10 @@ import OcticonClippy from '@primer/octicons/build/svg/clippy.svg';
 import Spinner from '../components/Spinner';
 
 
+const SPOTIFY_SCOPES = encodeURIComponent(['user-read-currently-playing'].join(' '));
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_REDIRECT_URI = encodeURIComponent((process.env.NODE_ENV === 'development' ? process.env.SPOTIFY_REDIRECT_URI_DEV : process.env.SPOTIFY_REDIRECT_URI) ?? '');
-const SPOTIFY_AUTH_URL = `https://accounts.spotify.com/authorize?client_id=${SPOTIFY_CLIENT_ID}&response_type=code&redirect_uri=${SPOTIFY_REDIRECT_URI}`;
+const SPOTIFY_AUTH_URL = `https://accounts.spotify.com/authorize?client_id=${SPOTIFY_CLIENT_ID}&response_type=code&scope=${SPOTIFY_SCOPES}&redirect_uri=${SPOTIFY_REDIRECT_URI}`;
 const TOKEN_SERVER_URL = process.env.NODE_ENV === 'development' ? process.env.TOKEN_SERVER_URL_DEV : process.env.TOKEN_SERVER_URL;
 
 // eslint-disable-next-line camelcase
