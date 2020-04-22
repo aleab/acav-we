@@ -29,6 +29,7 @@
                 "ignoredNodes": ["JSXAttribute", "JSXElement", "JSXFragment"]
             }
         ],
+        "jsx-a11y/media-has-caption": "off",
         "linebreak-style": "off",
         "lines-between-class-members": "off",
         "max-len": "off",

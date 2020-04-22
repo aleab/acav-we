@@ -29,6 +29,9 @@ function getWebpackConfig(env, argv) {
             from: './public/**/*',
             transformPath(targetPath) { return path.relative('./public', targetPath); },
         },
+        {
+            from: './public/.nojekyll',
+        },
     ]);
     const miniCssExtractPlugin = new MiniCssExtractPlugin({
         filename: '[name].css',

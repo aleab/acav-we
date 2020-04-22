@@ -32,3 +32,5 @@ yarn-error.log*
 
 !.vscode/markdown-github.css
 .env.gh-pages
+
+public/media/**/*.mp4

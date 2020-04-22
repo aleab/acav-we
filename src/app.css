@@ -163,6 +163,12 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 .text-align-center { text-align: center; }
 .text-align-end { text-align: end; }
 
+.fw-2 { font-weight: 200; }
+.fw-4 { font-weight: 400; }
+.fw-5 { font-weight: 500; }
+.fw-7 { font-weight: 700; }
+.fw-8 { font-weight: 800; }
+
 
 /* --- */
 
@@ -175,6 +181,11 @@ input[type='email'], input[type='number'], input[type='password'], input[type='s
 }
 
 small, .small { font-size: 87.5%; }
+
+details > summary {
+  cursor: pointer;
+  display: inline-block;
+}
 
 
 /* =====================
@@ -211,6 +222,11 @@ h5.lead, .h5.lead { font-size: calc(1.4625rem + .3vw); }
 @media (min-width: 80rem) { h5.lead, .h5.lead { font-size: 1.6875rem; } }
 h6.lead, .h6.lead { font-size: calc(1.275rem + .3vw); }
 @media (min-width: 80rem) { h6.lead, .h6.lead { font-size: 1.5rem; } }
+
+h1.lead, .h1.lead, h2.lead, .h2.lead {
+  padding-bottom: .2em;
+  border-bottom: 1px solid #d9dbdd;
+}
 
 
 /* ========
