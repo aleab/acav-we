@@ -2,8 +2,8 @@
 > A highly customizable audio visualizer for [Wallpaper Engine](https://www.wallpaperengine.io/).
 
 [![GitHub last commit (master)](https://img.shields.io/github/last-commit/aleab/acav-we/master)][commits/master]
-[![GitHub license](https://img.shields.io/github/license/aleab/acav-we?cacheSeconds=86400)][license]
-[![Steam subscribers](https://img.shields.io/steam/subscriptions/FILE_ID?label=subscribers&color=1C3F56&logo=steam)][steam-workshop]
+[![GitHub license](https://img.shields.io/github/license/aleab/acav-we)][license]
+[![Steam subscribers](https://img.shields.io/steam/subscriptions/2071366191?color=1C3F56&logo=steam)][steam-workshop]
 
 ## Contributing
 
@@ -37,4 +37,4 @@ Variable name         | Description
 [//]: # (Links)
 [commits/master]: <https://github.com/aleab/acav-we/commits/master>
 [license]: </LICENSE.txt>
-[steam-workshop]: <>
+[steam-workshop]: <https://steamcommunity.com/sharedfiles/filedetails/?id=2071366191>
