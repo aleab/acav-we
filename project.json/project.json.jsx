@@ -65,7 +65,7 @@ function withTextColor(tag, color, text) {
 function samp(text) { return `<samp>${text}</samp>`; }
 
 const asterisk = () => '<sup class="text-warning">*</sup>';
-const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/mz2cdi4qlf">${text}</a>`;
+const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/f0rirujpk8">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
 const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
@@ -253,7 +253,7 @@ function getProjectJson() {
         },
         preview: 'preview.gif',
         tags: ['Abstract'],
-        title: 'Aleab\'s Customizable Audio Visualizer',
+        title: 'Customizable Audio Visualizer',
         type: 'web',
     };
 }
