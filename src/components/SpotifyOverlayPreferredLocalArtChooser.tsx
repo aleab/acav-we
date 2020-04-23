@@ -60,12 +60,10 @@ export default function SpotifyOverlayPreferredLocalArtChooser(props: SpotifyOve
     }, [ mbReleaseCoverArts, onSelected, props.currentMbReleaseCoverArt ]);
 
     return props.portalElementRef.current !== null ? ReactDOM.createPortal((
-      <div id="mb-plac">
-        <SimpleBar style={{ maxHeight: (props.hidden ? 0 : props.maxHeight), width: props.width }}>
-          <div className="mb-plac-content">
-            {covers}
-          </div>
-        </SimpleBar>
-      </div>
+      <SimpleBar id="mb-plac" style={{ maxHeight: (props.hidden ? 0 : props.maxHeight), width: props.width }}>
+        <div className="mb-plac-content">
+          {covers}
+        </div>
+      </SimpleBar>
     ), props.portalElementRef.current) : null;
 }

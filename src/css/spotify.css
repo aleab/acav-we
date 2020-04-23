@@ -148,12 +148,8 @@
 /* ========================================
  *  SpotifyOverlayPreferredLocalArtChooser
  * ======================================== */
-#mb-plac [data-simplebar] { transition: max-height .5s ease-in-out 0s; }
+#mb-plac { transition: max-height .5s ease-in-out 0s; }
 #mb-plac .simplebar-scrollbar:before { background: white; }
-
-#mb-plac .mb-plac-title {
-  color: white
-}
 
 #mb-plac .mb-plac-content:not(:empty) {
   padding: 8px 0 0 8px;
