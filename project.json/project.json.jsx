@@ -255,6 +255,7 @@ function getProjectJson() {
         tags: ['Abstract'],
         title: 'Customizable Audio Visualizer',
         type: 'web',
+        workshopid: '2071366191',
     };
 }
 
