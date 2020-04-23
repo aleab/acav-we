@@ -21,7 +21,7 @@ export default function App() {
     const navbarNavClass = !isNavActive || (toggleRef.current?.offsetWidth ?? 0) <= 0 ? 'navbar-nav' : 'navbar-nav active';
 
     return (
-      <Router>
+      <Router basename={process.env.PUBLIC_URL}>
         <header className="navbar">
           <div className="container">
             <button ref={toggleRef} type="button" className="button-link navbar-toggle" onClick={toggleIsNavActive} aria-label="Toggle Menu">

@@ -173,6 +173,12 @@ function getWebpackConfig(env, argv) {
     const prodConfig = {
         ...config,
         mode: 'production',
+        plugins: [
+            ...config.plugins,
+            new webpack.DefinePlugin({
+                'process.env.PUBLIC_URL': JSON.stringify('/acav-we'),
+            }),
+        ],
     };
 
     // =============
