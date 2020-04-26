@@ -1,16 +1,17 @@
 import _ from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef } from 'react';
 
-import Log from '../common/Log';
-import CircularBuffer from '../common/CircularBuffer';
-import AudioSamplesArray from '../common/AudioSamplesArray';
-import WallpaperContext from '../app/WallpaperContext';
-import useBarVisualizerRendering from '../hooks/useBarVisualizerRendering';
+import Log from '../../common/Log';
+import CircularBuffer from '../../common/CircularBuffer';
+import AudioSamplesArray from '../../common/AudioSamplesArray';
+import WallpaperContext from '../../app/WallpaperContext';
 
-const Logc = Log.getLogger('BarVisualizer', 'darkblue');
+import useHorizontalBarVisualizerRendering from './rendering/useHorizontalBarVisualizerRendering';
 
-export default function BarVisualizer() {
-    const RENDER_ID = useMemo(() => `BarVisualizer-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
+const Logc = Log.getLogger('HorizontalBarVisualizer', 'darkblue');
+
+export default function HorizontalBarVisualizer() {
+    const RENDER_ID = useMemo(() => `HorizontalBarVisualizer-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.barVisualizer);
 
@@ -27,7 +28,7 @@ export default function BarVisualizer() {
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
     // =================================
-    const render = useBarVisualizerRendering(canvas);
+    const render = useHorizontalBarVisualizerRendering(canvas);
     useEffect(() => {
         Logc.info('Registering onAudioSamples and render callbacks...');
 

@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
 
-import { darkenOrLightenRgbColor } from '../common/Colors';
-import { cssColorToRgba } from '../common/Css';
-import WallpaperContext from '../app/WallpaperContext';
-import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
+import { darkenOrLightenRgbColor } from '../../common/Colors';
+import { cssColorToRgba } from '../../common/Css';
+import WallpaperContext from '../../app/WallpaperContext';
+import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
-import ScrollableLoopingText from './ScrollableLoopingText';
+import ScrollableLoopingText from '../ScrollableLoopingText';
 
 const BRIGHTNESS_R = 0.4;
 function darkenOrLighten(cssColor: string): string {

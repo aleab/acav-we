@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { cssColorToRgba } from '../common/Css';
-import { darkenOrLightenRgbColor } from '../common/Colors';
+import { cssColorToRgba } from '../../common/Css';
+import { darkenOrLightenRgbColor } from '../../common/Colors';
 
 interface SpotifyOverlayErrorProps {
     message: string;

@@ -1,12 +1,12 @@
 import { RefObject, useCallback, useContext, useRef } from 'react';
 import { RGB } from 'color-convert/conversions';
 
-import Log from '../common/Log';
-import CircularBuffer from '../common/CircularBuffer';
-import AudioSamplesArray from '../common/AudioSamplesArray';
-import { AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
-import { ColorReactionFactory, ColorReactionType } from '../app/ColorReactionType';
-import WallpaperContext from '../app/WallpaperContext';
+import Log from '../../../common/Log';
+import CircularBuffer from '../../../common/CircularBuffer';
+import AudioSamplesArray from '../../../common/AudioSamplesArray';
+import { AudioResponsiveValueProviderFactory } from '../../../app/AudioResponsiveValueProvider';
+import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';
+import WallpaperContext from '../../../app/WallpaperContext';
 
 interface RenderArgs {
     readonly samples: AudioSamplesArray | undefined;
@@ -42,7 +42,7 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
     }
 }
 
-export default function useBarVisualizerRendering(canvas: RefObject<HTMLCanvasElement>) {
+export default function useHorizontalBarVisualizerRendering(canvas: RefObject<HTMLCanvasElement>) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.barVisualizer);
 

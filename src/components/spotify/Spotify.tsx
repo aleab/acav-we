@@ -7,27 +7,27 @@ import React, { CSSProperties, RefObject, useCallback, useContext, useEffect, us
 import { AnyEventObject } from 'xstate';
 import { useMachine } from '@xstate/react';
 
-import { FaCircleNotch, FaFilter, FaPlug, FaSkull } from '../fa';
+import { FaCircleNotch, FaFilter, FaPlug, FaSkull } from '../../fa';
 
-import Log from '../common/Log';
-import { checkInternetConnection } from '../common/Network';
-import { calculatePivotTransform } from '../common/Pivot';
-import { Position } from '../common/Position';
-import { CssBackground, generateCssStyle as generateBackgroundCss } from '../app/BackgroundMode';
-import SpotifyOverlayArtType from '../app/SpotifyOverlayArtType';
-import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../app/SpotifyStateMachine';
-import WallpaperContext from '../app/WallpaperContext';
-import useSpotifySmartTrackRefresh from '../hooks/useSpotifySmartTrackRefresh';
-import useUserPropertiesListener from '../hooks/useUserPropertiesListener';
-import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../services/musicbrainz-client';
-import MusicbrainzClientCacheDecorator from '../services/musicbrainz-client-cache-decorator';
+import Log from '../../common/Log';
+import { checkInternetConnection } from '../../common/Network';
+import { calculatePivotTransform } from '../../common/Pivot';
+import { Position } from '../../common/Position';
+import { CssBackground, generateCssStyle as generateBackgroundCss } from '../../app/BackgroundMode';
+import SpotifyOverlayArtType from '../../app/SpotifyOverlayArtType';
+import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../../app/SpotifyStateMachine';
+import WallpaperContext from '../../app/WallpaperContext';
+import useSpotifySmartTrackRefresh from '../../hooks/useSpotifySmartTrackRefresh';
+import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
+import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
+import MusicbrainzClientCacheDecorator from '../../services/musicbrainz-client-cache-decorator';
 
 import SpotifyAlbumArt from './SpotifyAlbumArt';
 import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlayProgressBar, { SpotifyOverlayProgressBarProps } from './SpotifyOverlayProgressBar';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
-import useClientRect from '../hooks/useClientRect';
+import useClientRect from '../../hooks/useClientRect';
 
 const Logc = Log.getLogger('Spofity', '#1DB954');
 

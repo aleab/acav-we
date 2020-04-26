@@ -5,12 +5,12 @@
 import _ from 'lodash';
 import React, { CSSProperties, RefObject, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { FaChevronCircleDown } from '../fa';
-import MusicTrack, { getAlbumHashCode } from '../app/MusicTrack';
-import PreferredLocalArtStore from '../app/PreferredLocalArtStore';
-import { CancellationTokenSource } from '../common/CancellationToken';
-import { IMusicbrainzClient, MusicbrainzReleaseCoverArt } from '../services/musicbrainz-client';
-import { IMusicbrainzClientCache } from '../services/musicbrainz-client-cache-decorator';
+import { FaChevronCircleDown } from '../../fa';
+import MusicTrack, { getAlbumHashCode } from '../../app/MusicTrack';
+import PreferredLocalArtStore from '../../app/PreferredLocalArtStore';
+import { CancellationTokenSource } from '../../common/CancellationToken';
+import { IMusicbrainzClient, MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
+import { IMusicbrainzClientCache } from '../../services/musicbrainz-client-cache-decorator';
 
 import SpotifyOverlayPreferredLocalArtChooser, { SpotifyOverlayPreferredLocalArtChooserProps } from './SpotifyOverlayPreferredLocalArtChooser';
 

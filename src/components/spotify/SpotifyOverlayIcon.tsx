@@ -23,12 +23,12 @@ import {
     isUrlImage,
 } from 'html2canvas/background-parser';
 
-import { FaSpotify } from '../fa';
-import Log from '../common/Log';
-import Bounds from '../common/Bounds';
-import { CancellationToken, CancellationTokenSource } from '../common/CancellationToken';
-import { colorEquals, lerp as colorLerp } from '../common/Colors';
-import { cssColorToRgba, getComputedBackgroundProperties } from '../common/Css';
+import { FaSpotify } from '../../fa';
+import Log from '../../common/Log';
+import Bounds from '../../common/Bounds';
+import { CancellationToken, CancellationTokenSource } from '../../common/CancellationToken';
+import { colorEquals, lerp as colorLerp } from '../../common/Colors';
+import { cssColorToRgba, getComputedBackgroundProperties } from '../../common/Css';
 
 const SPOTIFY_LIGHT_GREEN = { hex: '#1ED760', rgb: [ 30, 215, 96 ] };
 const SPOTIFY_WHITE = { hex: '#FFFFFF', rgb: [ 255, 255, 255 ] };

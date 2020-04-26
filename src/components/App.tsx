@@ -10,11 +10,11 @@ import { PINK_NOISE } from '../app/noise';
 import Renderer from '../app/Renderer';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
 import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
-
-import BarVisualizer from './BarVisualizer';
-import Spotify from './Spotify';
-import Stats from './Stats';
 import useWallpaperBackground from '../hooks/useWallpaperBackground';
+
+import Stats from './Stats';
+import Spotify from './spotify/Spotify';
+import HorizontalBarVisualizer from './visualizers/HorizontalBarVisualizer';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
@@ -250,7 +250,7 @@ export default function App(props: AppProps) {
       <div ref={wallpaperRef} style={style}>
         <WallpaperContext.Provider value={wallpaperContext}>
           {showStats ? <Stats /> : null}
-          <BarVisualizer />
+          <HorizontalBarVisualizer />
           {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
         </WallpaperContext.Provider>
       </div>

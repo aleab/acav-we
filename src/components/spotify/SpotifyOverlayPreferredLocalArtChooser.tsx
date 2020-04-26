@@ -3,10 +3,10 @@ import React, { RefObject, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import SimpleBar from 'simplebar-react';
 
-import { FaCheckCircle } from '../fa';
-import MusicTrack, { getAlbumHashCode } from '../app/MusicTrack';
-import PreferredLocalArtStore from '../app/PreferredLocalArtStore';
-import { MusicbrainzReleaseCoverArt } from '../services/musicbrainz-client';
+import { FaCheckCircle } from '../../fa';
+import MusicTrack, { getAlbumHashCode } from '../../app/MusicTrack';
+import PreferredLocalArtStore from '../../app/PreferredLocalArtStore';
+import { MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
 
 interface PreferredLocalArtDB extends DBSchema {
     'preferences': {

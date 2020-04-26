@@ -2,9 +2,9 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import React, { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
-import { darkenOrLightenRgbColor } from '../common/Colors';
-import { cssColorToRgba } from '../common/Css';
-import WallpaperContext from '../app/WallpaperContext';
+import { darkenOrLightenRgbColor } from '../../common/Colors';
+import { cssColorToRgba } from '../../common/Css';
+import WallpaperContext from '../../app/WallpaperContext';
 
 export interface SpotifyOverlayProgressBarProps {
     isPlaying: boolean;

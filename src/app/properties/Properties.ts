@@ -1,6 +1,5 @@
 /* eslint-disable no-param-reassign */
 import _ from 'lodash';
-import { RGB } from 'color-convert/conversions';
 
 import { Pivot } from '../../common/Pivot';
 import { Position } from '../../common/Position';
@@ -13,6 +12,8 @@ import { TextScrollingType } from '../TextScrollingType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
+import BarVisualizerProperties from './BarVisualizerProperties';
+import SpotifyProperties from './SpotifyProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
@@ -20,62 +21,8 @@ export default interface Properties {
     limitFps: boolean;
     background: BackgroundProperties;
     audioSamples: AudioSamplesProperties;
-    barVisualizer: {
-        position: number;
-        width: number;
-        flipFrequencies: boolean;
-        smoothing: number;
-        bars: {
-            width: number;
-            height: number;
-            borderRadius: number;
-            alignment: number;
-            color: RGBA;
-            responseType: ColorReactionType;
-            responseProvider: AudioResponsiveValueProvider;
-            responseValueGain: number;
-            responseRange: number;
-            responseDegree: number;
-            responseToHue: RGB;
-        };
-    },
-    spotify: {
-        showOverlay: boolean;
-        backendURL: string;
-        token: string;
-        style: {
-            pivot: Pivot;
-            left: number;
-            top: number;
-            width: number;
-            fontSize: number;
-            textColor: RGB;
-            background: {
-                mode: BackgroundMode;
-                color: RGB;
-                /** [0,100] */
-                colorAlpha: number;
-                css: string;
-            };
-        };
-        art: {
-            enabled: boolean;
-            type: SpotifyOverlayArtType;
-            fetchLocalCovers: boolean;
-            fetchLocalCacheMaxAge: number;
-        };
-        scroll: {
-            enabled: boolean;
-            type: TextScrollingType;
-            speed: number;
-            autoDelay: number;
-        };
-        progressBar: {
-            enabled: boolean;
-            color: RGB;
-            position: Position;
-        };
-    },
+    barVisualizer: BarVisualizerProperties;
+    spotify: SpotifyProperties;
 }
 
 function parseComboProperty<TEnum>(prop: WEProperty<'combo'>, EnumType: TEnum): TEnum[keyof TEnum] {
