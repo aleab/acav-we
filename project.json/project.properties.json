@@ -299,14 +299,47 @@
         "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
     },
 
-    // [BAR VISUALIZER]
-    "barVisualizer": {
+    // [VISUALIZER]
+    "visualizer": {
         "order": 1000,
         "type": "text",
-        "text": "ui_barVisualizer"
+        "text": "ui_visualizer"
+    },
+    "visualizer_type": {
+        "order": 1001,
+        "type": "combo",
+        "text": "ui_visualizer_type",
+        "options": [
+            { "label": "Vertical Bars", "value": "VerticalBars" }
+        ],
+        "value": "VerticalBars"
+    },
+    "visualizer_flipFrequencies": {
+        "order": 1002,
+        "type": "bool",
+        "text": "ui_visualizer_flipFrequencies",
+        "value": false
+    },
+    "visualizer_smoothing": {
+        "order": 1003,
+        "type": "slider",
+        "text": "ui_visualizer_smoothing",
+        "value": 38,
+        "min": 0,
+        "max": 100,
+        "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
+    },
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~
+    // [BAR VISUALIZER]
+    "barVisualizer": {
+        "order": 1100,
+        "type": "text",
+        "text": "ui_barVisualizer",
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_position": {
-        "order": 1001,
+        "order": 1101,
         "type": "slider",
         "text": "ui_barVisualizer_position",
         "value": 50,
@@ -314,68 +347,59 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
-        "editable": false
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_width": {
-        "order": 1002,
+        "order": 1102,
         "type": "slider",
         "text": "ui_barVisualizer_width",
         "value": 45,
         "min": 25,
         "max": 100,
-        "editable": false
-    },
-    "barVisualizer_flipFrequencies": {
-        "order": 1003,
-        "type": "bool",
-        "text": "ui_barVisualizer_flipFrequencies",
-        "value": false
-    },
-    "barVisualizer_smoothing": {
-        "order": 1004,
-        "type": "slider",
-        "text": "ui_barVisualizer_smoothing",
-        "value": 38,
-        "min": 0,
-        "max": 100,
-        "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     //
     // [BAR VISUALIZER > BARS]
     "barVisualizer_bars": {
-        "order": 1020,
+        "order": 1120,
         "type": "text",
-        "text": "ui_barVisualizer_bars"
+        "text": "ui_barVisualizer_bars",
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_bars_width": {
-        "order": 1021,
+        "order": 1121,
         "type": "slider",
         "text": "ui_barVisualizer_bars_width",
         "value": 38,
         "min": 1,
         "max": 100,
-        "editable": false
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_bars_height": {
-        "order": 1022,
+        "order": 1122,
         "type": "slider",
         "text": "ui_barVisualizer_bars_height",
         "value": 45,
         "min": 10,
         "max": 100,
-        "editable": false
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_bars_borderRadius": {
-        "order": 1023,
+        "order": 1123,
         "type": "slider",
         "text": "ui_barVisualizer_bars_borderRadius",
         "value": 0,
         "min": 0,
         "max": 100,
-        "editable": false
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_bars_alignment": {
-        "order": 1024,
+        "order": 1124,
         "type": "slider",
         "text": "ui_barVisualizer_bars_alignment",
         "value": 0,
@@ -383,17 +407,19 @@
         "max": 1,
         "fraction": true,
         "step": 0.01,
-        "editable": false
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_bars_color": {
-        "order": 1025,
+        "order": 1125,
         "type": "color",
         "text": "ui_barVisualizer_bars_color",
-        "value": "0.176470 0.266667 0.611764"
+        "value": "0.176470 0.266667 0.611764",
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
 
     "barVisualizer_bars_responseType": {
-        "order": 1050,
+        "order": 1150,
         "type": "combo",
         "text": "ui_barVisualizer_bars_responseType",
         "options": [
@@ -406,16 +432,17 @@
             { "label": "<samp>L<u>A</u>B</samp> - Green&#8596;Red", "value": "LabA" },
             { "label": "<samp>LA<u>B</u></samp> - Blue&#8596;Yellow", "value": "LabB" }
         ],
-        "value": "HsvBrightness"
+        "value": "HsvBrightness",
+        "condition": "visualizer_type.value === 'VerticalBars'"
     },
     "$_barVisualizer_bars_responseType": {
-        "order": 1051,
+        "order": 1151,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseType",
-        "condition": "showDescriptions.value"
+        "condition": "showDescriptions.value && visualizer_type.value === 'VerticalBars'"
     },
     "barVisualizer_bars_responseProvider": {
-        "order": 1052,
+        "order": 1152,
         "type": "combo",
         "text": "ui_barVisualizer_bars_responseProvider",
         "options": [
@@ -425,16 +452,16 @@
             { "label": "Change (absolute)", "value": "ChangeAbsolute" }
         ],
         "value": "ValueNormalized",
-        "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
+        "condition": "showAdvancedOptions.value && visualizer_type.value === 'VerticalBars' && barVisualizer_bars_responseType.value !== 'None'"
     },
     "$_barVisualizer_bars_responseProvider": {
-        "order": 1053,
+        "order": 1153,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseProvider",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && barVisualizer_bars_responseType.value !== 'None'"
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && visualizer_type.value === 'VerticalBars' && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_responseValueGain": {
-        "order": 1054,
+        "order": 1154,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseValueGain",
         "value": 1,
@@ -442,25 +469,25 @@
         "max": 5,
         "fraction": true,
         "step": 0.1,
-        "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
+        "condition": "showAdvancedOptions.value && visualizer_type.value === 'VerticalBars' && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_responseRange": {
-        "order": 1056,
+        "order": 1156,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseRange",
         "value": 35,
         "min": -50,
         "max": 50,
-        "condition": "!['None','Hue'].includes(barVisualizer_bars_responseType.value)"
+        "condition": "visualizer_type.value === 'VerticalBars' && !['None','Hue'].includes(barVisualizer_bars_responseType.value)"
     },
     "$_barVisualizer_bars_responseRange": {
-        "order": 1057,
+        "order": 1157,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseRange",
-        "condition": "showDescriptions.value && !['None','Hue'].includes(barVisualizer_bars_responseType.value)"
+        "condition": "showDescriptions.value && visualizer_type.value === 'VerticalBars' && !['None','Hue'].includes(barVisualizer_bars_responseType.value)"
     },
     "barVisualizer_bars_responseDegree": {
-        "order": 1058,
+        "order": 1158,
         "type": "slider",
         "text": "ui_barVisualizer_bars_responseDegree",
         "value": 0.8,
@@ -468,20 +495,20 @@
         "max": 3,
         "fraction": true,
         "step": 0.1,
-        "condition": "showAdvancedOptions.value && barVisualizer_bars_responseType.value !== 'None'"
+        "condition": "showAdvancedOptions.value && visualizer_type.value === 'VerticalBars' && barVisualizer_bars_responseType.value !== 'None'"
     },
     "$_barVisualizer_bars_responseDegree": {
-        "order": 1059,
+        "order": 1159,
         "type": "text",
         "text": "ui_$_barVisualizer_bars_responseDegree",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && barVisualizer_bars_responseType.value !== 'None'"
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && visualizer_type.value === 'VerticalBars' && barVisualizer_bars_responseType.value !== 'None'"
     },
     "barVisualizer_bars_response_toHue": {
-        "order": 1060,
+        "order": 1160,
         "type": "color",
         "text": "ui_barVisualizer_bars_response_toHue",
         "value": "0.4 0.839 0.8",
-        "condition": "barVisualizer_bars_responseType.value === 'Hue'"
+        "condition": "visualizer_type.value === 'VerticalBars' && barVisualizer_bars_responseType.value === 'Hue'"
     },
 
     // [SPOTIFY]

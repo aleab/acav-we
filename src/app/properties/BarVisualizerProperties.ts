@@ -6,8 +6,6 @@ import { ColorReactionType } from '../ColorReactionType';
 export default interface BarVisualizerProperties {
     position: number;
     width: number;
-    flipFrequencies: boolean;
-    smoothing: number;
     bars: {
         width: number;
         height: number;

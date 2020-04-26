@@ -1,18 +1,14 @@
-import { RefObject, useCallback, useContext, useRef } from 'react';
+import { MutableRefObject, RefObject } from 'react';
 import { RGB } from 'color-convert/conversions';
 
-import Log from '../../../common/Log';
-import CircularBuffer from '../../../common/CircularBuffer';
-import AudioSamplesArray from '../../../common/AudioSamplesArray';
-import { AudioResponsiveValueProviderFactory } from '../../../app/AudioResponsiveValueProvider';
-import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';
-import WallpaperContext from '../../../app/WallpaperContext';
+import Log from '../../common/Log';
+import { AudioResponsiveValueProviderFactory } from '../../app/AudioResponsiveValueProvider';
+import { ColorReactionFactory, ColorReactionType } from '../../app/ColorReactionType';
+import { WallpaperContextType } from '../../app/WallpaperContext';
+import BarVisualizerProperties from '../../app/properties/BarVisualizerProperties';
+import VisualizerProperties from '../../app/properties/VisualizerProperties';
 
-interface RenderArgs {
-    readonly samples: AudioSamplesArray | undefined;
-    readonly samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined;
-    readonly peak: number;
-}
+import VisualizerRenderArgs from './VisualizerRenderArgs';
 
 /**
  * @param {number} x x coordinate of the top-left corner of the bar.
@@ -42,11 +38,16 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
     }
 }
 
-export default function useHorizontalBarVisualizerRendering(canvas: RefObject<HTMLCanvasElement>) {
-    const context = useContext(WallpaperContext)!;
-    const O = useRef(context.wallpaperProperties.barVisualizer);
+export default function getVerticalBarsVisualizerRenderer(
+    context: WallpaperContextType,
+    canvas: RefObject<HTMLCanvasElement>,
+    visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
+    barVisualizerOptions: MutableRefObject<DeepReadonly<BarVisualizerProperties>>,
+) {
+    const Ov = visualizerOptions;
+    const O = barVisualizerOptions;
 
-    return useCallback((args: RenderArgs) => {
+    return function render(args: VisualizerRenderArgs) {
         const canvasContext = canvas.current?.getContext('2d');
         if (!canvasContext) return;
 
@@ -58,7 +59,7 @@ export default function useHorizontalBarVisualizerRendering(canvas: RefObject<HT
 
             // Snapshot current properties, to render all bars consistently with the same settings
             const width = canvasContext.canvas.width * (O.current.width / 100);
-            const flipFrequencies = O.current.flipFrequencies;
+            const flipFrequencies = Ov.current.flipFrequencies;
             const alignment = O.current.bars.alignment;
             const position = canvasContext.canvas.height * (O.current.position / 100);
             const barWidth = (width / N_BARS) * (O.current.bars.width / 100);
@@ -121,5 +122,5 @@ export default function useHorizontalBarVisualizerRendering(canvas: RefObject<HT
                 canvasContext.restore();
             });
         }
-    }, [ canvas, context ]);
+    };
 }

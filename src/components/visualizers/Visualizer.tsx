@@ -1,19 +1,32 @@
 import _ from 'lodash';
-import React, { useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../../common/Log';
 import CircularBuffer from '../../common/CircularBuffer';
 import AudioSamplesArray from '../../common/AudioSamplesArray';
+import { VisualizerType } from '../../app/VisualizerType';
 import WallpaperContext from '../../app/WallpaperContext';
 
-import useHorizontalBarVisualizerRendering from './rendering/useHorizontalBarVisualizerRendering';
+import VisualizerRenderArgs from './VisualizerRenderArgs';
+import getVerticalBarsVisualizerRenderer from './getVerticalBarsVisualizerRenderer';
+import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
-const Logc = Log.getLogger('HorizontalBarVisualizer', 'darkblue');
+const Logc = Log.getLogger('Visualizer', 'darkblue');
 
-export default function HorizontalBarVisualizer() {
-    const RENDER_ID = useMemo(() => `HorizontalBarVisualizer-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
+export default function Visualizer() {
+    const RENDER_ID = useMemo(() => `Visualizer-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const context = useContext(WallpaperContext)!;
-    const O = useRef(context.wallpaperProperties.barVisualizer);
+
+    const O = useRef(context.wallpaperProperties.visualizer);
+    const barVisualizerOptions = useRef(context.wallpaperProperties.barVisualizer);
+    const [ visualizerType, setVisualizerType ] = useState(O.current.type);
+
+    // =====================
+    //  PROPERTIES LISTENER
+    // =====================
+    useUserPropertiesListener(p => p.visualizer, visualizerProps => {
+        if (visualizerProps.type !== undefined) setVisualizerType(visualizerProps.type);
+    }, []);
 
     // ==========
     //  <canvas>
@@ -28,9 +41,20 @@ export default function HorizontalBarVisualizer() {
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
     // =================================
-    const render = useHorizontalBarVisualizerRendering(canvas);
+    const render = useMemo<((args: VisualizerRenderArgs) => void)>(() => {
+        switch (visualizerType) {
+            case VisualizerType.VerticalBars:
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions);
+
+            default: return (_args: VisualizerRenderArgs) => {};
+        }
+    }, [ context, visualizerType ]);
+
     useEffect(() => {
         Logc.info('Registering onAudioSamples and render callbacks...');
+
+        // Clear
+        canvas.current?.getContext('2d')?.clearRect(0, 0, canvas.current.width, canvas.current.height);
 
         const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;

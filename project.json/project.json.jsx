@@ -148,12 +148,16 @@ function getProjectJson() {
                         `The most usable values are ${samp('0.4')}&#8239;${samp('&le;')}&#8239;${samp('&#120590;')}&#8239;${samp('&le;')}&#8201;${samp('0.5')} and ${samp('&#120583;')}&#8239;${samp('&ge;')}&#8239;${samp('0.8')}.`,
                     ),
 
+                    // [VISUALIZER]
+                    ui_visualizer: section('Visualizer'),
+                    ui_visualizer_type: indent('Type'),
+                    ui_visualizer_flipFrequencies: indent('Flip Frequencies'),
+                    ui_visualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
+
                     // [BAR VISUALIZER]
                     ui_barVisualizer: section('Bar Visualizer'),
                     ui_barVisualizer_position: indent('Position (%)'),
                     ui_barVisualizer_width: indent('Width (%)'),
-                    ui_barVisualizer_flipFrequencies: indent('Flip Frequencies'),
-                    ui_barVisualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
                     //
                     // [BAR VISUALIZER > BARS]
                     ui_barVisualizer_bars: subSection('Bars'),

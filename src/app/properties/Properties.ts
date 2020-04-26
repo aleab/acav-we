@@ -9,11 +9,13 @@ import { ColorReactionType } from '../ColorReactionType';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
 import { TextScrollingType } from '../TextScrollingType';
+import { VisualizerType } from '../VisualizerType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
 import BarVisualizerProperties from './BarVisualizerProperties';
 import SpotifyProperties from './SpotifyProperties';
+import VisualizerProperties from './VisualizerProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
@@ -21,6 +23,7 @@ export default interface Properties {
     limitFps: boolean;
     background: BackgroundProperties;
     audioSamples: AudioSamplesProperties;
+    visualizer: VisualizerProperties;
     barVisualizer: BarVisualizerProperties;
     spotify: SpotifyProperties;
 }
@@ -91,12 +94,16 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(audioSamplesOptions.scale!, 'gaussianMean', raw.audioSamples_scale_Gaussian_mean as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(audioSamplesOptions.scale)) delete audioSamplesOptions.scale;
 
+    // .visualizer
+    const visualizerOptions: MappedProperties['visualizer'] = {};
+    setProperty(visualizerOptions, 'type', raw.visualizer_type as WEProperty<'combo'>, _r => parseComboProperty(_r, VisualizerType));
+    setProperty(visualizerOptions, 'flipFrequencies', raw.visualizer_flipFrequencies as WEProperty<'bool'>, _r => _r.value);
+    setProperty(visualizerOptions, 'smoothing', raw.visualizer_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+
     // .barVisualizer
     const barVisualizerOptions: MappedProperties['barVisualizer'] = { bars: {} };
     setProperty(barVisualizerOptions, 'position', raw.barVisualizer_position as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions, 'width', raw.barVisualizer_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions, 'flipFrequencies', raw.barVisualizer_flipFrequencies as WEProperty<'bool'>, _r => _r.value);
-    setProperty(barVisualizerOptions, 'smoothing', raw.barVisualizer_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     // .barVisualizer.bars
     setProperty(barVisualizerOptions.bars!, 'width', raw.barVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'height', raw.barVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -147,6 +154,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         { ...rootOptions },
         !_.isEmpty(backgroundOptions) ? { background: backgroundOptions } : {},
         !_.isEmpty(audioSamplesOptions) ? { audioSamples: audioSamplesOptions } : {},
+        !_.isEmpty(visualizerOptions) ? { visualizer: visualizerOptions } : {},
         !_.isEmpty(barVisualizerOptions) ? { barVisualizer: barVisualizerOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
     );

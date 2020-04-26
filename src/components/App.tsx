@@ -14,7 +14,7 @@ import useWallpaperBackground from '../hooks/useWallpaperBackground';
 
 import Stats from './Stats';
 import Spotify from './spotify/Spotify';
-import HorizontalBarVisualizer from './visualizers/HorizontalBarVisualizer';
+import Visualizer from './visualizers/Visualizer';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
@@ -250,7 +250,7 @@ export default function App(props: AppProps) {
       <div ref={wallpaperRef} style={style}>
         <WallpaperContext.Provider value={wallpaperContext}>
           {showStats ? <Stats /> : null}
-          <HorizontalBarVisualizer />
+          <Visualizer />
           {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
         </WallpaperContext.Provider>
       </div>
