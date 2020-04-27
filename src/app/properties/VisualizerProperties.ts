@@ -27,6 +27,8 @@ export interface BarVisualizerProperties {
         alignment: number;
         color: RGBA;
         blockThickness: number;
+        waveThickness: number;
+        fullWave: boolean;
     };
 }
 

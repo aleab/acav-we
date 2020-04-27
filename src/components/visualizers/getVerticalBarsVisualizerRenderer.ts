@@ -10,11 +10,20 @@ import { BarVisualizerProperties, VisualizerProperties } from '../../app/propert
 
 import VisualizerRenderArgs from './VisualizerRenderArgs';
 
+interface RenderOpts {
+    borderRadius: number;
+    blockThickness: number;
+    waveThickness: number;
+    alignment: number;
+    fullWave: boolean;
+    prev: { x: number, y: number, height: number } | null;
+}
+
 /**
  * @param {number} x x coordinate of the top-left corner of the bar.
  * @param {number} y y coordinate of the top-left corner of the bar.
  */
-function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: { borderRadius: number }) {
+function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: RenderOpts) {
     const { borderRadius } = opts;
 
     const radius = borderRadius > width / 2 ? width / 2 : borderRadius;
@@ -44,11 +53,38 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
  * @param {number} x x coordinate of the top-left corner of the bar.
  * @param {number} y y coordinate of the top-left corner of the bar.
  */
-function renderBlock(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: { blockThickness: number }) {
+function renderBlock(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: RenderOpts) {
     const { blockThickness } = opts;
 
     canvasContext.fillRect(x, y - blockThickness, width, blockThickness);
     canvasContext.fillRect(x, y + height, width, blockThickness);
+}
+
+/**
+ * @param {number} x x coordinate of the top-left corner of the bar.
+ * @param {number} y y coordinate of the top-left corner of the bar.
+ */
+function renderWave(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: RenderOpts) {
+    const { waveThickness, alignment, fullWave, prev } = opts;
+    if (prev === null) return;
+
+    canvasContext.lineCap = 'round';
+    canvasContext.lineWidth = waveThickness;
+    canvasContext.beginPath();
+
+    const main = alignment >= 0 ? { x, y } : { x, y: y + height };
+    const prevMain = alignment >= 0 ? { x: prev.x, y: prev.y } : { x: prev.x, y: prev.y + prev.height };
+    canvasContext.moveTo(prevMain.x, prevMain.y);
+    canvasContext.lineTo(main.x, main.y);
+
+    if (fullWave) {
+        const other = alignment >= 0 ? { x, y: y + height } : { x, y };
+        const prevOther = alignment >= 0 ? { x: prev.x, y: prev.y + prev.height } : { x: prev.x, y: prev.y };
+        canvasContext.moveTo(prevOther.x, prevOther.y);
+        canvasContext.lineTo(other.x, other.y);
+    }
+
+    canvasContext.stroke();
 }
 
 export default function getVerticalBarsVisualizerRenderer(
@@ -63,6 +99,7 @@ export default function getVerticalBarsVisualizerRenderer(
 
     const _renderOne = type === VerticalVisualizerType.Bars ? renderBar
         : type === VerticalVisualizerType.Blocks ? renderBlock
+        : type === VerticalVisualizerType.Wave ? renderWave
         : (..._args: any[]) => {};
 
     return function render(args: VisualizerRenderArgs) {
@@ -86,7 +123,10 @@ export default function getVerticalBarsVisualizerRenderer(
                 (2 / (1 + alignment)) * (canvasContext.canvas.height - position),   // (1+a)/2: section of the bar above the pivot point
             ) * (O.current.bars.height / 100);
             const barBorderRadius = (barWidth / 2) * (O.current.bars.borderRadius / 100);
+
             const blockThickness = O.current.bars.blockThickness;
+            const waveThickness = O.current.bars.waveThickness;
+            const fullWave = O.current.bars.fullWave;
 
             const barColorRgb: Readonly<RGB> = [ O.current.bars.color[0], O.current.bars.color[1], O.current.bars.color[2] ];
             const barColorReaction = Ov.current.responseType !== ColorReactionType.None
@@ -102,7 +142,10 @@ export default function getVerticalBarsVisualizerRenderer(
 
             if (barColorReaction === undefined) {
                 canvasContext.setFillColorRgb(barColorRgb as RGB);
+                canvasContext.setStrokeColorRgb(barColorRgb as RGB);
             }
+
+            let prevSamplePosition: { x: number, y: number, height: number }[] | null = null;
             args.samples.forEach((sample, i) => {
                 if (sample[0] === 0 && sample[1] === 0) return;
                 if (sample[0] > args.peak || sample[1] > args.peak) {
@@ -129,24 +172,60 @@ export default function getVerticalBarsVisualizerRenderer(
                     }
                 }
 
+                const _samplePosition = [
+                    {
+                        x: canvasContext.canvas.width / 2 - dx - barWidth,
+                        y: y[0],
+                        height: sample[0] * barHeight,
+                    },
+                    {
+                        x: canvasContext.canvas.width / 2 + dx,
+                        y: y[1],
+                        height: sample[1] * barHeight,
+                    },
+                ];
+
                 canvasContext.save();
                 if (sample[0] !== 0) {
                     canvasContext.setFillColorRgb(fillColor[0] as RGB);
-                    _renderOne(canvasContext, canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight, {
-                        barBorderRadius,
+                    canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
+                    _renderOne(canvasContext, _samplePosition[0].x, _samplePosition[0].y, barWidth, _samplePosition[0].height, {
+                        borderRadius: barBorderRadius,
                         blockThickness,
+                        waveThickness,
+                        alignment,
+                        fullWave,
+                        prev: prevSamplePosition === null ? null : prevSamplePosition[0],
                     });
                 }
                 if (sample[1] !== 0) {
                     if (fillColor.length > 0) {
                         canvasContext.setFillColorRgb(fillColor[1] as RGB);
+                        canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
                     }
-                    _renderOne(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight, {
-                        barBorderRadius,
+                    _renderOne(canvasContext, _samplePosition[1].x, _samplePosition[1].y, barWidth, _samplePosition[1].height, {
+                        borderRadius: barBorderRadius,
                         blockThickness,
+                        waveThickness,
+                        alignment,
+                        fullWave,
+                        prev: prevSamplePosition === null ? null : prevSamplePosition[1],
+                    });
+                }
+
+                if (i === 0 && type === VerticalVisualizerType.Wave) {
+                    _renderOne(canvasContext, _samplePosition[0].x, _samplePosition[0].y, barWidth, _samplePosition[0].height, {
+                        borderRadius: barBorderRadius,
+                        blockThickness,
+                        waveThickness,
+                        alignment,
+                        fullWave,
+                        prev: _samplePosition[1],
                     });
                 }
                 canvasContext.restore();
+
+                prevSamplePosition = _samplePosition;
             });
         }
     };

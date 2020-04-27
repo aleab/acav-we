@@ -1,4 +1,4 @@
-export enum VisualizerType { VerticalBars, VerticalBlocks, CircularBars, CircularBlocks }
+export enum VisualizerType { VerticalBars, VerticalBlocks, VerticalWave, CircularBars, CircularBlocks }
 
-export enum VerticalVisualizerType { Bars, Blocks }
+export enum VerticalVisualizerType { Bars, Blocks, Wave }
 export enum CircularVisualizerType { Bars, Blocks }

@@ -176,18 +176,21 @@ function getProjectJson() {
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [BAR VISUALIZER]
-                    ui_barVisualizer: section('Bar Visualizer'),
+                    ui_barVisualizer: section('Vertical Visualizer'),
                     ui_barVisualizer_position: indent('Position (%)'),
                     ui_barVisualizer_width: indent('Width (%)'),
                     //
                     // [BAR VISUALIZER > BARS]
                     ui_barVisualizer_bars: subSection('Bars'),
+                    ui_barVisualizer_wave: subSection('Wave'),
                     ui_barVisualizer_bars_width: indent('Width (%)'),
                     ui_barVisualizer_bars_height: indent('Height (%)'),
                     ui_barVisualizer_bars_borderRadius: indent('Border Radius (%)'),
                     ui_barVisualizer_bars_alignment: indent('Alignment'),
                     ui_barVisualizer_bars_color: indent('Color'),
                     ui_barVisualizer_bars_blockThickness: indent('Thickness (px)'),
+                    ui_barVisualizer_bars_waveThickness: indent('Thickness (px)'),
+                    ui_barVisualizer_bars_fullWave: indent('Full Wave'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [CIRCULAR VISUALIZER]

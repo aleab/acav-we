@@ -50,6 +50,8 @@ export default function Visualizer() {
                 return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Bars);
             case VisualizerType.VerticalBlocks:
                 return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Blocks);
+            case VisualizerType.VerticalWave:
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Wave);
 
             case VisualizerType.CircularBars:
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Bars);

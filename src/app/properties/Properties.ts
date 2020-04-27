@@ -118,6 +118,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(barVisualizerOptions.bars!, 'alignment', raw.barVisualizer_bars_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'color', raw.barVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     setProperty(barVisualizerOptions.bars!, 'blockThickness', raw.barVisualizer_bars_blockThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(barVisualizerOptions.bars!, 'waveThickness', raw.barVisualizer_bars_waveThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(barVisualizerOptions.bars!, 'fullWave', raw.barVisualizer_bars_fullWave as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
     // .circularVisualizer

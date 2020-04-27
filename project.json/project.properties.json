@@ -312,6 +312,7 @@
         "options": [
             { "label": "Vertical, Bars", "value": "VerticalBars" },
             { "label": "Vertical, Blocks", "value": "VerticalBlocks" },
+            { "label": "Vertical, Wave", "value": "VerticalWave" },
             { "label": "Circular, Bars", "value": "CircularBars" },
             { "label": "Circular, Blocks", "value": "CircularBlocks" }
         ],
@@ -461,7 +462,13 @@
         "order": 1120,
         "type": "text",
         "text": "ui_barVisualizer_bars",
-        "condition": "visualizer_type.value.startsWith('Vertical')"
+        "condition": "visualizer_type.value.startsWith('Vertical') && visualizer_type.value !== 'VerticalWave'"
+    },
+    "barVisualizer_wave": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_barVisualizer_wave",
+        "condition": "visualizer_type.value === 'VerticalWave'"
     },
     "barVisualizer_bars_width": {
         "order": 1121,
@@ -521,6 +528,23 @@
         "max": 10,
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalBlocks'"
+    },
+    "barVisualizer_bars_waveThickness": {
+        "order": 1126,
+        "type": "slider",
+        "text": "ui_barVisualizer_bars_waveThickness",
+        "value": 1,
+        "min": 1,
+        "max": 5,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalWave'"
+    },
+    "barVisualizer_bars_fullWave": {
+        "order": 1127,
+        "type": "bool",
+        "text": "ui_barVisualizer_bars_fullWave",
+        "value": true,
+        "condition": "visualizer_type.value === 'VerticalWave'"
     },
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~
