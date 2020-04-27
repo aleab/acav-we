@@ -117,6 +117,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(barVisualizerOptions.bars!, 'borderRadius', raw.barVisualizer_bars_borderRadius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'alignment', raw.barVisualizer_bars_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'color', raw.barVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    setProperty(barVisualizerOptions.bars!, 'blockThickness', raw.barVisualizer_bars_blockThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
 
     // .circularVisualizer

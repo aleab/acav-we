@@ -26,6 +26,7 @@ export interface BarVisualizerProperties {
         borderRadius: number;
         alignment: number;
         color: RGBA;
+        blockThickness: number;
     };
 }
 

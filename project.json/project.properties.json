@@ -311,6 +311,7 @@
         "text": "ui_visualizer_type",
         "options": [
             { "label": "Vertical, Bars", "value": "VerticalBars" },
+            { "label": "Vertical, Blocks", "value": "VerticalBlocks" },
             { "label": "Circular, Bars", "value": "CircularBars" },
             { "label": "Circular, Blocks", "value": "CircularBlocks" }
         ],
@@ -430,7 +431,7 @@
         "order": 1100,
         "type": "text",
         "text": "ui_barVisualizer",
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "barVisualizer_position": {
         "order": 1101,
@@ -442,7 +443,7 @@
         "fraction": true,
         "step": 0.1,
         "editable": false,
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "barVisualizer_width": {
         "order": 1102,
@@ -452,7 +453,7 @@
         "min": 25,
         "max": 100,
         "editable": false,
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     //
     // [BAR VISUALIZER > BARS]
@@ -460,7 +461,7 @@
         "order": 1120,
         "type": "text",
         "text": "ui_barVisualizer_bars",
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "barVisualizer_bars_width": {
         "order": 1121,
@@ -470,7 +471,7 @@
         "min": 1,
         "max": 100,
         "editable": false,
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "barVisualizer_bars_height": {
         "order": 1122,
@@ -480,7 +481,7 @@
         "min": 10,
         "max": 100,
         "editable": false,
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "barVisualizer_bars_borderRadius": {
         "order": 1123,
@@ -502,14 +503,24 @@
         "fraction": true,
         "step": 0.01,
         "editable": false,
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "barVisualizer_bars_color": {
         "order": 1125,
         "type": "color",
         "text": "ui_barVisualizer_bars_color",
         "value": "0.176470 0.266667 0.611764",
-        "condition": "visualizer_type.value === 'VerticalBars'"
+        "condition": "visualizer_type.value.startsWith('Vertical')"
+    },
+    "barVisualizer_bars_blockThickness": {
+        "order": 1126,
+        "type": "slider",
+        "text": "ui_barVisualizer_bars_blockThickness",
+        "value": 3,
+        "min": 1,
+        "max": 10,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBlocks'"
     },
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~

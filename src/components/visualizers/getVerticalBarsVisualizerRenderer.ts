@@ -5,6 +5,7 @@ import Log from '../../common/Log';
 import { AudioResponsiveValueProviderFactory } from '../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../app/ColorReactionType';
 import { WallpaperContextType } from '../../app/WallpaperContext';
+import { VerticalVisualizerType } from '../../app/VisualizerType';
 import { BarVisualizerProperties, VisualizerProperties } from '../../app/properties/VisualizerProperties';
 
 import VisualizerRenderArgs from './VisualizerRenderArgs';
@@ -13,7 +14,9 @@ import VisualizerRenderArgs from './VisualizerRenderArgs';
  * @param {number} x x coordinate of the top-left corner of the bar.
  * @param {number} y y coordinate of the top-left corner of the bar.
  */
-function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, borderRadius: number) {
+function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: { borderRadius: number }) {
+    const { borderRadius } = opts;
+
     const radius = borderRadius > width / 2 ? width / 2 : borderRadius;
     if (height > 1 && radius > 0) {
         canvasContext.beginPath();
@@ -37,14 +40,30 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
     }
 }
 
+/**
+ * @param {number} x x coordinate of the top-left corner of the bar.
+ * @param {number} y y coordinate of the top-left corner of the bar.
+ */
+function renderBlock(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, opts: { blockThickness: number }) {
+    const { blockThickness } = opts;
+
+    canvasContext.fillRect(x, y - blockThickness, width, blockThickness);
+    canvasContext.fillRect(x, y + height, width, blockThickness);
+}
+
 export default function getVerticalBarsVisualizerRenderer(
     context: WallpaperContextType,
     canvas: RefObject<HTMLCanvasElement>,
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     barVisualizerOptions: MutableRefObject<DeepReadonly<BarVisualizerProperties>>,
+    type: VerticalVisualizerType,
 ) {
     const Ov = visualizerOptions;
     const O = barVisualizerOptions;
+
+    const _renderOne = type === VerticalVisualizerType.Bars ? renderBar
+        : type === VerticalVisualizerType.Blocks ? renderBlock
+        : (..._args: any[]) => {};
 
     return function render(args: VisualizerRenderArgs) {
         const canvasContext = canvas.current?.getContext('2d');
@@ -67,6 +86,7 @@ export default function getVerticalBarsVisualizerRenderer(
                 (2 / (1 + alignment)) * (canvasContext.canvas.height - position),   // (1+a)/2: section of the bar above the pivot point
             ) * (O.current.bars.height / 100);
             const barBorderRadius = (barWidth / 2) * (O.current.bars.borderRadius / 100);
+            const blockThickness = O.current.bars.blockThickness;
 
             const barColorRgb: Readonly<RGB> = [ O.current.bars.color[0], O.current.bars.color[1], O.current.bars.color[2] ];
             const barColorReaction = Ov.current.responseType !== ColorReactionType.None
@@ -112,13 +132,19 @@ export default function getVerticalBarsVisualizerRenderer(
                 canvasContext.save();
                 if (sample[0] !== 0) {
                     canvasContext.setFillColorRgb(fillColor[0] as RGB);
-                    renderBar(canvasContext, canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight, barBorderRadius);
+                    _renderOne(canvasContext, canvasContext.canvas.width / 2 - dx - barWidth, y[0], barWidth, sample[0] * barHeight, {
+                        barBorderRadius,
+                        blockThickness,
+                    });
                 }
                 if (sample[1] !== 0) {
                     if (fillColor.length > 0) {
                         canvasContext.setFillColorRgb(fillColor[1] as RGB);
                     }
-                    renderBar(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight, barBorderRadius);
+                    _renderOne(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], barWidth, sample[1] * barHeight, {
+                        barBorderRadius,
+                        blockThickness,
+                    });
                 }
                 canvasContext.restore();
             });

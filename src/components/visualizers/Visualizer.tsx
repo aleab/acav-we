@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Log from '../../common/Log';
 import CircularBuffer from '../../common/CircularBuffer';
 import AudioSamplesArray from '../../common/AudioSamplesArray';
-import { CircularVisualizerType, VisualizerType } from '../../app/VisualizerType';
+import { CircularVisualizerType, VerticalVisualizerType, VisualizerType } from '../../app/VisualizerType';
 import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
@@ -47,7 +47,9 @@ export default function Visualizer() {
     const render = useMemo<((args: VisualizerRenderArgs) => void)>(() => {
         switch (visualizerType) {
             case VisualizerType.VerticalBars:
-                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions);
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Bars);
+            case VisualizerType.VerticalBlocks:
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Blocks);
 
             case VisualizerType.CircularBars:
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Bars);

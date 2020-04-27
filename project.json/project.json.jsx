@@ -187,6 +187,7 @@ function getProjectJson() {
                     ui_barVisualizer_bars_borderRadius: indent('Border Radius (%)'),
                     ui_barVisualizer_bars_alignment: indent('Alignment'),
                     ui_barVisualizer_bars_color: indent('Color'),
+                    ui_barVisualizer_bars_blockThickness: indent('Thickness (px)'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [CIRCULAR VISUALIZER]
