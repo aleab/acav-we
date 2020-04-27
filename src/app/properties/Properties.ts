@@ -13,9 +13,8 @@ import { VisualizerType } from '../VisualizerType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
-import BarVisualizerProperties from './BarVisualizerProperties';
 import SpotifyProperties from './SpotifyProperties';
-import VisualizerProperties from './VisualizerProperties';
+import { BarVisualizerProperties, CircularVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
@@ -25,6 +24,7 @@ export default interface Properties {
     audioSamples: AudioSamplesProperties;
     visualizer: VisualizerProperties;
     barVisualizer: BarVisualizerProperties;
+    circularVisualizer: CircularVisualizerProperties;
     spotify: SpotifyProperties;
 }
 
@@ -100,6 +100,13 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(visualizerOptions, 'flipFrequencies', raw.visualizer_flipFrequencies as WEProperty<'bool'>, _r => _r.value);
     setProperty(visualizerOptions, 'smoothing', raw.visualizer_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
+    setProperty(visualizerOptions, 'responseType', raw.visualizer_color_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));
+    setProperty(visualizerOptions, 'responseProvider', raw.visualizer_color_responseProvider as WEProperty<'combo'>, _r => parseComboProperty(_r, AudioResponsiveValueProvider));
+    setProperty(visualizerOptions, 'responseValueGain', raw.visualizer_color_responseValueGain as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(visualizerOptions, 'responseRange', raw.visualizer_color_responseRange as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(visualizerOptions, 'responseDegree', raw.visualizer_color_responseDegree as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(visualizerOptions, 'responseToHue', raw.visualizer_color_response_toHue as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+
     // .barVisualizer
     const barVisualizerOptions: MappedProperties['barVisualizer'] = { bars: {} };
     setProperty(barVisualizerOptions, 'position', raw.barVisualizer_position as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -110,13 +117,21 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(barVisualizerOptions.bars!, 'borderRadius', raw.barVisualizer_bars_borderRadius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'alignment', raw.barVisualizer_bars_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(barVisualizerOptions.bars!, 'color', raw.barVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
-    setProperty(barVisualizerOptions.bars!, 'responseType', raw.barVisualizer_bars_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));
-    setProperty(barVisualizerOptions.bars!, 'responseProvider', raw.barVisualizer_bars_responseProvider as WEProperty<'combo'>, _r => parseComboProperty(_r, AudioResponsiveValueProvider));
-    setProperty(barVisualizerOptions.bars!, 'responseValueGain', raw.barVisualizer_bars_responseValueGain as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'responseRange', raw.barVisualizer_bars_responseRange as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'responseDegree', raw.barVisualizer_bars_responseDegree as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'responseToHue', raw.barVisualizer_bars_response_toHue as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
+
+    // .circularVisualizer
+    const circularVisualizerOptions: MappedProperties['circularVisualizer'] = { bars: {} };
+    setProperty(circularVisualizerOptions, 'x', raw.circularVisualizer_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions, 'y', raw.circularVisualizer_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions, 'radius', raw.circularVisualizer_radius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions, 'rotation', raw.circularVisualizer_rotation as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions, 'angle', raw.circularVisualizer_angle as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    // .circularVisualizer.bars
+    setProperty(circularVisualizerOptions.bars!, 'width', raw.circularVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.bars!, 'height', raw.circularVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.bars!, 'color', raw.circularVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    setProperty(circularVisualizerOptions.bars!, 'blockThickness', raw.circularVisualizer_bars_blockThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(circularVisualizerOptions.bars)) delete circularVisualizerOptions.bars;
 
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
@@ -135,20 +150,25 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.style!.background!, 'color', raw.spotify_background_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     setProperty(spotifyOptions.style!.background!, 'colorAlpha', raw.spotify_background_color_alpha as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.style!.background!, 'css', raw.spotify_background_css as WEProperty<'textinput'>, _r => _r.value);
+    if (_.isEmpty(spotifyOptions.style!.background)) delete spotifyOptions.style!.background;
+    if (_.isEmpty(spotifyOptions.style)) delete spotifyOptions.style;
     // .spotify.art
     setProperty(spotifyOptions.art!, 'enabled', raw.spotify_art as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'type', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
     setProperty(spotifyOptions.art!, 'fetchLocalCovers', raw.spotify_art_fetch_local as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'fetchLocalCacheMaxAge', raw.spotify_art_fetch_local_cache_age as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(spotifyOptions.art)) delete spotifyOptions.art;
     // .spotify.scroll
     setProperty(spotifyOptions.scroll!, 'enabled', raw.spotify_scroll as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll_type as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
     setProperty(spotifyOptions.scroll!, 'speed', raw.spotify_scroll_speed as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.scroll!, 'autoDelay', raw.spotify_scroll_auto_delay as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(spotifyOptions.scroll)) delete spotifyOptions.scroll;
     // .spotify.progressBar
     setProperty(spotifyOptions.progressBar!, 'enabled', raw.spotify_progressbar as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.progressBar!, 'color', raw.spotify_progressbar_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     setProperty(spotifyOptions.progressBar!, 'position', raw.spotify_progressbar_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
+    if (_.isEmpty(spotifyOptions.progressBar)) delete spotifyOptions.progressBar;
 
     return _.merge(
         { ...rootOptions },
@@ -156,6 +176,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         !_.isEmpty(audioSamplesOptions) ? { audioSamples: audioSamplesOptions } : {},
         !_.isEmpty(visualizerOptions) ? { visualizer: visualizerOptions } : {},
         !_.isEmpty(barVisualizerOptions) ? { barVisualizer: barVisualizerOptions } : {},
+        !_.isEmpty(circularVisualizerOptions) ? { circularVisualizer: circularVisualizerOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
     );
 }

@@ -4,12 +4,13 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Log from '../../common/Log';
 import CircularBuffer from '../../common/CircularBuffer';
 import AudioSamplesArray from '../../common/AudioSamplesArray';
-import { VisualizerType } from '../../app/VisualizerType';
+import { CircularVisualizerType, VisualizerType } from '../../app/VisualizerType';
 import WallpaperContext from '../../app/WallpaperContext';
+import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
 import VisualizerRenderArgs from './VisualizerRenderArgs';
 import getVerticalBarsVisualizerRenderer from './getVerticalBarsVisualizerRenderer';
-import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
+import getCircularVisualizerRenderer from './getCircularVisualizerRenderer';
 
 const Logc = Log.getLogger('Visualizer', 'darkblue');
 
@@ -19,6 +20,8 @@ export default function Visualizer() {
 
     const O = useRef(context.wallpaperProperties.visualizer);
     const barVisualizerOptions = useRef(context.wallpaperProperties.barVisualizer);
+    const circularVisualizerOptions = useRef(context.wallpaperProperties.circularVisualizer);
+
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
 
     // =====================
@@ -45,6 +48,11 @@ export default function Visualizer() {
         switch (visualizerType) {
             case VisualizerType.VerticalBars:
                 return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions);
+
+            case VisualizerType.CircularBars:
+                return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Bars);
+            case VisualizerType.CircularBlocks:
+                return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Blocks);
 
             default: return (_args: VisualizerRenderArgs) => {};
         }

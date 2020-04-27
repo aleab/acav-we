@@ -21,6 +21,7 @@ interface Math {
 
 interface CanvasRenderingContext2D {
     setFillColorRgb(rgb: [number, number, number]): void;
+    setStrokeColorRgb(rgb: [number, number, number]): void;
 }
 
 // HotModuleReplacementPlugin

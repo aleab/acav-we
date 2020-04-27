@@ -5,8 +5,7 @@ import Log from '../../common/Log';
 import { AudioResponsiveValueProviderFactory } from '../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../app/ColorReactionType';
 import { WallpaperContextType } from '../../app/WallpaperContext';
-import BarVisualizerProperties from '../../app/properties/BarVisualizerProperties';
-import VisualizerProperties from '../../app/properties/VisualizerProperties';
+import { BarVisualizerProperties, VisualizerProperties } from '../../app/properties/VisualizerProperties';
 
 import VisualizerRenderArgs from './VisualizerRenderArgs';
 
@@ -58,8 +57,8 @@ export default function getVerticalBarsVisualizerRenderer(
             const N_BARS = args.samples.length * 2;
 
             // Snapshot current properties, to render all bars consistently with the same settings
-            const width = canvasContext.canvas.width * (O.current.width / 100);
             const flipFrequencies = Ov.current.flipFrequencies;
+            const width = canvasContext.canvas.width * (O.current.width / 100);
             const alignment = O.current.bars.alignment;
             const position = canvasContext.canvas.height * (O.current.position / 100);
             const barWidth = (width / N_BARS) * (O.current.bars.width / 100);
@@ -70,14 +69,14 @@ export default function getVerticalBarsVisualizerRenderer(
             const barBorderRadius = (barWidth / 2) * (O.current.bars.borderRadius / 100);
 
             const barColorRgb: Readonly<RGB> = [ O.current.bars.color[0], O.current.bars.color[1], O.current.bars.color[2] ];
-            const barColorReaction = O.current.bars.responseType !== ColorReactionType.None
-                ? ColorReactionFactory.buildColorReaction(O.current.bars.responseType, {
+            const barColorReaction = Ov.current.responseType !== ColorReactionType.None
+                ? ColorReactionFactory.buildColorReaction(Ov.current.responseType, {
                     fromRgb: barColorRgb,
-                    toRgb: [ O.current.bars.responseToHue[0], O.current.bars.responseToHue[1], O.current.bars.responseToHue[2] ],
-                    degree: O.current.bars.responseDegree,
-                    range: O.current.bars.responseRange,
+                    toRgb: [ Ov.current.responseToHue[0], Ov.current.responseToHue[1], Ov.current.responseToHue[2] ],
+                    degree: Ov.current.responseDegree,
+                    range: Ov.current.responseRange,
                 }) : undefined;
-            const barColorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(O.current.bars.responseProvider, O.current.bars.responseValueGain);
+            const barColorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(Ov.current.responseProvider, Ov.current.responseValueGain);
 
             const spacing = (width - N_BARS * barWidth) / (N_BARS - 1);
 
@@ -104,8 +103,10 @@ export default function getVerticalBarsVisualizerRenderer(
                 const fillColor = [ barColorRgb, barColorRgb ];
                 if (barColorReaction !== undefined) {
                     const value = barColorReactionValueProvider([ sample[0], sample[1] ], i, { samplesBuffer: args.samplesBuffer, peak: args.peak });
-                    fillColor[0] = barColorReaction(value[0]);
-                    fillColor[1] = barColorReaction(value[1]);
+                    if (!Number.isNaN(value[0]) && !Number.isNaN(value[1])) {
+                        fillColor[0] = barColorReaction(value[0]);
+                        fillColor[1] = barColorReaction(value[1]);
+                    }
                 }
 
                 canvasContext.save();

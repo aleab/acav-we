@@ -154,6 +154,27 @@ function getProjectJson() {
                     ui_visualizer_flipFrequencies: indent('Flip Frequencies'),
                     ui_visualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
 
+                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,
+                    ui_visualizer_color_responseProvider: indent('React to', { n: 3 }) + asterisk(),
+                    ui_visualizer_color_responseValueGain: indent('Gain', { n: 3 }) + asterisk(),
+                    ui_visualizer_color_responseRange: indent('Range', { n: 3 }),
+                    ui_visualizer_color_responseDegree: indent('Degree', { n: 3 }) + asterisk(),
+                    ui_visualizer_color_response_toHue: indent('Max Color (Hue)', { n: 3 }),
+                    //
+                    // $[VISUALIZER]
+                    ui_$_visualizer_color_responseType: note('This option controls what kind of transformation to apply to the color of each bar.'),
+                    ui_$_visualizer_color_responseProvider: note(
+                        'This defines which parameter or characteristic <samp>P</samp> of the audio samples to use to determine the <em>amount of effect</em> to apply to the color of each bar.',
+                        '<samp><u>Value</u></samp>: the (normalized) value of the current sample.',
+                        '<samp><u>Value Change</u></samp>: the (absolute) difference between the current sample and the oldest one in the buffer.',
+                    ),
+                    ui_$_visualizer_color_responseRange: note(
+                        'The intensity of the effect, i.e. the difference between the maximum and minimum possible values of the color component(s) involved after the effect has been applied to the base color.',
+                        '<u>Example</u>: for a base color with lightness 75, and a range of 35, the effect will produce a color with lightness 100 when the sample value is 1 (maximum) and 65 when the sample value is 0 (minimum).',
+                    ),
+                    ui_$_visualizer_color_responseDegree: note('Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.'),
+
+                    // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [BAR VISUALIZER]
                     ui_barVisualizer: section('Bar Visualizer'),
                     ui_barVisualizer_position: indent('Position (%)'),
@@ -166,25 +187,22 @@ function getProjectJson() {
                     ui_barVisualizer_bars_borderRadius: indent('Border Radius (%)'),
                     ui_barVisualizer_bars_alignment: indent('Alignment'),
                     ui_barVisualizer_bars_color: indent('Color'),
-                    ui_barVisualizer_bars_responseType: indent('Response Type') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,
-                    ui_barVisualizer_bars_responseProvider: indent('React to', { n: 3 }) + asterisk(),
-                    ui_barVisualizer_bars_responseValueGain: indent('Gain', { n: 3 }) + asterisk(),
-                    ui_barVisualizer_bars_responseRange: indent('Range', { n: 3 }),
-                    ui_barVisualizer_bars_responseDegree: indent('Degree', { n: 3 }) + asterisk(),
-                    ui_barVisualizer_bars_response_toHue: indent('Max Color (Hue)', { n: 3 }),
+
+                    // ~ ~ ~ ~ ~ ~ ~ ~ ~
+                    // [CIRCULAR VISUALIZER]
+                    ui_circularVisualizer: section('Circular Visualizer'),
+                    ui_circularVisualizer_x: indent('X (%)'),
+                    ui_circularVisualizer_y: indent('Y (%)'),
+                    ui_circularVisualizer_radius: indent('Radius (%)'),
+                    ui_circularVisualizer_rotation: indent('Rotation (deg)'),
+                    ui_circularVisualizer_angle: indent('Angle (deg)'),
                     //
-                    // $[BAR VISUALIZER]
-                    ui_$_barVisualizer_bars_responseType: note('This option controls what kind of transformation to apply to the color of each bar.'),
-                    ui_$_barVisualizer_bars_responseProvider: note(
-                        'This defines which parameter or characteristic <samp>P</samp> of the audio samples to use to determine the <em>amount of effect</em> to apply to the color of each bar.',
-                        '<samp><u>Value</u></samp>: the (normalized) value of the current sample.',
-                        '<samp><u>Value Change</u></samp>: the (absolute) difference between the current sample and the oldest one in the buffer.',
-                    ),
-                    ui_$_barVisualizer_bars_responseRange: note(
-                        'The intensity of the effect, i.e. the difference between the maximum and minimum possible values of the color component(s) involved after the effect has been applied to the base color.',
-                        '<u>Example</u>: for a base color with lightness 75, and a range of 35, the effect will produce a color with lightness 100 when the sample value is 1 (maximum) and 65 when the sample value is 0 (minimum).',
-                    ),
-                    ui_$_barVisualizer_bars_responseDegree: note('Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.'),
+                    // [CIRCULAR VISUALIZER > BARS]
+                    ui_circularVisualizer_bars: subSection('Bars'),
+                    ui_circularVisualizer_bars_width: indent('Width (%)'),
+                    ui_circularVisualizer_bars_height: indent('Height (%)'),
+                    ui_circularVisualizer_bars_color: indent('Color'),
+                    ui_circularVisualizer_bars_blockThickness: indent('Thickness (px)'),
 
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),

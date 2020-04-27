@@ -29,7 +29,7 @@
             4,
             {
                 "SwitchCase": 1,
-                "ignoredNodes": ["JSXAttribute", "JSXElement", "JSXFragment"]
+                "ignoredNodes": ["JSXAttribute", "JSXElement", "JSXFragment", "ConditionalExpression"]
             }
         ],
         "linebreak-style": "off",
