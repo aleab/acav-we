@@ -5,6 +5,7 @@ interface ACAV {
     getSamples?: () => number[];
     togglePauseAudioListener?: () => void;
     resetAudioListener?: () => void;
+    startPreview?: (ms: number) => void;
 
     refreshSpotifyToken?: () => void;
 }

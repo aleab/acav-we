@@ -8,6 +8,8 @@ import './tests/tests';
 
 import App from './components/App';
 import Properties, { mapProperties } from './app/properties/Properties';
+
+import { startPreview } from './preview';
 import projectProperties from '../project.json/project.properties.json';
 
 import '@fortawesome/fontawesome-free/css/svg-with-js.css';
@@ -49,6 +51,8 @@ function run(Component: typeof App) {
     };
 
     window.acav.reload();
+
+    window.acav.startPreview = (ms: number) => startPreview(projectProperties, ms);
 }
 
 run(App);
