@@ -35,7 +35,8 @@ export interface VerticalVisualizerProperties {
     wave: {
         height: number;
         thickness: number;
-        showSecondaryWave: boolean;
+        showMirrorWave: boolean;
+        fill: boolean;
     };
 }
 
@@ -54,5 +55,11 @@ export interface CircularVisualizerProperties {
         width: number;
         height: number;
         thickness: number;
+    };
+    wave: {
+        height: number;
+        thickness: number;
+        showMirrorWave: boolean;
+        fill: boolean;
     };
 }

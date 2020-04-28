@@ -57,6 +57,8 @@ export default function Visualizer() {
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Bars);
             case VisualizerType.CircularBlocks:
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Blocks);
+            case VisualizerType.CircularWave:
+                return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Wave);
 
             default: return (_args: VisualizerRenderArgs) => {};
         }

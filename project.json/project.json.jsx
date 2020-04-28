@@ -198,7 +198,8 @@ function getProjectJson() {
                     ui_verticalVisualizer_wave: subSection('Wave'),
                     ui_verticalVisualizer_wave_height: indent('Height (%)'),
                     ui_verticalVisualizer_wave_thickness: indent('Thickness (px)'),
-                    ui_verticalVisualizer_wave_showSecondaryWave: indent('Secondary Wave'),
+                    ui_verticalVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
+                    ui_verticalVisualizer_wave_fill: indent('Fill'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [CIRCULAR VISUALIZER]
@@ -220,6 +221,13 @@ function getProjectJson() {
                     ui_circularVisualizer_blocks_width: indent('Width (%)'),
                     ui_circularVisualizer_blocks_height: indent('Height (%)'),
                     ui_circularVisualizer_blocks_thickness: indent('Thickness (px)'),
+                    //
+                    // [CIRCULAR VISUALIZER > WAVE]
+                    ui_circularVisualizer_wave: subSection('Wave'),
+                    ui_circularVisualizer_wave_height: indent('Height (%)'),
+                    ui_circularVisualizer_wave_thickness: indent('Thickness (px)'),
+                    ui_circularVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
+                    ui_circularVisualizer_wave_fill: indent('Fill'),
 
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),

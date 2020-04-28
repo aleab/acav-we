@@ -7,6 +7,7 @@ import { CircularVisualizerProperties, VisualizerProperties } from '../../app/pr
 import { ICircularRenderer } from './circular/CircularRenderer';
 import CircularBarsRenderer from './circular/CircularBarsRenderer';
 import CircularBlocksRenderer from './circular/CircularBlocksRenderer';
+import CircularWaveRenderer from './circular/CircularWaveRenderer';
 
 export default function getCircularVisualizerRenderer(
     context: WallpaperContextType,
@@ -32,6 +33,14 @@ export default function getCircularVisualizerRenderer(
                 visualizerOptions,
                 get commonOptions() { return O.current; },
                 get options() { return O.current.blocks; },
+            });
+            break;
+
+        case CircularVisualizerType.Wave:
+            renderer = new CircularWaveRenderer(context, canvas, {
+                visualizerOptions,
+                get commonOptions() { return O.current; },
+                get options() { return O.current.wave; },
             });
             break;
 

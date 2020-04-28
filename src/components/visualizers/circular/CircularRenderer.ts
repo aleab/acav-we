@@ -14,13 +14,14 @@ export interface CircularRendererOptions<T extends CircularVisualizerType> {
     readonly commonOptions: DeepReadonly<Omit<CircularVisualizerProperties, 'bars' | 'blocks' | 'wave'>>;
     readonly options: DeepReadonly<T extends CircularVisualizerType.Bars ? CircularVisualizerProperties['bars']
         : T extends CircularVisualizerType.Blocks ? CircularVisualizerProperties['blocks']
-        //: T extends CircularVisualizerType.Wave ? CircularVisualizerProperties['wave']
+        : T extends CircularVisualizerType.Wave ? CircularVisualizerProperties['wave']
         : never>;
 }
 
 export interface VisualizerParams {
     canvasContext: CanvasRenderingContext2D;
     N: number;
+    visualizerAngle: number;
     angularDelta: number;
     flipFrequencies: boolean;
     x: number;
@@ -127,6 +128,7 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
             this.renderSamples(args, {
                 canvasContext,
                 N,
+                visualizerAngle,
                 angularDelta,
                 flipFrequencies,
                 x,

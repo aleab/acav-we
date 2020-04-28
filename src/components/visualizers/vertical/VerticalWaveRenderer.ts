@@ -4,6 +4,13 @@ import { VerticalVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
 import VerticalRenderer, { VisualizerParams } from './VerticalRenderer';
 
+function stroke(canvasContext: CanvasRenderingContext2D, thickness: number) {
+    canvasContext.lineCap = 'round';
+    canvasContext.lineJoin = 'round';
+    canvasContext.lineWidth = thickness;
+    canvasContext.stroke();
+}
+
 /**
  * @param {number} x x coordinate of the top-left corner of the bar.
  * @param {number} y y coordinate of the top-left corner of the bar.
@@ -13,13 +20,12 @@ function renderWave(
     x: number, y: number, height: number,
     thickness: number,
     alignment: number,
-    showSecondaryWave: boolean,
+    showMirrorWave: boolean, fill: boolean,
     prev: { x: number, y: number, height: number } | null,
 ) {
     if (prev === null) return;
 
-    canvasContext.lineCap = 'round';
-    canvasContext.lineWidth = thickness;
+
     canvasContext.beginPath();
 
     const main = alignment >= 0 ? { x, y } : { x, y: y + height };
@@ -27,14 +33,26 @@ function renderWave(
     canvasContext.moveTo(prevMain.x, prevMain.y);
     canvasContext.lineTo(main.x, main.y);
 
-    if (showSecondaryWave) {
+    if (showMirrorWave) {
         const other = alignment >= 0 ? { x, y: y + height } : { x, y };
         const prevOther = alignment >= 0 ? { x: prev.x, y: prev.y + prev.height } : { x: prev.x, y: prev.y };
-        canvasContext.moveTo(prevOther.x, prevOther.y);
-        canvasContext.lineTo(other.x, other.y);
-    }
 
-    canvasContext.stroke();
+        const d1 = Math.sqrt((prevMain.x - prevOther.x) ** 2 + (prevMain.y - prevOther.y) ** 2);
+        const d2 = Math.sqrt((main.x - other.x) ** 2 + (main.y - other.y) ** 2);
+        const shouldFill = fill && (d1 >= 1 || d2 >= 1);
+
+        if (shouldFill) {
+            canvasContext.lineTo(other.x, other.y);
+            canvasContext.lineTo(prevOther.x, prevOther.y);
+            canvasContext.fill();
+        } else {
+            canvasContext.moveTo(prevOther.x, prevOther.y);
+            canvasContext.lineTo(other.x, other.y);
+            stroke(canvasContext, thickness);
+        }
+    } else {
+        stroke(canvasContext, thickness);
+    }
 }
 
 export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisualizerType.Wave> {
@@ -61,7 +79,8 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         } = visualizerParams;
 
         const waveThickness = O.thickness;
-        const showSecondaryWave = O.showSecondaryWave;
+        const showMirrorWave = O.showMirrorWave;
+        const fill = O.fill;
         const spacing = visualizerWidth / N_BARS;
 
         let prev: { x: number, y: number, height: number }[] | null = null;
@@ -88,20 +107,20 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             if (sample[0] !== 0) {
                 canvasContext.setFillColorRgb(fillColor[0] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-                renderWave(canvasContext, current[0].x, current[0].y, current[0].height, waveThickness, alignment, showSecondaryWave, prev?.[0] ?? null);
+                renderWave(canvasContext, current[0].x, current[0].y, current[0].height, waveThickness, alignment, showMirrorWave, fill, prev?.[0] ?? null);
             }
             if (sample[1] !== 0) {
                 if (fillColor.length > 0) {
                     canvasContext.setFillColorRgb(fillColor[1] as RGB);
                     canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
                 }
-                renderWave(canvasContext, current[1].x, current[1].y, current[1].height, waveThickness, alignment, showSecondaryWave, prev?.[1] ?? null);
+                renderWave(canvasContext, current[1].x, current[1].y, current[1].height, waveThickness, alignment, showMirrorWave, fill, prev?.[1] ?? null);
             }
             prev = current;
 
             // Link first left sample with first right sample
             if (i === 0) {
-                renderWave(canvasContext, current[0].x, current[0].y, current[0].height, waveThickness, alignment, showSecondaryWave, current[1]);
+                renderWave(canvasContext, current[0].x, current[0].y, current[0].height, waveThickness, alignment, showMirrorWave, fill, current[1]);
             }
 
             canvasContext.restore();

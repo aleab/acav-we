@@ -126,11 +126,12 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .verticalVisualizer.wave
     setProperty(verticalVisualizerOptions.wave!, 'height', raw.verticalVisualizer_wave_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.wave!, 'thickness', raw.verticalVisualizer_wave_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(verticalVisualizerOptions.wave!, 'showSecondaryWave', raw.verticalVisualizer_wave_showSecondaryWave as WEProperty<'bool'>, _r => _r.value);
+    setProperty(verticalVisualizerOptions.wave!, 'showMirrorWave', raw.verticalVisualizer_wave_showMirrorWave as WEProperty<'bool'>, _r => _r.value);
+    setProperty(verticalVisualizerOptions.wave!, 'fill', raw.verticalVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(verticalVisualizerOptions.wave)) delete verticalVisualizerOptions.wave;
 
     // .circularVisualizer
-    const circularVisualizerOptions: MappedProperties['circularVisualizer'] = { bars: {}, blocks: {} };
+    const circularVisualizerOptions: MappedProperties['circularVisualizer'] = { bars: {}, blocks: {}, wave: {} };
     setProperty(circularVisualizerOptions, 'x', raw.circularVisualizer_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'y', raw.circularVisualizer_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'radius', raw.circularVisualizer_radius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -145,6 +146,12 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions.blocks!, 'height', raw.circularVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.blocks!, 'thickness', raw.circularVisualizer_blocks_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(circularVisualizerOptions.blocks)) delete circularVisualizerOptions.blocks;
+    // .circularVisualizer.wave
+    setProperty(circularVisualizerOptions.wave!, 'height', raw.circularVisualizer_wave_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.wave!, 'thickness', raw.circularVisualizer_wave_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.wave!, 'showMirrorWave', raw.circularVisualizer_wave_showMirrorWave as WEProperty<'bool'>, _r => _r.value);
+    setProperty(circularVisualizerOptions.wave!, 'fill', raw.circularVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
+    if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
 
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
