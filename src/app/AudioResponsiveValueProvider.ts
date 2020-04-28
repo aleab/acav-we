@@ -4,11 +4,10 @@ import AudioSamplesArray from '../common/AudioSamplesArray';
 
 export enum AudioResponsiveValueProvider { Value, ValueNormalized, Change, ChangeAbsolute }
 
-type AudioResponsiveValueProviderFunctionArgs = { samplesBuffer?: CircularBuffer<AudioSamplesArray>, peak?: number };
-type AudioResponsiveValueProviderFunction = (sample: [ number, number ], i: number, gain: number, args: AudioResponsiveValueProviderFunctionArgs) => [ number, number ];
+export type AudioResponsiveValueProviderFunctionArgs = { samplesBuffer?: CircularBuffer<AudioSamplesArray>, peak?: number };
 
 const AudioResponsiveValueProviders: {
-    [k in AudioResponsiveValueProvider]: AudioResponsiveValueProviderFunction;
+    [k in AudioResponsiveValueProvider]: (sample: [ number, number ], i: number, gain: number, args: AudioResponsiveValueProviderFunctionArgs) => [ number, number ];
 } = {
     [AudioResponsiveValueProvider.Value]: (sample, _i, gain) => {
         return [
@@ -39,8 +38,9 @@ const AudioResponsiveValueProviders: {
     },
 };
 
+export type AudioResponsiveValueProviderFunction = (sample: [number, number], i: number, args: AudioResponsiveValueProviderFunctionArgs) => [number, number];
 export const AudioResponsiveValueProviderFactory = {
-    buildAudioResponsiveValueProvider(type: AudioResponsiveValueProvider, gain: number) {
+    buildAudioResponsiveValueProvider(type: AudioResponsiveValueProvider, gain: number): AudioResponsiveValueProviderFunction {
         let valueProvider = AudioResponsiveValueProviders[type];
         if (!valueProvider) {
             Log.warn('Unhandled AudioResponsiveValueProvider type:', AudioResponsiveValueProvider[type]);

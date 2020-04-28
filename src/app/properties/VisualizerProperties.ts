@@ -17,18 +17,25 @@ export interface VisualizerProperties {
     responseToHue: RGB;
 }
 
-export interface BarVisualizerProperties {
+export interface VerticalVisualizerProperties {
     position: number;
     width: number;
+    alignment: number;
+    color: RGBA;
     bars: {
         width: number;
         height: number;
         borderRadius: number;
-        alignment: number;
-        color: RGBA;
-        blockThickness: number;
-        waveThickness: number;
-        fullWave: boolean;
+    };
+    blocks: {
+        width: number;
+        height: number;
+        thickness: number;
+    };
+    wave: {
+        height: number;
+        thickness: number;
+        showSecondaryWave: boolean;
     };
 }
 
@@ -38,10 +45,14 @@ export interface CircularVisualizerProperties {
     radius: number;
     rotation: number;
     angle: number;
+    color: RGBA;
     bars: {
         width: number;
         height: number;
-        color: RGBA;
-        blockThickness: number;
+    };
+    blocks: {
+        width: number;
+        height: number;
+        thickness: number;
     };
 }

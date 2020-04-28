@@ -427,17 +427,17 @@
     },
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~
-    // [BAR VISUALIZER] (vertical)
-    "barVisualizer": {
+    // [VERTICAL VISUALIZER]
+    "verticalVisualizer": {
         "order": 1100,
         "type": "text",
-        "text": "ui_barVisualizer",
+        "text": "ui_verticalVisualizer",
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
-    "barVisualizer_position": {
+    "verticalVisualizer_position": {
         "order": 1101,
         "type": "slider",
-        "text": "ui_barVisualizer_position",
+        "text": "ui_verticalVisualizer_position",
         "value": 50,
         "min": 0,
         "max": 100,
@@ -446,64 +446,20 @@
         "editable": false,
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
-    "barVisualizer_width": {
+    "verticalVisualizer_width": {
         "order": 1102,
         "type": "slider",
-        "text": "ui_barVisualizer_width",
+        "text": "ui_verticalVisualizer_width",
         "value": 45,
         "min": 25,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
-    //
-    // [BAR VISUALIZER > BARS]
-    "barVisualizer_bars": {
-        "order": 1120,
-        "type": "text",
-        "text": "ui_barVisualizer_bars",
-        "condition": "visualizer_type.value.startsWith('Vertical') && visualizer_type.value !== 'VerticalWave'"
-    },
-    "barVisualizer_wave": {
-        "order": 1120,
-        "type": "text",
-        "text": "ui_barVisualizer_wave",
-        "condition": "visualizer_type.value === 'VerticalWave'"
-    },
-    "barVisualizer_bars_width": {
-        "order": 1121,
+    "verticalVisualizer_alignment": {
+        "order": 1103,
         "type": "slider",
-        "text": "ui_barVisualizer_bars_width",
-        "value": 38,
-        "min": 1,
-        "max": 100,
-        "editable": false,
-        "condition": "visualizer_type.value.startsWith('Vertical')"
-    },
-    "barVisualizer_bars_height": {
-        "order": 1122,
-        "type": "slider",
-        "text": "ui_barVisualizer_bars_height",
-        "value": 45,
-        "min": 10,
-        "max": 100,
-        "editable": false,
-        "condition": "visualizer_type.value.startsWith('Vertical')"
-    },
-    "barVisualizer_bars_borderRadius": {
-        "order": 1123,
-        "type": "slider",
-        "text": "ui_barVisualizer_bars_borderRadius",
-        "value": 0,
-        "min": 0,
-        "max": 100,
-        "editable": false,
-        "condition": "visualizer_type.value === 'VerticalBars'"
-    },
-    "barVisualizer_bars_alignment": {
-        "order": 1124,
-        "type": "slider",
-        "text": "ui_barVisualizer_bars_alignment",
+        "text": "ui_verticalVisualizer_alignment",
         "value": 0,
         "min": -1,
         "max": 1,
@@ -512,37 +468,121 @@
         "editable": false,
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
-    "barVisualizer_bars_color": {
-        "order": 1125,
+    "verticalVisualizer_color": {
+        "order": 1104,
         "type": "color",
-        "text": "ui_barVisualizer_bars_color",
+        "text": "ui_verticalVisualizer_color",
         "value": "0.176470 0.266667 0.611764",
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
-    "barVisualizer_bars_blockThickness": {
-        "order": 1126,
+    //
+    // [VERTICAL VISUALIZER > BARS]
+    "verticalVisualizer_bars": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_verticalVisualizer_bars",
+        "condition": "visualizer_type.value === 'VerticalBars'"
+    },
+    "verticalVisualizer_bars_width": {
+        "order": 1121,
         "type": "slider",
-        "text": "ui_barVisualizer_bars_blockThickness",
-        "value": 3,
+        "text": "ui_verticalVisualizer_bars_width",
+        "value": 38,
+        "min": 1,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
+    },
+    "verticalVisualizer_bars_height": {
+        "order": 1122,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_bars_height",
+        "value": 45,
+        "min": 10,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
+    },
+    "verticalVisualizer_bars_borderRadius": {
+        "order": 1123,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_bars_borderRadius",
+        "value": 0,
+        "min": 0,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
+    },
+    //
+    // [VERTICAL VISUALIZER > BLOCKS]
+    "verticalVisualizer_blocks": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_verticalVisualizer_blocks",
+        "condition": "visualizer_type.value === 'VerticalBlocks'"
+    },
+    "verticalVisualizer_blocks_width": {
+        "order": 1121,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_blocks_width",
+        "value": 85,
+        "min": 1,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBlocks'"
+    },
+    "verticalVisualizer_blocks_height": {
+        "order": 1122,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_blocks_height",
+        "value": 32,
+        "min": 10,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBlocks'"
+    },
+    "verticalVisualizer_blocks_thickness": {
+        "order": 1123,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_blocks_thickness",
+        "value": 2,
         "min": 1,
         "max": 10,
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalBlocks'"
     },
-    "barVisualizer_bars_waveThickness": {
-        "order": 1126,
+    //
+    // [VERTICAL VISUALIZER > WAVE]
+    "verticalVisualizer_wave": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_verticalVisualizer_wave",
+        "condition": "visualizer_type.value === 'VerticalWave'"
+    },
+    "verticalVisualizer_wave_height": {
+        "order": 1121,
         "type": "slider",
-        "text": "ui_barVisualizer_bars_waveThickness",
+        "text": "ui_verticalVisualizer_wave_height",
+        "value": 30,
+        "min": 10,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalWave'"
+    },
+    "verticalVisualizer_wave_thickness": {
+        "order": 1122,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_wave_thickness",
         "value": 1,
         "min": 1,
         "max": 5,
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalWave'"
     },
-    "barVisualizer_bars_fullWave": {
-        "order": 1127,
+    "verticalVisualizer_wave_showSecondaryWave": {
+        "order": 1123,
         "type": "bool",
-        "text": "ui_barVisualizer_bars_fullWave",
+        "text": "ui_verticalVisualizer_wave_showSecondaryWave",
         "value": true,
         "condition": "visualizer_type.value === 'VerticalWave'"
     },
@@ -609,23 +649,30 @@
         "editable": false,
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
+    "circularVisualizer_color": {
+        "order": 1106,
+        "type": "color",
+        "text": "ui_circularVisualizer_color",
+        "value": "0.176470 0.266667 0.611764",
+        "condition": "visualizer_type.value.startsWith('Circular')"
+    },
     //
     // [CIRCULAR VISUALIZER > BARS]
     "circularVisualizer_bars": {
         "order": 1120,
         "type": "text",
         "text": "ui_circularVisualizer_bars",
-        "condition": "visualizer_type.value.startsWith('Circular')"
+        "condition": "visualizer_type.value === 'CircularBars'"
     },
     "circularVisualizer_bars_width": {
         "order": 1121,
         "type": "slider",
         "text": "ui_circularVisualizer_bars_width",
-        "value": 45,
-        "min": 10,
+        "value": 60,
+        "min": 1,
         "max": 100,
         "editable": false,
-        "condition": "visualizer_type.value.startsWith('Circular')"
+        "condition": "visualizer_type.value === 'CircularBars'"
     },
     "circularVisualizer_bars_height": {
         "order": 1122,
@@ -635,20 +682,41 @@
         "min": 10,
         "max": 100,
         "editable": false,
-        "condition": "visualizer_type.value.startsWith('Circular')"
+        "condition": "visualizer_type.value === 'CircularBars'"
     },
-    "circularVisualizer_bars_color": {
-        "order": 1123,
-        "type": "color",
-        "text": "ui_circularVisualizer_bars_color",
-        "value": "0.176470 0.266667 0.611764",
-        "condition": "visualizer_type.value.startsWith('Circular')"
+    //
+    // [CIRCULAR VISUALIZER > BLOCKS]
+    "circularVisualizer_blocks": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_circularVisualizer_blocks",
+        "condition": "visualizer_type.value === 'CircularBlocks'"
     },
-    "circularVisualizer_bars_blockThickness": {
-        "order": 1124,
+    "circularVisualizer_blocks_width": {
+        "order": 1121,
         "type": "slider",
-        "text": "ui_circularVisualizer_bars_blockThickness",
-        "value": 3,
+        "text": "ui_circularVisualizer_blocks_width",
+        "value": 100,
+        "min": 1,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'CircularBlocks'"
+    },
+    "circularVisualizer_blocks_height": {
+        "order": 1122,
+        "type": "slider",
+        "text": "ui_circularVisualizer_blocks_height",
+        "value": 50,
+        "min": 10,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'CircularBlocks'"
+    },
+    "circularVisualizer_blocks_thickness": {
+        "order": 1123,
+        "type": "slider",
+        "text": "ui_circularVisualizer_blocks_thickness",
+        "value": 2,
         "min": 1,
         "max": 10,
         "editable": false,

@@ -175,22 +175,30 @@ function getProjectJson() {
                     ui_$_visualizer_color_responseDegree: note('Mathematical <em>degree</em> of the root of <samp>P</samp> used to control the sensitivity, or spread in some way, of the effect.'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
-                    // [BAR VISUALIZER]
-                    ui_barVisualizer: section('Vertical Visualizer'),
-                    ui_barVisualizer_position: indent('Position (%)'),
-                    ui_barVisualizer_width: indent('Width (%)'),
+                    // [VERTICAL VISUALIZER]
+                    ui_verticalVisualizer: section('Vertical Visualizer'),
+                    ui_verticalVisualizer_position: indent('Position (%)'),
+                    ui_verticalVisualizer_width: indent('Width (%)'),
+                    ui_verticalVisualizer_alignment: indent('Alignment'),
+                    ui_verticalVisualizer_color: indent('Color'),
                     //
-                    // [BAR VISUALIZER > BARS]
-                    ui_barVisualizer_bars: subSection('Bars'),
-                    ui_barVisualizer_wave: subSection('Wave'),
-                    ui_barVisualizer_bars_width: indent('Width (%)'),
-                    ui_barVisualizer_bars_height: indent('Height (%)'),
-                    ui_barVisualizer_bars_borderRadius: indent('Border Radius (%)'),
-                    ui_barVisualizer_bars_alignment: indent('Alignment'),
-                    ui_barVisualizer_bars_color: indent('Color'),
-                    ui_barVisualizer_bars_blockThickness: indent('Thickness (px)'),
-                    ui_barVisualizer_bars_waveThickness: indent('Thickness (px)'),
-                    ui_barVisualizer_bars_fullWave: indent('Full Wave'),
+                    // [VERTICAL VISUALIZER > BARS]
+                    ui_verticalVisualizer_bars: subSection('Bars'),
+                    ui_verticalVisualizer_bars_width: indent('Width (%)'),
+                    ui_verticalVisualizer_bars_height: indent('Height (%)'),
+                    ui_verticalVisualizer_bars_borderRadius: indent('Border Radius (%)'),
+                    //
+                    // [VERTICAL VISUALIZER > BLOCKS]
+                    ui_verticalVisualizer_blocks: subSection('Blocks'),
+                    ui_verticalVisualizer_blocks_width: indent('Width (%)'),
+                    ui_verticalVisualizer_blocks_height: indent('Height (%)'),
+                    ui_verticalVisualizer_blocks_thickness: indent('Thickness (px)'),
+                    //
+                    // [VERTICAL VISUALIZER > WAVE]
+                    ui_verticalVisualizer_wave: subSection('Wave'),
+                    ui_verticalVisualizer_wave_height: indent('Height (%)'),
+                    ui_verticalVisualizer_wave_thickness: indent('Thickness (px)'),
+                    ui_verticalVisualizer_wave_showSecondaryWave: indent('Secondary Wave'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [CIRCULAR VISUALIZER]
@@ -200,13 +208,18 @@ function getProjectJson() {
                     ui_circularVisualizer_radius: indent('Radius (%)'),
                     ui_circularVisualizer_rotation: indent('Rotation (deg)'),
                     ui_circularVisualizer_angle: indent('Angle (deg)'),
+                    ui_circularVisualizer_color: indent('Color'),
                     //
                     // [CIRCULAR VISUALIZER > BARS]
                     ui_circularVisualizer_bars: subSection('Bars'),
                     ui_circularVisualizer_bars_width: indent('Width (%)'),
                     ui_circularVisualizer_bars_height: indent('Height (%)'),
-                    ui_circularVisualizer_bars_color: indent('Color'),
-                    ui_circularVisualizer_bars_blockThickness: indent('Thickness (px)'),
+                    //
+                    // [CIRCULAR VISUALIZER > BLOCKS]
+                    ui_circularVisualizer_blocks: subSection('Blocks'),
+                    ui_circularVisualizer_blocks_width: indent('Width (%)'),
+                    ui_circularVisualizer_blocks_height: indent('Height (%)'),
+                    ui_circularVisualizer_blocks_thickness: indent('Thickness (px)'),
 
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),

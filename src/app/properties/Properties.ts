@@ -14,7 +14,7 @@ import { VisualizerType } from '../VisualizerType';
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
 import SpotifyProperties from './SpotifyProperties';
-import { BarVisualizerProperties, CircularVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
+import { CircularVisualizerProperties, VerticalVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
@@ -23,7 +23,7 @@ export default interface Properties {
     background: BackgroundProperties;
     audioSamples: AudioSamplesProperties;
     visualizer: VisualizerProperties;
-    barVisualizer: BarVisualizerProperties;
+    verticalVisualizer: VerticalVisualizerProperties;
     circularVisualizer: CircularVisualizerProperties;
     spotify: SpotifyProperties;
 }
@@ -107,34 +107,44 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(visualizerOptions, 'responseDegree', raw.visualizer_color_responseDegree as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(visualizerOptions, 'responseToHue', raw.visualizer_color_response_toHue as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
 
-    // .barVisualizer
-    const barVisualizerOptions: MappedProperties['barVisualizer'] = { bars: {} };
-    setProperty(barVisualizerOptions, 'position', raw.barVisualizer_position as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions, 'width', raw.barVisualizer_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    // .barVisualizer.bars
-    setProperty(barVisualizerOptions.bars!, 'width', raw.barVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'height', raw.barVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'borderRadius', raw.barVisualizer_bars_borderRadius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'alignment', raw.barVisualizer_bars_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'color', raw.barVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
-    setProperty(barVisualizerOptions.bars!, 'blockThickness', raw.barVisualizer_bars_blockThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'waveThickness', raw.barVisualizer_bars_waveThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(barVisualizerOptions.bars!, 'fullWave', raw.barVisualizer_bars_fullWave as WEProperty<'bool'>, _r => _r.value);
-    if (_.isEmpty(barVisualizerOptions.bars)) delete barVisualizerOptions.bars;
+    // .verticalVisualizer
+    const verticalVisualizerOptions: MappedProperties['verticalVisualizer'] = { bars: {}, blocks: {}, wave: {} };
+    setProperty(verticalVisualizerOptions, 'position', raw.verticalVisualizer_position as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions, 'width', raw.verticalVisualizer_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions, 'alignment', raw.verticalVisualizer_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions, 'color', raw.verticalVisualizer_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    // .verticalVisualizer.bars
+    setProperty(verticalVisualizerOptions.bars!, 'width', raw.verticalVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.bars!, 'height', raw.verticalVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.bars!, 'borderRadius', raw.verticalVisualizer_bars_borderRadius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(verticalVisualizerOptions.bars)) delete verticalVisualizerOptions.bars;
+    // .verticalVisualizer.blocks
+    setProperty(verticalVisualizerOptions.blocks!, 'width', raw.verticalVisualizer_blocks_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.blocks!, 'height', raw.verticalVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.blocks!, 'thickness', raw.verticalVisualizer_blocks_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(verticalVisualizerOptions.blocks)) delete verticalVisualizerOptions.blocks;
+    // .verticalVisualizer.wave
+    setProperty(verticalVisualizerOptions.wave!, 'height', raw.verticalVisualizer_wave_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.wave!, 'thickness', raw.verticalVisualizer_wave_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.wave!, 'showSecondaryWave', raw.verticalVisualizer_wave_showSecondaryWave as WEProperty<'bool'>, _r => _r.value);
+    if (_.isEmpty(verticalVisualizerOptions.wave)) delete verticalVisualizerOptions.wave;
 
     // .circularVisualizer
-    const circularVisualizerOptions: MappedProperties['circularVisualizer'] = { bars: {} };
+    const circularVisualizerOptions: MappedProperties['circularVisualizer'] = { bars: {}, blocks: {} };
     setProperty(circularVisualizerOptions, 'x', raw.circularVisualizer_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'y', raw.circularVisualizer_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'radius', raw.circularVisualizer_radius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'rotation', raw.circularVisualizer_rotation as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'angle', raw.circularVisualizer_angle as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions, 'color', raw.circularVisualizer_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     // .circularVisualizer.bars
     setProperty(circularVisualizerOptions.bars!, 'width', raw.circularVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.bars!, 'height', raw.circularVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(circularVisualizerOptions.bars!, 'color', raw.circularVisualizer_bars_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
-    setProperty(circularVisualizerOptions.bars!, 'blockThickness', raw.circularVisualizer_bars_blockThickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    if (_.isEmpty(circularVisualizerOptions.bars)) delete circularVisualizerOptions.bars;
+    // .circularVisualizer.blocks
+    setProperty(circularVisualizerOptions.blocks!, 'width', raw.circularVisualizer_blocks_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.blocks!, 'height', raw.circularVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.blocks!, 'thickness', raw.circularVisualizer_blocks_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(circularVisualizerOptions.blocks)) delete circularVisualizerOptions.blocks;
 
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
@@ -178,7 +188,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         !_.isEmpty(backgroundOptions) ? { background: backgroundOptions } : {},
         !_.isEmpty(audioSamplesOptions) ? { audioSamples: audioSamplesOptions } : {},
         !_.isEmpty(visualizerOptions) ? { visualizer: visualizerOptions } : {},
-        !_.isEmpty(barVisualizerOptions) ? { barVisualizer: barVisualizerOptions } : {},
+        !_.isEmpty(verticalVisualizerOptions) ? { verticalVisualizer: verticalVisualizerOptions } : {},
         !_.isEmpty(circularVisualizerOptions) ? { circularVisualizer: circularVisualizerOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
     );

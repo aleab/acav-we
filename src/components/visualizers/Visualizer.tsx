@@ -19,7 +19,7 @@ export default function Visualizer() {
     const context = useContext(WallpaperContext)!;
 
     const O = useRef(context.wallpaperProperties.visualizer);
-    const barVisualizerOptions = useRef(context.wallpaperProperties.barVisualizer);
+    const verticalVisualizerOptions = useRef(context.wallpaperProperties.verticalVisualizer);
     const circularVisualizerOptions = useRef(context.wallpaperProperties.circularVisualizer);
 
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
@@ -47,11 +47,11 @@ export default function Visualizer() {
     const render = useMemo<((args: VisualizerRenderArgs) => void)>(() => {
         switch (visualizerType) {
             case VisualizerType.VerticalBars:
-                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Bars);
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, verticalVisualizerOptions, VerticalVisualizerType.Bars);
             case VisualizerType.VerticalBlocks:
-                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Blocks);
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, verticalVisualizerOptions, VerticalVisualizerType.Blocks);
             case VisualizerType.VerticalWave:
-                return getVerticalBarsVisualizerRenderer(context, canvas, O, barVisualizerOptions, VerticalVisualizerType.Wave);
+                return getVerticalBarsVisualizerRenderer(context, canvas, O, verticalVisualizerOptions, VerticalVisualizerType.Wave);
 
             case VisualizerType.CircularBars:
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Bars);
