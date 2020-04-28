@@ -625,7 +625,7 @@
         "fraction": true,
         "step": 0.1,
         "editable": false,
-        "condition": "visualizer_type.value === 'CircularBars'"
+        "condition": "visualizer_type.value.startsWith('Circular')"
     },
     "circularVisualizer_radius": {
         "order": 1103,
