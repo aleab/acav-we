@@ -27,6 +27,7 @@ function renderBlock(canvasContext: CanvasRenderingContext2D, x: number, y: numb
     canvasContext.lineTo(blockStart[1].x, -blockStart[1].y);
     canvasContext.lineTo(blockEnd[1].x, -blockEnd[1].y);
     canvasContext.lineTo(blockEnd[0].x, -blockEnd[0].y);
+    canvasContext.closePath();
     canvasContext.fill();
 }
 

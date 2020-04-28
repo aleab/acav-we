@@ -44,6 +44,7 @@ function renderWave(
         if (shouldFill) {
             canvasContext.lineTo(other.x, other.y);
             canvasContext.lineTo(prevOther.x, prevOther.y);
+            canvasContext.closePath();
             canvasContext.fill();
         } else {
             canvasContext.moveTo(prevOther.x, prevOther.y);

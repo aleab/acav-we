@@ -36,6 +36,7 @@ function run(Component: typeof App) {
             '======================================================================\n' +
             ' LOADING WALLPAPER\n' +
             `   NODE_ENV: "${process.env['NODE_ENV']}"\n` +
+            `   APP_VERSION: "${process.env['APP_VERSION']}"\n` +
             `   BACKEND_API_BASEURL: "${process.env['BACKEND_API_BASEURL']}"\n` +
             '======================================================================\n',
             'color: #350E23; font-weight:bold',

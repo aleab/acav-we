@@ -56,6 +56,7 @@ function renderWave(
         if (shouldFill) {
             canvasContext.lineTo(mirror.x, -mirror.y);
             canvasContext.lineTo(prevMirror.x, -prevMirror.y);
+            canvasContext.closePath();
             canvasContext.fill();
         } else {
             canvasContext.moveTo(prevMirror.x, -prevMirror.y);

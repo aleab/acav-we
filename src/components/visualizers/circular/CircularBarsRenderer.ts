@@ -20,6 +20,7 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
         canvasContext.lineTo(start[1].x, -start[1].y);
         canvasContext.lineTo(end[1].x, -end[1].y);
         canvasContext.lineTo(end[0].x, -end[0].y);
+        canvasContext.closePath();
         canvasContext.fill();
     } else {
         canvasContext.lineCap = 'butt';
