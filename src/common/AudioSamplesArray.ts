@@ -35,9 +35,9 @@ export default class AudioSamplesArray implements Iterable<number[]> {
         return _.max(this._raw) ?? 0;
     }
 
-    forEach(callback: (sample: number[], index: number) => void) {
+    forEach(callback: (sample: number[], index: number, samples: AudioSamplesArray) => void) {
         for (let i = 0; i < this.length; ++i) {
-            callback(this.getSample(i), i);
+            callback(this.getSample(i), i, this);
         }
     }
 

@@ -35,6 +35,7 @@ export interface VerticalVisualizerProperties {
     wave: {
         height: number;
         thickness: number;
+        smoothness: number;
         showMirrorWave: boolean;
         fill: boolean;
     };
@@ -59,6 +60,7 @@ export interface CircularVisualizerProperties {
     wave: {
         height: number;
         thickness: number;
+        smoothness: number;
         showMirrorWave: boolean;
         fill: boolean;
     };

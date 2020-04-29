@@ -198,6 +198,7 @@ function getProjectJson() {
                     ui_verticalVisualizer_wave: subSection('Wave'),
                     ui_verticalVisualizer_wave_height: indent('Height (%)'),
                     ui_verticalVisualizer_wave_thickness: indent('Thickness (px)'),
+                    ui_verticalVisualizer_wave_smoothness: indent('Smoothness'),
                     ui_verticalVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
                     ui_verticalVisualizer_wave_fill: indent('Fill'),
 
@@ -226,6 +227,7 @@ function getProjectJson() {
                     ui_circularVisualizer_wave: subSection('Wave'),
                     ui_circularVisualizer_wave_height: indent('Height (%)'),
                     ui_circularVisualizer_wave_thickness: indent('Thickness (px)'),
+                    ui_circularVisualizer_wave_smoothness: indent('Smoothness'),
                     ui_circularVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
                     ui_circularVisualizer_wave_fill: indent('Fill'),
 
