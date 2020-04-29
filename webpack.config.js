@@ -121,16 +121,18 @@ function getWebpackConfig(env, argv) {
     });
 
     const postcssPlugins = [postcssImport()];
+    const postcssNoPurgePlugins = [postcssImport()];
     if (isProduction) {
-        postcssPlugins.push(
-            cssnano({ preset: 'default' }),
-            purgecss({
-                content: [ './static/**/*.html', './src/**/*.tsx' ],
-                fontFace: true,
-                keyframes: true,
-                variables: true,
-            }),
-        );
+        const purgecssPlugin = purgecss({
+            content: [ './static/**/*.html', './src/**/*.tsx' ],
+            fontFace: true,
+            keyframes: true,
+            variables: true,
+            whitelistPatterns: [/^simplebar-/],
+        });
+
+        postcssNoPurgePlugins.push(cssnano({ preset: 'default' }));
+        postcssPlugins.push(cssnano({ preset: 'default' }), purgecssPlugin);
     }
 
     // ===============
@@ -166,6 +168,20 @@ function getWebpackConfig(env, argv) {
                             test: /\.(js|ts)x?$/,
                             loader: 'babel-loader',
                             exclude: [/node_modules/],
+                        },
+                        {
+                            // NO PURGECSS
+                            test: /[\\/](simplebar)\.css$/,
+                            use: [
+                                MiniCssExtractPlugin.loader,
+                                { loader: 'css-loader', options: { importLoaders: 1 } },
+                                {
+                                    loader: 'postcss-loader',
+                                    options: {
+                                        plugins: postcssNoPurgePlugins,
+                                    },
+                                },
+                            ],
                         },
                         {
                             test: /\.css$/,
