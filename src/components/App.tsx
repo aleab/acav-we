@@ -7,10 +7,12 @@ import AudioSamplesArray from '../common/AudioSamplesArray';
 import CircularBuffer from '../common/CircularBuffer';
 import Properties, { applyUserProperties } from '../app/properties/Properties';
 import { PINK_NOISE } from '../app/noise';
-import Renderer from '../app/Renderer';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
 import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
+import { usePlugin } from '../hooks/usePlugin';
+import { useRenderer } from '../hooks/useRenderer';
 import useWallpaperBackground from '../hooks/useWallpaperBackground';
+import PluginManager, { PluginName } from '../plugins/PluginManager';
 
 import Stats from './Stats';
 import Spotify from './spotify/Spotify';
@@ -30,6 +32,9 @@ export default function App(props: AppProps) {
     const O = useRef(props.options);
     const [ showStats, setShowStats ] = useState(false);
     const [ showSpotify, setShowSpotify ] = useState(false);
+
+    const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
+    const [ useICue, setUseICue ] = useState(false);
 
     window.acav.getProperties = () => _.cloneDeep(O.current);
 
@@ -54,11 +59,7 @@ export default function App(props: AppProps) {
     }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs ]);
 
     // Context
-    const renderer = useMemo(() => Renderer(), []);
-    useEffect(() => {
-        renderer.start();
-        return () => renderer.stop();
-    }, [renderer]);
+    const renderer = useRenderer();
     const wallpaperContext = useMemo<WallpaperContextType>(() => {
         Logc.info('Creating WallpaperContext...');
         return {
@@ -66,6 +67,7 @@ export default function App(props: AppProps) {
             wallpaperEvents,
             wallpaperProperties: O.current,
             renderer,
+            pluginManager: new PluginManager(),
         };
     }, [ props.windowEvents, wallpaperEvents, renderer ]);
 
@@ -75,8 +77,16 @@ export default function App(props: AppProps) {
 
     useEffect(() => {
         window.wallpaperPropertyListener = {};
+        window.wallpaperPluginListener = {
+            onPluginLoaded: (name: PluginName) => {
+                if (name === 'cue') setWeCuePluginLoaded(true);
+            },
+        };
+
         return () => {
             delete window.wallpaperPropertyListener;
+            delete window.wallpaperPluginListener;
+            setWeCuePluginLoaded(false);
         };
     }, []);
 
@@ -157,6 +167,10 @@ export default function App(props: AppProps) {
                 setShowSpotify(newProps.spotify.showOverlay);
             }
 
+            if (newProps.icuePlugin !== undefined) {
+                if (newProps.icuePlugin.enabled !== undefined) setUseICue(newProps.icuePlugin.enabled);
+            }
+
             onUserPropertiesChangedSubs.forEach(callback => callback({ oldProps, newProps }));
         };
         return () => {
@@ -164,6 +178,13 @@ export default function App(props: AppProps) {
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
     }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground ]);
+
+    // =========
+    //  PLUGINS
+    // =========
+    usePlugin(wallpaperContext.pluginManager, 'cue', useICue && weCuePluginLoaded, {
+        getOptions: () => O.current.icuePlugin,
+    });
 
     // ================
     //  AUDIO LISTENER
@@ -229,7 +250,8 @@ export default function App(props: AppProps) {
             }
             if (samples !== undefined) {
                 const _rawSamples = new AudioSamplesArray(rawSamples, 2);
-                onAudioSamplesSubs.forEach(callback => callback({ rawSamples: _rawSamples, samples: samples!, samplesBuffer, peak, mean }));
+                const audioSamplesEventArgs: AudioSamplesEventArgs = { rawSamples: _rawSamples, samples: samples!, samplesBuffer, peak, mean };
+                onAudioSamplesSubs.forEach(callback => callback(audioSamplesEventArgs));
             }
         };
         window.wallpaperRegisterAudioListener(audioListener);
@@ -243,7 +265,7 @@ export default function App(props: AppProps) {
             window.wallpaperRegisterAudioListener(null);
             delete window.acav.togglePauseAudioListener;
         };
-    }, [ onAudioSamplesSubs, samplesBuffer ]);
+    }, [ onAudioSamplesSubs, samplesBuffer, wallpaperContext.pluginManager ]);
 
     const wallpaperRef = useRef<HTMLDivElement>(null);
     return (

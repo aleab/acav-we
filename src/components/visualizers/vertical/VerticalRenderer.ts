@@ -8,6 +8,7 @@ import { VerticalVisualizerType } from '../../../app/VisualizerType';
 import { WallpaperContextType } from '../../../app/WallpaperContext';
 
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
+import VisualizerRenderReturnArgs from '../VisualizerRenderReturnArgs';
 
 export interface VerticalRendererOptions<T extends VerticalVisualizerType> {
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>;
@@ -32,7 +33,7 @@ export interface VisualizerParams {
 }
 
 export interface IVerticalRenderer {
-    render(args: VisualizerRenderArgs): void;
+    render(args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null;
 }
 
 export default abstract class VerticalRenderer<T extends VerticalVisualizerType> implements IVerticalRenderer {
@@ -82,9 +83,11 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
     abstract getHeight(maxHeight: number): number;
     abstract renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void;
 
-    render(args: VisualizerRenderArgs) {
+    render(args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
         const canvasContext = this.canvas.current?.getContext('2d');
-        if (!canvasContext) return;
+        if (!canvasContext) return null;
+
+        let renderReturnArgs: VisualizerRenderReturnArgs | null = null;
 
         canvasContext.clearRect(0, 0, canvasContext.canvas.width, canvasContext.canvas.height);
         if (!this.context.wallpaperProperties.audioprocessing) {
@@ -132,6 +135,16 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
                 colorReaction,
                 colorReactionValueProvider,
             });
+
+            renderReturnArgs = {
+                samples: args.samples,
+                color: colorRgb,
+                colorReactionType: Ov.current.responseType,
+                colorReaction,
+                colorResponseValueGain: Ov.current.responseValueGain,
+            };
         }
+
+        return renderReturnArgs;
     }
 }

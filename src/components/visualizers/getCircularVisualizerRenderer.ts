@@ -9,13 +9,16 @@ import CircularBarsRenderer from './circular/CircularBarsRenderer';
 import CircularBlocksRenderer from './circular/CircularBlocksRenderer';
 import CircularWaveRenderer from './circular/CircularWaveRenderer';
 
+import VisualizerRenderArgs from './VisualizerRenderArgs';
+import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
+
 export default function getCircularVisualizerRenderer(
     context: WallpaperContextType,
     canvas: RefObject<HTMLCanvasElement>,
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     circularVisualizerOptions: MutableRefObject<DeepReadonly<CircularVisualizerProperties>>,
     type: CircularVisualizerType,
-) {
+): ((args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
     const O = circularVisualizerOptions;
 
     let renderer: ICircularRenderer | undefined;
@@ -47,5 +50,5 @@ export default function getCircularVisualizerRenderer(
         default: break;
     }
 
-    return renderer === undefined ? () => {} : renderer.render.bind(renderer);
+    return renderer === undefined ? () => null : renderer.render.bind(renderer);
 }

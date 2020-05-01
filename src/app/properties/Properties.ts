@@ -26,6 +26,10 @@ export default interface Properties {
     verticalVisualizer: VerticalVisualizerProperties;
     circularVisualizer: CircularVisualizerProperties;
     spotify: SpotifyProperties;
+    icuePlugin: {
+        enabled: boolean;
+        boost: number;
+    };
 }
 
 function parseComboProperty<TEnum>(prop: WEProperty<'combo'>, EnumType: TEnum): TEnum[keyof TEnum] {
@@ -192,6 +196,11 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.progressBar!, 'position', raw.spotify_progressbar_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
     if (_.isEmpty(spotifyOptions.progressBar)) delete spotifyOptions.progressBar;
 
+    // .icue
+    const icueOptions: MappedProperties['icuePlugin'] = {};
+    setProperty(icueOptions, 'enabled', raw.icue as WEProperty<'bool'>, _r => _r.value);
+    setProperty(icueOptions, 'boost', raw.icue_boost as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+
     return _.merge(
         { ...rootOptions },
         !_.isEmpty(backgroundOptions) ? { background: backgroundOptions } : {},
@@ -200,6 +209,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         !_.isEmpty(verticalVisualizerOptions) ? { verticalVisualizer: verticalVisualizerOptions } : {},
         !_.isEmpty(circularVisualizerOptions) ? { circularVisualizer: circularVisualizerOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
+        !_.isEmpty(icueOptions) ? { icuePlugin: icueOptions } : {},
     );
 }
 

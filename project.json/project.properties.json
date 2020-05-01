@@ -1053,6 +1053,26 @@
         "condition": "spotify.value && spotify_progressbar.value"
     },
 
+    // [iCUE]
+    "icue": {
+        "order": 6000,
+        "type": "bool",
+        "text": "ui_icue",
+        "value": false
+    },
+    "icue_boost": {
+        "order": 6001,
+        "type": "slider",
+        "text": "ui_icue_boost",
+        "value": 6,
+        "min": 0.1,
+        "max": 10,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "icue.value"
+    },
+
+
     // [NOTES]
     "notes": {
         "order": 9000,

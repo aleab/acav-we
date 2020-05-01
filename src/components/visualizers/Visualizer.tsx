@@ -9,6 +9,7 @@ import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
 import VisualizerRenderArgs from './VisualizerRenderArgs';
+import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 import getVerticalBarsVisualizerRenderer from './getVerticalBarsVisualizerRenderer';
 import getCircularVisualizerRenderer from './getCircularVisualizerRenderer';
 
@@ -44,7 +45,7 @@ export default function Visualizer() {
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
     // =================================
-    const render = useMemo<((args: VisualizerRenderArgs) => void)>(() => {
+    const render = useMemo<((args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null)>(() => {
         switch (visualizerType) {
             case VisualizerType.VerticalBars:
                 return getVerticalBarsVisualizerRenderer(context, canvas, O, verticalVisualizerOptions, VerticalVisualizerType.Bars);
@@ -60,7 +61,7 @@ export default function Visualizer() {
             case VisualizerType.CircularWave:
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Wave);
 
-            default: return (_args: VisualizerRenderArgs) => {};
+            default: return (_args: VisualizerRenderArgs) => null;
         }
     }, [ context, visualizerType ]);
 
@@ -137,7 +138,15 @@ export default function Visualizer() {
             }
 
             // Queue render job
-            context.renderer.queue(RENDER_ID, render.bind(null, { samplesBuffer, samples, peak }));
+            const renderArgs = { samplesBuffer, samples, peak };
+            context.renderer.queue(RENDER_ID, () => {
+                const visualizerReturnArgs = render(renderArgs);
+
+                context.pluginManager.processAudioData(renderArgs);
+                if (canvas.current !== null && visualizerReturnArgs !== null) {
+                    context.pluginManager.processVisualizerSamplesData(visualizerReturnArgs);
+                }
+            });
         };
         context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
 

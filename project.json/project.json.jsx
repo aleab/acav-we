@@ -285,6 +285,10 @@ function getProjectJson() {
                     ui_spotify_progressbar_position: indent('Position', { n: 3 }),
                     ui_spotify_progressbar_color: indent('Color', { n: 3 }),
 
+                    // [iCUE]
+                    ui_icue: section('iCUE'),
+                    ui_icue_boost: indent('Boost'),
+
                     // [NOTES]
                     ui_notes: section('Notes', true),
                     ui_note1: note(

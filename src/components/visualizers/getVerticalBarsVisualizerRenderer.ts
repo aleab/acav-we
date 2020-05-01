@@ -9,13 +9,16 @@ import VerticalBarsRenderer from './vertical/VerticalBarsRenderer';
 import VerticalBlocksRenderer from './vertical/VerticalBlocksRenderer';
 import VerticalWaveRenderer from './vertical/VerticalWaveRenderer';
 
+import VisualizerRenderArgs from './VisualizerRenderArgs';
+import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
+
 export default function getVerticalBarsVisualizerRenderer(
     context: WallpaperContextType,
     canvas: RefObject<HTMLCanvasElement>,
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     verticalVisualizerOptions: MutableRefObject<DeepReadonly<VerticalVisualizerProperties>>,
     type: VerticalVisualizerType,
-) {
+): ((args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
     const O = verticalVisualizerOptions;
 
     let renderer: IVerticalRenderer | undefined;
@@ -47,5 +50,5 @@ export default function getVerticalBarsVisualizerRenderer(
         default: break;
     }
 
-    return renderer === undefined ? () => {} : renderer.render.bind(renderer);
+    return renderer === undefined ? () => null : renderer.render.bind(renderer);
 }

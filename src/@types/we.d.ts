@@ -74,10 +74,16 @@ type WallpaperEvents = {
     onAudioSamples: ComponentEvent<AudioSamplesEventArgs>;
 };
 
+type WallpaperPluginListener = {
+    onPluginLoaded?: (name: import('../plugins/PluginManager').PluginName, version: string) => void;
+};
+
 interface Window {
     wallpaperPropertyListener?: WEPropertyListener;
     wallpaperRegisterAudioListener: (callback: WEAudioListener | null) => void;
 
     /** Request a random file from the directory a named property points to. */
     wallpaperRequestRandomFileForProperty: (propertyName: string, callback: (propertyName: string, filePath: string) => void) => void;
+
+    wallpaperPluginListener?: WallpaperPluginListener;
 }
