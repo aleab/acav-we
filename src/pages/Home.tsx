@@ -31,6 +31,14 @@ export default function Home() {
             <VideoAlt href="./media/spotify.mp4" />
           </video>
         </Details>
+        <Details>
+          <summary>iCUE support for RGB hardware</summary>
+          <video width="864" controls autoPlay={false}>
+            <source src="./media/icue.mp4" type="video/mp4" />
+            <VideoAlt href="./media/icue.mp4" />
+          </video>
+          <p><a href="https://www.jamendo.com/track/1719234/skyline">Skiline (2020)</a> by <a href="https://www.jamendo.com/artist/484695/samie-bower">Samie Bower</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/2.0/">CC BY-NC-ND</a>.</p>
+        </Details>
       </>
     );
 }
