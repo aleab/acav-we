@@ -1058,7 +1058,7 @@
         "order": 6000,
         "type": "bool",
         "text": "ui_icue",
-        "value": false
+        "value": true
     },
     "icue_boost": {
         "order": 6001,
@@ -1080,14 +1080,26 @@
         "max": 100,
         "condition": "icue.value"
     },
-    "icue_spectrum_width": {
+    "$_icue_spectrum_start": {
         "order": 6003,
+        "type": "text",
+        "text": "ui_$_icue_spectrum_start",
+        "condition": "showDescriptions.value && icue.value"
+    },
+    "icue_spectrum_width": {
+        "order": 6004,
         "type": "slider",
         "text": "ui_icue_spectrum_width",
         "value": 100,
         "min": 0,
         "max": 100,
         "condition": "icue.value"
+    },
+    "$_icue_spectrum_width": {
+        "order": 6005,
+        "type": "text",
+        "text": "ui_$_icue_spectrum_width",
+        "condition": "showDescriptions.value && icue.value"
     },
 
 

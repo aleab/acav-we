@@ -289,7 +289,9 @@ function getProjectJson() {
                     ui_icue: section('iCUE'),
                     ui_icue_boost: indent('Boost'),
                     ui_icue_spectrum_start: indent('Spectrum Start (%)'),
+                    ui_$_icue_spectrum_start: note('The index of the first audio sample to use.', null),
                     ui_icue_spectrum_width: indent('Spectrum Width (%)'),
+                    ui_$_icue_spectrum_width: note('The amount of audio samples to use.', null),
 
                     // [NOTES]
                     ui_notes: section('Notes', true),
