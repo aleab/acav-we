@@ -288,6 +288,8 @@ function getProjectJson() {
                     // [iCUE]
                     ui_icue: section('iCUE'),
                     ui_icue_boost: indent('Boost'),
+                    ui_icue_spectrum_start: indent('Spectrum Start (%)'),
+                    ui_icue_spectrum_width: indent('Spectrum Width (%)'),
 
                     // [NOTES]
                     ui_notes: section('Notes', true),

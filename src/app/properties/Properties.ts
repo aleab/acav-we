@@ -29,6 +29,8 @@ export default interface Properties {
     icuePlugin: {
         enabled: boolean;
         boost: number;
+        spectrumStart: number;
+        spectrumWidth: number;
     };
 }
 
@@ -200,6 +202,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     const icueOptions: MappedProperties['icuePlugin'] = {};
     setProperty(icueOptions, 'enabled', raw.icue as WEProperty<'bool'>, _r => _r.value);
     setProperty(icueOptions, 'boost', raw.icue_boost as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(icueOptions, 'spectrumStart', raw.icue_spectrum_start as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(icueOptions, 'spectrumWidth', raw.icue_spectrum_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     return _.merge(
         { ...rootOptions },

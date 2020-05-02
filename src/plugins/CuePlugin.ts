@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
 
+import { createNullActor } from 'xstate/lib/Actor';
 import Log from '../common/Log';
 import VisualizerRenderArgs from '../components/visualizers/VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRenderReturnArgs';
@@ -13,6 +14,8 @@ const Logc = Log.getLogger('iCUE Plugin', 'black');
 
 type CueOptions = {
     boost: number;
+    spectrumStart: number;
+    spectrumWidth: number;
 };
 export type CueCtorArgs = {
     getOptions: () => CueOptions;
@@ -92,23 +95,29 @@ export default class CuePlugin implements IPlugin {
 
         const O = this.getOptions();
 
+        const startIndex = Math.round((visualizerReturnArgs.samples.length - 1) * (O.spectrumStart / 100));
+        const endIndex = Math.clamp(startIndex + Math.round((visualizerReturnArgs.samples.length - startIndex) * (O.spectrumWidth / 100)), 0, visualizerReturnArgs.samples.length - 1);
+        const samples = startIndex === 0 && endIndex === visualizerReturnArgs.samples.length - 1 ? visualizerReturnArgs.samples : visualizerReturnArgs.samples.slice(startIndex, endIndex + 1);
+
         const N_BARS = 15;
-        const nSamplesPerBucket = visualizerReturnArgs.samples.length / N_BARS;
+        const nSamplesPerBucket = samples.length / N_BARS;
         const barWidth = cueCanvasContext.canvas.width / N_BARS;
 
         let ibar = 0;
-        const bars: Array<{ value: number; n: number }> = [];
-        visualizerReturnArgs.samples.forEach((sample, i) => {
+        const bars: Array<{ value: number; n: number } | undefined> = [];
+
+        samples.forEach((sample, i) => {
             if (i >= Math.floor((ibar + 1) * nSamplesPerBucket)) {
                 ibar++;
             }
 
             const s = _.mean(sample);
-            if (bars[ibar] === undefined) {
+            const bar = bars[ibar];
+            if (bar === undefined) {
                 bars[ibar] = { value: s, n: 1 };
             } else {
-                bars[ibar].value += s;
-                bars[ibar].n++;
+                bar.value += s;
+                bar.n++;
             }
         });
 
@@ -118,21 +127,23 @@ export default class CuePlugin implements IPlugin {
             cueCanvasContext.fillRect(0, 0, cueCanvasContext.canvas.width, cueCanvasContext.canvas.height);
         }
 
-        const values = bars.map(v => Math.clamp(v.value / v.n, 0, 1));
-        const peak = Math.max(...values);
+        const values = bars.map(v => (v !== undefined ? Math.clamp(v.value / v.n, 0, 1) : 0));
+        const peak = _.max(values);
 
         values.forEach((value, i) => {
+            const _value = value >= 0 ? value : 0;
+
             const colorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(
                 AudioResponsiveValueProvider.ValueNormalized,
                 visualizerReturnArgs.colorResponseValueGain,
             );
-            const colorValue = colorReactionValueProvider([ value, 0 ], i, { samplesBuffer: undefined, peak });
+            const colorValue = colorReactionValueProvider([ _value, 0 ], i, { samplesBuffer: undefined, peak });
             let color = visualizerReturnArgs.color;
             if (visualizerReturnArgs.colorReaction !== undefined) {
                 color = visualizerReturnArgs.colorReaction(colorValue[0]);
             }
 
-            const barHeight = Math.clamp(cueCanvasContext.canvas.height * value * O.boost, 0, cueCanvasContext.canvas.height);
+            const barHeight = Math.clamp(cueCanvasContext.canvas.height * _value * O.boost, 0, cueCanvasContext.canvas.height);
 
             cueCanvasContext.setFillColorRgb(color as RGB);
             cueCanvasContext.fillRect(barWidth * i, cueCanvasContext.canvas.height - barHeight, barWidth, barHeight);

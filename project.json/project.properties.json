@@ -1071,6 +1071,24 @@
         "step": 0.1,
         "condition": "icue.value"
     },
+    "icue_spectrum_start": {
+        "order": 6002,
+        "type": "slider",
+        "text": "ui_icue_spectrum_start",
+        "value": 0,
+        "min": 0,
+        "max": 100,
+        "condition": "icue.value"
+    },
+    "icue_spectrum_width": {
+        "order": 6003,
+        "type": "slider",
+        "text": "ui_icue_spectrum_width",
+        "value": 100,
+        "min": 0,
+        "max": 100,
+        "condition": "icue.value"
+    },
 
 
     // [NOTES]

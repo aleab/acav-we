@@ -41,6 +41,14 @@ export default class AudioSamplesArray implements Iterable<number[]> {
         }
     }
 
+    slice(start: number, end: number): AudioSamplesArray {
+        const slicedRaw: number[] = [];
+        for (let i = 0; i < this.channels; ++i) {
+            slicedRaw.push(...this.getChannel(i).slice(start, end));
+        }
+        return new AudioSamplesArray(slicedRaw, this.channels);
+    }
+
     [Symbol.iterator](): Iterator<number[]> {
         let i = 0;
         return {
