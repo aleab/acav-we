@@ -30,11 +30,11 @@ interface AppProps {
 
 export default function App(props: AppProps) {
     const O = useRef(props.options);
-    const [ showStats, setShowStats ] = useState(false);
-    const [ showSpotify, setShowSpotify ] = useState(false);
+    const [ showStats, setShowStats ] = useState(O.current.showStats);
+    const [ showSpotify, setShowSpotify ] = useState(O.current.spotify.showOverlay);
 
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
-    const [ useICue, setUseICue ] = useState(false);
+    const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
 
     window.acav.getProperties = () => _.cloneDeep(O.current);
 
@@ -138,12 +138,8 @@ export default function App(props: AppProps) {
             if (_.isEmpty(newProps)) return;
             Logc.debug('User properties applied', newProps);
 
-            if (newProps.showStats !== undefined) {
-                setShowStats(newProps.showStats);
-            }
-            if (newProps.limitFps !== undefined) {
-                renderer.setFps(newProps.limitFps ? targetFps.current : 0);
-            }
+            if (newProps.showStats !== undefined) setShowStats(newProps.showStats);
+            if (newProps.limitFps !== undefined) renderer.setFps(newProps.limitFps ? targetFps.current : 0);
 
             if (newProps.background !== undefined) {
                 const { playlistTimerMinutes: _playlistTimerMinutes, ..._background } = newProps.background;
@@ -163,8 +159,8 @@ export default function App(props: AppProps) {
                 samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
             }
 
-            if (newProps.spotify?.showOverlay !== undefined) {
-                setShowSpotify(newProps.spotify.showOverlay);
+            if (newProps.spotify !== undefined) {
+                if (newProps.spotify.showOverlay !== undefined) setShowSpotify(newProps.spotify.showOverlay);
             }
 
             if (newProps.icuePlugin !== undefined) {
