@@ -9,7 +9,7 @@ import './tests/tests';
 import App from './components/App';
 import Properties, { mapProperties } from './app/properties/Properties';
 
-import { startPreview } from './preview';
+import { startPreview as startWallpaperPreview } from './preview';
 import projectProperties from '../project.json/project.properties.json';
 
 import '@fortawesome/fontawesome-free/css/svg-with-js.css';
@@ -32,7 +32,7 @@ function run(Component: typeof App) {
     const defaultProperties = mapProperties(projectProperties) as Properties;
     const rootElement = document.getElementById('root');
 
-    window.acav.reload = () => {
+    window.acav.reload = function reload() {
         console.info(
             '%c' +
             '======================================================================\n' +
@@ -52,7 +52,7 @@ function run(Component: typeof App) {
 
     window.acav.reload();
 
-    window.acav.startPreview = (ms: number) => startPreview(projectProperties, ms);
+    window.acav.startPreview = function startPreview(ms: number) { startWallpaperPreview(projectProperties, ms); };
 }
 
 run(App);

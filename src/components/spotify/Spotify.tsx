@@ -106,7 +106,7 @@ export default function Spotify(props: SpotifyProps) {
     // ===============
     const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token, backendUrl: process.env.BACKEND_API_BASEURL! }));
     useEffect(() => { // window.acav.refreshSpotifyToken()
-        window.acav.refreshSpotifyToken = () => {
+        window.acav.refreshSpotifyToken = function refreshSpotifyToken() {
             const lsSpotifyToken = localStorage.getItem(LOCALSTORAGE_SPOTIFY_TOKEN);
             if (lsSpotifyToken !== null) {
                 const spToken: SpotifyToken = JSON.parse(lsSpotifyToken);

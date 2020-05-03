@@ -1,13 +1,13 @@
 interface ACAV {
-    reload?: () => void;
-    getProperties?: () => import('../app/properties/Properties').default;
+    reload?(): void;
+    getProperties?(): import('../app/properties/Properties').default;
 
-    getSamples?: () => number[];
-    togglePauseAudioListener?: () => void;
-    resetAudioListener?: () => void;
-    startPreview?: (ms: number) => void;
+    getSamples?(): number[];
+    togglePauseAudioListener?(): void;
+    resetAudioListener?(): void;
+    startPreview?(ms: number): void;
 
-    refreshSpotifyToken?: () => void;
+    refreshSpotifyToken?(): void;
 }
 
 interface Window {

@@ -36,7 +36,7 @@ export default function App(props: AppProps) {
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
     const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
 
-    window.acav.getProperties = () => _.cloneDeep(O.current);
+    window.acav.getProperties = function getProperties() { return _.cloneDeep(O.current); };
 
     // Observer
     const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
@@ -233,7 +233,7 @@ export default function App(props: AppProps) {
         }
 
         let listenerIsPaused = false;
-        window.acav.togglePauseAudioListener = () => {
+        window.acav.togglePauseAudioListener = function togglePauseAudioListener() {
             listenerIsPaused = !listenerIsPaused;
         };
 
@@ -252,7 +252,7 @@ export default function App(props: AppProps) {
         };
         window.wallpaperRegisterAudioListener(audioListener);
 
-        window.acav.resetAudioListener = () => {
+        window.acav.resetAudioListener = function resetAudioListener() {
             window.wallpaperRegisterAudioListener(audioListener);
         };
 
