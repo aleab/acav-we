@@ -3,6 +3,7 @@
 @import 'spacing.css';
 @import 'stats.css';
 @import 'spotify.css';
+@import 'clock.css';
 
 html, body, #root {
   width: 100%;

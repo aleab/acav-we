@@ -15,6 +15,7 @@ import useWallpaperBackground from '../hooks/useWallpaperBackground';
 import PluginManager, { PluginName } from '../plugins/PluginManager';
 
 import Stats from './Stats';
+import Clock from './clock/Clock';
 import Spotify from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
 
@@ -32,6 +33,7 @@ export default function App(props: AppProps) {
     const O = useRef(props.options);
     const [ showStats, setShowStats ] = useState(O.current.showStats);
     const [ showSpotify, setShowSpotify ] = useState(O.current.spotify.showOverlay);
+    const [ showClock, setShowClock ] = useState(O.current.clock.enabled);
 
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
     const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
@@ -159,6 +161,10 @@ export default function App(props: AppProps) {
                 samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
             }
 
+            if (newProps.clock !== undefined) {
+                if (newProps.clock.enabled !== undefined) setShowClock(newProps.clock.enabled);
+            }
+
             if (newProps.spotify !== undefined) {
                 if (newProps.spotify.showOverlay !== undefined) setShowSpotify(newProps.spotify.showOverlay);
             }
@@ -270,6 +276,7 @@ export default function App(props: AppProps) {
           {showStats ? <Stats /> : null}
           <Visualizer />
           {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
+          {showClock ? <Clock /> : null}
         </WallpaperContext.Provider>
       </div>
     );

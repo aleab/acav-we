@@ -298,6 +298,12 @@
         "value": false,
         "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
     },
+    
+    "___audioSamples": {
+        "order": 999,
+        "type": "text",
+        "text": "&nbsp;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;"
+    },
 
     // [VISUALIZER]
     "visualizer": {
@@ -796,6 +802,130 @@
         "editable": false,
         "condition": "visualizer_type.value === 'CircularWave'"
     },
+    
+    "___visualizer": {
+        "order": 1999,
+        "type": "text",
+        "text": "&nbsp;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;"
+    },
+
+    // [CLOCK]
+    "clock": {
+        "order": 2000,
+        "type": "bool",
+        "text": "ui_clock",
+        "value": false
+    },
+    "clock_pivot": {
+        "order": 2010,
+        "type": "combo",
+        "text": "ui_clock_pivot",
+        "options": [
+            { "label": "Center", "value": "Center" },
+            { "label": "Top", "value": "Top" },
+            { "label": "Left", "value": "Left" },
+            { "label": "Bottom", "value": "Bottom" },
+            { "label": "Right", "value": "Right" },
+            { "label": "Top Left", "value": "TopLeft" },
+            { "label": "Bottom Left", "value": "BottomLeft" },
+            { "label": "Bottom Right", "value": "BottomRight" },
+            { "label": "Top Right", "value": "TopRight" }
+        ],
+        "value": "Bottom",
+        "condition": "clock.value"
+    },
+    "clock_position_x": {
+        "order": 2011,
+        "type": "slider",
+        "text": "ui_clock_position_x",
+        "value": 50,
+        "min": 0,
+        "max": 100,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "clock.value"
+    },
+    "clock_position_y": {
+        "order": 2012,
+        "type": "slider",
+        "text": "ui_clock_position_y",
+        "value": 96,
+        "min": 0,
+        "max": 100,
+        "fraction": true,
+        "step": 0.1,
+        "condition": "clock.value"
+    },
+    "clock_digital_font": {
+        "order": 2020,
+        "type": "combo",
+        "text": "ui_clock_digital_font",
+        "options": [
+            { "label": "Open Sans", "value": "OpenSans" },
+            { "label": "Heebo", "value": "Heebo" },
+            { "label": "Arapey", "value": "Arapey" },
+            { "label": "<em>Local Font</em>", "value": "LocalFont" }
+        ],
+        "value": "OpenSans",
+        "condition": "clock.value"
+    },
+    "clock_digital_fontsize": {
+        "order": 2021,
+        "type": "slider",
+        "text": "ui_clock_digital_fontsize",
+        "value": 72,
+        "min": 18,
+        "max": 192,
+        "condition": "clock.value"
+    },
+    "clock_digital_text_color": {
+        "order": 2022,
+        "type": "color",
+        "text": "ui_clock_digital_text_color",
+        "value": "1 1 1",
+        "condition": "clock.value"
+    },
+    "clock_custom_css": {
+        "order": 2023,
+        "type": "textinput",
+        "text": "ui_clock_custom_css",
+        "value": "",
+        "condition": "showAdvancedOptions.value && clock.value"
+    },
+    "clock_seconds": {
+        "order": 2030,
+        "type": "bool",
+        "text": "ui_clock_seconds",
+        "value": false,
+        "condition": "clock.value"
+    },
+    "clock_digital_24h": {
+        "order": 2031,
+        "type": "bool",
+        "text": "ui_clock_digital_24h",
+        "value": true,
+        "condition": "clock.value && !clock_digital_locale.value"
+    },
+    "clock_digital_locale": {
+        "order": 2032,
+        "type": "textinput",
+        "text": "ui_clock_digital_locale",
+        "value": "",
+        "condition": "showAdvancedOptions.value && clock.value"
+    },
+    "$_clock_digital_locale": {
+        "order": 2033,
+        "type": "text",
+        "text": "ui_$_clock_digital_locale",
+        "condition": "showAdvancedOptions.value && clock.value"
+    },
+    
+    "___clock": {
+        "order": 2999,
+        "type": "text",
+        "text": "&nbsp;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;",
+        "condition": "clock.value"
+    },
 
     // [SPOTIFY]
     "spotify": {
@@ -1051,6 +1181,13 @@
         "text": "ui_spotify_progressbar_color",
         "value": "0.639215 0.749019 0.698039",
         "condition": "spotify.value && spotify_progressbar.value"
+    },
+    
+    "___spotify": {
+        "order": 5999,
+        "type": "text",
+        "text": "&nbsp;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;",
+        "condition": "spotify.value"
     },
 
     // [iCUE]

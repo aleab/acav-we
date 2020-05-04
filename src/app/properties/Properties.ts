@@ -6,6 +6,7 @@ import { Position } from '../../common/Position';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { BackgroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
+import { ClockFontFamily } from '../ClockFontFamily';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
 import { TextScrollingType } from '../TextScrollingType';
@@ -13,6 +14,7 @@ import { VisualizerType } from '../VisualizerType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
+import ClockProperties from './ClockProperties';
 import SpotifyProperties from './SpotifyProperties';
 import { CircularVisualizerProperties, VerticalVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
 
@@ -25,6 +27,7 @@ export default interface Properties {
     visualizer: VisualizerProperties;
     verticalVisualizer: VerticalVisualizerProperties;
     circularVisualizer: CircularVisualizerProperties;
+    clock: ClockProperties;
     spotify: SpotifyProperties;
     icuePlugin: {
         enabled: boolean;
@@ -161,6 +164,22 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions.wave!, 'fill', raw.circularVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
 
+    // .clock
+    const clockOptions: MappedProperties['clock'] = { digital: {} };
+    setProperty(clockOptions, 'enabled', raw.clock as WEProperty<'bool'>, _r => _r.value);
+    setProperty(clockOptions, 'pivot', raw.clock_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
+    setProperty(clockOptions, 'left', raw.clock_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions, 'top', raw.clock_position_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions, 'customCss', raw.clock_custom_css as WEProperty<'textinput'>, _r => _r.value);
+    setProperty(clockOptions, 'showSeconds', raw.clock_seconds as WEProperty<'bool'>, _r => _r.value);
+    // .clock.digital
+    setProperty(clockOptions.digital!, 'font', raw.clock_digital_font as WEProperty<'combo'>, _r => parseComboProperty(_r, ClockFontFamily));
+    setProperty(clockOptions.digital!, 'fontSize', raw.clock_digital_fontsize as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.digital!, 'textColor', raw.clock_digital_text_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(clockOptions.digital!, 'locale', raw.clock_digital_locale as WEProperty<'textinput'>, _r => _r.value);
+    setProperty(clockOptions.digital!, 'is24h', raw.clock_digital_24h as WEProperty<'bool'>, _r => _r.value);
+    if (_.isEmpty(clockOptions.digital)) delete clockOptions.digital;
+
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
@@ -212,6 +231,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         !_.isEmpty(visualizerOptions) ? { visualizer: visualizerOptions } : {},
         !_.isEmpty(verticalVisualizerOptions) ? { verticalVisualizer: verticalVisualizerOptions } : {},
         !_.isEmpty(circularVisualizerOptions) ? { circularVisualizer: circularVisualizerOptions } : {},
+        !_.isEmpty(clockOptions) ? { clock: clockOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
         !_.isEmpty(icueOptions) ? { icuePlugin: icueOptions } : {},
     );

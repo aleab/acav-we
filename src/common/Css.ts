@@ -46,18 +46,18 @@ export function cssColorToRgba(cssColor: string): RGBA | undefined {
     return rgba;
 }
 
-function isFilteredIn(propertyName: string, filter?: Array<string | RegExp>) {
-    return _.some(filter, v => {
+function matchesFilter(propertyName: string, filter?: Array<string | RegExp>) {
+    return filter === undefined ? true : _.some(filter, v => {
         return typeof v === 'string' ? (v.toLowerCase() === propertyName.toLowerCase()) : v.test(propertyName);
     });
 }
-export function parseCustomCss(css: string, filter?: Array<string | RegExp>) {
+export function parseCustomCss(css: string, filter?: Array<string | RegExp>, toReactStyleNames: boolean = true) {
     const regex = /([\w-]+)\s*:\s*((['"]).*\3|[^;]*)/g;
-    const custom: any = {};
+    const custom: { [key: string]: string } = {};
     let match: RegExpExecArray | null;
     while ((match = regex.exec(css)) !== null) {
-        if (isFilteredIn(match[1], filter)) {
-            const propertyName = match[1].replace(/-(.)/g, (_s, v) => v.toUpperCase()); // background-image  =>  backgroundImage
+        if (matchesFilter(match[1], filter)) {
+            const propertyName = toReactStyleNames ? match[1].replace(/-(.)/g, (_s, v) => v.toUpperCase()) : match[1]; // background-image  =>  backgroundImage
             if (propertyName) {
                 custom[propertyName] = match[2];
             }

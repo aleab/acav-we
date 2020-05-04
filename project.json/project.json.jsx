@@ -70,6 +70,7 @@ const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtj
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
 const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
+const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -230,6 +231,20 @@ function getProjectJson() {
                     ui_circularVisualizer_wave_smoothness: indent('Smoothness'),
                     ui_circularVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
                     ui_circularVisualizer_wave_fill: indent('Fill'),
+
+                    // [CLOCK]
+                    ui_clock: section('Clock', false, 'far fa-clock'),
+                    ui_clock_pivot: indent('Pivot'),
+                    ui_clock_position_x: indent('X (%)'),
+                    ui_clock_position_y: indent('Y (%)'),
+                    ui_clock_digital_font: indent('Font'),
+                    ui_clock_digital_fontsize: indent('Font Size (px)'),
+                    ui_clock_digital_text_color: indent('Text Color'),
+                    ui_clock_custom_css: indent(withPropertyIcon('fab fa-css3-alt', 'Style')) + asterisk(),
+                    ui_clock_seconds: indent('Show Seconds'),
+                    ui_clock_digital_locale: indent('Locale') + asterisk(),
+                    ui_clock_digital_24h: indent('24H'),
+                    ui_$_clock_digital_locale: note(`A BCP 47 language tag; unicode extension are supported: ${mdnLocaleLink('documentation')}.`),
 
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),

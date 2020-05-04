@@ -1,0 +1,16 @@
+#clock {
+  position: absolute;
+  display: flex;
+  flex-flow: column nowrap;
+  -webkit-font-smoothing: subpixel-antialiased;
+}
+
+#clock > .digital {
+  line-height: 1.2;
+}
+
+#clock > #browseFont {
+  position: absolute;
+  transform: translateY(-100%);
+}
+#clock > #browseFont:focus { outline: none; }
