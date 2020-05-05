@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 type ProjectProperties = typeof import('../project.json/project.properties.json');
 
-export function startPreview(projectProperties: ProjectProperties, ms: number) {
+export function startPreview(projectProperties: ProjectProperties | null, ms: number) {
     const presets: Array<ProjectProperties> = [
         _.merge({}, projectProperties, {
             audioSamples_volumeGain: { value: 35 },
@@ -20,7 +20,6 @@ export function startPreview(projectProperties: ProjectProperties, ms: number) {
             verticalVisualizer_bars_width: { value: 60 },
             verticalVisualizer_bars_height: { value: 40 },
             verticalVisualizer_bars_borderRadius: { value: 0 },
-            spotify: { value: false },
         } as DeepPartial<ProjectProperties>),
 
         _.merge({}, projectProperties, {
@@ -40,7 +39,6 @@ export function startPreview(projectProperties: ProjectProperties, ms: number) {
             verticalVisualizer_wave_thickness: { value: 2 },
             verticalVisualizer_wave_showMirrorWave: { value: true },
             verticalVisualizer_wave_fill: { value: false },
-            spotify: { value: false },
         } as DeepPartial<ProjectProperties>),
 
         _.merge({}, projectProperties, {
@@ -57,7 +55,6 @@ export function startPreview(projectProperties: ProjectProperties, ms: number) {
             circularVisualizer_wave_height: { value: 65 },
             circularVisualizer_wave_showMirrorWave: { value: true },
             circularVisualizer_wave_fill: { value: true },
-            spotify: { value: false },
         } as DeepPartial<ProjectProperties>),
 
         _.merge({}, projectProperties, {
@@ -74,7 +71,6 @@ export function startPreview(projectProperties: ProjectProperties, ms: number) {
             circularVisualizer_blocks_width: { value: 100 },
             circularVisualizer_blocks_height: { value: 75 },
             circularVisualizer_blocks_thickness: { value: 5 },
-            spotify: { value: false },
         } as DeepPartial<ProjectProperties>),
     ];
 

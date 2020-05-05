@@ -52,7 +52,7 @@ function run(Component: typeof App) {
 
     window.acav.reload();
 
-    window.acav.startPreview = function startPreview(ms: number) { startWallpaperPreview(projectProperties, ms); };
+    window.acav.startPreview = function startPreview(ms: number, mergeToDefault: boolean = true) { startWallpaperPreview(mergeToDefault ? projectProperties : null, ms); };
 }
 
 run(App);
