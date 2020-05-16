@@ -919,6 +919,34 @@
         "text": "ui_$_clock_digital_locale",
         "condition": "showAdvancedOptions.value && clock.value"
     },
+    //
+    // [CLOCK > BASS EFFECT]
+    "clock_bass_effect": {
+        "order": 2050,
+        "type": "bool",
+        "text": "ui_clock_bass_effect",
+        "value": false,
+        "condition": "clock.value"
+    },
+    "clock_bass_effect_frequency": {
+        "order": 2051,
+        "type": "slider",
+        "text": "ui_clock_bass_effect_frequency",
+        "value": 200,
+        "min": 60,
+        "max": 500,
+        "step": 5,
+        "condition": "clock.value && clock_bass_effect.value"
+    },
+    "clock_bass_effect_smoothing": {
+        "order": 2052,
+        "type": "slider",
+        "text": "ui_clock_bass_effect_smoothing",
+        "value": 35,
+        "min": 0,
+        "max": 100,
+        "condition": "clock.value && clock_bass_effect.value"
+    },
     
     "___clock": {
         "order": 2999,

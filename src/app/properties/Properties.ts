@@ -165,7 +165,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
 
     // .clock
-    const clockOptions: MappedProperties['clock'] = { digital: {} };
+    const clockOptions: MappedProperties['clock'] = { digital: {}, bassEffect: {} };
     setProperty(clockOptions, 'enabled', raw.clock as WEProperty<'bool'>, _r => _r.value);
     setProperty(clockOptions, 'pivot', raw.clock_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
     setProperty(clockOptions, 'left', raw.clock_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -179,6 +179,11 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(clockOptions.digital!, 'locale', raw.clock_digital_locale as WEProperty<'textinput'>, _r => _r.value);
     setProperty(clockOptions.digital!, 'is24h', raw.clock_digital_24h as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(clockOptions.digital)) delete clockOptions.digital;
+    // .clock.bassEffect
+    setProperty(clockOptions.bassEffect!, 'enabled', raw.clock_bass_effect as WEProperty<'bool'>, _r => _r.value);
+    setProperty(clockOptions.bassEffect!, 'frequency', raw.clock_bass_effect_frequency as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.bassEffect!, 'smoothing', raw.clock_bass_effect_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(clockOptions.bassEffect)) delete clockOptions.bassEffect;
 
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };

@@ -245,6 +245,11 @@ function getProjectJson() {
                     ui_clock_digital_locale: indent('Locale') + asterisk(),
                     ui_clock_digital_24h: indent('24H'),
                     ui_$_clock_digital_locale: note(`A BCP 47 language tag; unicode extension are supported: ${mdnLocaleLink('documentation')}.`),
+                    //
+                    // [CLOCK > BASS EFFECT]
+                    ui_clock_bass_effect: subSection('Bass Effect'),
+                    ui_clock_bass_effect_frequency: indent('Range (Hz)', { n: 3 }),
+                    ui_clock_bass_effect_smoothing: indent('Smoothing', { n: 3 }),
 
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),

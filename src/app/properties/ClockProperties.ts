@@ -17,4 +17,9 @@ export default interface ClockProperties {
         locale: string;
     };
     showSeconds: boolean;
+    bassEffect: {
+        enabled: boolean;
+        frequency: number;
+        smoothing: number;
+    };
 }
