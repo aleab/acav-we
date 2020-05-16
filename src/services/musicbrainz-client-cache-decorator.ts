@@ -46,6 +46,7 @@ const CACHE_MAINTENANCE_DEFAULT_INTERVAL = 1000 * 60 * 30;
 export interface IMusicbrainzClientCache {
     cacheRealUrl(key: string, url: string): Promise<void>;
     getCachedRealUrl(key: string): Promise<string | undefined>;
+    clearCachedRealUrl(key: string): Promise<void>;
 }
 
 export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClient, IMusicbrainzClientCache {
@@ -157,6 +158,15 @@ export default class MusicbrainzClientCacheDecorator implements IMusicbrainzClie
             }
         }
         return undefined;
+    }
+
+    async clearCachedRealUrl(key: string): Promise<void> {
+        if (key) {
+            if (this.db === undefined) await this.init();
+            if (this.db) {
+                await this.db.delete('musicbrainz-cover-urls', key);
+            }
+        }
     }
 
     private async doCacheMaintenanceLoop() {
