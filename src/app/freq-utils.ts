@@ -14,7 +14,10 @@ export function getFrequency(i: number) {
 }
 
 export function getClosestFrequencyIndex(freq: number) {
-    for (let i = 0; i < frequencies.length; ++i)     {
+    if (freq <= frequencies[0]) return 0;
+    if (freq >= frequencies[frequencies.length - 1]) return frequencies.length - 1;
+
+    for (let i = 0; i < frequencies.length; ++i) {
         const f1 = frequencies[i];
         if (freq === f1) return i;
 

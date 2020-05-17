@@ -68,10 +68,10 @@ export default function Clock() {
         const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
             const bassIndex = getClosestFrequencyIndex(bassEffectFrequency);
 
-            const currSample = args.samples.slice(0, bassIndex).raw;
+            const currSample = args.samples.slice(0, bassIndex + 1).raw;
             const currentMean = _.mean(currSample);
             const smoothedPrevMean = args.samplesBuffer.raw.reduce((avg, samples, i, rawArray) => {
-                return avg + _.mean(samples.slice(0, bassIndex).raw) / rawArray.length;
+                return avg + _.mean(samples.slice(0, bassIndex + 1).raw) / rawArray.length;
             }, 0);
 
             context?.renderer.queue(RENDER_ID, () => {
