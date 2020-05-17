@@ -28,6 +28,12 @@ body {
   font-size: 16px;
 }
 
+#winTaskbarCanvas { position: absolute; }
+#winTaskbarCanvas.left { left: 0; top: 0; }
+#winTaskbarCanvas.top { left: 0; top: 0; }
+#winTaskbarCanvas.right { right: 0; top: 0; }
+#winTaskbarCanvas.bottom { left: 0; bottom: 0; }
+
 /* ================= */
 
 .lh-0 { line-height: 0; }

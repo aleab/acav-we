@@ -955,6 +955,92 @@
         "condition": "clock.value"
     },
 
+    // [TASKBAR]
+    "taskbar": {
+        "order": 3000,
+        "type": "bool",
+        "text": "ui_taskbar",
+        "value": false
+    },
+    "taskbar_isSmall": {
+        "order": 3001,
+        "type": "bool",
+        "text": "ui_taskbar_isSmall",
+        "value": false,
+        "condition": "taskbar.value"
+    },
+    "taskbar_scale": {
+        "order": 3002,
+        "type": "slider",
+        "text": "ui_taskbar_scale",
+        "value": 100,
+        "min": 100,
+        "max": 200,
+        "condition": "taskbar.value"
+    },
+    "taskbar_size": {
+        "order": 3003,
+        "type": "slider",
+        "text": "ui_taskbar_size",
+        "value": 1,
+        "min": 1,
+        "max": 5,
+        "condition": "taskbar.value"
+    },
+    "taskbar_position": {
+        "order": 3004,
+        "type": "combo",
+        "text": "ui_taskbar_position",
+        "options": [
+            { "label": "Left", "value": "Left" },
+            { "label": "Top", "value": "Top" },
+            { "label": "Right", "value": "Right" },
+            { "label": "Bottom", "value": "Bottom" }
+        ],
+        "value": "Bottom",
+        "condition": "taskbar.value"
+    },
+    "taskbar_frequency_range": {
+        "order": 3010,
+        "type": "combo",
+        "text": "ui_taskbar_frequency_range",
+        "options": [
+            { "label": "All", "value": "All" },
+            { "label": "Bass", "value": "Bass" },
+            { "label": "Midrange", "value": "Midrange" },
+            { "label": "Upper Midrange", "value": "UpperMidrange" },
+            { "label": "Vocals", "value": "Vocals" },
+            { "label": "Treble", "value": "Treble" }
+        ],
+        "value": "Treble",
+        "condition": "taskbar.value"
+    },
+    "taskbar_resolution": {
+        "order": 3011,
+        "type": "slider",
+        "text": "ui_taskbar_resolution",
+        "value": 100,
+        "min": 0,
+        "max": 100,
+        "condition": "taskbar.value"
+    },
+    "taskbar_brightness": {
+        "order": 3012,
+        "type": "slider",
+        "text": "ui_taskbar_brightness",
+        "value": 75,
+        "min": 0,
+        "max": 100,
+        "condition": "taskbar.value"
+    },
+    
+    "___taskbar": {
+        "order": 3999,
+        "type": "text",
+        "text": "&nbsp;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;",
+        "condition": "taskbar.value"
+    },
+
     // [SPOTIFY]
     "spotify": {
         "order": 5000,

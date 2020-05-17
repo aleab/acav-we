@@ -13,11 +13,13 @@ import { usePlugin } from '../hooks/usePlugin';
 import { useRenderer } from '../hooks/useRenderer';
 import useWallpaperBackground from '../hooks/useWallpaperBackground';
 import PluginManager, { PluginName } from '../plugins/PluginManager';
+import TaskbarPlugin from '../plugins/TaskbarPlugin';
 
 import Stats from './Stats';
 import Clock from './clock/Clock';
 import Spotify from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
+import WinTaskBar from './WinTaskBar';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
@@ -37,6 +39,13 @@ export default function App(props: AppProps) {
 
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
     const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
+
+    const [ useTaskbarPlugin, setUseTaskbarPlugin ] = useState(O.current.taskbar.enabled);
+    const [ taskbarIsSmall, setTaskbarIsSmall ] = useState(O.current.taskbar.isSmall);
+    const [ taskbarScale, setTaskbarScale ] = useState(O.current.taskbar.scale);
+    const [ taskbarSize, setTaskbarSize ] = useState(O.current.taskbar.size);
+    const [ taskbarPosition, setTaskbarPosition ] = useState(O.current.taskbar.position);
+    const [ taskbarBrightness, setTaskbarBrightness ] = useState(O.current.taskbar.brightness);
 
     window.acav.getProperties = function getProperties() { return _.cloneDeep(O.current); };
 
@@ -165,6 +174,15 @@ export default function App(props: AppProps) {
                 if (newProps.clock.enabled !== undefined) setShowClock(newProps.clock.enabled);
             }
 
+            if (newProps.taskbar !== undefined) {
+                if (newProps.taskbar.enabled !== undefined) setUseTaskbarPlugin(newProps.taskbar.enabled);
+                if (newProps.taskbar.isSmall !== undefined) setTaskbarIsSmall(newProps.taskbar.isSmall);
+                if (newProps.taskbar.scale !== undefined) setTaskbarScale(newProps.taskbar.scale);
+                if (newProps.taskbar.size !== undefined) setTaskbarSize(newProps.taskbar.size);
+                if (newProps.taskbar.position !== undefined) setTaskbarPosition(newProps.taskbar.position);
+                if (newProps.taskbar.brightness !== undefined) setTaskbarBrightness(newProps.taskbar.brightness);
+            }
+
             if (newProps.spotify !== undefined) {
                 if (newProps.spotify.showOverlay !== undefined) setShowSpotify(newProps.spotify.showOverlay);
             }
@@ -186,6 +204,9 @@ export default function App(props: AppProps) {
     // =========
     usePlugin(wallpaperContext.pluginManager, 'cue', useICue && weCuePluginLoaded, {
         getOptions: () => O.current.icuePlugin,
+    });
+    const taskbarPlugin = usePlugin(wallpaperContext.pluginManager, 'taskbar', useTaskbarPlugin, {
+        getOptions: () => O.current.taskbar,
     });
 
     // ================
@@ -277,6 +298,14 @@ export default function App(props: AppProps) {
           <Visualizer />
           {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
           {showClock ? <Clock /> : null}
+          {
+            useTaskbarPlugin ? (
+              <WinTaskBar
+                small={taskbarIsSmall} scale={taskbarScale / 100} size={taskbarSize} position={taskbarPosition}
+                brightness={taskbarBrightness / 100} plugin={taskbarPlugin.current}
+              />
+            ) : null
+          }
         </WallpaperContext.Provider>
       </div>
     );

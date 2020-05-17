@@ -2,61 +2,77 @@
 
 import IPlugin from './IPlugin';
 import CuePlugin, { CueCtorArgs } from './CuePlugin';
+import TaskbarPlugin, { TaskbarPluginCtorArgs } from './TaskbarPlugin';
 
 import VisualizerRenderArgs from '../components/visualizers/VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRenderReturnArgs';
+import AudioSamplesArray from '../common/AudioSamplesArray';
+import CircularBuffer from '../common/CircularBuffer';
 
 class NoopPlugin implements IPlugin {
     processAudioData(_args: AudioSamplesEventArgs) { return Promise.resolve(); }
     processVisualizerSamplesData(_visualizerReturnArgs: VisualizerRenderReturnArgs) { return Promise.resolve(); }
 }
 
-export type PluginName = 'cue';
-export type PluginArgs<T extends PluginName> = T extends 'cue' ? CueCtorArgs : never;
+export type PluginName = 'cue' | 'taskbar';
+export type PluginArgs<T extends PluginName> = T extends 'cue' ? CueCtorArgs
+    : T extends 'taskbar' ? TaskbarPluginCtorArgs
+    : never;
 
 export default class PluginManager {
-    private readonly plugins: Map<string, IPlugin>;
+    private readonly plugins: Map<string, { plugin: IPlugin; enabled: boolean }>;
     private readonly noop: IPlugin = new NoopPlugin();
 
     constructor() {
-        this.plugins = new Map<string, IPlugin>();
+        this.plugins = new Map<string, { plugin: IPlugin; enabled: boolean }>();
     }
 
     processAudioData(args: VisualizerRenderArgs): Array<Promise<void>> {
         const promises: Array<Promise<void>> = [];
-        this.plugins.forEach(plugin => {
+        this.plugins.forEach(p => {
+            if (!p.enabled) return;
             promises.push(new Promise((resolve, reject) => {
-                plugin.processAudioData(args).then(() => resolve()).catch(err => reject(err));
+                p.plugin.processAudioData(args).then(() => resolve()).catch(err => reject(err));
             }));
         });
         return promises;
     }
 
-    processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs): Array<Promise<void>> {
+    processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined): Array<Promise<void>> {
         const promises: Array<Promise<void>> = [];
-        this.plugins.forEach(plugin => {
+        this.plugins.forEach(p => {
+            if (!p.enabled) return;
             promises.push(new Promise((resolve, reject) => {
-                plugin.processVisualizerSamplesData(visualizerReturnArgs).then(() => resolve()).catch(err => reject(err));
+                p.plugin.processVisualizerSamplesData(visualizerReturnArgs, samplesBuffer).then(() => resolve()).catch(err => reject(err));
             }));
         });
         return promises;
     }
 
     enable<T extends PluginName>(name: T, args: PluginArgs<T>): IPlugin {
-        let plugin = this.plugins.get(name);
-        if (plugin === undefined) {
+        let p = this.plugins.get(name);
+        if (p === undefined) {
+            let plugin = this.noop;
             switch (name) {
-                case 'cue': plugin = new CuePlugin(args); break;
-                default: return this.noop;
+                case 'cue': plugin = new CuePlugin(args as PluginArgs<'cue'>); break;
+                case 'taskbar': plugin = new TaskbarPlugin(args as PluginArgs<'taskbar'>); break;
+                default: break;
             }
 
-            this.plugins.set(name, plugin);
+            p = { enabled: true, plugin };
+            this.plugins.set(name, p);
+        } else {
+            p.enabled = true;
         }
 
-        return plugin;
+        return p.plugin;
     }
 
     disable(name: PluginName): boolean {
-        return this.plugins.delete(name);
+        const p = this.plugins.get(name);
+        if (p !== undefined) {
+            p.enabled = false;
+        }
+        return p !== undefined;
     }
 }

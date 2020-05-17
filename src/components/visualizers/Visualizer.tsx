@@ -144,7 +144,7 @@ export default function Visualizer() {
 
                 context.pluginManager.processAudioData(renderArgs);
                 if (canvas.current !== null && visualizerReturnArgs !== null) {
-                    context.pluginManager.processVisualizerSamplesData(visualizerReturnArgs);
+                    context.pluginManager.processVisualizerSamplesData(visualizerReturnArgs, samplesBuffer);
                 }
             });
         };

@@ -7,8 +7,10 @@ import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { BackgroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ClockFontFamily } from '../ClockFontFamily';
+import { FrequencyRange } from '../FrequencyRange';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
+import { TaskbarPosition } from '../TaskbarPosition';
 import { TextScrollingType } from '../TextScrollingType';
 import { VisualizerType } from '../VisualizerType';
 
@@ -16,6 +18,7 @@ import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
 import ClockProperties from './ClockProperties';
 import SpotifyProperties from './SpotifyProperties';
+import TaskbarProperties from './TaskbarProperties';
 import { CircularVisualizerProperties, VerticalVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
 
 export default interface Properties {
@@ -28,6 +31,7 @@ export default interface Properties {
     verticalVisualizer: VerticalVisualizerProperties;
     circularVisualizer: CircularVisualizerProperties;
     clock: ClockProperties;
+    taskbar: TaskbarProperties;
     spotify: SpotifyProperties;
     icuePlugin: {
         enabled: boolean;
@@ -185,6 +189,17 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(clockOptions.bassEffect!, 'smoothing', raw.clock_bass_effect_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(clockOptions.bassEffect)) delete clockOptions.bassEffect;
 
+    // .taskbar
+    const taskbarOptions: MappedProperties['taskbar'] = {};
+    setProperty(taskbarOptions, 'enabled', raw.taskbar as WEProperty<'bool'>, _r => _r.value);
+    setProperty(taskbarOptions, 'isSmall', raw.taskbar_isSmall as WEProperty<'bool'>, _r => _r.value);
+    setProperty(taskbarOptions, 'scale', raw.taskbar_scale as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(taskbarOptions, 'position', raw.taskbar_position as WEProperty<'combo'>, _r => parseComboProperty(_r, TaskbarPosition));
+    setProperty(taskbarOptions, 'size', raw.taskbar_size as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(taskbarOptions, 'frequencyRange', raw.taskbar_frequency_range as WEProperty<'combo'>, _r => parseComboProperty(_r, FrequencyRange));
+    setProperty(taskbarOptions, 'resolution', raw.taskbar_resolution as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(taskbarOptions, 'brightness', raw.taskbar_brightness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+
     // .spotify
     const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
@@ -237,6 +252,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         !_.isEmpty(verticalVisualizerOptions) ? { verticalVisualizer: verticalVisualizerOptions } : {},
         !_.isEmpty(circularVisualizerOptions) ? { circularVisualizer: circularVisualizerOptions } : {},
         !_.isEmpty(clockOptions) ? { clock: clockOptions } : {},
+        !_.isEmpty(taskbarOptions) ? { taskbar: taskbarOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},
         !_.isEmpty(icueOptions) ? { icuePlugin: icueOptions } : {},
     );

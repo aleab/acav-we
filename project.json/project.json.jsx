@@ -251,6 +251,16 @@ function getProjectJson() {
                     ui_clock_bass_effect_frequency: indent('Range (Hz)', { n: 3 }),
                     ui_clock_bass_effect_smoothing: indent('Smoothing', { n: 3 }),
 
+                    // [TASKBAR]
+                    ui_taskbar: section('Taskbar', false, 'text-white fab fa-windows'),
+                    ui_taskbar_isSmall: indent('Small'),
+                    ui_taskbar_scale: indent('Scale (%)'),
+                    ui_taskbar_size: indent('Size Multiplier'),
+                    ui_taskbar_position: indent('Position'),
+                    ui_taskbar_frequency_range: indent('Frequency Range'),
+                    ui_taskbar_resolution: indent('Resolution (%)'),
+                    ui_taskbar_brightness: indent('Brightness (%)'),
+
                     // [SPOTIFY]
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),
                     ui_spotify_backend_url: indent('Backend URL') + asterisk(),
