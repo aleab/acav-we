@@ -70,6 +70,7 @@ const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtj
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
 const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
+const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_language_tag">${text}</a>`;
 const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
 
 function getProjectJson() {
@@ -244,7 +245,10 @@ function getProjectJson() {
                     ui_clock_seconds: indent('Show Seconds'),
                     ui_clock_digital_locale: indent('Locale') + asterisk(),
                     ui_clock_digital_24h: indent('24H'),
-                    ui_$_clock_digital_locale: note(`A BCP 47 language tag; unicode extension are supported: ${mdnLocaleLink('documentation')}.`),
+                    ui_$_clock_digital_locale: note(
+                        `A ${bcp47WikiLink('BCP 47 language tag')}; unicode extensions are supported. The documentation of the formatting function used is ${mdnLocaleLink('here')}.`,
+                        'For example, <code>th-TH-u-nu-thai-hc-h12</code> changes the formatting to use the thai language (<em>th-TH</em>), the thai numerals (<em>nu-thai</em>) and a 12-hour clock (<em>hc-h12</em>).',
+                    ),
                     //
                     // [CLOCK > BASS EFFECT]
                     ui_clock_bass_effect: subSection('Bass Effect'),

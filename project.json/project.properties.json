@@ -917,7 +917,7 @@
         "order": 2033,
         "type": "text",
         "text": "ui_$_clock_digital_locale",
-        "condition": "showAdvancedOptions.value && clock.value"
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && clock.value"
     },
     //
     // [CLOCK > BASS EFFECT]
