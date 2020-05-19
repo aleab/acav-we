@@ -10,13 +10,17 @@ const React = require('react');
 const { renderToStaticMarkup } = require('react-dom/server');
 const Parser = require('html-react-parser');
 
-function withPropertyIcon(className, text) {
+function withFAIcon(className, text) {
     return renderToStaticMarkup(
       <>
-        <span className={`${className} fa-fw propertyIcon`} />
+        <i className={`${className} fa-fw`} />
         {Parser(text)}
       </>,
     );
+}
+
+function withPropertyIcon(className, text) {
+    return withFAIcon(`propertyIcon ${className}`, text);
 }
 
 function section(name, muted = false, propertyIcon = null) {
@@ -155,6 +159,14 @@ function getProjectJson() {
                     ui_visualizer_type: indent('Type'),
                     ui_visualizer_flipFrequencies: indent('Flip Frequencies'),
                     ui_visualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
+
+                    ui_visualizer_type_VerticalBars: withFAIcon('far fa-horizontal-rule fa-sm', ' Vertical, Bars'),
+                    ui_visualizer_type_VerticalBlocks: withFAIcon('far fa-horizontal-rule fa-sm', ' Vertical, Blocks'),
+                    ui_visualizer_type_VerticalWave: withFAIcon('far fa-horizontal-rule fa-sm', ' Vertical, Wave'),
+                    ui_visualizer_type_CircularBars: withFAIcon('far fa-circle', ' Circular, Bars'),
+                    ui_visualizer_type_CircularBlocks: withFAIcon('far fa-circle', ' Circular, Blocks'),
+                    ui_visualizer_type_CircularWave: withFAIcon('far fa-circle', ' Circular, Wave'),
+                    ui_visualizer_type_3DBars: withFAIcon('fas fa-cube', ' 3D, Bars'),
 
                     ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,
                     ui_visualizer_color_responseProvider: indent('React to', { n: 3 }) + asterisk(),

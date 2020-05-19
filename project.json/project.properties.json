@@ -316,13 +316,13 @@
         "type": "combo",
         "text": "ui_visualizer_type",
         "options": [
-            { "label": "Vertical, Bars", "value": "VerticalBars" },
-            { "label": "Vertical, Blocks", "value": "VerticalBlocks" },
-            { "label": "Vertical, Wave", "value": "VerticalWave" },
-            { "label": "Circular, Bars", "value": "CircularBars" },
-            { "label": "Circular, Blocks", "value": "CircularBlocks" },
-            { "label": "Circular, Wave", "value": "CircularWave" },
-            { "label": "3D, Bars", "value": "3DBars" }
+            { "label": "ui_visualizer_type_VerticalBars", "value": "VerticalBars" },
+            { "label": "ui_visualizer_type_VerticalBlocks", "value": "VerticalBlocks" },
+            { "label": "ui_visualizer_type_VerticalWave", "value": "VerticalWave" },
+            { "label": "ui_visualizer_type_CircularBars", "value": "CircularBars" },
+            { "label": "ui_visualizer_type_CircularBlocks", "value": "CircularBlocks" },
+            { "label": "ui_visualizer_type_CircularWave", "value": "CircularWave" },
+            { "label": "ui_visualizer_type_3DBars", "value": "3DBars" }
         ],
         "value": "VerticalBars"
     },
