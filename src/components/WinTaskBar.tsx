@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import AudioSamplesArray from '../common/AudioSamplesArray';
 import { TaskbarPosition } from '../app/TaskbarPosition';
-import WallpaperContext from '../app/WallpaperContext';
 import IPlugin from '../plugins/IPlugin';
 import TaskbarPlugin from '../plugins/TaskbarPlugin';
 
@@ -85,9 +84,7 @@ export default function WinTaskBar(props: WinTaskBarProps) {
     // Init plugin
     useEffect(() => {
         (props.plugin as TaskbarPlugin)?.subscribe?.(callback);
-        return () => {
-            (props.plugin as TaskbarPlugin)?.unsubscribe?.(callback);
-        };
+        return () => (props.plugin as TaskbarPlugin)?.unsubscribe?.(callback);
     }, [ callback, props.plugin ]);
 
     const className = useMemo(() => {

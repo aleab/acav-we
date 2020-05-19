@@ -302,7 +302,7 @@ export default function App(props: AppProps) {
             useTaskbarPlugin ? (
               <WinTaskBar
                 small={taskbarIsSmall} scale={taskbarScale / 100} size={taskbarSize} position={taskbarPosition}
-                brightness={taskbarBrightness / 100} plugin={taskbarPlugin.current}
+                brightness={taskbarBrightness / 100} plugin={taskbarPlugin}
               />
             ) : null
           }
