@@ -19,7 +19,7 @@ import BackgroundProperties from './BackgroundProperties';
 import ClockProperties from './ClockProperties';
 import SpotifyProperties from './SpotifyProperties';
 import TaskbarProperties from './TaskbarProperties';
-import { CircularVisualizerProperties, VerticalVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
+import { CircularVisualizerProperties, ThreeDVisualizerProperties, VerticalVisualizerProperties, VisualizerProperties } from './VisualizerProperties';
 
 export default interface Properties {
     audioprocessing: boolean;
@@ -30,6 +30,7 @@ export default interface Properties {
     visualizer: VisualizerProperties;
     verticalVisualizer: VerticalVisualizerProperties;
     circularVisualizer: CircularVisualizerProperties;
+    threeDVisualizer: ThreeDVisualizerProperties;
     clock: ClockProperties;
     taskbar: TaskbarProperties;
     spotify: SpotifyProperties;
@@ -155,6 +156,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .circularVisualizer.bars
     setProperty(circularVisualizerOptions.bars!, 'width', raw.circularVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.bars!, 'height', raw.circularVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(circularVisualizerOptions.bars)) delete circularVisualizerOptions.bars;
     // .circularVisualizer.blocks
     setProperty(circularVisualizerOptions.blocks!, 'width', raw.circularVisualizer_blocks_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.blocks!, 'height', raw.circularVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -167,6 +169,25 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions.wave!, 'showMirrorWave', raw.circularVisualizer_wave_showMirrorWave as WEProperty<'bool'>, _r => _r.value);
     setProperty(circularVisualizerOptions.wave!, 'fill', raw.circularVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
+
+    // .threeDVisualizer
+    const threeDVisualizerOptions: MappedProperties['threeDVisualizer'] = { bars: { light: {} } };
+    setProperty(threeDVisualizerOptions, 'color', raw['3dVisualizer_color'] as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    setProperty(threeDVisualizerOptions, 'zoom', raw['3dVisualizer_zoom'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    // .threeDVisualizer.bars
+    setProperty(threeDVisualizerOptions.bars!, 'width', raw['3dVisualizer_bars_width'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!, 'height', raw['3dVisualizer_bars_height'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!, 'phiX', raw['3dVisualizer_bars_phiX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!, 'phiY', raw['3dVisualizer_bars_phiY'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!, 'y0', raw['3dVisualizer_bars_y0'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!, 'deltaX', raw['3dVisualizer_bars_deltaX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!, 'deltaY', raw['3dVisualizer_bars_deltaY'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    // .threeDVisualizer.light
+    setProperty(threeDVisualizerOptions.bars!.light!, 'angleX', raw['3dVisualizer_bars_light_angleX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!.light!, 'power', raw['3dVisualizer_bars_light_power'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.bars!.light!, 'color', raw['3dVisualizer_bars_light_color'] as WEProperty<'color'>, _r => parseColorProperty(_r));
+    if (_.isEmpty(threeDVisualizerOptions.bars!.light)) delete threeDVisualizerOptions.bars!.light;
+    if (_.isEmpty(threeDVisualizerOptions.bars)) delete threeDVisualizerOptions.bars;
 
     // .clock
     const clockOptions: MappedProperties['clock'] = { digital: {}, bassEffect: {} };
@@ -251,6 +272,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
         !_.isEmpty(visualizerOptions) ? { visualizer: visualizerOptions } : {},
         !_.isEmpty(verticalVisualizerOptions) ? { verticalVisualizer: verticalVisualizerOptions } : {},
         !_.isEmpty(circularVisualizerOptions) ? { circularVisualizer: circularVisualizerOptions } : {},
+        !_.isEmpty(threeDVisualizerOptions) ? { threeDVisualizer: threeDVisualizerOptions } : {},
         !_.isEmpty(clockOptions) ? { clock: clockOptions } : {},
         !_.isEmpty(taskbarOptions) ? { taskbar: taskbarOptions } : {},
         !_.isEmpty(spotifyOptions) ? { spotify: spotifyOptions } : {},

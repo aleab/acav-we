@@ -18,7 +18,7 @@ export default function getVerticalBarsVisualizerRenderer(
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     verticalVisualizerOptions: MutableRefObject<DeepReadonly<VerticalVisualizerProperties>>,
     type: VerticalVisualizerType,
-): ((args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
+): ((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
     const O = verticalVisualizerOptions;
 
     let renderer: IVerticalRenderer | undefined;

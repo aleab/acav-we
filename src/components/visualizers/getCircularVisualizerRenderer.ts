@@ -18,7 +18,7 @@ export default function getCircularVisualizerRenderer(
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     circularVisualizerOptions: MutableRefObject<DeepReadonly<CircularVisualizerProperties>>,
     type: CircularVisualizerType,
-): ((args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
+): ((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
     const O = circularVisualizerOptions;
 
     let renderer: ICircularRenderer | undefined;

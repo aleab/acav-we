@@ -13,6 +13,7 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
 const LodashPlugin = require('lodash-webpack-plugin');
+const ThreeMinifierPlugin = require('@yushijinhun/three-minifier-webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const RequireVarsDotenvPlugin = require('./build-scripts/require-vars-dotenv-webpack');
@@ -80,6 +81,7 @@ function getWebpackConfig(env, argv) {
         },
     });
     const lodashPlugin = new LodashPlugin({ cloning: true, exotics: true });
+    const threeJsMinifierPlugin = new ThreeMinifierPlugin();
     const copyPlugin = new CopyWebpackPlugin([
         { from: './LICENSE.txt' },
         {
@@ -149,6 +151,9 @@ function getWebpackConfig(env, argv) {
         },
         resolve: {
             extensions: [ '.css', '.ts', '.tsx', '.js', '.jsx' ],
+            plugins: [
+                threeJsMinifierPlugin.resolver,
+            ],
         },
         module: {
             rules: [
@@ -242,6 +247,10 @@ function getWebpackConfig(env, argv) {
                         },
                         priority: 10,
                     },
+                    three: { // three.js
+                        test: /[\\/]node_modules[\\/]three[\\/]/,
+                        priority: 10,
+                    },
                     react: {
                         test: module => {
                             if (/\.css$/.test(module.resource)) return false;
@@ -266,6 +275,7 @@ function getWebpackConfig(env, argv) {
             dotenvPlugin,           // Dotenv plugin + Fail build if required variables are not defined
             licensePlugin,          // Output third party licenses to a file
             lodashPlugin,
+            threeJsMinifierPlugin,
             copyPlugin,             // Copy static files to build directory
             miniCssExtractPlugin,   // Extract CSS into separate files; one .css file per .js
         ],

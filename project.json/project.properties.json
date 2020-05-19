@@ -321,7 +321,8 @@
             { "label": "Vertical, Wave", "value": "VerticalWave" },
             { "label": "Circular, Bars", "value": "CircularBars" },
             { "label": "Circular, Blocks", "value": "CircularBlocks" },
-            { "label": "Circular, Wave", "value": "CircularWave" }
+            { "label": "Circular, Wave", "value": "CircularWave" },
+            { "label": "3D, Bars", "value": "3DBars" }
         ],
         "value": "VerticalBars"
     },
@@ -801,6 +802,145 @@
         "step": 0.1,
         "editable": false,
         "condition": "visualizer_type.value === 'CircularWave'"
+    },
+
+    // ~ ~ ~ ~ ~ ~ ~ ~ ~
+    // [3D VISUALIZER]
+    "3dVisualizer": {
+        "order": 1100,
+        "type": "text",
+        "text": "ui_3dVisualizer",
+        "condition": "visualizer_type.value.startsWith('3D')"
+    },
+    "3dVisualizer_color": {
+        "order": 1106,
+        "type": "color",
+        "text": "ui_3dVisualizer_color",
+        "value": "0.176470 0.266667 0.611764",
+        "condition": "visualizer_type.value.startsWith('3D')"
+    },
+    "3dVisualizer_zoom": {
+        "order": 1107,
+        "type": "slider",
+        "text": "ui_3dVisualizer_zoom",
+        "value": 100,
+        "min": 0,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value.startsWith('3D')"
+    },
+    //
+    // [3D VISUALIZER > BARS]
+    "3dVisualizer_bars": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_3dVisualizer_bars",
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_width": {
+        "order": 1121,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_width",
+        "value": 85,
+        "min": 1,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_height": {
+        "order": 1122,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_height",
+        "value": 35,
+        "min": 10,
+        "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_phiX": {
+        "order": 1123,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_phiX",
+        "value": 105,
+        "min": 0,
+        "max": 360,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_phiY": {
+        "order": 1124,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_phiY",
+        "value": 15,
+        "min": 0,
+        "max": 60,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_y0": {
+        "order": 1125,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_y0",
+        "value": 20,
+        "min": 0,
+        "max": 50,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_deltaX": {
+        "order": 1126,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_deltaX",
+        "value": 0,
+        "min": 0,
+        "max": 35,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_deltaY": {
+        "order": 1127,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_deltaY",
+        "value": 10,
+        "min": 0,
+        "max": 35,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    //
+    // [3D VISUALIZER > BARS > LIGHT]
+    "3dVisualizer_bars_light": {
+        "order": 1200,
+        "type": "text",
+        "text": "ui_3dVisualizer_bars_light",
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_light_angleX": {
+        "order": 1201,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_light_angleX",
+        "value": 35,
+        "min": 0,
+        "max": 360,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_light_power": {
+        "order": 1202,
+        "type": "slider",
+        "text": "ui_3dVisualizer_bars_light_power",
+        "value": 85,
+        "min": 25,
+        "max": 125,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DBars'"
+    },
+    "3dVisualizer_bars_light_color": {
+        "order": 1203,
+        "type": "color",
+        "text": "ui_3dVisualizer_bars_light_color",
+        "value": "1 1 1",
+        "condition": "visualizer_type.value === '3DBars'"
     },
     
     "___visualizer": {

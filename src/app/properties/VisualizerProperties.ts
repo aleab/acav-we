@@ -65,3 +65,22 @@ export interface CircularVisualizerProperties {
         fill: boolean;
     };
 }
+
+export interface ThreeDVisualizerProperties {
+    color: RGBA;
+    zoom: number;
+    bars: {
+        width: number;
+        height: number;
+        phiX: number;
+        phiY: number;
+        y0: number;
+        deltaX: number;
+        deltaY: number;
+        light: {
+            angleX: number;
+            power: number;
+            color: RGB;
+        };
+    };
+}

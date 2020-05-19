@@ -233,6 +233,28 @@ function getProjectJson() {
                     ui_circularVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
                     ui_circularVisualizer_wave_fill: indent('Fill'),
 
+                    // ~ ~ ~ ~ ~ ~ ~ ~ ~
+                    // [3D VISUALIZER]
+                    ui_3dVisualizer: section('3D Visualizer'),
+                    ui_3dVisualizer_color: indent('Color'),
+                    ui_3dVisualizer_zoom: indent('Zoom'),
+                    //
+                    // [3D VISUALIZER > BARS]
+                    ui_3dVisualizer_bars: subSection('Bars'),
+                    ui_3dVisualizer_bars_width: indent('Width (%)'),
+                    ui_3dVisualizer_bars_height: indent('Height (%)'),
+                    ui_3dVisualizer_bars_phiX: indent('<sample>&#120593;<sub>x</sub></sample> (deg)'),
+                    ui_3dVisualizer_bars_phiY: indent('<sample>&#120593;<sub>y</sub></sample> (deg)'),
+                    ui_3dVisualizer_bars_y0: indent('<var>y<sub>0</sub></var> (%)'),
+                    ui_3dVisualizer_bars_deltaX: indent('<sample>&#120575;<sub>x</sub></sample> (%)'),
+                    ui_3dVisualizer_bars_deltaY: indent('<sample>&#120575;<sub>y</sub></sample> (%)'),
+                    //
+                    // [3D VISUALIZER > BARS > LIGHT]
+                    ui_3dVisualizer_bars_light: subSection('Light'),
+                    ui_3dVisualizer_bars_light_angleX: indent('<sample>&#120599;<sub>x</sub></sample> (deg)'),
+                    ui_3dVisualizer_bars_light_power: indent('Power'),
+                    ui_3dVisualizer_bars_light_color: indent('Color'),
+
                     // [CLOCK]
                     ui_clock: section('Clock', false, 'far fa-clock'),
                     ui_clock_pivot: indent('Pivot'),

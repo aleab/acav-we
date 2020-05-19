@@ -33,7 +33,7 @@ export interface VisualizerParams {
 }
 
 export interface IVerticalRenderer {
-    render(args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null;
+    render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null;
 }
 
 export default abstract class VerticalRenderer<T extends VerticalVisualizerType> implements IVerticalRenderer {
@@ -83,7 +83,7 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
     abstract getHeight(maxHeight: number): number;
     abstract renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void;
 
-    render(args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
+    render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
         const canvasContext = this.canvas.current?.getContext('2d');
         if (!canvasContext) return null;
 

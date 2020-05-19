@@ -36,7 +36,7 @@ export interface VisualizerParams {
 }
 
 export interface ICircularRenderer {
-    render(args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null;
+    render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null;
 }
 
 export default abstract class CircularRenderer<T extends CircularVisualizerType> implements ICircularRenderer {
@@ -86,7 +86,7 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
     abstract getHeight(maxHeight: number): number;
     abstract renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void;
 
-    render(args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
+    render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
         const canvasContext = this.canvas.current?.getContext('2d');
         if (!canvasContext) return null;
 
@@ -103,13 +103,13 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
 
             const minDimension = Math.min(canvasContext.canvas.width, canvasContext.canvas.height);
             const visualizerAngle = O.angle;
-            const angularDelta = ((visualizerAngle / 180) * Math.PI) / N;
+            const angularDelta = (visualizerAngle * Math.DEG2RAD) / N;
 
             const flipFrequencies = Ov.current.flipFrequencies;
             const x = canvasContext.canvas.width * (O.x / 100);
             const y = canvasContext.canvas.height * (O.y / 100);
             const radius = minDimension * (O.radius / 100);
-            const rotation = (O.rotation / 180) * Math.PI;
+            const rotation = O.rotation * Math.DEG2RAD;
 
             const colorRgb: Readonly<RGB> = [ O.color[0], O.color[1], O.color[2] ];
             const colorReaction = Ov.current.responseType !== ColorReactionType.None

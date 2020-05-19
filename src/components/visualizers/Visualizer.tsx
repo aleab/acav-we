@@ -4,7 +4,7 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import Log from '../../common/Log';
 import CircularBuffer from '../../common/CircularBuffer';
 import AudioSamplesArray from '../../common/AudioSamplesArray';
-import { CircularVisualizerType, VerticalVisualizerType, VisualizerType } from '../../app/VisualizerType';
+import { CircularVisualizerType, ThreeDimensionalVisualizerType, VerticalVisualizerType, VisualizerType } from '../../app/VisualizerType';
 import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
@@ -12,6 +12,7 @@ import VisualizerRenderArgs from './VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 import getVerticalBarsVisualizerRenderer from './getVerticalBarsVisualizerRenderer';
 import getCircularVisualizerRenderer from './getCircularVisualizerRenderer';
+import get3dVisualizerRenderer from './get3dVisualizerRenderer';
 
 const Logc = Log.getLogger('Visualizer', 'darkblue');
 
@@ -22,6 +23,7 @@ export default function Visualizer() {
     const O = useRef(context.wallpaperProperties.visualizer);
     const verticalVisualizerOptions = useRef(context.wallpaperProperties.verticalVisualizer);
     const circularVisualizerOptions = useRef(context.wallpaperProperties.circularVisualizer);
+    const threeDVisualizerOptions = useRef(context.wallpaperProperties.threeDVisualizer);
 
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
 
@@ -36,16 +38,24 @@ export default function Visualizer() {
     //  <canvas>
     // ==========
     const canvas = useRef<HTMLCanvasElement>(null);
+    const canvas3d = useRef<HTMLCanvasElement>(null);
     useEffect(() => {
         Logc.info('Initializing canvas...');
-        canvas.current!.width = window.innerWidth;
-        canvas.current!.height = window.innerHeight;
+        if (canvas.current !== null) {
+            canvas.current!.width = window.innerWidth;
+            canvas.current!.height = window.innerHeight;
+        }
+
+        if (canvas3d.current !== null) {
+            canvas3d.current.width = window.innerWidth;
+            canvas3d.current.height = window.innerHeight;
+        }
     }, []); // just once
 
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
     // =================================
-    const render = useMemo<((args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null)>(() => {
+    const render = useMemo<((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null)>(() => {
         switch (visualizerType) {
             case VisualizerType.VerticalBars:
                 return getVerticalBarsVisualizerRenderer(context, canvas, O, verticalVisualizerOptions, VerticalVisualizerType.Bars);
@@ -61,7 +71,10 @@ export default function Visualizer() {
             case VisualizerType.CircularWave:
                 return getCircularVisualizerRenderer(context, canvas, O, circularVisualizerOptions, CircularVisualizerType.Wave);
 
-            default: return (_args: VisualizerRenderArgs) => null;
+            case VisualizerType['3DBars']:
+                return get3dVisualizerRenderer(context, canvas3d, O, threeDVisualizerOptions, ThreeDimensionalVisualizerType.Bars);
+
+            default: return (_timestamp: number, _args: VisualizerRenderArgs) => null;
         }
     }, [ context, visualizerType ]);
 
@@ -69,7 +82,7 @@ export default function Visualizer() {
         Logc.info('Registering onAudioSamples and render callbacks...');
 
         // Clear
-        canvas.current?.getContext('2d')?.clearRect(0, 0, canvas.current.width, canvas.current.height);
+        //canvas.current?.getContext('2d')?.clearRect(0, 0, canvas.current.width, canvas.current.height);
 
         const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;
@@ -139,8 +152,8 @@ export default function Visualizer() {
 
             // Queue render job
             const renderArgs = { samplesBuffer, samples, peak };
-            context.renderer.queue(RENDER_ID, () => {
-                const visualizerReturnArgs = render(renderArgs);
+            context.renderer.queue(RENDER_ID, ts => {
+                const visualizerReturnArgs = render(ts, renderArgs);
 
                 context.pluginManager.processAudioData(renderArgs);
                 if (canvas.current !== null && visualizerReturnArgs !== null) {
@@ -156,7 +169,11 @@ export default function Visualizer() {
         };
     }, [ RENDER_ID, context, render ]);
 
+    const is3d = useMemo(() => visualizerType === VisualizerType['3DBars'], [visualizerType]);
     return (
-      <canvas ref={canvas} />
+      <>
+        <canvas ref={canvas} style={{ display: is3d ? 'none' : undefined }} />
+        <canvas ref={canvas3d} style={{ display: !is3d ? 'none' : undefined }} />
+      </>
     );
 }
