@@ -13,7 +13,7 @@ import Log from '../../common/Log';
 import { checkInternetConnection } from '../../common/Network';
 import { calculatePivotTransform } from '../../common/Pivot';
 import { Position } from '../../common/Position';
-import { CssBackground, generateCssStyle as generateBackgroundCss } from '../../app/BackgroundMode';
+import { generateCssStyle as generateBackgroundCss } from '../../app/BackgroundMode';
 import SpotifyOverlayArtType from '../../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../../app/SpotifyStateMachine';
 import WallpaperContext from '../../app/WallpaperContext';

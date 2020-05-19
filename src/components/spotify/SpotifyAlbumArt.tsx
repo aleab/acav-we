@@ -9,10 +9,13 @@ import { FaChevronCircleDown } from '../../fa';
 import MusicTrack, { getAlbumHashCode } from '../../app/MusicTrack';
 import PreferredLocalArtStore from '../../app/PreferredLocalArtStore';
 import { CancellationTokenSource } from '../../common/CancellationToken';
+import Log from '../../common/Log';
 import { IMusicbrainzClient, MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
 import { IMusicbrainzClientCache } from '../../services/musicbrainz-client-cache-decorator';
 
 import SpotifyOverlayPreferredLocalArtChooser, { SpotifyOverlayPreferredLocalArtChooserProps } from './SpotifyOverlayPreferredLocalArtChooser';
+
+const Logc = Log.getLogger('SpotifyAlbumArt', '#1DB954');
 
 interface SpotifyAlbumArtProps {
     style?: CSSProperties;
@@ -26,6 +29,34 @@ interface SpotifyAlbumArtProps {
 
     preferrectLocalArtChooserElementRef: RefObject<HTMLElement>;
     preferrectLocalArtChooserSize: { width: number; height: number };
+}
+
+function testCachedUrl(url: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        const img = document.createElement('img');
+        img.onerror = () => reject();
+        img.onload = () => resolve();
+        img.src = url;
+    });
+}
+
+function followRedirectsAndCacheFinalUrl(
+    url: string,
+    mbClientCache: IMusicbrainzClientCache | undefined,
+    cts: React.MutableRefObject<CancellationTokenSource>,
+): Promise<string> {
+    return new Promise((resolve, reject) => {
+        fetch(url).then(res => {
+            if (cts.current.token.isCancelled()) {
+                reject();
+            } else if (mbClientCache !== undefined) {
+                mbClientCache.cacheRealUrl(url, res.url);
+                resolve(res.url);
+            } else {
+                reject();
+            }
+        }).catch(e => reject(e));
+    });
 }
 
 export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
@@ -49,24 +80,25 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
 
     const [ mbReleaseCoverArts, setMbReleaseCoverArts ] = useState<MusicbrainzReleaseCoverArt[] | null>(null);
     const [ currentMbReleaseCoverArt, setCurrentMbReleaseCoverArt ] = useState<MusicbrainzReleaseCoverArt | null>(null);
-    const [ currentMbReleaseCoverArtImageKey, setCurrentMbReleaseCoverArtImageKey ] = useState<string | null>(null);
     const currentMbReleaseCoverArtId = currentMbReleaseCoverArt?.release ?? null;
 
     const localTrack = useMemo<MusicTrack | undefined>(() => {
         if (!props.track.is_local) return undefined;
-        return {
+        const _localTrack = {
             title: props.track.name,
             album: props.track.album.name,
             artists: props.track.artists.map(artist => artist.name),
         };
+        //Logc.debug('Local track changed:', _localTrack);
+        return _localTrack;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ _artists, props.track.album.name, props.track.is_local, props.track.name ]);
 
     const cts = useRef(new CancellationTokenSource());
     const setLocalCoverArt = useCallback((mbReleaseCoverArt: MusicbrainzReleaseCoverArt | null) => {
+        //Logc.debug('Setting local cover art:', _.cloneDeep(mbReleaseCoverArt));
         if (mbReleaseCoverArt === null) {
             setLocalSrc('');
-            setCurrentMbReleaseCoverArtImageKey(null);
             setCurrentMbReleaseCoverArt(null);
         } else {
             const images = mbReleaseCoverArt.cover.slice().sort((a, b) => b.size - a.size); // Sort in descending order by size
@@ -74,24 +106,29 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
 
             if (mbClientCache !== undefined) {
                 mbClientCache.getCachedRealUrl(image.url).then(cachedRedirectedUrl => {
+                    //Logc.debug(`Retrieving cached real url of '${image.url}':`, cachedRedirectedUrl);
                     if (cts.current.token.isCancelled()) return;
                     if (cachedRedirectedUrl !== undefined) {
-                        setLocalSrc(cachedRedirectedUrl);
+                        // The cached value may become unavailable after a while and return 403;
+                        // if that happens, invalidate the cache and fetch a new value from MusicBrainz
+                        testCachedUrl(cachedRedirectedUrl).then(() => {
+                            setLocalSrc(cachedRedirectedUrl);
+                        }).catch(() => {
+                            //Logc.debug('Cached url was invalid; fetching new one...');
+                            mbClientCache.clearCachedRealUrl(image.url).then(() => {
+                                followRedirectsAndCacheFinalUrl(image.url, mbClientCache, cts).then(url => {
+                                    setLocalSrc(url);
+                                });
+                            });
+                        });
                     } else {
-                        // Get the real redirected url and cache it
-                        fetch(image.url).then(res => {
-                            if (cts.current.token.isCancelled()) return;
-                            if (mbClientCache !== undefined) {
-                                mbClientCache.cacheRealUrl(image.url, res.url);
-                                setLocalSrc(res.url);
-                            }
+                        followRedirectsAndCacheFinalUrl(image.url, mbClientCache, cts).then(url => {
+                            setLocalSrc(url);
                         });
                     }
                 });
-                setCurrentMbReleaseCoverArtImageKey(image.url);
             } else {
                 setLocalSrc(image.url);
-                setCurrentMbReleaseCoverArtImageKey(null);
             }
 
             setCurrentMbReleaseCoverArt(mbReleaseCoverArt);
@@ -104,6 +141,7 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
 
         if (fetchLocalCovers && props.track.is_local && localTrack !== undefined) {
             mbClient?.findCoverArtByReleaseGroup(localTrack).then(_mbReleaseCoverArts => {
+                //Logc.debug('Fetching local covers:', _.cloneDeep(_mbReleaseCoverArts));
                 if (_mbReleaseCoverArts === null || _mbReleaseCoverArts === undefined || _mbReleaseCoverArts.length === 0) {
                     setLocalCoverArt(null);
                     setMbReleaseCoverArts(null);
@@ -118,14 +156,6 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
         }
         return () => { setLocalSrc(''); };
     }, [ fetchLocalCovers, localTrack, mbClient, preferredLocalArtStore, props.track.is_local, setLocalCoverArt ]);
-
-    // The cached value may become unavailable after a while and return 403;
-    // if that happens, invalidate the cache and fetch a new value from MusicBrainz
-    const onImgError = useCallback(() => {
-        if (mbClientCache !== undefined && currentMbReleaseCoverArtImageKey !== null) {
-            mbClientCache.clearCachedRealUrl(currentMbReleaseCoverArtImageKey).then(() => setLocalCoverArt(currentMbReleaseCoverArt));
-        }
-    }, [ currentMbReleaseCoverArt, currentMbReleaseCoverArtImageKey, mbClientCache, setLocalCoverArt ]);
 
     // <img> attributes
     const src = useMemo(() => (props.track.is_local ? localSrc : spotifySrc), [ localSrc, props.track.is_local, spotifySrc ]);
@@ -170,7 +200,7 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     return (
       <>
         <div className={classNames.join(' ')} style={{ ...props.style, lineHeight: 0 }} onClick={onClick}>
-          <img style={imgStyle} src={src} alt="" onError={props.track.is_local ? onImgError : undefined} />
+          <img style={imgStyle} src={src} alt="" />
           {canShowPreferredLocalArtChooser ? (
             <span className={showPreferredCoverArtChooser ? 'chevron up' : 'chevron'}>
               <FaChevronCircleDown />
