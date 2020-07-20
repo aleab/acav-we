@@ -127,22 +127,27 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(verticalVisualizerOptions, 'width', raw.verticalVisualizer_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions, 'alignment', raw.verticalVisualizer_alignment as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions, 'color', raw.verticalVisualizer_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    setProperty(verticalVisualizerOptions, 'useSilentColor', raw.verticalVisualizer_silentColor_bool as WEProperty<'bool'>, _r => _r.value);
+    setProperty(verticalVisualizerOptions, 'silentColor', raw.verticalVisualizer_silentColor as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     // .verticalVisualizer.bars
     setProperty(verticalVisualizerOptions.bars!, 'width', raw.verticalVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.bars!, 'height', raw.verticalVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.bars!, 'minHeight', raw.verticalVisualizer_bars_minHeight as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.bars!, 'borderRadius', raw.verticalVisualizer_bars_borderRadius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(verticalVisualizerOptions.bars)) delete verticalVisualizerOptions.bars;
     // .verticalVisualizer.blocks
     setProperty(verticalVisualizerOptions.blocks!, 'width', raw.verticalVisualizer_blocks_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.blocks!, 'height', raw.verticalVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.blocks!, 'thickness', raw.verticalVisualizer_blocks_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.blocks!, 'hideWhenSilent', raw.verticalVisualizer_blocks_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(verticalVisualizerOptions.blocks)) delete verticalVisualizerOptions.blocks;
     // .verticalVisualizer.wave
     setProperty(verticalVisualizerOptions.wave!, 'height', raw.verticalVisualizer_wave_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(verticalVisualizerOptions.wave!, 'thickness', raw.verticalVisualizer_wave_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    setProperty(verticalVisualizerOptions.wave!, 'smoothness', raw.verticalVisualizer_wave_smoothness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.wave!, 'showMirrorWave', raw.verticalVisualizer_wave_showMirrorWave as WEProperty<'bool'>, _r => _r.value);
     setProperty(verticalVisualizerOptions.wave!, 'fill', raw.verticalVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
+    setProperty(verticalVisualizerOptions.wave!, 'thickness', raw.verticalVisualizer_wave_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.wave!, 'smoothness', raw.verticalVisualizer_wave_smoothness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.wave!, 'hideWhenSilent', raw.verticalVisualizer_wave_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(verticalVisualizerOptions.wave)) delete verticalVisualizerOptions.wave;
 
     // .circularVisualizer
@@ -153,14 +158,18 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions, 'rotation', raw.circularVisualizer_rotation as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'angle', raw.circularVisualizer_angle as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions, 'color', raw.circularVisualizer_color as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    setProperty(circularVisualizerOptions, 'useSilentColor', raw.circularVisualizer_silentColor_bool as WEProperty<'bool'>, _r => _r.value);
+    setProperty(circularVisualizerOptions, 'silentColor', raw.circularVisualizer_silentColor as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     // .circularVisualizer.bars
     setProperty(circularVisualizerOptions.bars!, 'width', raw.circularVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.bars!, 'height', raw.circularVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.bars!, 'minHeight', raw.circularVisualizer_bars_minHeight as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(circularVisualizerOptions.bars)) delete circularVisualizerOptions.bars;
     // .circularVisualizer.blocks
     setProperty(circularVisualizerOptions.blocks!, 'width', raw.circularVisualizer_blocks_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.blocks!, 'height', raw.circularVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.blocks!, 'thickness', raw.circularVisualizer_blocks_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.blocks!, 'hideWhenSilent', raw.circularVisualizer_blocks_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.blocks)) delete circularVisualizerOptions.blocks;
     // .circularVisualizer.wave
     setProperty(circularVisualizerOptions.wave!, 'height', raw.circularVisualizer_wave_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -168,12 +177,16 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions.wave!, 'smoothness', raw.circularVisualizer_wave_smoothness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.wave!, 'showMirrorWave', raw.circularVisualizer_wave_showMirrorWave as WEProperty<'bool'>, _r => _r.value);
     setProperty(circularVisualizerOptions.wave!, 'fill', raw.circularVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
+    setProperty(circularVisualizerOptions.wave!, 'hideWhenSilent', raw.circularVisualizer_wave_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
 
     // .threeDVisualizer
     const threeDVisualizerOptions: MappedProperties['threeDVisualizer'] = { bars: { light: {} } };
     setProperty(threeDVisualizerOptions, 'color', raw['3dVisualizer_color'] as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     setProperty(threeDVisualizerOptions, 'zoom', raw['3dVisualizer_zoom'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions, 'useSilentColor', raw['_3dVisualizer_silentColor_bool'] as WEProperty<'bool'>, _r => _r.value);
+    setProperty(threeDVisualizerOptions, 'silentColor', raw['3dVisualizer_silentColor'] as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
+    setProperty(threeDVisualizerOptions, 'hideWhenSilent', raw['3dVisualizer_hideWhenSilent'] as WEProperty<'bool'>, _r => _r.value);
     // .threeDVisualizer.bars
     setProperty(threeDVisualizerOptions.bars!, 'width', raw['3dVisualizer_bars_width'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!, 'height', raw['3dVisualizer_bars_height'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -182,7 +195,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(threeDVisualizerOptions.bars!, 'y0', raw['3dVisualizer_bars_y0'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!, 'deltaX', raw['3dVisualizer_bars_deltaX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!, 'deltaY', raw['3dVisualizer_bars_deltaY'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
-    // .threeDVisualizer.light
+    // .threeDVisualizer.bars.light
     setProperty(threeDVisualizerOptions.bars!.light!, 'angleX', raw['3dVisualizer_bars_light_angleX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!.light!, 'power', raw['3dVisualizer_bars_light_power'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!.light!, 'color', raw['3dVisualizer_bars_light_color'] as WEProperty<'color'>, _r => parseColorProperty(_r));

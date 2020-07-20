@@ -1,7 +1,7 @@
 type Point = { x: number; y: number };
 
 export function stroke(canvasContext: CanvasRenderingContext2D, thickness: number) {
-    canvasContext.lineCap = 'round';
+    canvasContext.lineCap = 'butt';
     canvasContext.lineJoin = 'round';
     canvasContext.lineWidth = thickness;
     canvasContext.stroke();

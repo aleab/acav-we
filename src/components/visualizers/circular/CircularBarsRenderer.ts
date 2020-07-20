@@ -8,11 +8,17 @@ import CircularRenderer, { VisualizerParams, getBarSegmentPoints } from './Circu
  * @param {number} x x coordinate of the center of the circle.
  * @param {number} y y coordinate of the center of the circle.
  */
-function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, radius: number, angle: number, barWidth: number, barHeight: number) {
+function renderBar(
+    canvasContext: CanvasRenderingContext2D,
+    x: number, y: number,
+    radius: number, angle: number,
+    barWidth: number, barHeight: number,
+    minHeight: number,
+) {
     const stdAngle = -(angle - Math.PI_2);
     const start = getBarSegmentPoints(0, stdAngle, radius, { x, y }, barWidth);
 
-    if (barHeight >= 1) {
+    if (barHeight > minHeight) {
         const end = getBarSegmentPoints(barHeight, stdAngle, radius, { x, y }, barWidth);
 
         canvasContext.beginPath();
@@ -24,7 +30,7 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
         canvasContext.fill();
     } else {
         canvasContext.lineCap = 'butt';
-        canvasContext.lineWidth = 1;
+        canvasContext.lineWidth = minHeight;
         canvasContext.beginPath();
         canvasContext.moveTo(start[0].x, -start[0].y);
         canvasContext.lineTo(start[1].x, -start[1].y);
@@ -41,6 +47,7 @@ export default class CircularBarsRenderer extends CircularRenderer<CircularVisua
         if (args.samples === undefined) return;
 
         const O = this.options.options;
+        if (args.isSilent && O.minHeight === 0) return;
 
         const {
             canvasContext,
@@ -68,13 +75,13 @@ export default class CircularBarsRenderer extends CircularRenderer<CircularVisua
 
             canvasContext.setFillColorRgb(fillColor[0] as RGB);
             canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderBar(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height);
+            renderBar(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, O.minHeight);
 
             if (fillColor.length > 0) {
                 canvasContext.setFillColorRgb(fillColor[1] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            renderBar(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height);
+            renderBar(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, O.minHeight);
 
             canvasContext.restore();
         });

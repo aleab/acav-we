@@ -1,23 +1,21 @@
 import { RGB } from 'color-convert/conversions';
-import { MutableRefObject, RefObject } from 'react';
 
-import { CircularVisualizerProperties, VisualizerProperties } from '../../../app/properties/VisualizerProperties';
+import { CircularVisualizerProperties } from '../../../app/properties/VisualizerProperties';
 import { AudioResponsiveValueProviderFactory, AudioResponsiveValueProviderFunction } from '../../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';
 import { CircularVisualizerType } from '../../../app/VisualizerType';
-import { WallpaperContextType } from '../../../app/WallpaperContext';
 
+import VisualizerBaseRenderer, { VisualizerRendererOptions } from '../VisualizerBaseRenderer';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../VisualizerRenderReturnArgs';
 
-export interface CircularRendererOptions<T extends CircularVisualizerType> {
-    visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>;
-    readonly commonOptions: DeepReadonly<Omit<CircularVisualizerProperties, 'bars' | 'blocks' | 'wave'>>;
-    readonly options: DeepReadonly<T extends CircularVisualizerType.Bars ? CircularVisualizerProperties['bars']
+export type CircularRendererOptions<T extends CircularVisualizerType> = VisualizerRendererOptions<
+    Omit<CircularVisualizerProperties, 'bars' | 'blocks' | 'wave'>,
+    T extends CircularVisualizerType.Bars ? CircularVisualizerProperties['bars']
         : T extends CircularVisualizerType.Blocks ? CircularVisualizerProperties['blocks']
         : T extends CircularVisualizerType.Wave ? CircularVisualizerProperties['wave']
-        : never>;
-}
+        : never
+>;
 
 export interface VisualizerParams {
     canvasContext: CanvasRenderingContext2D;
@@ -35,56 +33,13 @@ export interface VisualizerParams {
     colorReactionValueProvider: AudioResponsiveValueProviderFunction;
 }
 
-export interface ICircularRenderer {
-    render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null;
-}
-
-export default abstract class CircularRenderer<T extends CircularVisualizerType> implements ICircularRenderer {
-    protected readonly context: WallpaperContextType;
-    protected readonly canvas: RefObject<HTMLCanvasElement>;
-    protected readonly options: CircularRendererOptions<T>;
-
-    constructor(
-        context: WallpaperContextType,
-        canvas: RefObject<HTMLCanvasElement>,
-        options: CircularRendererOptions<T>,
-    ) {
-        this.context = context;
-        this.canvas = canvas;
-        this.options = options;
-    }
-
-    protected setCanvasColor(canvasContext: CanvasRenderingContext2D, color: RGB | undefined) {
-        if (color !== undefined) {
-            canvasContext.setFillColorRgb(color);
-            canvasContext.setStrokeColorRgb(color);
-        }
-    }
-
-    protected computeFillColor(
-        i: number,
-        args: VisualizerRenderArgs,
-        baseColor: Readonly<RGB>,
-        colorReaction: ((value: number) => RGB) | undefined,
-        colorReactionValueProvider: AudioResponsiveValueProviderFunction,
-    ): Readonly<RGB>[] {
-        const fillColor = [ baseColor, baseColor ];
-        if (args.samples !== undefined) {
-            const sample = args.samples.getSample(i);
-            if (colorReaction !== undefined) {
-                const value = colorReactionValueProvider([ sample[0], sample[1] ], i, { samplesBuffer: args.samplesBuffer, peak: args.peak });
-                if (!Number.isNaN(value[0]) && !Number.isNaN(value[1])) {
-                    fillColor[0] = colorReaction(value[0]);
-                    fillColor[1] = colorReaction(value[1]);
-                }
-            }
-        }
-
-        return fillColor;
-    }
-
-    abstract getHeight(maxHeight: number): number;
+export default abstract class CircularRenderer<T extends CircularVisualizerType> extends VisualizerBaseRenderer<CircularRendererOptions<T>> {
     abstract renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void;
+
+    protected getColor(args: VisualizerRenderArgs): Readonly<RGBA> {
+        const O = this.options.commonOptions;
+        return (args.isSilent && O.useSilentColor ? O.silentColor : O.color) as Readonly<RGBA>;
+    }
 
     render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
         const canvasContext = this.canvas.current?.getContext('2d');
@@ -111,7 +66,8 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
             const radius = minDimension * (O.radius / 100);
             const rotation = O.rotation * Math.DEG2RAD;
 
-            const colorRgb: Readonly<RGB> = [ O.color[0], O.color[1], O.color[2] ];
+            const colorRgba = this.getColor(args);
+            const colorRgb: Readonly<RGB> = [ colorRgba[0], colorRgba[1], colorRgba[2] ];
             const colorReaction = Ov.current.responseType !== ColorReactionType.None
                 ? ColorReactionFactory.buildColorReaction(Ov.current.responseType, {
                     fromRgb: colorRgb,

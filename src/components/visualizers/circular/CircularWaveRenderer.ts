@@ -117,8 +117,9 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
         if (args.samples === undefined) return;
 
         const O = this.options.options;
-        const N_SAMPLES = args.samples.length;
+        if (args.isSilent && O.hideWhenSilent) return;
 
+        const N_SAMPLES = args.samples.length;
         const {
             canvasContext,
             visualizerAngle,

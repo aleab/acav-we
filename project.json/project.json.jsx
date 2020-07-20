@@ -195,11 +195,14 @@ function getProjectJson() {
                     ui_verticalVisualizer_width: indent('Width (%)'),
                     ui_verticalVisualizer_alignment: indent('Alignment'),
                     ui_verticalVisualizer_color: indent('Color'),
+                    ui_verticalVisualizer_silentColor_bool: indent('Use Different Color when Silent'),
+                    ui_verticalVisualizer_silentColor: '',
                     //
                     // [VERTICAL VISUALIZER > BARS]
                     ui_verticalVisualizer_bars: subSection('Bars'),
                     ui_verticalVisualizer_bars_width: indent('Width (%)'),
                     ui_verticalVisualizer_bars_height: indent('Height (%)'),
+                    ui_verticalVisualizer_bars_minHeight: indent('Min Height (px)'),
                     ui_verticalVisualizer_bars_borderRadius: indent('Border Radius (%)'),
                     //
                     // [VERTICAL VISUALIZER > BLOCKS]
@@ -207,14 +210,16 @@ function getProjectJson() {
                     ui_verticalVisualizer_blocks_width: indent('Width (%)'),
                     ui_verticalVisualizer_blocks_height: indent('Height (%)'),
                     ui_verticalVisualizer_blocks_thickness: indent('Thickness (px)'),
+                    ui_verticalVisualizer_blocks_hideWhenSilent: indent('Hide when Silent'),
                     //
                     // [VERTICAL VISUALIZER > WAVE]
                     ui_verticalVisualizer_wave: subSection('Wave'),
                     ui_verticalVisualizer_wave_height: indent('Height (%)'),
-                    ui_verticalVisualizer_wave_thickness: indent('Thickness (px)'),
-                    ui_verticalVisualizer_wave_smoothness: indent('Smoothness'),
                     ui_verticalVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
                     ui_verticalVisualizer_wave_fill: indent('Fill'),
+                    ui_verticalVisualizer_wave_thickness: indent('Thickness (px)'),
+                    ui_verticalVisualizer_wave_smoothness: indent('Smoothness'),
+                    ui_verticalVisualizer_wave_hideWhenSilent: indent('Hide when Silent'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [CIRCULAR VISUALIZER]
@@ -225,31 +230,40 @@ function getProjectJson() {
                     ui_circularVisualizer_rotation: indent('Rotation (deg)'),
                     ui_circularVisualizer_angle: indent('Angle (deg)'),
                     ui_circularVisualizer_color: indent('Color'),
+                    ui_circularVisualizer_hideWhenSilent: indent('Hide when Silent'),
+                    ui_circularVisualizer_silentColor_bool: indent('Use Different Color when Silent'),
+                    ui_circularVisualizer_silentColor: '',
                     //
                     // [CIRCULAR VISUALIZER > BARS]
                     ui_circularVisualizer_bars: subSection('Bars'),
                     ui_circularVisualizer_bars_width: indent('Width (%)'),
                     ui_circularVisualizer_bars_height: indent('Height (%)'),
+                    ui_circularVisualizer_bars_minHeight: indent('Min Height (px)'),
                     //
                     // [CIRCULAR VISUALIZER > BLOCKS]
                     ui_circularVisualizer_blocks: subSection('Blocks'),
                     ui_circularVisualizer_blocks_width: indent('Width (%)'),
                     ui_circularVisualizer_blocks_height: indent('Height (%)'),
                     ui_circularVisualizer_blocks_thickness: indent('Thickness (px)'),
+                    ui_circularVisualizer_blocks_hideWhenSilent: indent('Hide when Silent'),
                     //
                     // [CIRCULAR VISUALIZER > WAVE]
                     ui_circularVisualizer_wave: subSection('Wave'),
                     ui_circularVisualizer_wave_height: indent('Height (%)'),
-                    ui_circularVisualizer_wave_thickness: indent('Thickness (px)'),
-                    ui_circularVisualizer_wave_smoothness: indent('Smoothness'),
                     ui_circularVisualizer_wave_showMirrorWave: indent('Mirror Wave'),
                     ui_circularVisualizer_wave_fill: indent('Fill'),
+                    ui_circularVisualizer_wave_thickness: indent('Thickness (px)'),
+                    ui_circularVisualizer_wave_smoothness: indent('Smoothness'),
+                    ui_circularVisualizer_wave_hideWhenSilent: indent('Hide when Silent'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
                     // [3D VISUALIZER]
                     ui_3dVisualizer: section('3D Visualizer'),
                     ui_3dVisualizer_color: indent('Color'),
                     ui_3dVisualizer_zoom: indent('Zoom'),
+                    ui_3dVisualizer_silentColor_bool: indent('Use Different Color when Silent'),
+                    ui_3dVisualizer_silentColor: '',
+                    ui_3dVisualizer_hideWhenSilent: indent('Hide when Silent'),
                     //
                     // [3D VISUALIZER > BARS]
                     ui_3dVisualizer_bars: subSection('Bars'),

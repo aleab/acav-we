@@ -8,9 +8,14 @@ import VerticalRenderer, { VisualizerParams } from './VerticalRenderer';
  * @param {number} x x coordinate of the top-left corner of the bar.
  * @param {number} y y coordinate of the top-left corner of the bar.
  */
-function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, barBorderRadius: number) {
+function renderBar(
+    canvasContext: CanvasRenderingContext2D,
+    x: number, y: number,
+    width: number, height: number,
+    minHeight: number, barBorderRadius: number,
+) {
     const radius = barBorderRadius > width / 2 ? width / 2 : barBorderRadius;
-    if (height > 1 && radius > 0) {
+    if (height > minHeight && height > 1 && radius > 0) {
         canvasContext.beginPath();
         if (height > 2 * radius) {
             canvasContext.rect(x, y + radius, width, height - 2 * radius);
@@ -28,7 +33,8 @@ function renderBar(canvasContext: CanvasRenderingContext2D, x: number, y: number
         }
         canvasContext.fill();
     } else {
-        canvasContext.fillRect(x, y, width, height);
+        const h = height > minHeight ? height : minHeight;
+        canvasContext.fillRect(x, y, width, h);
     }
 }
 
@@ -41,6 +47,7 @@ export default class VerticalBarsRenderer extends VerticalRenderer<VerticalVisua
         if (args.samples === undefined) return;
 
         const O = this.options.options;
+        if (args.isSilent && O.minHeight === 0) return;
 
         const {
             canvasContext,
@@ -60,8 +67,6 @@ export default class VerticalBarsRenderer extends VerticalRenderer<VerticalVisua
         const spacing = (visualizerWidth - N_BARS * width) / (N_BARS - 1);
 
         args.samples.forEach((sample, i) => {
-            if (sample[0] === 0 && sample[1] === 0) return;
-
             // y = H - p - h∙(1+a)/2
             const y = [
                 canvasContext.canvas.height - visualizerPosition - 0.5 * (1 + alignment) * (sample[0] * height),
@@ -72,20 +77,18 @@ export default class VerticalBarsRenderer extends VerticalRenderer<VerticalVisua
             const dx = spacing / 2 + index * (width + spacing);
             const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
+            // Render left and right samples
             canvasContext.save();
 
-            if (sample[0] !== 0) {
-                canvasContext.setFillColorRgb(fillColor[0] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-                renderBar(canvasContext, canvasContext.canvas.width / 2 - dx - width, y[0], width, sample[0] * height, barBorderRadius);
+            canvasContext.setFillColorRgb(fillColor[0] as RGB);
+            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
+            renderBar(canvasContext, canvasContext.canvas.width / 2 - dx - width, y[0], width, sample[0] * height, O.minHeight, barBorderRadius);
+
+            if (fillColor.length > 0) {
+                canvasContext.setFillColorRgb(fillColor[1] as RGB);
+                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            if (sample[1] !== 0) {
-                if (fillColor.length > 0) {
-                    canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                    canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-                }
-                renderBar(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], width, sample[1] * height, barBorderRadius);
-            }
+            renderBar(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], width, sample[1] * height, O.minHeight, barBorderRadius);
 
             canvasContext.restore();
         });

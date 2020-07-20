@@ -4,11 +4,8 @@ import { WallpaperContextType } from '../../app/WallpaperContext';
 import { ThreeDimensionalVisualizerType } from '../../app/VisualizerType';
 import { ThreeDVisualizerProperties, VisualizerProperties } from '../../app/properties/VisualizerProperties';
 
-import { I3DRenderer } from './3d/Renderer3D';
+import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
 import BarsRenderer3D from './3d/BarsRenderer3D';
-
-import VisualizerRenderArgs from './VisualizerRenderArgs';
-import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 
 export default function getVerticalBarsVisualizerRenderer(
     context: WallpaperContextType,
@@ -16,10 +13,10 @@ export default function getVerticalBarsVisualizerRenderer(
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     threeDVisualizerOptions: MutableRefObject<DeepReadonly<ThreeDVisualizerProperties>>,
     type: ThreeDimensionalVisualizerType,
-): ((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
+): IVisualizerRenderer {
     const O = threeDVisualizerOptions;
 
-    let renderer: I3DRenderer | undefined;
+    let renderer: IVisualizerRenderer | undefined;
     switch (type) {
         case ThreeDimensionalVisualizerType.Bars:
             renderer = new BarsRenderer3D(context, canvas, {
@@ -32,5 +29,5 @@ export default function getVerticalBarsVisualizerRenderer(
         default: break;
     }
 
-    return renderer === undefined ? () => null : renderer.render.bind(renderer);
+    return renderer ?? NullRenderer;
 }

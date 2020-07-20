@@ -4,13 +4,10 @@ import { CircularVisualizerType } from '../../app/VisualizerType';
 import { WallpaperContextType } from '../../app/WallpaperContext';
 import { CircularVisualizerProperties, VisualizerProperties } from '../../app/properties/VisualizerProperties';
 
-import { ICircularRenderer } from './circular/CircularRenderer';
+import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
 import CircularBarsRenderer from './circular/CircularBarsRenderer';
 import CircularBlocksRenderer from './circular/CircularBlocksRenderer';
 import CircularWaveRenderer from './circular/CircularWaveRenderer';
-
-import VisualizerRenderArgs from './VisualizerRenderArgs';
-import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 
 export default function getCircularVisualizerRenderer(
     context: WallpaperContextType,
@@ -18,10 +15,10 @@ export default function getCircularVisualizerRenderer(
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     circularVisualizerOptions: MutableRefObject<DeepReadonly<CircularVisualizerProperties>>,
     type: CircularVisualizerType,
-): ((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
+): IVisualizerRenderer {
     const O = circularVisualizerOptions;
 
-    let renderer: ICircularRenderer | undefined;
+    let renderer: IVisualizerRenderer | undefined;
     switch (type) {
         case CircularVisualizerType.Bars:
             renderer = new CircularBarsRenderer(context, canvas, {
@@ -50,5 +47,5 @@ export default function getCircularVisualizerRenderer(
         default: break;
     }
 
-    return renderer === undefined ? () => null : renderer.render.bind(renderer);
+    return renderer ?? NullRenderer;
 }

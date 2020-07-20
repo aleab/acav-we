@@ -8,6 +8,7 @@ import { CircularVisualizerType, ThreeDimensionalVisualizerType, VerticalVisuali
 import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
+import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
 import VisualizerRenderArgs from './VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 import getVerticalBarsVisualizerRenderer from './getVerticalBarsVisualizerRenderer';
@@ -55,7 +56,7 @@ export default function Visualizer() {
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
     // =================================
-    const render = useMemo<((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null)>(() => {
+    const visualizerRenderer = useMemo<IVisualizerRenderer>(() => {
         switch (visualizerType) {
             case VisualizerType.VerticalBars:
                 return getVerticalBarsVisualizerRenderer(context, canvas, O, verticalVisualizerOptions, VerticalVisualizerType.Bars);
@@ -74,15 +75,12 @@ export default function Visualizer() {
             case VisualizerType['3DBars']:
                 return get3dVisualizerRenderer(context, canvas3d, O, threeDVisualizerOptions, ThreeDimensionalVisualizerType.Bars);
 
-            default: return (_timestamp: number, _args: VisualizerRenderArgs) => null;
+            default: return NullRenderer;
         }
     }, [ context, visualizerType ]);
 
     useEffect(() => {
         Logc.info('Registering onAudioSamples and render callbacks...');
-
-        // Clear
-        //canvas.current?.getContext('2d')?.clearRect(0, 0, canvas.current.width, canvas.current.height);
 
         const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;
@@ -143,7 +141,13 @@ export default function Visualizer() {
                 });
             }
 
-            peak = _.max(smoothSamples) ?? 0;
+            // Find peak and whether there is any non-null sample
+            peak = 0;
+            let isSilent = true;
+            smoothSamples.forEach(v => {
+                peak = v > peak ? v : peak;
+                isSilent = isSilent && v <= 0;
+            });
             samples = new AudioSamplesArray(smoothSamples, 2);
             if (++prevSamplesCount >= 2) {
                 prevSamples = args.samples;
@@ -151,9 +155,9 @@ export default function Visualizer() {
             }
 
             // Queue render job
-            const renderArgs = { samplesBuffer, samples, peak };
+            const renderArgs = { samplesBuffer, samples, peak, isSilent };
             context.renderer.queue(RENDER_ID, ts => {
-                const visualizerReturnArgs = render(ts, renderArgs);
+                const visualizerReturnArgs = visualizerRenderer.render(ts, renderArgs);
 
                 context.pluginManager.processAudioData(renderArgs);
                 if (canvas.current !== null && visualizerReturnArgs !== null) {
@@ -166,14 +170,15 @@ export default function Visualizer() {
         return () => {
             context?.renderer.cancel(RENDER_ID);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
+            visualizerRenderer.clear();
         };
-    }, [ RENDER_ID, context, render ]);
+    }, [ RENDER_ID, context, visualizerRenderer ]);
 
     const is3d = useMemo(() => visualizerType === VisualizerType['3DBars'], [visualizerType]);
     return (
       <>
-        <canvas ref={canvas} style={{ display: is3d ? 'none' : undefined }} />
-        <canvas ref={canvas3d} style={{ display: !is3d ? 'none' : undefined }} />
+        <canvas id="2dCanvas" ref={canvas} style={{ display: is3d ? 'none' : undefined }} />
+        <canvas id="3dCanvas" ref={canvas3d} style={{ display: !is3d ? 'none' : undefined }} />
       </>
     );
 }

@@ -483,6 +483,20 @@
         "value": "0.176470 0.266667 0.611764",
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
+    "verticalVisualizer_silentColor_bool": {
+        "order": 1105,
+        "type": "bool",
+        "text": "ui_verticalVisualizer_silentColor_bool",
+        "value": false,
+        "condition": "visualizer_type.value.startsWith('Vertical')"
+    },
+    "verticalVisualizer_silentColor": {
+        "order": 1106,
+        "type": "color",
+        "text": "ui_verticalVisualizer_silentColor",
+        "value": "0.176470 0.266667 0.611764",
+        "condition": "visualizer_type.value.startsWith('Vertical') && verticalVisualizer_silentColor_bool.value"
+    },
     //
     // [VERTICAL VISUALIZER > BARS]
     "verticalVisualizer_bars": {
@@ -511,8 +525,20 @@
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalBars'"
     },
-    "verticalVisualizer_bars_borderRadius": {
+    "verticalVisualizer_bars_minHeight": {
         "order": 1123,
+        "type": "slider",
+        "text": "ui_verticalVisualizer_bars_minHeight",
+        "value": 0,
+        "min": 0,
+        "max": 2,
+        "fraction": true,
+        "step": 0.5,
+        "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBars'"
+    },
+    "verticalVisualizer_bars_borderRadius": {
+        "order": 1124,
         "type": "slider",
         "text": "ui_verticalVisualizer_bars_borderRadius",
         "value": 0,
@@ -557,6 +583,13 @@
         "min": 1,
         "max": 10,
         "editable": false,
+        "condition": "visualizer_type.value === 'VerticalBlocks'"
+    },
+    "verticalVisualizer_blocks_hideWhenSilent": {
+        "order": 1124,
+        "type": "bool",
+        "text": "ui_verticalVisualizer_blocks_hideWhenSilent",
+        "value": true,
         "condition": "visualizer_type.value === 'VerticalBlocks'"
     },
     //
@@ -611,6 +644,13 @@
         "fraction": true,
         "step": 0.1,
         "editable": false,
+        "condition": "visualizer_type.value === 'VerticalWave'"
+    },
+    "verticalVisualizer_wave_hideWhenSilent": {
+        "order": 1126,
+        "type": "bool",
+        "text": "ui_verticalVisualizer_wave_hideWhenSilent",
+        "value": true,
         "condition": "visualizer_type.value === 'VerticalWave'"
     },
 
@@ -683,6 +723,20 @@
         "value": "0.176470 0.266667 0.611764",
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
+    "circularVisualizer_silentColor_bool": {
+        "order": 1107,
+        "type": "bool",
+        "text": "ui_circularVisualizer_silentColor_bool",
+        "value": false,
+        "condition": "visualizer_type.value.startsWith('Circular')"
+    },
+    "circularVisualizer_silentColor": {
+        "order": 1108,
+        "type": "color",
+        "text": "ui_circularVisualizer_silentColor",
+        "value": "0.176470 0.266667 0.611764",
+        "condition": "visualizer_type.value.startsWith('Circular') && circularVisualizer_silentColor_bool.value"
+    },
     //
     // [CIRCULAR VISUALIZER > BARS]
     "circularVisualizer_bars": {
@@ -708,6 +762,18 @@
         "value": 55,
         "min": 10,
         "max": 100,
+        "editable": false,
+        "condition": "visualizer_type.value === 'CircularBars'"
+    },
+    "circularVisualizer_bars_minHeight": {
+        "order": 1123,
+        "type": "slider",
+        "text": "ui_circularVisualizer_bars_minHeight",
+        "value": 1,
+        "min": 0,
+        "max": 2,
+        "fraction": true,
+        "step": 0.5,
         "editable": false,
         "condition": "visualizer_type.value === 'CircularBars'"
     },
@@ -747,6 +813,13 @@
         "min": 1,
         "max": 10,
         "editable": false,
+        "condition": "visualizer_type.value === 'CircularBlocks'"
+    },
+    "circularVisualizer_blocks_hideWhenSilent": {
+        "order": 1124,
+        "type": "bool",
+        "text": "ui_circularVisualizer_blocks_hideWhenSilent",
+        "value": false,
         "condition": "visualizer_type.value === 'CircularBlocks'"
     },
     //
@@ -803,6 +876,13 @@
         "editable": false,
         "condition": "visualizer_type.value === 'CircularWave'"
     },
+    "circularVisualizer_wave_hideWhenSilent": {
+        "order": 1126,
+        "type": "bool",
+        "text": "ui_circularVisualizer_wave_hideWhenSilent",
+        "value": false,
+        "condition": "visualizer_type.value === 'CircularWave'"
+    },
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~
     // [3D VISUALIZER]
@@ -813,20 +893,41 @@
         "condition": "visualizer_type.value.startsWith('3D')"
     },
     "3dVisualizer_color": {
-        "order": 1106,
+        "order": 1101,
         "type": "color",
         "text": "ui_3dVisualizer_color",
         "value": "0.176470 0.266667 0.611764",
         "condition": "visualizer_type.value.startsWith('3D')"
     },
     "3dVisualizer_zoom": {
-        "order": 1107,
+        "order": 1102,
         "type": "slider",
         "text": "ui_3dVisualizer_zoom",
         "value": 100,
         "min": 0,
         "max": 100,
         "editable": false,
+        "condition": "visualizer_type.value.startsWith('3D')"
+    },
+    "_3dVisualizer_silentColor_bool": {
+        "order": 1103,
+        "type": "bool",
+        "text": "ui_3dVisualizer_silentColor_bool",
+        "value": false,
+        "condition": "visualizer_type.value.startsWith('3D')"
+    },
+    "3dVisualizer_silentColor": {
+        "order": 1104,
+        "type": "color",
+        "text": "ui_3dVisualizer_silentColor",
+        "value": "0.176470 0.266667 0.611764",
+        "condition": "visualizer_type.value.startsWith('3D') && _3dVisualizer_silentColor_bool.value"
+    },
+    "3dVisualizer_hideWhenSilent": {
+        "order": 1105,
+        "type": "bool",
+        "text": "ui_3dVisualizer_hideWhenSilent",
+        "value": false,
         "condition": "visualizer_type.value.startsWith('3D')"
     },
     //

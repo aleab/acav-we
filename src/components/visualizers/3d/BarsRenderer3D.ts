@@ -60,6 +60,8 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
     protected initScene(vfov: number, aspect: number, zoom: number, nSamples: number) {
         super.initScene(vfov, aspect, zoom, nSamples);
 
+        this.camera.position.z = 1;
+
         if (this.light === undefined) {
             this.light = new PointLight(0xFFFFFF, 1, 0, 2);
             this.light.castShadow = true;

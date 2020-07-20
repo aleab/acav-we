@@ -22,22 +22,27 @@ export interface VerticalVisualizerProperties {
     width: number;
     alignment: number;
     color: RGBA;
+    useSilentColor: boolean;
+    silentColor: RGBA;
     bars: {
         width: number;
         height: number;
+        minHeight: number;
         borderRadius: number;
     };
     blocks: {
         width: number;
         height: number;
         thickness: number;
+        hideWhenSilent: boolean;
     };
     wave: {
         height: number;
-        thickness: number;
-        smoothness: number;
         showMirrorWave: boolean;
         fill: boolean;
+        thickness: number;
+        smoothness: number;
+        hideWhenSilent: boolean;
     };
 }
 
@@ -48,27 +53,35 @@ export interface CircularVisualizerProperties {
     rotation: number;
     angle: number;
     color: RGBA;
+    useSilentColor: boolean;
+    silentColor: RGBA;
     bars: {
         width: number;
         height: number;
+        minHeight: number;
     };
     blocks: {
         width: number;
         height: number;
         thickness: number;
+        hideWhenSilent: boolean;
     };
     wave: {
         height: number;
-        thickness: number;
-        smoothness: number;
         showMirrorWave: boolean;
         fill: boolean;
+        thickness: number;
+        smoothness: number;
+        hideWhenSilent: boolean;
     };
 }
 
 export interface ThreeDVisualizerProperties {
     color: RGBA;
     zoom: number;
+    useSilentColor: boolean;
+    silentColor: RGBA;
+    hideWhenSilent: boolean;
     bars: {
         width: number;
         height: number;

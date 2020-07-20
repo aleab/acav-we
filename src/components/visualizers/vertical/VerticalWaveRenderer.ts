@@ -112,6 +112,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         if (args.samples === undefined) return;
 
         const O = this.options.options;
+        if (args.isSilent && O.hideWhenSilent) return;
 
         const {
             canvasContext,
@@ -129,8 +130,6 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
 
         let prev: { x: number, y: number, height: number }[] | null = null;
         args.samples.forEach((sample, i, samples) => {
-            if (sample[0] === 0 && sample[1] === 0) return;
-
             const sampleRenderProps = this.getSampleRenderProps(samples, i, visualizerParams, args, spacing);
             if (sampleRenderProps === null) return;
 
@@ -146,20 +145,19 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
                 { x: nextSampleRenderProps.position[1].x, y: nextSampleRenderProps.position[1].y, height: nextSampleRenderProps.height[1] },
             ] : null;
 
+            // Render left and right samples
             canvasContext.save();
 
-            if (sample[0] !== 0) {
-                canvasContext.setFillColorRgb(fillColor[0] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-                renderWave(canvasContext, current[0].x, current[0].y, current[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[0] ?? null, next?.[0] ?? null);
+            canvasContext.setFillColorRgb(fillColor[0] as RGB);
+            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
+            renderWave(canvasContext, current[0].x, current[0].y, current[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[0] ?? null, next?.[0] ?? null);
+
+            if (fillColor.length > 0) {
+                canvasContext.setFillColorRgb(fillColor[1] as RGB);
+                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            if (sample[1] !== 0) {
-                if (fillColor.length > 0) {
-                    canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                    canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-                }
-                renderWave(canvasContext, current[1].x, current[1].y, current[1].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[1] ?? null, next?.[1] ?? null);
-            }
+            renderWave(canvasContext, current[1].x, current[1].y, current[1].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[1] ?? null, next?.[1] ?? null);
+
             prev = current;
 
             // Link first left sample with first right sample

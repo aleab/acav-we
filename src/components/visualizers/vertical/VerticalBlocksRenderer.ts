@@ -22,6 +22,7 @@ export default class VerticalBlocksRenderer extends VerticalRenderer<VerticalVis
         if (args.samples === undefined) return;
 
         const O = this.options.options;
+        if (args.isSilent && O.hideWhenSilent) return;
 
         const {
             canvasContext,
@@ -41,8 +42,6 @@ export default class VerticalBlocksRenderer extends VerticalRenderer<VerticalVis
         const spacing = (visualizerWidth - N_BARS * width) / (N_BARS - 1);
 
         args.samples.forEach((sample, i) => {
-            if (sample[0] === 0 && sample[1] === 0) return;
-
             // y = H - p - h∙(1+a)/2
             const y = [
                 canvasContext.canvas.height - visualizerPosition - 0.5 * (1 + alignment) * (sample[0] * height),
@@ -53,20 +52,18 @@ export default class VerticalBlocksRenderer extends VerticalRenderer<VerticalVis
             const dx = spacing / 2 + index * (width + spacing);
             const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
+            // Render left and right samples
             canvasContext.save();
 
-            if (sample[0] !== 0) {
-                canvasContext.setFillColorRgb(fillColor[0] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-                renderBlock(canvasContext, canvasContext.canvas.width / 2 - dx - width, y[0], width, sample[0] * height, blockThickness);
+            canvasContext.setFillColorRgb(fillColor[0] as RGB);
+            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
+            renderBlock(canvasContext, canvasContext.canvas.width / 2 - dx - width, y[0], width, sample[0] * height, blockThickness);
+
+            if (fillColor.length > 0) {
+                canvasContext.setFillColorRgb(fillColor[1] as RGB);
+                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            if (sample[1] !== 0) {
-                if (fillColor.length > 0) {
-                    canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                    canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-                }
-                renderBlock(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], width, sample[1] * height, blockThickness);
-            }
+            renderBlock(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], width, sample[1] * height, blockThickness);
 
             canvasContext.restore();
         });

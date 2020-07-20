@@ -40,6 +40,7 @@ export default class CircularBlocksRenderer extends CircularRenderer<CircularVis
         if (args.samples === undefined) return;
 
         const O = this.options.options;
+        if (args.isSilent && O.hideWhenSilent) return;
 
         const {
             canvasContext,

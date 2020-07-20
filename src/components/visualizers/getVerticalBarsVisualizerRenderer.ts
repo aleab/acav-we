@@ -4,13 +4,10 @@ import { WallpaperContextType } from '../../app/WallpaperContext';
 import { VerticalVisualizerType } from '../../app/VisualizerType';
 import { VerticalVisualizerProperties, VisualizerProperties } from '../../app/properties/VisualizerProperties';
 
-import { IVerticalRenderer } from './vertical/VerticalRenderer';
+import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
 import VerticalBarsRenderer from './vertical/VerticalBarsRenderer';
 import VerticalBlocksRenderer from './vertical/VerticalBlocksRenderer';
 import VerticalWaveRenderer from './vertical/VerticalWaveRenderer';
-
-import VisualizerRenderArgs from './VisualizerRenderArgs';
-import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 
 export default function getVerticalBarsVisualizerRenderer(
     context: WallpaperContextType,
@@ -18,10 +15,10 @@ export default function getVerticalBarsVisualizerRenderer(
     visualizerOptions: MutableRefObject<DeepReadonly<VisualizerProperties>>,
     verticalVisualizerOptions: MutableRefObject<DeepReadonly<VerticalVisualizerProperties>>,
     type: VerticalVisualizerType,
-): ((timestamp: number, args: VisualizerRenderArgs) => VisualizerRenderReturnArgs | null) {
+): IVisualizerRenderer {
     const O = verticalVisualizerOptions;
 
-    let renderer: IVerticalRenderer | undefined;
+    let renderer: IVisualizerRenderer | undefined;
     switch (type) {
         case VerticalVisualizerType.Bars:
             renderer = new VerticalBarsRenderer(context, canvas, {
@@ -50,5 +47,5 @@ export default function getVerticalBarsVisualizerRenderer(
         default: break;
     }
 
-    return renderer === undefined ? () => null : renderer.render.bind(renderer);
+    return renderer ?? NullRenderer;
 }
