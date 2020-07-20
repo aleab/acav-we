@@ -96,6 +96,44 @@
         "condition": "background_type.value === 'Playlist'"
     },
 
+    // [BACKGROUND]
+    "foreground": {
+        "order": 60,
+        "type": "bool",
+        "value": false,
+        "text": "ui_foreground"
+    },
+    "foreground_type": {
+        "order": 61,
+        "type": "combo",
+        "text": "ui_foreground_type",
+        "options": [
+            { "label": "Image", "value": "Image" },
+            { "label": "CSS", "value": "Css" }
+        ],
+        "value": "Css",
+        "condition": "foreground.value"
+    },
+    "foreground_image": {
+        "order": 62,
+        "type": "file",
+        "text": "ui_foreground_image",
+        "condition": "foreground.value && foreground_type.value === 'Image'"
+    },
+    "foreground_css": {
+        "order": 62,
+        "type": "textinput",
+        "text": "ui_foreground_css",
+        "value": "background: linear-gradient(to right, #00000000 49.25%, #ffffff 49.75% 50.25%, #00000000 50.75%);",
+        "condition": "foreground.value && foreground_type.value === 'Css'"
+    },
+    "foreground_$_css": {
+        "order": 63,
+        "type": "text",
+        "text": "ui_foreground_$_css",
+        "condition": "showDescriptions.value && foreground.value && foreground_type.value === 'Css'"
+    },
+
     // [AUDIO SAMPLES]
     "audioSamples": {
         "order": 100,

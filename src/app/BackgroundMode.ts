@@ -3,7 +3,8 @@ import { RGB } from 'color-convert/conversions';
 
 import { parseCustomCss } from '../common/Css';
 
-export enum BackgroundMode { Color, Image, Css, Playlist }
+export enum BackgroundMode { Color = 0x00, Image, Css, Playlist }
+export enum ForegroundMode { Image = 0x10, Css }
 
 type ColorOptions = { color: RGB, alpha?: number };
 type ImageOptions = { imagePath: string };
@@ -21,10 +22,10 @@ export type CssBackground = {
 };
 
 export function generateCssStyle(mode: BackgroundMode.Color, options: ColorOptions): CssBackground;
-export function generateCssStyle(mode: BackgroundMode.Image | BackgroundMode.Playlist, options: ImageOptions): CssBackground;
-export function generateCssStyle(mode: BackgroundMode.Css, options: CssOptions): CssBackground;
+export function generateCssStyle(mode: BackgroundMode.Image | BackgroundMode.Playlist | ForegroundMode.Image, options: ImageOptions): CssBackground;
+export function generateCssStyle(mode: BackgroundMode.Css | ForegroundMode.Css, options: CssOptions): CssBackground;
 export function generateCssStyle<Mode extends BackgroundMode>(mode: Mode, options: Partial<ColorOptions & ImageOptions & CssOptions>): CssBackground;
-export function generateCssStyle(mode: BackgroundMode, options: any): CssBackground {
+export function generateCssStyle(mode: BackgroundMode | ForegroundMode, options: any): CssBackground {
     switch (mode) {
         case BackgroundMode.Color:
             return options.color ? {
@@ -35,11 +36,13 @@ export function generateCssStyle(mode: BackgroundMode, options: any): CssBackgro
 
         case BackgroundMode.Playlist:
         case BackgroundMode.Image:
+        case ForegroundMode.Image:
             return {
                 background: `center / cover no-repeat url("file:///${options.imagePath}")`,
             };
 
-        case BackgroundMode.Css: {
+        case BackgroundMode.Css:
+        case ForegroundMode.Css: {
             if (!options.css) return {};
             return parseCustomCss(options.css, [/^background(-[a-z]+)?/]);
         }

@@ -3,6 +3,7 @@
   display: flex;
   flex-flow: column nowrap;
   -webkit-font-smoothing: subpixel-antialiased;
+  z-index: 2;
 }
 
 #clock > .digital {

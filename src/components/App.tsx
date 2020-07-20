@@ -12,8 +12,8 @@ import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext'
 import { usePlugin } from '../hooks/usePlugin';
 import { useRenderer } from '../hooks/useRenderer';
 import useWallpaperBackground from '../hooks/useWallpaperBackground';
+import useWallpaperForeground from '../hooks/useWallpaperForeground';
 import PluginManager, { PluginName } from '../plugins/PluginManager';
-import TaskbarPlugin from '../plugins/TaskbarPlugin';
 
 import Stats from './Stats';
 import Clock from './clock/Clock';
@@ -23,6 +23,7 @@ import WinTaskBar from './WinTaskBar';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
+const LOCALSTORAGE_FG_CURRENT_IMAGE = 'aleab.acav.fgCurrentImage';
 
 const Logc = Log.getLogger('App', 'darkgreen');
 
@@ -33,6 +34,7 @@ interface AppProps {
 
 export default function App(props: AppProps) {
     const O = useRef(props.options);
+    const [ showForeground, setShowForeground ] = useState(O.current.foreground.enabled);
     const [ showStats, setShowStats ] = useState(O.current.showStats);
     const [ showSpotify, setShowSpotify ] = useState(O.current.spotify.showOverlay);
     const [ showClock, setShowClock ] = useState(O.current.clock.enabled);
@@ -111,7 +113,16 @@ export default function App(props: AppProps) {
         },
         options: O,
     });
+    const { styleForeground, updateForeground } = useWallpaperForeground({
+        localStorageKeys: {
+            currentImage: LOCALSTORAGE_FG_CURRENT_IMAGE,
+        },
+        options: O,
+    });
     const style = { ...styleBackground };
+    const fgStyle = { ...styleForeground };
+
+    // TODO: The foreground image needs to be considered as well when calculating the average color used in the Spotify overlay component
 
     // ====================
     //  GENERAL PROPERTIES
@@ -166,6 +177,12 @@ export default function App(props: AppProps) {
                 }
             }
 
+            if (newProps.foreground !== undefined) {
+                const { enabled: _enabled, ..._foreground } = newProps.foreground;
+                if (_enabled !== undefined) setShowForeground(_enabled);
+                if (!_.isEmpty(_foreground)) updateForeground();
+            }
+
             if (newProps.audioSamples?.bufferLength !== undefined) {
                 samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
             }
@@ -197,7 +214,7 @@ export default function App(props: AppProps) {
             //onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground ]);
+    }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
 
     // =========
     //  PLUGINS
@@ -294,6 +311,7 @@ export default function App(props: AppProps) {
     return (
       <div ref={wallpaperRef} style={style}>
         <WallpaperContext.Provider value={wallpaperContext}>
+          {showForeground ? <div id="foreground" style={fgStyle} /> : null}
           {showStats ? <Stats /> : null}
           <Visualizer />
           {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}

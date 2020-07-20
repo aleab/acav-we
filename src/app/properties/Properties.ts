@@ -4,7 +4,7 @@ import _ from 'lodash';
 import { Pivot } from '../../common/Pivot';
 import { Position } from '../../common/Position';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
-import { BackgroundMode } from '../BackgroundMode';
+import { BackgroundMode, ForegroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ClockFontFamily } from '../ClockFontFamily';
 import { FrequencyRange } from '../FrequencyRange';
@@ -16,6 +16,7 @@ import { VisualizerType } from '../VisualizerType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
 import BackgroundProperties from './BackgroundProperties';
+import ForegroundProperties from './ForegroundProperties';
 import ClockProperties from './ClockProperties';
 import SpotifyProperties from './SpotifyProperties';
 import TaskbarProperties from './TaskbarProperties';
@@ -26,6 +27,7 @@ export default interface Properties {
     showStats: boolean;
     limitFps: boolean;
     background: BackgroundProperties;
+    foreground: ForegroundProperties;
     audioSamples: AudioSamplesProperties;
     visualizer: VisualizerProperties;
     verticalVisualizer: VerticalVisualizerProperties;
@@ -88,6 +90,13 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(backgroundOptions, 'css', raw.background_css as WEProperty<'textinput'>, _r => _r.value);
     setProperty(backgroundOptions, 'playlistDirectory', raw.background_playlist as WEProperty<'directory'>, _r => _r.value);
     setProperty(backgroundOptions, 'playlistTimerMinutes', raw.background_playlistTimer as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r) * 60));
+
+    // .foreground
+    const foregroundOptions: MappedProperties['foreground'] = {};
+    setProperty(foregroundOptions, 'enabled', raw.foreground as WEProperty<'bool'>, _r => _r.value);
+    setProperty(foregroundOptions, 'mode', raw.foreground_type as WEProperty<'combo'>, _r => parseComboProperty(_r, ForegroundMode));
+    setProperty(foregroundOptions, 'imagePath', raw.foreground_image as WEProperty<'file'>, _r => _r.value);
+    setProperty(foregroundOptions, 'css', raw.foreground_css as WEProperty<'textinput'>, _r => _r.value);
 
     // .audioSamples
     const audioSamplesOptions: MappedProperties['audioSamples'] = { scale: {} };
@@ -281,6 +290,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     return _.merge(
         { ...rootOptions },
         !_.isEmpty(backgroundOptions) ? { background: backgroundOptions } : {},
+        !_.isEmpty(foregroundOptions) ? { foreground: foregroundOptions } : {},
         !_.isEmpty(audioSamplesOptions) ? { audioSamples: audioSamplesOptions } : {},
         !_.isEmpty(visualizerOptions) ? { visualizer: visualizerOptions } : {},
         !_.isEmpty(verticalVisualizerOptions) ? { verticalVisualizer: verticalVisualizerOptions } : {},

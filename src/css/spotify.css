@@ -1,5 +1,9 @@
 /* https://developer.spotify.com/branding-guidelines/ */
 
+#spotify {
+  z-index: 2;
+}
+
 /* ==============
  *  SPOTIFY ICON
  * ============== */

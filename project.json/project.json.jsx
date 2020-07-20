@@ -103,6 +103,13 @@ function getProjectJson() {
                     ui_background_playlistTimer: indent(withPropertyIcon('far fa-stopwatch', 'Interval (hours)')),
                     ui_background_$_css: note('Only the <samp>background&#8209;*</samp> style properties and the <samp>background</samp> shorthand are allowed.'),
 
+                    // [FOREGROUND]
+                    ui_foreground: section('Foreground'),
+                    ui_foreground_type: indent('Type'),
+                    ui_foreground_image: indent(withPropertyIcon('fas fa-image', 'Image')),
+                    ui_foreground_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS')),
+                    ui_foreground_$_css: note('Only the <samp>background&#8209;*</samp> style properties and the <samp>background</samp> shorthand are allowed.'),
+
                     // [AUDIO SAMPLES]
                     ui_audioSamples: section('Audio Samples'),
                     ui_audioSamples_correct: withPropertyIcon('fas fa-filter', 'Correct Samples') + asterisk(),
