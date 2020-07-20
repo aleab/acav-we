@@ -104,7 +104,8 @@ export default function Spotify(props: SpotifyProps) {
     // ===============
     //  STATE MACHINE
     // ===============
-    const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token, backendUrl: process.env.BACKEND_API_BASEURL! }));
+    const backendUrl = O.current.backendURL ? O.current.backendURL : process.env.BACKEND_API_BASEURL!;
+    const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token, backendUrl }));
     useEffect(() => { // window.acav.refreshSpotifyToken()
         window.acav.refreshSpotifyToken = function refreshSpotifyToken() {
             const lsSpotifyToken = localStorage.getItem(LOCALSTORAGE_SPOTIFY_TOKEN);
@@ -189,6 +190,7 @@ export default function Spotify(props: SpotifyProps) {
                     state.context.backendUrl = spotifyProps.backendURL;
                 } catch {
                     state.context.backendUrl = process.env.BACKEND_API_BASEURL!;
+                    Logc.warn(`"${spotifyProps.backendURL}" is not a valid URL!`);
                 }
             } else {
                 state.context.backendUrl = process.env.BACKEND_API_BASEURL!;
