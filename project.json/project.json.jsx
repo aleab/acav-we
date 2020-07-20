@@ -281,6 +281,8 @@ function getProjectJson() {
                     ui_clock_digital_24h: indent('24H'),
                     ui_$_clock_digital_locale: note(
                         `A ${bcp47WikiLink('BCP 47 language tag')}; unicode extensions are supported. The documentation of the formatting function used is ${mdnLocaleLink('here')}.`,
+                    ),
+                    ui_$_clock_digital_locale2: note(
                         'For example, <code>th-TH-u-nu-thai-hc-h12</code> changes the formatting to use the thai language (<em>th-TH</em>), the thai numerals (<em>nu-thai</em>) and a 12-hour clock (<em>hc-h12</em>).',
                     ),
                     //
@@ -291,6 +293,7 @@ function getProjectJson() {
 
                     // [TASKBAR]
                     ui_taskbar: section('Taskbar', false, 'text-white fab fa-windows'),
+                    ui_$_taskbar: note("Simple audio-responsive effect intended to be used with Windows 10's \"Transparency effects\" enabled."),
                     ui_taskbar_isSmall: indent('Small'),
                     ui_taskbar_scale: indent('Scale (%)'),
                     ui_taskbar_size: indent('Size Multiplier'),

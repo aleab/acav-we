@@ -1057,6 +1057,12 @@
         "order": 2033,
         "type": "text",
         "text": "ui_$_clock_digital_locale",
+        "condition": "showAdvancedOptions.value && clock.value"
+    },
+    "$_clock_digital_locale2": {
+        "order": 2034,
+        "type": "text",
+        "text": "ui_$_clock_digital_locale2",
         "condition": "(showAdvancedOptions.value && showDescriptions.value) && clock.value"
     },
     //
@@ -1102,15 +1108,21 @@
         "text": "ui_taskbar",
         "value": false
     },
-    "taskbar_isSmall": {
+    "$_taskbar": {
         "order": 3001,
+        "type": "text",
+        "text": "ui_$_taskbar",
+        "condition": "taskbar.value"
+    },
+    "taskbar_isSmall": {
+        "order": 3002,
         "type": "bool",
         "text": "ui_taskbar_isSmall",
         "value": false,
         "condition": "taskbar.value"
     },
     "taskbar_scale": {
-        "order": 3002,
+        "order": 3003,
         "type": "slider",
         "text": "ui_taskbar_scale",
         "value": 100,
@@ -1119,7 +1131,7 @@
         "condition": "taskbar.value"
     },
     "taskbar_size": {
-        "order": 3003,
+        "order": 3004,
         "type": "slider",
         "text": "ui_taskbar_size",
         "value": 1,
@@ -1128,7 +1140,7 @@
         "condition": "taskbar.value"
     },
     "taskbar_position": {
-        "order": 3004,
+        "order": 3005,
         "type": "combo",
         "text": "ui_taskbar_position",
         "options": [
