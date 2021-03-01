@@ -35,7 +35,7 @@
         "react-dom": "^16.13.1",
         "simplebar": "^5.1.0",
         "simplebar-react": "^2.1.0",
-        "three": "^0.116.1",
+        "three": "^0.125.0",
         "xstate": "^4.8.0"
     },
     "devDependencies": {
