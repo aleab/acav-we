@@ -34,13 +34,13 @@ export const LOCALSTORAGE_SPOTIFY_TOKEN = 'aleab.acav.spotify';
 //                          | |                   |                |  is not valid
 //               (error) ⌒ | V                   |  ⌒ refreshed  |     anymore
 //                       ⤿ ( 3 ) —————————————> ( 4 )⤾ ———————————|   (revoked?)
-//                          | ^   got at+rt      | ^               |
-//          - 500           | |                  | |               |
-//          - invalid token | |             idle | | expired       |      ( 4 ) <======> ( 7 )
-//          ∠———————————————' |                  V |               |
-//     ( 6 ) —————————————————'                 ( 5 ) —————————————'
-//               user entered
-//                   token
+//                          | ^^  got at+rt      | ^               |
+//          - 500           | | \                | |               |
+//          - invalid token | |  \          idle | | expired       |      ( 4 ) <======> ( 7 )
+//          ∠———————————————' |   \              V |               |
+//     ( 6 ) —————————————————'    '——————————— ( 5 ) —————————————'
+//               user entered       user entered
+//                   token           new token
 //
 
 enum SsmState {
@@ -72,7 +72,7 @@ enum SsmEvent {
     Init = 'Init',                                                              // 0 -> {1|2|4}
     NoInternetConnection = 'NoInternetConnection',                              // {3,4,5} -> N
     InternetConnectionRestored = 'InternetConnectionRestored',                  // N -> 0
-    UserEnteredToken = 'UserEnteredToken',                                      // {1,6} -> 3
+    UserEnteredToken = 'UserEnteredToken',                                      // {1,5,6} -> 3
     BackendTokenBadRequestOrForbidden = 'BackendTokenBadRequestOrForbidden',    // 3 -> 1
     GotSpotifyToken = 'GotSpotifyToken',                                        // 3 -> 4
     CouldntGetBackendTokenFatalError = 'CouldntGetBackendTokenFatalError',      // 3 -> 6
@@ -405,6 +405,7 @@ const SpotifyStateMachine = Machine<SsmContext>({
             entry: () => Logc.debug('~> (5)'),
             on: {
                 [SsmEvent.SpotifyTokenExpired]: SsmState.S4CheckingAT,
+                [SsmEvent.UserEnteredToken]: SsmState.S3HasNewToken,
                 [SsmEvent.NoInternetConnection]: SsmState.SNNoInternetConnection,
             },
         },
