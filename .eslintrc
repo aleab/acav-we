@@ -78,6 +78,7 @@
             }
         ],
         "react/no-unused-state": "off",
+        "react/require-default-props": [0, { "forbidDefaultForRequired": true, "ignoreFunctionalComponents": true }],
         "react/sort-comp": [
             "warn",
             {

@@ -2,7 +2,6 @@ import { RefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import useScrollHTMLElement, { UseScrollHTMLElementOptions } from './useScrollHTMLElement';
 
-
 function getComputedFontSize(el: HTMLElement) {
     return Number(getComputedStyle(el).fontSize.slice(0, -2));
 }

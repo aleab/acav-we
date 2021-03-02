@@ -117,7 +117,7 @@ function isValidTokenObject(token: any): boolean {
  * @param retry
  * @returns A RaiseAction for the state machine
  */
-async function fetchToken(context: SsmContext, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
+async function fetchToken(context: SsmContext, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject, EventObject>> {
     try {
         const res = await fetch(`${context.backendUrl}/token`, {
             method: 'POST',
@@ -181,7 +181,7 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
  * @param retry
  * @returns A RaiseAction for the state machine
  */
-async function fetchRefreshToken(context: SsmContext, spotifyToken: SpotifyToken, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject>> {
+async function fetchRefreshToken(context: SsmContext, spotifyToken: SpotifyToken, retry: number = 3): Promise<RaiseAction<EventObject> | SendAction<unknown, EventObject, EventObject>> {
     try {
         const res = await fetch(`${context.backendUrl}/refresh`, {
             method: 'POST',
@@ -312,9 +312,7 @@ const SpotifyStateMachine = Machine<SsmContext>({
         // !! This state's transitions are automatic and should not require external events!
         [SsmState.S2HasOldToken]: {
             entry: () => Logc.debug('~> (2)'),
-            on: {
-                '': SsmState.S1WaitingUserToken,
-            },
+            always: SsmState.S1WaitingUserToken,
         },
 
         // 3) In this state we should ask the backend to decrypt the newly received token

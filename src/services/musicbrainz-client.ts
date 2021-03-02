@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import Fuse, { IFuseOptions } from 'fuse.js';
+import Fuse from 'fuse.js';
 import { IRecording, IRecordingList, IRecordingMatch, IReleaseGroup, IReleaseGroupList, IReleaseGroupMatch, MusicBrainzApi } from 'musicbrainz-api';
 
 import Log from '../common/Log';
@@ -37,8 +37,8 @@ export interface IMusicbrainzClient {
 
 export default class MusicbrainzClient implements IMusicbrainzClient {
     private api: MusicBrainzApi;
-    private recordingsFuseOptions: IFuseOptions<IRecordingMatch>;
-    private releaseGroupsFuseOptions: IFuseOptions<IReleaseGroupMatch>;
+    private recordingsFuseOptions: Fuse.IFuseOptions<IRecordingMatch>;
+    private releaseGroupsFuseOptions: Fuse.IFuseOptions<IReleaseGroupMatch>;
     private coverArtArchiveApi: CoverArtArchiveApi;
 
     private readonly verbose: boolean;
@@ -52,8 +52,8 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
         });
 
         // TODO: Fine tune these options
-        const fuseOptions: IFuseOptions<any> = {
-            caseSensitive: false,
+        const fuseOptions: Fuse.IFuseOptions<any> = {
+            isCaseSensitive: false,
             includeScore: true,
             shouldSort: true,
             location: 0,

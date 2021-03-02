@@ -10,7 +10,7 @@ import AudioSamplesArray from '../common/AudioSamplesArray';
 import CircularBuffer from '../common/CircularBuffer';
 
 class NoopPlugin implements IPlugin {
-    processAudioData(_args: AudioSamplesEventArgs) { return Promise.resolve(); }
+    processAudioData(_args: VisualizerRenderArgs) { return Promise.resolve(); }
     processVisualizerSamplesData(_visualizerReturnArgs: VisualizerRenderReturnArgs) { return Promise.resolve(); }
 }
 
