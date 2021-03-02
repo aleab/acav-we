@@ -117,6 +117,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         const {
             canvasContext,
             N: N_BARS,
+            flipFrequencies,
             visualizerWidth,
             alignment,
         } = visualizerParams;
@@ -161,7 +162,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             prev = current;
 
             // Link first left sample with first right sample
-            if (i === 0) {
+            if ((i === 0 && !flipFrequencies) || (i === samples.length - 1 && flipFrequencies)) {
                 renderWave(canvasContext, current[0].x, current[0].y, current[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, current[1], next?.[0] ?? null);
                 renderWave(canvasContext, current[1].x, current[1].y, current[1].height, alignment, waveThickness, smoothness, showMirrorWave, fill, current[0], next?.[1] ?? null);
             }
