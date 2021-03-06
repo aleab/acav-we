@@ -32,7 +32,6 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify.scroll);
 
-    const [ scrollEnabled, setScrollEnabled ] = useState(O.current.enabled);
     const [ scrollType, setScrollType ] = useState(O.current.type);
     const [ scrollSpeed, setScrollSpeed ] = useState(O.current.speed);
     const [ scrollStartDelay, setScrollStartDelay ] = useState(O.current.autoDelay);
@@ -41,7 +40,6 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     //  PROPERTIES LISTENER
     // =====================
     useUserPropertiesListener(p => p.spotify?.scroll, scrollProps => {
-        if (scrollProps.enabled !== undefined) setScrollEnabled(scrollProps.enabled);
         if (scrollProps.type !== undefined) setScrollType(scrollProps.type);
         if (scrollProps.speed !== undefined) setScrollSpeed(scrollProps.speed);
         if (scrollProps.autoDelay !== undefined) setScrollStartDelay(scrollProps.autoDelay);
@@ -64,17 +62,19 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         width: props.width,
     }, props.style);
 
+    // TODO: Important! Show Spotify's logo (minimum 21px height) if SpotifyOverlayArtType is AlbumArt
+
     return (
       <div className={_.join([ 'song-info', props.className ], ' ').trim()} style={songInfoStyle}>
         <ScrollableLoopingText
           className="lh-0 scrollable-x song-info-mask" textClassName="song-info-field track"
-          scrollType={scrollEnabled ? scrollType : false} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
+          scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={track} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollTrackRenderCallback} cancelRender={scrollTrackCancelRender}
         />
         <ScrollableLoopingText
           className="lh-0 scrollable-x song-info-mask" textClassName="song-info-field artists" textStyle={{ color: darkenOrLighten(props.color) }}
-          scrollType={scrollEnabled ? scrollType : false} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
+          scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={artists} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollArtistsRenderCallback} cancelRender={scrollArtistsCancelRender}
         />

@@ -69,7 +69,6 @@ export default function Spotify(props: SpotifyProps) {
     //  STYLES
     // ========
     //--art
-    const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
     const [ overlayArtType, setOverlayArtType ] = useState(O.current.art.type);
     const [ overlayArtFetchLocalCovers, setOverlayArtFetchLocalCovers ] = useState(O.current.art.fetchLocalCovers);
 
@@ -200,7 +199,6 @@ export default function Spotify(props: SpotifyProps) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
         if (spotifyProps.art !== undefined) {
-            if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
             if (spotifyProps.art.fetchLocalCovers !== undefined) setOverlayArtFetchLocalCovers(spotifyProps.art.fetchLocalCovers);
             if (spotifyProps.art.fetchLocalCacheMaxAge !== undefined) {
@@ -340,19 +338,6 @@ export default function Spotify(props: SpotifyProps) {
                   <div {...spotifyDivProps}>
                     <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
                     <StateIcons />
-                  </div>
-                );
-            }
-
-            // No cover art nor icon
-            if (!showOverlayArt) {
-                return (
-                  <div {...spotifyDivProps}>
-                    <StateIcons />
-                    {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
-                    <div {...songInfoRowProps}>
-                      <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
-                    </div>
                   </div>
                 );
             }

@@ -263,13 +263,11 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(spotifyOptions.style!.background)) delete spotifyOptions.style!.background;
     if (_.isEmpty(spotifyOptions.style)) delete spotifyOptions.style;
     // .spotify.art
-    setProperty(spotifyOptions.art!, 'enabled', raw.spotify_art as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'type', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
     setProperty(spotifyOptions.art!, 'fetchLocalCovers', raw.spotify_art_fetch_local as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'fetchLocalCacheMaxAge', raw.spotify_art_fetch_local_cache_age as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(spotifyOptions.art)) delete spotifyOptions.art;
     // .spotify.scroll
-    setProperty(spotifyOptions.scroll!, 'enabled', raw.spotify_scroll as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll_type as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));
     setProperty(spotifyOptions.scroll!, 'speed', raw.spotify_scroll_speed as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.scroll!, 'autoDelay', raw.spotify_scroll_auto_delay as WEProperty<'slider'>, _r => parseSliderProperty(_r));

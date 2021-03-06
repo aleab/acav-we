@@ -26,13 +26,11 @@ export default interface SpotifyProperties {
         };
     };
     art: {
-        enabled: boolean;
         type: SpotifyOverlayArtType;
         fetchLocalCovers: boolean;
         fetchLocalCacheMaxAge: number;
     };
     scroll: {
-        enabled: boolean;
         type: TextScrollingType;
         speed: number;
         autoDelay: number;

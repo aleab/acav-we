@@ -1476,9 +1476,8 @@
     // [SPOTIFY > ART]
     "spotify_art": {
         "order": 5030,
-        "type": "bool",
+        "type": "text",
         "text": "ui_spotify_art",
-        "value": true,
         "condition": "spotify.value"
     },
     "spotify_art_type": {
@@ -1490,26 +1489,26 @@
             { "label": "Spotify Icon", "value": "SpotifyIcon" }
         ],
         "value": "SpotifyIcon",
-        "condition": "spotify.value && spotify_art.value"
+        "condition": "spotify.value"
     },
     "spotify_art_fetch_local": {
         "order": 5032,
         "type": "bool",
         "text": "ui_spotify_art_fetch_local",
         "value": false,
-        "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
+        "condition": "spotify.value && spotify_art_type.value === 'AlbumArt'"
     },
     "$_spotify_art_fetch_local": {
         "order": 5033,
         "type": "text",
         "text": "ui_$_spotify_art_fetch_local",
-        "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
+        "condition": "spotify.value && spotify_art_type.value === 'AlbumArt'"
     },
     "$_spotify_art_fetch_local_note": {
         "order": 5034,
         "type": "text",
         "text": "ui_$_spotify_art_fetch_local_note",
-        "condition": "showDescriptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
+        "condition": "showDescriptions.value && spotify.value && spotify_art_type.value === 'AlbumArt'"
     },
     "spotify_art_fetch_local_cache_age": {
         "order": 5035,
@@ -1518,15 +1517,14 @@
         "value": 5,
         "min": 1,
         "max": 28,
-        "condition": "showAdvancedOptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
+        "condition": "showAdvancedOptions.value && spotify.value && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
     },
     //
     // [SPOTIFY > TEXT SCROLLING]
     "spotify_scroll": {
         "order": 5040,
-        "type": "bool",
+        "type": "text",
         "text": "ui_spotify_scroll",
-        "value": true,
         "condition": "spotify.value"
     },
     "spotify_scroll_type": {
@@ -1538,7 +1536,7 @@
             { "label": "On Mouse Over", "value": "OnMouseOver" }
         ],
         "value": "OnMouseOver",
-        "condition": "spotify.value && spotify_scroll.value"
+        "condition": "spotify.value"
     },
     "spotify_scroll_speed": {
         "order": 5042,
@@ -1547,7 +1545,7 @@
         "value": 30,
         "min": 15,
         "max": 75,
-        "condition": "spotify.value && spotify_scroll.value"
+        "condition": "spotify.value"
     },
     "spotify_scroll_auto_delay": {
         "order": 5043,
@@ -1558,7 +1556,7 @@
         "max": 10,
         "fraction": true,
         "step": 0.1,
-        "condition": "(spotify.value && spotify_scroll.value) && spotify_scroll_type.value === 'Automatic'"
+        "condition": "spotify.value && spotify_scroll_type.value === 'Automatic'"
     },
     //
     // [SPOTIFY > PROGRESS BAR]
