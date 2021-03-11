@@ -52,21 +52,48 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
         return _containerColor;
     }, [props.color]);
 
+    // NOTE: Occasionally, when the wallpaper is paused the useEffect down below goes haywire:
+    //       the `interval` will not be cleared correctly causing the existence of two
+    //       instances of the callback running at the same time but trying to set the progress
+    //       percent to two different values. ¯\_(ツ)_/¯
+    //       This `onPaused` callback should probably maybe possibly fix it (?)
+    const predictProgressIntervalHandle = useRef(0);
+    useEffect(() => {
+        function onPaused(e: PausedEventArgs) {
+            if (!e.isPaused) return;
+            if (predictProgressIntervalHandle.current > 0) {
+                clearInterval(predictProgressIntervalHandle.current);
+                predictProgressIntervalHandle.current = 0;
+            }
+        }
+        context.wallpaperEvents.onPaused.subscribe(onPaused);
+        return () => {
+            context.wallpaperEvents.onPaused.unsubscribe(onPaused);
+        };
+    }, [context.wallpaperEvents.onPaused]);
+
     // Update state
     useEffect(() => { isPlaying.current = props.isPlaying; }, [props.isPlaying]);
     useEffect(() => {
         context.renderer.queue(RENDER_ID, () => setProgressPercent(calcProgressPercent(props.progressMs, props.durationMs)));
 
+        if (predictProgressIntervalHandle.current > 0) {
+            clearInterval(predictProgressIntervalHandle.current);
+            predictProgressIntervalHandle.current = 0;
+        }
+
         let predictedProgressMs = props.progressMs;
-        const predictProgressIntervalId = setInterval((() => {
+        const _predictProgressIntervalId = setInterval((() => {
             if (isPlaying.current) {
                 predictedProgressMs += PROGRESS_PREDICTION_UPDATE_INTERVAL_MS;
                 context.renderer.queue(RENDER_ID, () => setProgressPercent(calcProgressPercent(predictedProgressMs, props.durationMs)));
             }
         }) as TimerHandler, PROGRESS_PREDICTION_UPDATE_INTERVAL_MS);
+        predictProgressIntervalHandle.current = _predictProgressIntervalId;
 
         return () => {
-            clearTimeout(predictProgressIntervalId);
+            clearInterval(_predictProgressIntervalId);
+            predictProgressIntervalHandle.current = 0;
             context.renderer.cancel(RENDER_ID);
         };
     }, [ RENDER_ID, context.renderer, props.durationMs, props.progressMs ]);

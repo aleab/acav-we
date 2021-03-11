@@ -57,6 +57,7 @@ export default function App(props: AppProps) {
     const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
     const onGeneralPropertiesChangedSubs: Set<(args: GeneralPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
     const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = useMemo(() => new Set(), []);
+    const onPausedSubs: Set<(args: PausedEventArgs) => void> = useMemo(() => new Set(), []);
 
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
         onUserPropertiesChanged: {
@@ -71,7 +72,11 @@ export default function App(props: AppProps) {
             subscribe: callback => { onAudioSamplesSubs.add(callback); },
             unsubscribe: callback => { onAudioSamplesSubs.delete(callback); },
         },
-    }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs ]);
+        onPaused: {
+            subscribe: callback => { onPausedSubs.add(callback); },
+            unsubscribe: callback => { onPausedSubs.delete(callback); },
+        },
+    }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs, onPausedSubs ]);
 
     // Context
     const renderer = useRenderer();
@@ -218,6 +223,17 @@ export default function App(props: AppProps) {
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
     }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
+
+    // =================
+    //  PAUSED LISTENER
+    // =================
+    useEffect(() => {
+        window.wallpaperPropertyListener!.setPaused = isPaused => onPausedSubs.forEach(callback => callback?.({ isPaused }));
+        return () => {
+            //onPausedSubs.clear();
+            delete window.wallpaperPropertyListener?.setPaused;
+        };
+    }, [onPausedSubs]);
 
     // =========
     //  PLUGINS
