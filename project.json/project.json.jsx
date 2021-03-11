@@ -76,6 +76,7 @@ const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token"
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
 const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_language_tag">${text}</a>`;
 const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
+const mdnObjectFitLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit">${text}</a>`;
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -98,6 +99,8 @@ function getProjectJson() {
                     ui_background_type: indent('Type'),
                     ui_background_color: indent(withPropertyIcon('fas fa-palette', 'Color')),
                     ui_background_image: indent(withPropertyIcon('fas fa-image', 'Image')),
+                    ui_background_video: indent(withPropertyIcon('fas fa-video', 'Video')),
+                    ui_background_videoObjectFit: indent(withPropertyIcon('far fa-compress-arrows-alt', 'object-fit')) + `&nbsp;<sup>${mdnObjectFitLink('(?)')}</sup>`,
                     ui_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS')),
                     ui_background_playlist: indent(withPropertyIcon('fas fa-images', 'Playlist')),
                     ui_background_playlistTimer: indent(withPropertyIcon('far fa-stopwatch', 'Interval (hours)')),

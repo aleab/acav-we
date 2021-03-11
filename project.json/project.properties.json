@@ -45,6 +45,7 @@
         "options": [
             { "label": "Solid Color", "value": "Color" },
             { "label": "Image", "value": "Image" },
+            { "label": "Video", "value": "Video" },
             { "label": "CSS", "value": "Css" },
             { "label": "Playlist", "value": "Playlist" }
         ],
@@ -60,8 +61,30 @@
     "background_image": {
         "order": 52,
         "type": "file",
+        "fileType": "image",
         "text": "ui_background_image",
         "condition": "background_type.value === 'Image'"
+    },
+    "background_video": {
+        "order": 52,
+        "type": "file",
+        "fileType": "video",
+        "text": "ui_background_video",
+        "condition": "background_type.value === 'Video'"
+    },
+    "background_videoObjectFit": {
+        "order": 53,
+        "type": "combo",
+        "text": "ui_background_videoObjectFit",
+        "options": [
+            { "label": "Contain", "value": "Contain" },
+            { "label": "Cover", "value": "Cover" },
+            { "label": "Fill", "value": "Fill" },
+            { "label": "None", "value": "None" },
+            { "label": "Scale Down", "value": "ScaleDown" }
+        ],
+        "value": "Contain",
+        "condition": "background_video.value"
     },
     "background_css": {
         "order": 52,

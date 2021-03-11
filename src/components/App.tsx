@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
 import CircularBuffer from '../common/CircularBuffer';
+import { BackgroundMode } from '../app/BackgroundMode';
 import Properties, { applyUserProperties } from '../app/properties/Properties';
 import { PINK_NOISE } from '../app/noise';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
@@ -22,6 +23,7 @@ import Visualizer from './visualizers/Visualizer';
 import WinTaskBar from './WinTaskBar';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
+const LOCALSTORAGE_BG_CURRENT_VIDEO = 'aleab.acav.bgCurrentVideo';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
 const LOCALSTORAGE_FG_CURRENT_IMAGE = 'aleab.acav.fgCurrentImage';
 
@@ -106,9 +108,10 @@ export default function App(props: AppProps) {
     // ===========
     //  CSS STYLE
     // ===========
-    const { styleBackground, updateBackground, scheduleBackgroundImageChange } = useWallpaperBackground({
+    const { styleBackground, updateBackground, scheduleBackgroundImageChange, videoSource, videoStyle } = useWallpaperBackground({
         localStorageKeys: {
             currentImage: LOCALSTORAGE_BG_CURRENT_IMAGE,
+            currentVideo: LOCALSTORAGE_BG_CURRENT_VIDEO,
             playlistTimer: LOCALSTORAGE_BG_PLAYLIST_TIMER,
         },
         options: O,
@@ -309,22 +312,29 @@ export default function App(props: AppProps) {
 
     const wallpaperRef = useRef<HTMLDivElement>(null);
     return (
-      <div ref={wallpaperRef} style={style}>
-        <WallpaperContext.Provider value={wallpaperContext}>
-          {showForeground ? <div id="foreground" style={fgStyle} /> : null}
-          {showStats ? <Stats /> : null}
-          <Visualizer />
-          {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
-          {showClock ? <Clock /> : null}
-          {
-            useTaskbarPlugin ? (
-              <WinTaskBar
-                small={taskbarIsSmall} scale={taskbarScale / 100} size={taskbarSize} position={taskbarPosition}
-                brightness={taskbarBrightness / 100} plugin={taskbarPlugin}
-              />
-            ) : null
-          }
-        </WallpaperContext.Provider>
-      </div>
+      <>
+        {
+          O.current.background.mode === BackgroundMode.Video ? (
+            <video id="background-video" autoPlay loop playsInline muted src={videoSource ?? ''} style={videoStyle} />
+          ) : null
+        }
+        <div ref={wallpaperRef} style={style}>
+          <WallpaperContext.Provider value={wallpaperContext}>
+            {showForeground ? <div id="foreground" style={fgStyle} /> : null}
+            {showStats ? <Stats /> : null}
+            <Visualizer />
+            {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
+            {showClock ? <Clock /> : null}
+            {
+              useTaskbarPlugin ? (
+                <WinTaskBar
+                  small={taskbarIsSmall} scale={taskbarScale / 100} size={taskbarSize} position={taskbarPosition}
+                  brightness={taskbarBrightness / 100} plugin={taskbarPlugin}
+                />
+              ) : null
+            }
+          </WallpaperContext.Provider>
+        </div>
+      </>
     );
 }

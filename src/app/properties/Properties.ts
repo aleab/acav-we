@@ -7,6 +7,7 @@ import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { BackgroundMode, ForegroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ClockFontFamily } from '../ClockFontFamily';
+import { CssObjectFit } from '../CssObjectFit';
 import { FrequencyRange } from '../FrequencyRange';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
@@ -87,6 +88,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(backgroundOptions, 'mode', raw.background_type as WEProperty<'combo'>, _r => parseComboProperty(_r, BackgroundMode));
     setProperty(backgroundOptions, 'color', raw.background_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     setProperty(backgroundOptions, 'imagePath', raw.background_image as WEProperty<'file'>, _r => _r.value);
+    setProperty(backgroundOptions, 'videoPath', raw.background_video as WEProperty<'file'>, _r => _r.value);
+    setProperty(backgroundOptions, 'videoObjectFit', raw.background_videoObjectFit as WEProperty<'combo'>, _r => parseComboProperty(_r, CssObjectFit));
     setProperty(backgroundOptions, 'css', raw.background_css as WEProperty<'textinput'>, _r => _r.value);
     setProperty(backgroundOptions, 'playlistDirectory', raw.background_playlist as WEProperty<'directory'>, _r => _r.value);
     setProperty(backgroundOptions, 'playlistTimerMinutes', raw.background_playlistTimer as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r) * 60));

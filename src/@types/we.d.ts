@@ -24,7 +24,7 @@ type WEProperty<T extends WEPropertyType | string = string> = Readonly<{
     } : {}
 ) & (
     T extends 'file' ? {
-        fileType?: 'video' | string;
+        fileType?: 'video' | 'image' | string;
     } : {}
 ) & (
     T extends 'directory' ? {

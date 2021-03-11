@@ -77,7 +77,6 @@ function getWebpackConfig(env, argv) {
         licenseTextOverrides: {
             'musicbrainz-api': '<missing license text>',
             '@xstate/react': '<missing license text>',
-            xstate: '<missing license text>',
         },
     });
     const lodashPlugin = new LodashPlugin({ cloning: true, exotics: true });

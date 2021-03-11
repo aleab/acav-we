@@ -3,7 +3,7 @@ import { RGB } from 'color-convert/conversions';
 
 import { parseCustomCss } from '../common/Css';
 
-export enum BackgroundMode { Color = 0x00, Image, Css, Playlist }
+export enum BackgroundMode { Color = 0x00, Image, Video, Css, Playlist }
 export enum ForegroundMode { Image = 0x10, Css }
 
 type ColorOptions = { color: RGB, alpha?: number };
@@ -23,6 +23,7 @@ export type CssBackground = {
 
 export function generateCssStyle(mode: BackgroundMode.Color, options: ColorOptions): CssBackground;
 export function generateCssStyle(mode: BackgroundMode.Image | BackgroundMode.Playlist | ForegroundMode.Image, options: ImageOptions): CssBackground;
+export function generateCssStyle(mode: BackgroundMode.Video, options: null | undefined | {}): CssBackground;
 export function generateCssStyle(mode: BackgroundMode.Css | ForegroundMode.Css, options: CssOptions): CssBackground;
 export function generateCssStyle<Mode extends BackgroundMode>(mode: Mode, options: Partial<ColorOptions & ImageOptions & CssOptions>): CssBackground;
 export function generateCssStyle(mode: BackgroundMode | ForegroundMode, options: any): CssBackground {
@@ -39,6 +40,11 @@ export function generateCssStyle(mode: BackgroundMode | ForegroundMode, options:
         case ForegroundMode.Image:
             return {
                 background: `center / cover no-repeat url("file:///${options.imagePath}")`,
+            };
+
+        case BackgroundMode.Video:
+            return {
+                backgroundColor: 'transparent',
             };
 
         case BackgroundMode.Css:

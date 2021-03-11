@@ -28,6 +28,18 @@ body {
   font-size: 16px;
 }
 
+video#background-video {
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+video#background-video + div {
+  position: relative;
+  height: 100%;
+}
+
 #foreground {
   position: absolute;
   height: 100%;
