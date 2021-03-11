@@ -74,41 +74,44 @@
 /* ====================
  *  TRACK PROGRESS BAR
  * ==================== */
-#spotify progress[value].progress-bar {
+#spotify .spotify-progress-bar {
   position: absolute;
   margin: .1em;
   width: calc(100% - 2 * .1em);
   width: -webkit-fill-available;
   width: -moz-available;
   height: .07em;
+  border-radius: .35em;
+}
 
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
+#spotify .spotify-progress-bar > .progress-bar {
+  width: 100%;
+  height: 100%;
+  background-color: var(--bar-color);
+  
+  position: unset;
+  top: unset;
+  left: unset;
+  z-index: unset;
+  transition: unset;
 
   /* vars */
   --bar-color: unset;
   --value-color: unset;
 }
-#spotify progress[value].progress-bar::-webkit-progress-bar {
-  overflow: hidden;
+#spotify .spotify-progress-bar > .progress-bar > .progress-bar-percent {
+  height: 100%;
   border-radius: .35em;
-  background-color: var(--bar-color);
-}
-#spotify progress[value].progress-bar::-moz-progress-bar {
-  overflow: hidden;
-  border-radius: .35em;
-  background-color: var(--bar-color);
-}
-#spotify progress[value].progress-bar::-webkit-progress-value {
-  border-radius: .35em;
-  background-color: var(--value-color);
+  background: var(--value-color);
+
+  -webkit-box-shadow: unset;
+          box-shadow: unset;
 }
 
-#spotify progress[value].progress-bar.top { top: 0; }
-#spotify progress[value].progress-bar.bottom { bottom: 0; }
-#spotify progress[value].progress-bar.top ~ .main { margin-top: .1em; }
-#spotify progress[value].progress-bar.bottom ~ .main { margin-bottom: .1em; }
+#spotify .spotify-progress-bar.top { top: 0; }
+#spotify .spotify-progress-bar.bottom { bottom: 0; }
+#spotify .spotify-progress-bar.top ~ .main { margin-top: .1em; }
+#spotify .spotify-progress-bar.bottom ~ .main { margin-bottom: .1em; }
 
 
 /* =============

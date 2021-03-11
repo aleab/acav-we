@@ -1,0 +1,54 @@
+@keyframes progress-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  visibility: visible;
+  opacity: 1;
+  transition: all 400ms;
+  z-index: 9999;
+}
+.progress-bar.onTop {
+  height: 100%;
+}
+
+.progress-bar-percent {
+  height: 2px;
+  background: #29D;
+  box-shadow: 0 0 10px #29D, 0 0 5px #29D;
+  transition: all 200ms ease;
+}
+
+.progress-bar-spinner {
+  display: block;
+  position: fixed;
+  top: 15px;
+}
+.progress-bar-spinner.left {
+  left: 15px;
+  right: auto;
+}
+.progress-bar-spinner.right {
+  left: auto;
+  right: 15px;
+}
+
+.progress-bar-spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+  border: solid 2px transparent;
+  border-top-color: #29d;
+  border-left-color: #29d;
+  border-radius: 50%;
+  animation: progress-spinner 400ms linear infinite;
+}

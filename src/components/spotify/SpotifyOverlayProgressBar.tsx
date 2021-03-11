@@ -2,6 +2,7 @@ import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import React, { CSSProperties, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
+import ProgressBar from '../ProgressBar';
 import { darkenOrLightenRgbColor } from '../../common/Colors';
 import { cssColorToRgba } from '../../common/Css';
 import WallpaperContext from '../../app/WallpaperContext';
@@ -76,9 +77,8 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
     }), [ containerColor, props.color ]);
 
     return (
-      <progress
-        className={_.join([ 'progress-bar', props.className ], ' ').trim()} style={{ ...style, ...props.style }}
-        max={100} value={progressPercent}
-      />
+      <div className={_.join([ 'spotify-progress-bar', props.className ], ' ').trim()} style={{ ...style, ...props.style }}>
+        <ProgressBar percent={progressPercent} spinner={false} />
+      </div>
     );
 }
