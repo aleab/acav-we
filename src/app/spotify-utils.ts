@@ -4,6 +4,7 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
+import { useEffect, useRef } from 'react';
 
 import {
     BACKGROUND_CLIP,
@@ -465,23 +466,26 @@ function _lerpBackgroundColors(
 //  EXPORTED FUNCTIONS
 // ====================
 
-function createHtml2canvasCache(id: string): [ Cache, () => void, ] {
-    const cacheId = `${id}-${(Math.round(Math.random() * 1000) + Date.now()).toString(16)}`;
-    const cache = CacheStorage.create(cacheId, {
-        allowTaint: false,
-        imageTimeout: 15000,
-        proxy: undefined,
-        useCORS: false,
-    });
-    Logger.create({ id: cacheId, enabled: true });
+function useHtml2canvasCache(id: string): React.MutableRefObject<Cache | undefined> {
+    const html2canvasCache = useRef<Cache>();
+    useEffect(() => {
+        const cacheId = `${id}-${(Math.round(Math.random() * 1000) + Date.now()).toString(16)}`;
+        html2canvasCache.current = CacheStorage.create(cacheId, {
+            allowTaint: false,
+            imageTimeout: 15000,
+            proxy: undefined,
+            useCORS: false,
+        });
+        Logger.create({ id: cacheId, enabled: true });
 
-    return [
-        cache,
-        () => {
+        return () => {
             CacheStorage.destroy(cacheId);
             Logger.destroy(cacheId);
-        },
-    ];
+            html2canvasCache.current = undefined;
+        };
+    }, [id]);
+
+    return html2canvasCache;
 }
 
 function chooseAppropriateSpotifyColor(
@@ -515,6 +519,6 @@ function chooseAppropriateSpotifyColor(
 
 export default {
     SPOTIFY_LIGHT_GREEN, SPOTIFY_WHITE, SPOTIFY_BLACK,
-    createHtml2canvasCache,
+    useHtml2canvasCache,
     chooseAppropriateSpotifyColor,
 };

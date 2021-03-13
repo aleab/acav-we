@@ -21,7 +21,7 @@ interface SpotifyOverlaySongInfoProps {
     width: number;
     color: string;
     fontSize: number;
-    style?: any;
+    style?: React.CSSProperties;
     className?: string;
 }
 
@@ -61,8 +61,6 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     const songInfoStyle = _.merge({}, {
         width: props.width,
     }, props.style);
-
-    // TODO: Important! Show Spotify's logo (minimum 21px height) if SpotifyOverlayArtType is AlbumArt
 
     return (
       <div className={_.join([ 'song-info', props.className ], ' ').trim()} style={songInfoStyle}>

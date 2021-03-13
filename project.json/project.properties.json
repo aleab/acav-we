@@ -1409,7 +1409,7 @@
         "order": 5013,
         "type": "slider",
         "text": "ui_spotify_width",
-        "value": 255,
+        "value": 270,
         "min": 200,
         "max": 500,
         "condition": "spotify.value"
@@ -1488,7 +1488,7 @@
             { "label": "Album Art", "value": "AlbumArt" },
             { "label": "Spotify Icon", "value": "SpotifyIcon" }
         ],
-        "value": "SpotifyIcon",
+        "value": "AlbumArt",
         "condition": "spotify.value"
     },
     "spotify_art_fetch_local": {

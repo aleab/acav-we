@@ -23,13 +23,14 @@ import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../../services/mu
 import MusicbrainzClientCacheDecorator from '../../services/musicbrainz-client-cache-decorator';
 
 import SpotifyAlbumArt from './SpotifyAlbumArt';
+import SpotifyLogo from './SpotifyLogo';
 import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlayProgressBar, { SpotifyOverlayProgressBarProps } from './SpotifyOverlayProgressBar';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
 import useClientRect from '../../hooks/useClientRect';
 
-const Logc = Log.getLogger('Spofity', '#1DB954');
+const Logc = Log.getLogger('Spotify', '#1DB954');
 
 type OverlayStyle = {
     transform: string,
@@ -344,7 +345,15 @@ export default function Spotify(props: SpotifyProps) {
 
             switch (overlayArtType) {
                 case SpotifyOverlayArtType.AlbumArt: {
-                    const artWidth = 4 * overlayStyle.fontSize - 2 * 0.25 * overlayStyle.fontSize; // calc(4em - 2 * .25em)
+                    const ALBUM_ART_MARGIN = 0.25 * overlayStyle.fontSize;
+                    const OVERLAY_CONTENT_MARGIN_LEFT = 0.25 * overlayStyle.fontSize;
+                    const SPOTIFY_LOGO_HEIGHT = 21;
+
+                    const artSize = 2 * overlayStyle.fontSize // Track Title + Artist Name
+                                  + 2 * overlayStyle.fontSize // .overlay-content's padding
+                                  + SPOTIFY_LOGO_HEIGHT
+                                  - 2 * ALBUM_ART_MARGIN;
+                    const logoMarginLeft = Math.max(0, SPOTIFY_LOGO_HEIGHT / 2 - ALBUM_ART_MARGIN - OVERLAY_CONTENT_MARGIN_LEFT);
                     return (
                       <>
                         <div {...spotifyDivProps}>
@@ -352,13 +361,19 @@ export default function Spotify(props: SpotifyProps) {
                           {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
                           <div {...songInfoRowProps}>
                             <SpotifyAlbumArt
-                              className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth}
+                              className="flex-shrink-0" style={{ margin: ALBUM_ART_MARGIN }} width={artSize}
                               track={currentlyPlaying.item} fetchLocalCovers={overlayArtFetchLocalCovers}
                               mbClient={mbClient.current} mbClientCache={mbClient.current}
                               preferrectLocalArtChooserElementRef={preferredLocalArtChooserRef}
                               preferrectLocalArtChooserSize={{ width: preferredLocalArtChooserStyle.width, height: preferredLocalArtChooserStyle.maxHeight }}
                             />
-                            <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
+                            <div className="overlay-content align-self-end" style={{ width: overlayStyle.maxWidth, marginLeft: OVERLAY_CONTENT_MARGIN_LEFT }}>
+                              <SpotifyLogo
+                                src="./images/spotify-logo.png" height={SPOTIFY_LOGO_HEIGHT} style={{ margin: `-6px 0 6px ${logoMarginLeft}px` }}
+                                overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement}
+                              />
+                              <SpotifyOverlaySongInfo {...songInfoProps} style={{ width: 'unset' }} />
+                            </div>
                           </div>
                         </div>
                         <div ref={preferredLocalArtChooserRef} style={{ position: 'absolute', ...preferredLocalArtChooserStyle, ...preferredLocalArtChooserPosition }} />
