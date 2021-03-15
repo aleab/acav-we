@@ -6,9 +6,22 @@
   z-index: 999;
 }
 
+#stats > div.h:not(:first-child) { margin-top: 1em; }
+#stats > div.h {
+  margin-bottom: .1em;
+  font-size: 1.15em;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 #stats table th {
   text-align: right;
   vertical-align: middle;
 }
 
 #stats table th + td { padding-left: .5rem; }
+
+#stats code {
+  font-size: .95em;
+  font-style: italic;
+}

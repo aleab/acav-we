@@ -1,6 +1,6 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
@@ -28,6 +28,13 @@ const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
 const LOCALSTORAGE_FG_CURRENT_IMAGE = 'aleab.acav.fgCurrentImage';
 
 const Logc = Log.getLogger('App', 'darkgreen');
+
+function createComponentEvent<T extends ComponentEventArgs>(subs: Set<(args: T) => void>): ComponentEvent<T> {
+    return {
+        subscribe: callback => { subs.add(callback); },
+        unsubscribe: callback => { subs.delete(callback); },
+    };
+}
 
 interface AppProps {
     windowEvents: WindowEvents;
@@ -58,25 +65,21 @@ export default function App(props: AppProps) {
     const onGeneralPropertiesChangedSubs: Set<(args: GeneralPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
     const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = useMemo(() => new Set(), []);
     const onPausedSubs: Set<(args: PausedEventArgs) => void> = useMemo(() => new Set(), []);
+    const onEnteredAudioListenerCallbackSubs: Set<(args: PerformanceEventArgs) => void> = useMemo(() => new Set(), []);
+    const onExecutedAudioListenerCallbackSubs: Set<(args: PerformanceEventArgs) => void> = useMemo(() => new Set(), []);
+    const onVisualizerRenderedSubs: Set<(args: PerformanceEventArgs) => void> = useMemo(() => new Set(), []);
 
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
-        onUserPropertiesChanged: {
-            subscribe: callback => { onUserPropertiesChangedSubs.add(callback); },
-            unsubscribe: callback => { onUserPropertiesChangedSubs.delete(callback); },
+        onUserPropertiesChanged: createComponentEvent(onUserPropertiesChangedSubs),
+        onGeneralPropertiesChanged: createComponentEvent(onGeneralPropertiesChangedSubs),
+        onAudioSamples: createComponentEvent(onAudioSamplesSubs),
+        onPaused: createComponentEvent(onPausedSubs),
+        stats: {
+            enteredAudioListenerCallback: createComponentEvent(onEnteredAudioListenerCallbackSubs),
+            executedAudioListenerCallback: createComponentEvent(onExecutedAudioListenerCallbackSubs),
+            visualizerRendered: createComponentEvent(onVisualizerRenderedSubs),
         },
-        onGeneralPropertiesChanged: {
-            subscribe: callback => { onGeneralPropertiesChangedSubs.add(callback); },
-            unsubscribe: callback => { onGeneralPropertiesChangedSubs.delete(callback); },
-        },
-        onAudioSamples: {
-            subscribe: callback => { onAudioSamplesSubs.add(callback); },
-            unsubscribe: callback => { onAudioSamplesSubs.delete(callback); },
-        },
-        onPaused: {
-            subscribe: callback => { onPausedSubs.add(callback); },
-            unsubscribe: callback => { onPausedSubs.delete(callback); },
-        },
-    }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs, onPausedSubs ]);
+    }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs, onPausedSubs, onEnteredAudioListenerCallbackSubs, onExecutedAudioListenerCallbackSubs, onVisualizerRenderedSubs ]);
 
     // Context
     const renderer = useRenderer();
@@ -303,6 +306,9 @@ export default function App(props: AppProps) {
         // The samples array is declared outside the callback to let the previous samples pass throught if listenerIsPaused is true
         let samples: AudioSamplesArray | undefined;
         const audioListener: WEAudioListener = rawSamples => {
+            const t0 = performance.now();
+            onEnteredAudioListenerCallbackSubs.forEach(callback => callback({ timestamp: t0, time: -1 }));
+
             if (!listenerIsPaused) {
                 samples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
                 samplesBuffer.push(samples);
@@ -312,6 +318,9 @@ export default function App(props: AppProps) {
                 const audioSamplesEventArgs: AudioSamplesEventArgs = { rawSamples: _rawSamples, samples: samples!, samplesBuffer, peak, mean };
                 onAudioSamplesSubs.forEach(callback => callback(audioSamplesEventArgs));
             }
+
+            const t1 = performance.now();
+            onExecutedAudioListenerCallbackSubs.forEach(callback => callback({ timestamp: t1, time: t1 - t0 }));
         };
         window.wallpaperRegisterAudioListener(audioListener);
 
@@ -324,7 +333,11 @@ export default function App(props: AppProps) {
             window.wallpaperRegisterAudioListener(null);
             delete window.acav.togglePauseAudioListener;
         };
-    }, [ onAudioSamplesSubs, samplesBuffer, wallpaperContext.pluginManager ]);
+    }, [ onAudioSamplesSubs, onEnteredAudioListenerCallbackSubs, onExecutedAudioListenerCallbackSubs, samplesBuffer, wallpaperContext.pluginManager ]);
+
+    const onVisualizerRendered = useCallback((e: PerformanceEventArgs) => {
+        onVisualizerRenderedSubs.forEach(callback => callback({ timestamp: e.timestamp, time: e.time }));
+    }, [onVisualizerRenderedSubs]);
 
     const wallpaperRef = useRef<HTMLDivElement>(null);
     return (
@@ -338,7 +351,7 @@ export default function App(props: AppProps) {
           <WallpaperContext.Provider value={wallpaperContext}>
             {showForeground ? <div id="foreground" style={fgStyle} /> : null}
             {showStats ? <Stats /> : null}
-            <Visualizer />
+            <Visualizer onRendered={onVisualizerRendered} />
             {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
             {showClock ? <Clock /> : null}
             {

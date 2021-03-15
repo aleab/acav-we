@@ -71,11 +71,17 @@ type AudioSamplesEventArgs = {
 type PausedEventArgs = {
     isPaused: boolean;
 };
+type PerformanceEventArgs = { timestamp: number; time: number; };
 type WallpaperEvents = {
     onUserPropertiesChanged: ComponentEvent<UserPropertiesChangedEventArgs>;
     onGeneralPropertiesChanged: ComponentEvent<GeneralPropertiesChangedEventArgs>;
     onAudioSamples: ComponentEvent<AudioSamplesEventArgs>;
     onPaused: ComponentEvent<PausedEventArgs>;
+    stats: {
+        enteredAudioListenerCallback: ComponentEvent<PerformanceEventArgs>;
+        executedAudioListenerCallback: ComponentEvent<PerformanceEventArgs>;
+        visualizerRendered: ComponentEvent<PerformanceEventArgs>;
+    };
 };
 
 type WallpaperPluginListener = {

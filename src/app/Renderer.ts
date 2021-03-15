@@ -42,9 +42,7 @@ export default function Renderer(fps: number = 0): Renderer {
         });
 
         if (renderedEventSubscribers.size > 0) {
-            setTimeout(() => {
-                renderedEventSubscribers.forEach(callback => callback(timestamp));
-            }, 0);
+            renderedEventSubscribers.forEach(callback => callback(timestamp));
         }
     }
 

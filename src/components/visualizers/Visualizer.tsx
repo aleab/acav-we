@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../../common/Log';
 import CircularBuffer from '../../common/CircularBuffer';
@@ -17,7 +17,11 @@ import get3dVisualizerRenderer from './get3dVisualizerRenderer';
 
 const Logc = Log.getLogger('Visualizer', 'darkblue');
 
-export default function Visualizer() {
+interface VisualizerProps {
+    onRendered?: (e: PerformanceEventArgs) => void;
+}
+
+export default function Visualizer(props: VisualizerProps) {
     const RENDER_ID = useMemo(() => `Visualizer-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const context = useContext(WallpaperContext)!;
 
@@ -27,6 +31,9 @@ export default function Visualizer() {
     const threeDVisualizerOptions = useRef(context.wallpaperProperties.threeDVisualizer);
 
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
+
+    const onRenderedCallback = useRef((e: PerformanceEventArgs) => props.onRendered?.(e));
+    useEffect(() => { onRenderedCallback.current = (e: PerformanceEventArgs) => props.onRendered?.(e); }, [props.onRendered]);
 
     // =====================
     //  PROPERTIES LISTENER
@@ -157,7 +164,10 @@ export default function Visualizer() {
             // Queue render job
             const renderArgs = { samplesBuffer, samples, peak, isSilent };
             context.renderer.queue(RENDER_ID, ts => {
+                const t0 = performance.now();
                 const visualizerReturnArgs = visualizerRenderer.render(ts, renderArgs);
+                const t1 = performance.now();
+                onRenderedCallback.current({ timestamp: t1, time: t1 - t0 });
 
                 context.pluginManager.processAudioData(renderArgs);
                 if (canvas.current !== null && visualizerReturnArgs !== null) {
