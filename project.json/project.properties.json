@@ -1118,6 +1118,17 @@
         "text": "ui_clock",
         "value": false
     },
+    "clock_type": {
+        "order": 2001,
+        "type": "combo",
+        "text": "ui_clock_type",
+        "options": [
+            { "label": "Digital", "value": "Digital" },
+            { "label": "Analog", "value": "Analog" }
+        ],
+        "value": "Digital",
+        "condition": "clock.value"
+    },
     "clock_pivot": {
         "order": 2010,
         "type": "combo",
@@ -1158,6 +1169,15 @@
         "step": 0.1,
         "condition": "clock.value"
     },
+    "clock_custom_css": {
+        "order": 2013,
+        "type": "textinput",
+        "text": "ui_clock_custom_css",
+        "value": "",
+        "condition": "showAdvancedOptions.value && clock.value"
+    },
+    //
+    // [CLOCK > DIGITAL]
     "clock_digital_font": {
         "order": 2020,
         "type": "combo",
@@ -1169,7 +1189,7 @@
             { "label": "<em>Local Font</em>", "value": "LocalFont" }
         ],
         "value": "OpenSans",
-        "condition": "clock.value"
+        "condition": "clock.value && clock_type.value === 'Digital'"
     },
     "clock_digital_fontsize": {
         "order": 2021,
@@ -1178,66 +1198,253 @@
         "value": 72,
         "min": 18,
         "max": 192,
-        "condition": "clock.value"
+        "condition": "clock.value && clock_type.value === 'Digital'"
     },
     "clock_digital_text_color": {
         "order": 2022,
         "type": "color",
         "text": "ui_clock_digital_text_color",
         "value": "1 1 1",
-        "condition": "clock.value"
+        "condition": "clock.value && clock_type.value === 'Digital'"
     },
-    "clock_custom_css": {
-        "order": 2023,
-        "type": "textinput",
-        "text": "ui_clock_custom_css",
-        "value": "",
-        "condition": "showAdvancedOptions.value && clock.value"
-    },
-    "clock_seconds": {
+    "clock_digital_seconds": {
         "order": 2030,
         "type": "bool",
-        "text": "ui_clock_seconds",
+        "text": "ui_clock_digital_seconds",
         "value": false,
-        "condition": "clock.value"
+        "condition": "clock.value && clock_type.value === 'Digital'"
     },
     "clock_digital_24h": {
         "order": 2031,
         "type": "bool",
         "text": "ui_clock_digital_24h",
         "value": true,
-        "condition": "clock.value && !clock_digital_locale.value"
+        "condition": "clock.value && clock_type.value === 'Digital' && !clock_digital_locale.value"
     },
     "clock_digital_locale": {
         "order": 2032,
         "type": "textinput",
         "text": "ui_clock_digital_locale",
         "value": "",
-        "condition": "showAdvancedOptions.value && clock.value"
+        "condition": "showAdvancedOptions.value && clock.value && clock_type.value === 'Digital'"
     },
     "$_clock_digital_locale": {
         "order": 2033,
         "type": "text",
         "text": "ui_$_clock_digital_locale",
-        "condition": "showAdvancedOptions.value && clock.value"
+        "condition": "showAdvancedOptions.value && clock.value && clock_type.value === 'Digital'"
     },
     "$_clock_digital_locale2": {
         "order": 2034,
         "type": "text",
         "text": "ui_$_clock_digital_locale2",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value) && clock.value"
+        "condition": "(showAdvancedOptions.value && showDescriptions.value) && clock.value && clock_type.value === 'Digital'"
+    },
+    //
+    // [CLOCK > ANALOG]
+    "clock_analog_radius": {
+        "order": 2020,
+        "type": "slider",
+        "text": "ui_clock_analog_radius",
+        "value": 14,
+        "min": 10,
+        "max": 35,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_background_color": {
+        "order": 2021,
+        "type": "color",
+        "text": "ui_clock_analog_background_color",
+        "value": "0 0 0",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_background_color_alpha": {
+        "order": 2022,
+        "type": "slider",
+        "text": "ui_clock_analog_background_color_alpha",
+        "value": 0,
+        "min": 0,
+        "max": 100,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_showSeconds": {
+        "order": 2023,
+        "type": "bool",
+        "text": "ui_clock_analog_showSeconds",
+        "value": true,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_border": {
+        "order": 2030,
+        "type": "text",
+        "text": "ui_clock_analog_border",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_border_thickness": {
+        "order": 2031,
+        "type": "slider",
+        "text": "ui_clock_analog_border_thickness",
+        "value": 2,
+        "min": 0,
+        "max": 12,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_border_color": {
+        "order": 2032,
+        "type": "color",
+        "text": "ui_clock_analog_border_color",
+        "value": "1 1 1",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_ticks": {
+        "order": 2040,
+        "type": "text",
+        "text": "ui_clock_analog_ticks",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_ticks_radius": {
+        "order": 2041,
+        "type": "slider",
+        "text": "ui_clock_analog_ticks_radius",
+        "value": 95,
+        "min": 50,
+        "max": 100,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_ticks_thickness": {
+        "order": 2042,
+        "type": "slider",
+        "text": "ui_clock_analog_ticks_thickness",
+        "value": 2,
+        "min": 1,
+        "max": 3,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_ticks_length": {
+        "order": 2043,
+        "type": "slider",
+        "text": "ui_clock_analog_ticks_length",
+        "value": 6,
+        "min": 1,
+        "max": 10,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_ticks_color": {
+        "order": 2044,
+        "type": "color",
+        "text": "ui_clock_analog_ticks_color",
+        "value": "1 1 1",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_numbers": {
+        "order": 2050,
+        "type": "text",
+        "text": "ui_clock_analog_numbers",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_numbers_font": {
+        "order": 2051,
+        "type": "combo",
+        "text": "ui_clock_analog_numbers_font",
+        "options": [
+            { "label": "Open Sans", "value": "OpenSans" },
+            { "label": "Heebo", "value": "Heebo" },
+            { "label": "Arapey", "value": "Arapey" },
+            { "label": "<em>Local Font</em>", "value": "LocalFont" }
+        ],
+        "value": "OpenSans",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_numbers_fontsize": {
+        "order": 2052,
+        "type": "slider",
+        "text": "ui_clock_analog_numbers_fontsize",
+        "value": 28,
+        "min": 18,
+        "max": 85,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_numbers_radius": {
+        "order": 2053,
+        "type": "slider",
+        "text": "ui_clock_analog_numbers_radius",
+        "value": 85,
+        "min": 40,
+        "max": 100,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_numbers_color": {
+        "order": 2054,
+        "type": "color",
+        "text": "ui_clock_analog_numbers_color",
+        "value": "1 1 1",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_hands": {
+        "order": 2060,
+        "type": "text",
+        "text": "ui_clock_analog_hands",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_hands_hoursLength": {
+        "order": 2061,
+        "type": "slider",
+        "text": "ui_clock_analog_hands_hoursLength",
+        "value": 60,
+        "min": 40,
+        "max": 65,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_hands_hoursColor": {
+        "order": 2062,
+        "type": "color",
+        "text": "ui_clock_analog_hands_hoursColor",
+        "value": "1 1 1",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_hands_minutesLength": {
+        "order": 2063,
+        "type": "slider",
+        "text": "ui_clock_analog_hands_minutesLength",
+        "value": 85,
+        "min": 75,
+        "max": 100,
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_hands_minutesColor": {
+        "order": 2064,
+        "type": "color",
+        "text": "ui_clock_analog_hands_minutesColor",
+        "value": "1 1 1",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_hands_secondsLength": {
+        "order": 2065,
+        "type": "slider",
+        "text": "ui_clock_analog_hands_secondsLength",
+        "value": 90,
+        "min": 75,
+        "max": 100,
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_showSeconds.value"
+    },
+    "clock_analog_hands_secondsColor": {
+        "order": 2066,
+        "type": "color",
+        "text": "ui_clock_analog_hands_secondsColor",
+        "value": "0.5647 0.5647 0.5647",
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_showSeconds.value"
     },
     //
     // [CLOCK > BASS EFFECT]
     "clock_bass_effect": {
-        "order": 2050,
+        "order": 2100,
         "type": "bool",
         "text": "ui_clock_bass_effect",
         "value": false,
         "condition": "clock.value"
     },
     "clock_bass_effect_frequency": {
-        "order": 2051,
+        "order": 2101,
         "type": "slider",
         "text": "ui_clock_bass_effect_frequency",
         "value": 200,
@@ -1247,7 +1454,7 @@
         "condition": "clock.value && clock_bass_effect.value"
     },
     "clock_bass_effect_smoothing": {
-        "order": 2052,
+        "order": 2102,
         "type": "slider",
         "text": "ui_clock_bass_effect_smoothing",
         "value": 35,

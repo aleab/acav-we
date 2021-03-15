@@ -30,3 +30,7 @@ interface CanvasRenderingContext2D {
 
 // HotModuleReplacementPlugin
 interface NodeModule { hot?: any; }
+
+interface SVGAnimationElement {
+    beginElement(): void;
+}

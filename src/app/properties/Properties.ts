@@ -7,6 +7,7 @@ import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { BackgroundMode, ForegroundMode } from '../BackgroundMode';
 import { ColorReactionType } from '../ColorReactionType';
 import { ClockFontFamily } from '../ClockFontFamily';
+import { ClockType } from '../ClockType';
 import { CssObjectFit } from '../CssObjectFit';
 import { FrequencyRange } from '../FrequencyRange';
 import { ScaleFunction } from '../ScaleFunction';
@@ -215,20 +216,48 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(threeDVisualizerOptions.bars)) delete threeDVisualizerOptions.bars;
 
     // .clock
-    const clockOptions: MappedProperties['clock'] = { digital: {}, bassEffect: {} };
+    const clockOptions: MappedProperties['clock'] = { digital: {}, analog: {}, bassEffect: {} };
+    clockOptions.analog = { border: {}, ticks: {}, numbers: {}, hands: {} };
     setProperty(clockOptions, 'enabled', raw.clock as WEProperty<'bool'>, _r => _r.value);
+    setProperty(clockOptions, 'type', raw.clock_type as WEProperty<'combo'>, _r => parseComboProperty(_r, ClockType));
     setProperty(clockOptions, 'pivot', raw.clock_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
     setProperty(clockOptions, 'left', raw.clock_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(clockOptions, 'top', raw.clock_position_y as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(clockOptions, 'customCss', raw.clock_custom_css as WEProperty<'textinput'>, _r => _r.value);
-    setProperty(clockOptions, 'showSeconds', raw.clock_seconds as WEProperty<'bool'>, _r => _r.value);
     // .clock.digital
     setProperty(clockOptions.digital!, 'font', raw.clock_digital_font as WEProperty<'combo'>, _r => parseComboProperty(_r, ClockFontFamily));
     setProperty(clockOptions.digital!, 'fontSize', raw.clock_digital_fontsize as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(clockOptions.digital!, 'textColor', raw.clock_digital_text_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     setProperty(clockOptions.digital!, 'locale', raw.clock_digital_locale as WEProperty<'textinput'>, _r => _r.value);
+    setProperty(clockOptions.digital!, 'showSeconds', raw.clock_digital_seconds as WEProperty<'bool'>, _r => _r.value);
     setProperty(clockOptions.digital!, 'is24h', raw.clock_digital_24h as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(clockOptions.digital)) delete clockOptions.digital;
+    // .clock.analog
+    setProperty(clockOptions.analog!, 'radius', raw.clock_analog_radius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.analog!, 'backgroundColor', raw.clock_analog_background_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(clockOptions.analog!, 'backgroundColorAlpha', raw.clock_analog_background_color_alpha as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.analog!, 'showSeconds', raw.clock_analog_showSeconds as WEProperty<'bool'>, _r => _r.value);
+    setProperty(clockOptions.analog!.border!, 'thickness', raw.clock_analog_border_thickness as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.analog!.border!, 'color', raw.clock_analog_border_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    if (_.isEmpty(clockOptions.analog!.border)) delete clockOptions.analog!.border;
+    setProperty(clockOptions.analog!.ticks!, 'radius', raw.clock_analog_ticks_radius as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.analog!.ticks!, 'thickness', raw.clock_analog_ticks_thickness as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.analog!.ticks!, 'length', raw.clock_analog_ticks_length as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.analog!.ticks!, 'color', raw.clock_analog_ticks_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    if (_.isEmpty(clockOptions.analog!.ticks)) delete clockOptions.analog!.ticks;
+    setProperty(clockOptions.analog!.numbers!, 'font', raw.clock_analog_numbers_font as WEProperty<'combo'>, _r => parseComboProperty(_r, ClockFontFamily));
+    setProperty(clockOptions.analog!.numbers!, 'fontSize', raw.clock_analog_numbers_fontsize as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.analog!.numbers!, 'radius', raw.clock_analog_numbers_radius as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.analog!.numbers!, 'color', raw.clock_analog_numbers_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    if (_.isEmpty(clockOptions.analog!.numbers)) delete clockOptions.analog!.numbers;
+    setProperty(clockOptions.analog!.hands!, 'hoursLength', raw.clock_analog_hands_hoursLength as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.analog!.hands!, 'hoursColor', raw.clock_analog_hands_hoursColor as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(clockOptions.analog!.hands!, 'minutesLength', raw.clock_analog_hands_minutesLength as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.analog!.hands!, 'minutesColor', raw.clock_analog_hands_minutesColor as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(clockOptions.analog!.hands!, 'secondsLength', raw.clock_analog_hands_secondsLength as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(clockOptions.analog!.hands!, 'secondsColor', raw.clock_analog_hands_secondsColor as WEProperty<'color'>, _r => parseColorProperty(_r));
+    if (_.isEmpty(clockOptions.analog!.hands)) delete clockOptions.analog!.hands;
+    if (_.isEmpty(clockOptions.analog)) delete clockOptions.analog;
     // .clock.bassEffect
     setProperty(clockOptions.bassEffect!, 'enabled', raw.clock_bass_effect as WEProperty<'bool'>, _r => _r.value);
     setProperty(clockOptions.bassEffect!, 'frequency', raw.clock_bass_effect_frequency as WEProperty<'slider'>, _r => parseSliderProperty(_r));

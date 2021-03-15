@@ -2,11 +2,12 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
-import WallpaperContext from '../../app/WallpaperContext';
-import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 import { ClockFontFamily } from '../../app/ClockFontFamily';
+import WallpaperContext from '../../app/WallpaperContext';
+import useLocalFontFile from '../../hooks/useLocalFontFile';
+import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
 type DigitalClockStyle = {
     fontFamily: string;
@@ -15,7 +16,6 @@ type DigitalClockStyle = {
 };
 
 interface DigitalClockProps {
-    showSeconds: boolean;
     customCss: { [key: string]: string; };
 }
 
@@ -68,10 +68,13 @@ async function getCachedLocalClockFont() {
     return dataUrl !== null && dataUrl.startsWith('data:') ? fetch(dataUrl).then(res => res.blob()) : null;
 }
 
+const LOCALSTORAGE_FONT = 'aleab.acav.clock_digital.font';
+
 export default function DigitalClock(props: DigitalClockProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.clock.digital);
 
+    const [ showSeconds, setShowSeconds ] = useState(O.current.showSeconds);
     const [ is24h, setIs24h ] = useState(O.current.is24h);
     const [ locale, setLocale ] = useState(O.current.locale);
     const [ style, setStyle ] = useReducer((prevStyle: DigitalClockStyle, newStyle: Partial<DigitalClockStyle>) => {
@@ -84,11 +87,23 @@ export default function DigitalClock(props: DigitalClockProps) {
     });
 
     const [ now, setNow ] = useState(new Date());
-
-    const [ showBrowseFontButton, setShowBrowseFontButton ] = useState(false);
-    const [ localFontBlobUrl, setLocalFontBlobUrl ] = useState<string | null>(null);
-
     const [ loaded, setLoaded ] = useState(false);
+
+    // NOTE: Compatibility with older versions
+    useEffect(() => {
+        const value = window.localStorage.getItem('aleab.acav.clock.font');
+        if (value) {
+            window.localStorage.setItem(LOCALSTORAGE_FONT, value);
+            window.localStorage.removeItem('aleab.acav.clock.font');
+        }
+    }, []);
+    const [ showBrowseFontButton, setShowBrowseFontButton, localFontBlobUrl, onLocalFontChange ] = useLocalFontFile(
+        O.current.font === ClockFontFamily.LocalFont,
+        LOCALSTORAGE_FONT,
+        () => setLoaded(true),
+        () => setStyle({ fontFamily: ClockFontFamily.LocalFont }),
+        () => setStyle({ fontFamily: 'inherit' }),
+    );
 
     // =====================
     //  PROPERTIES LISTENER
@@ -104,6 +119,7 @@ export default function DigitalClock(props: DigitalClockProps) {
         setStyle(s);
 
         if (digitalProps.locale !== undefined) setLocale(digitalProps.locale);
+        if (digitalProps.showSeconds !== undefined) setShowSeconds(digitalProps.showSeconds);
         if (digitalProps.is24h !== undefined) setIs24h(digitalProps.is24h);
     }, []);
 
@@ -116,7 +132,7 @@ export default function DigitalClock(props: DigitalClockProps) {
         const opts: Intl.DateTimeFormatOptions = {
             hour: '2-digit',
             minute: '2-digit',
-            second: props.showSeconds ? '2-digit' : undefined,
+            second: showSeconds ? '2-digit' : undefined,
             hour12: !locale ? !is24h : locale.toLowerCase().includes('hc-h12'),
         };
 
@@ -125,65 +141,7 @@ export default function DigitalClock(props: DigitalClockProps) {
         } catch {
             return now.toLocaleTimeString([], opts).toUpperCase();
         }
-    }, [ is24h, locale, now, props.showSeconds ]);
-
-    useEffect(() => {
-        if (O.current.font === ClockFontFamily.LocalFont) {
-            getCachedLocalClockFont().then(blob => {
-                const blobUrl = blob !== null ? URL.createObjectURL(blob) : null;
-                setLocalFontBlobUrl(blobUrl);
-
-                if (blobUrl === null) {
-                    setShowBrowseFontButton(true);
-                    setStyle({ fontFamily: 'inherit' });
-                } else {
-                    setShowBrowseFontButton(false);
-                    setStyle({ fontFamily: ClockFontFamily.LocalFont });
-                }
-                setLoaded(true);
-            });
-        } else {
-            setLoaded(true);
-        }
-    }, []);
-
-    const onLocalFontChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file !== undefined) {
-            const fileReader = new FileReader();
-            fileReader.onload = ev => {
-                const result = ev.target?.result as ArrayBuffer | null | undefined;
-                if (result !== null && result !== undefined) {
-                    const mimeType = getMimeType(result) || file.type;
-                    if (Object.getOwnPropertyNames(FontMimeTypes).some(v => (FontMimeTypes as any)[v] === mimeType)) {
-                        const base64 = window.btoa(new Uint8Array(result).reduce((b64, byte) => b64 + String.fromCharCode(byte), ''));
-                        const data = `data:${mimeType};base64,${base64}`;
-                        setCachedLocalClockFont(`data:${mimeType};base64,${base64}`);
-
-                        fetch(data).then(res => res.blob()).then(blob => {
-                            setLocalFontBlobUrl(URL.createObjectURL(blob));
-                            setShowBrowseFontButton(false);
-                            setStyle({ fontFamily: ClockFontFamily.LocalFont });
-                        });
-                    } else {
-                        // Invalid font file
-                        setShowBrowseFontButton(false);
-                        setStyle({ fontFamily: 'inherit' });
-                    }
-                } else {
-                    // ???
-                    setShowBrowseFontButton(false);
-                    setStyle({ fontFamily: 'inherit' });
-                }
-            };
-            fileReader.readAsArrayBuffer(file);
-        } else {
-            setCachedLocalClockFont(null);
-            setLocalFontBlobUrl(null);
-            setShowBrowseFontButton(false);
-            setStyle({ fontFamily: 'inherit' });
-        }
-    }, []);
+    }, [ is24h, locale, now, showSeconds ]);
 
     return loaded ? (
       <>

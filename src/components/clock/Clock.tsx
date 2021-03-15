@@ -1,12 +1,14 @@
 import _ from 'lodash';
-import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 import { parseCustomCss } from '../../common/Css';
 import { calculatePivotTransform } from '../../common/Pivot';
 import { getClosestFrequencyIndex } from '../../app/freq-utils';
+import { ClockType } from '../../app/ClockType';
 import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
+import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
 
 type ClockStyle = {
@@ -21,7 +23,7 @@ export default function Clock() {
 
     const O = useRef(context.wallpaperProperties.clock);
 
-    const [ showSeconds, setShowSeconds ] = useState(O.current.showSeconds);
+    const [ clockType, setClockType ] = useState(O.current.type);
     const [ style, setStyle ] = useReducer((prevStyle: ClockStyle, newStyle: Partial<ClockStyle>) => {
         if (_.isMatch(prevStyle, newStyle)) return prevStyle;
         return _.merge({}, prevStyle, newStyle);
@@ -42,6 +44,8 @@ export default function Clock() {
     //  PROPERTIES LISTENER
     // =====================
     useUserPropertiesListener(p => p.clock, clockProps => {
+        if (clockProps.type !== undefined) setClockType(clockProps.type);
+
         const s: Partial<ClockStyle> = {};
         if (clockProps.left !== undefined) s.left = Math.round(window.innerWidth * (clockProps.left / 100));
         if (clockProps.top !== undefined) s.top = Math.round(window.innerHeight * (clockProps.top / 100));
@@ -49,7 +53,6 @@ export default function Clock() {
         setStyle(s);
 
         if (clockProps.customCss !== undefined) setCustomCss(clockProps.customCss);
-        if (clockProps.showSeconds !== undefined) setShowSeconds(clockProps.showSeconds);
 
         if (clockProps.bassEffect !== undefined) {
             if (clockProps.bassEffect.enabled !== undefined) setBassEffectEnabled(clockProps.bassEffect.enabled);
@@ -86,9 +89,20 @@ export default function Clock() {
         };
     }, [ RENDER_ID, bassEffectEnabled, bassEffectFrequency, bassEffectSmoothing, context ]);
 
+    const ClockComponent = useCallback(() => {
+        switch (clockType) {
+            case ClockType.Digital:
+                return <DigitalClock customCss={parsedCustomCss} />;
+            case ClockType.Analog:
+                return <AnalogClock />;
+            default:
+                return null;
+        }
+    }, [ clockType, parsedCustomCss ]);
+
     return (
       <div id="clock" style={{ ...style, transform: `perspective(1px) translateZ(0) ${style.transform} scale(${bassEffectEnabled ? 1 + bass : 1})` }}>
-        <DigitalClock showSeconds={showSeconds} customCss={parsedCustomCss} />
+        <ClockComponent />
       </div>
     );
 }

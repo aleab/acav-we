@@ -6,12 +6,18 @@
   z-index: 2;
 }
 
-#clock > .digital {
-  line-height: 1.2;
-}
-
 #clock > #browseFont {
   position: absolute;
   transform: translateY(-100%);
 }
 #clock > #browseFont:focus { outline: none; }
+
+/* [DIGITAL] */
+#clock > .digital {
+  line-height: 1.2;
+}
+
+/* [ANALOG] */
+#clock > .analog {
+  display: flex;
+}

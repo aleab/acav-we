@@ -293,14 +293,17 @@ function getProjectJson() {
 
                     // [CLOCK]
                     ui_clock: section('Clock', false, 'far fa-clock'),
+                    ui_clock_type: indent('Type'),
                     ui_clock_pivot: indent('Pivot'),
                     ui_clock_position_x: indent('X (%)'),
                     ui_clock_position_y: indent('Y (%)'),
+                    ui_clock_custom_css: indent(withPropertyIcon('fab fa-css3-alt', 'Style')) + asterisk(),
+                    //
+                    // [CLOCK > DIGITAL]
                     ui_clock_digital_font: indent('Font'),
                     ui_clock_digital_fontsize: indent('Font Size (px)'),
                     ui_clock_digital_text_color: indent('Text Color'),
-                    ui_clock_custom_css: indent(withPropertyIcon('fab fa-css3-alt', 'Style')) + asterisk(),
-                    ui_clock_seconds: indent('Show Seconds'),
+                    ui_clock_digital_seconds: indent('Show Seconds'),
                     ui_clock_digital_locale: indent('Locale') + asterisk(),
                     ui_clock_digital_24h: indent('24H'),
                     ui_$_clock_digital_locale: note(
@@ -309,6 +312,36 @@ function getProjectJson() {
                     ui_$_clock_digital_locale2: note(
                         'For example, <code>th-TH-u-nu-thai-hc-h12</code> changes the formatting to use the thai language (<em>th-TH</em>), the thai numerals (<em>nu-thai</em>) and a 12-hour clock (<em>hc-h12</em>).',
                     ),
+                    //
+                    // [CLOCK > ANALOG]
+                    ui_clock_analog_radius: indent('Radius (%)'),
+                    ui_clock_analog_background_color: indent('Background Color'),
+                    ui_clock_analog_background_color_alpha: indent('Opacity'),
+                    ui_clock_analog_showSeconds: indent('Show Seconds'),
+                    // [CLOCK > ANALOG > BORDER]
+                    ui_clock_analog_border: subSection('Border'),
+                    ui_clock_analog_border_thickness: indent('Thickness (px)', { n: 3 }),
+                    ui_clock_analog_border_color: indent('Color', { n: 3 }),
+                    // [CLOCK > ANALOG > TICKS]
+                    ui_clock_analog_ticks: subSection('Ticks'),
+                    ui_clock_analog_ticks_radius: indent('Radius (%)', { n: 3 }),
+                    ui_clock_analog_ticks_thickness: indent('Thickness (px)', { n: 3 }),
+                    ui_clock_analog_ticks_length: indent('Length (px)', { n: 3 }),
+                    ui_clock_analog_ticks_color: indent('Color', { n: 3 }),
+                    // [CLOCK > ANALOG > NUMBERS]
+                    ui_clock_analog_numbers: subSection('Numbers'),
+                    ui_clock_analog_numbers_font: indent('Font', { n: 3 }),
+                    ui_clock_analog_numbers_fontsize: indent('Font Size (px)', { n: 3 }),
+                    ui_clock_analog_numbers_radius: indent('Radius (%)', { n: 3 }),
+                    ui_clock_analog_numbers_color: indent('Color', { n: 3 }),
+                    // [CLOCK > ANALOG > HANDS]
+                    ui_clock_analog_hands: subSection('Hands'),
+                    ui_clock_analog_hands_hoursLength: indent('Hours Length (%)', { n: 3 }),
+                    ui_clock_analog_hands_hoursColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
+                    ui_clock_analog_hands_minutesLength: indent('Minutes Length (%)', { n: 3 }),
+                    ui_clock_analog_hands_minutesColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
+                    ui_clock_analog_hands_secondsLength: indent('Seconds Length (%)', { n: 3 }),
+                    ui_clock_analog_hands_secondsColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
                     //
                     // [CLOCK > BASS EFFECT]
                     ui_clock_bass_effect: subSection('Bass Effect'),
