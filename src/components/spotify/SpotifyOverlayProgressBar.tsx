@@ -57,11 +57,13 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
     //       instances of the callback running at the same time but trying to set the progress
     //       percent to two different values. ¯\_(ツ)_/¯
     //       This `onPaused` callback should probably maybe possibly fix it (?)
+    const pauseId = useRef(Math.random());
     const predictProgressIntervalHandle = useRef(0);
     useEffect(() => {
         function onPaused(e: PausedEventArgs) {
-            if (!e.isPaused) return;
-            if (predictProgressIntervalHandle.current > 0) {
+            if (!e.isPaused) {
+                pauseId.current = Math.random();
+            } else if (predictProgressIntervalHandle.current > 0) {
                 clearInterval(predictProgressIntervalHandle.current);
                 predictProgressIntervalHandle.current = 0;
             }
@@ -76,6 +78,7 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
     useEffect(() => { isPlaying.current = props.isPlaying; }, [props.isPlaying]);
     useEffect(() => {
         context.renderer.queue(RENDER_ID, () => setProgressPercent(calcProgressPercent(props.progressMs, props.durationMs)));
+        let PAUSE_ID = pauseId.current;
 
         if (predictProgressIntervalHandle.current > 0) {
             clearInterval(predictProgressIntervalHandle.current);
@@ -84,6 +87,16 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
 
         let predictedProgressMs = props.progressMs;
         const _predictProgressIntervalId = setInterval((() => {
+            // Clean up and return ASAP if we hit the paused bug
+            if (PAUSE_ID === -1) return;
+            if (PAUSE_ID !== pauseId.current) {
+                PAUSE_ID = -1;
+                if (Number.isInteger(_predictProgressIntervalId)) {
+                    clearInterval(_predictProgressIntervalId);
+                }
+                return;
+            }
+
             if (isPlaying.current) {
                 predictedProgressMs += PROGRESS_PREDICTION_UPDATE_INTERVAL_MS;
                 context.renderer.queue(RENDER_ID, () => setProgressPercent(calcProgressPercent(predictedProgressMs, props.durationMs)));
