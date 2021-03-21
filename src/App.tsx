@@ -3,7 +3,7 @@ import { Link, NavLink, Route, BrowserRouter as Router, Switch } from 'react-rou
 
 import { MarkGithubIcon as OcticonMarkGithub, ThreeBarsIcon as OcticonThreeBars } from '@primer/octicons-react';
 
-// Components
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Token from './pages/Token';
 import PageNotFound from './pages/404';
@@ -30,6 +30,7 @@ export default function App() {
             </nav>
           </div>
         </header>
+
         <main className="container">
           <Switch>
             <Route exact path="/" component={Home} />
@@ -37,6 +38,8 @@ export default function App() {
             <Route path="*" component={PageNotFound} />
           </Switch>
         </main>
+
+        <Footer />
       </Router>
     );
 }
