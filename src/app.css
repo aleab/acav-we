@@ -11,6 +11,7 @@
   --white: #fafafa;
   --accent: #9b4dca;
   --accent-dark: #57396a;
+  --accent-focus: #606c76;
   --white-bright: #ffffff;
   --disabled: #eaeded;
   --readonly: #eeeeee;
@@ -35,17 +36,48 @@ body {
 
 /* ===================================================================
  *  FIX milligram's rem sizes (since we changed the root's font size)
+ *      milligram's colors
  * =================================================================== */
 
 blockquote { border-left-width: .1875rem; padding: .625rem .9375rem; }
 .button, button, input[type='button'], input[type='reset'], input[type='submit'] {
+  background-color: var(--accent);
   border: 0.0625rem solid var(--accent);
   border-radius: .25rem;
+  color: var(--white);
   font-size: .6875rem;
   height: 2.375rem;
   letter-spacing: .0625rem;
   line-height: 2.375rem;
   padding: 0 1.875rem;
+}
+.button:focus, .button:hover, button:focus, button:hover, input[type='button']:focus, input[type='button']:hover, input[type='reset']:focus, input[type='reset']:hover, input[type='submit']:focus, input[type='submit']:hover {
+  background-color: var(--accent-focus);
+  border-color: var(--accent-focus);
+  color: var(--white);
+}
+.button[disabled]:focus, .button[disabled]:hover, button[disabled]:focus, button[disabled]:hover, input[type='button'][disabled]:focus, input[type='button'][disabled]:hover, input[type='reset'][disabled]:focus, input[type='reset'][disabled]:hover, input[type='submit'][disabled]:focus, input[type='submit'][disabled]:hover {
+  background-color: var(--accent);
+  border-color: var(--accent);
+}
+.button.button-outline, button.button-outline, input[type='button'].button-outline, input[type='reset'].button-outline, input[type='submit'].button-outline {
+  color: var(--accent);
+}
+.button.button-outline:focus, .button.button-outline:hover, button.button-outline:focus, button.button-outline:hover, input[type='button'].button-outline:focus, input[type='button'].button-outline:hover, input[type='reset'].button-outline:focus, input[type='reset'].button-outline:hover, input[type='submit'].button-outline:focus, input[type='submit'].button-outline:hover {
+  border-color: var(--accent-focus);
+  color: var(--accent-focus);
+}
+.button.button-outline[disabled]:focus, .button.button-outline[disabled]:hover, button.button-outline[disabled]:focus, button.button-outline[disabled]:hover, input[type='button'].button-outline[disabled]:focus, input[type='button'].button-outline[disabled]:hover, input[type='reset'].button-outline[disabled]:focus, input[type='reset'].button-outline[disabled]:hover, input[type='submit'].button-outline[disabled]:focus, input[type='submit'].button-outline[disabled]:hover {
+  color: var(--accent);
+}
+.button.button-clear, button.button-clear, input[type='button'].button-clear, input[type='reset'].button-clear, input[type='submit'].button-clear {
+  color: var(--accent);
+}
+.button.button-clear:focus, .button.button-clear:hover, button.button-clear:focus, button.button-clear:hover, input[type='button'].button-clear:focus, input[type='button'].button-clear:hover, input[type='reset'].button-clear:focus, input[type='reset'].button-clear:hover, input[type='submit'].button-clear:focus, input[type='submit'].button-clear:hover {
+  color: var(--accent-focus);
+}
+.button.button-clear[disabled]:focus, .button.button-clear[disabled]:hover, button.button-clear[disabled]:focus, button.button-clear[disabled]:hover, input[type='button'].button-clear[disabled]:focus, input[type='button'].button-clear[disabled]:hover, input[type='reset'].button-clear[disabled]:focus, input[type='reset'].button-clear[disabled]:hover, input[type='submit'].button-clear[disabled]:focus, input[type='submit'].button-clear[disabled]:hover {
+  color: var(--accent);
 }
 code {
   border-radius: .4rem;
@@ -54,11 +86,14 @@ code {
 }
 pre > code { padding: .625rem .9375rem; }
 hr { border-top-width: .0625rem; margin: 1.875rem 0; }
-input[type='email'], input[type='number'], input[type='password'], input[type='search'], input[type='tel'], input[type='text'], input[type='url'], textarea, select {
+input[type='color'], input[type='date'], input[type='datetime'], input[type='datetime-local'], input[type='email'], input[type='month'], input[type='number'], input[type='password'], input[type='search'], input[type='tel'], input[type='text'], input[type='url'], input[type='week'], input:not([type]), textarea, select {
   border-width: .0625rem;
   border-radius: .25rem;
   height: 2.375rem;
   padding: .375rem .625rem;
+}
+input[type='color']:focus, input[type='date']:focus, input[type='datetime']:focus, input[type='datetime-local']:focus, input[type='email']:focus, input[type='month']:focus, input[type='number']:focus, input[type='password']:focus, input[type='search']:focus, input[type='tel']:focus, input[type='text']:focus, input[type='url']:focus, input[type='week']:focus, input:not([type]):focus, textarea:focus, select:focus {
+  border-color: var(--accent);
 }
 select { padding-right: 1.875rem; }
 textarea { min-height: 4.0625rem; }
@@ -75,7 +110,7 @@ label, legend { font-size: 1rem; margin-bottom: .3125rem; }
 dl dl, dl ol, dl ul, ol dl, ol ol, ol ul, ul dl, ul ol, ul ul { margin: .9375rem 0 .9375rem 1.875rem; }
 .button, button, dd, dt, li { margin-bottom: .625rem; }
 fieldset, input, select, textarea { margin-bottom: .9375rem; }
-blockquote, dl, figure, form, ol, p, pre, table, ul { margin-bottom: 1.5625rem; }
+blockquote, dl, figure, form, ol, p, pre, table, ul { margin-bottom: 1.125rem; }
 td, th { border-bottom-width: .0625rem; padding: .75rem .9375rem; }
 h1,h2,h3,h4,h5,h6, .h1,.h2,.h3,.h4,.h5,.h6 {
   letter-spacing: -.0625rem;
@@ -112,6 +147,18 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
   .my-80-auto, .mt-80-auto { margin-top: auto; }
   .my-80-auto, .mb-80-auto { margin-bottom: auto; }
 }
+
+.p-0 { padding: 0 !important; }
+.px-0, .pl-0 { padding-left: 0 !important; }
+.px-0, .pr-0 { padding-right: 0 !important; }
+.py-0, .pt-0 { padding-top: 0 !important; }
+.py-0, .pb-0 { padding-bottom: 0 !important; }
+
+.p-auto { padding: auto; }
+.px-auto, .pl-auto { padding-left: auto; }
+.px-auto, .pr-auto { padding-right: auto; }
+.py-auto, .pt-auto { padding-top: auto; }
+.py-auto, .pb-auto { padding-bottom: auto; }
 
 .gap-x-1 > *:not(:first-child) { margin-left: .25rem; }
 .gap-x-2 > *:not(:first-child) { margin-left: .5rem; }
@@ -282,7 +329,7 @@ input[type='submit']:not(:disabled):focus {
 }
 .button-link:hover, .button-link:focus {
   background-color: unset;
-  color: var(--text-primary);
+  color: var(--accent-focus);
   opacity: .8;
 }
 
