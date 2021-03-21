@@ -182,11 +182,6 @@ input[type='email'], input[type='number'], input[type='password'], input[type='s
 
 small, .small { font-size: 87.5%; }
 
-details > summary {
-  cursor: pointer;
-  display: inline-block;
-}
-
 .border-0 { border: 0 !important; }
 
 
@@ -509,6 +504,25 @@ input[type='submit']:not(:disabled):focus {
             transform: scale(1.0);
   }
 }
+
+
+/* =========
+ *  DETAILS
+ * ========= */
+
+details { margin-left: 1.125em; }
+details > summary {
+  cursor: pointer;
+  display: inline flow-root list-item;
+  list-style-position: outside;
+}
+
+
+/* =========
+ *  SECTION
+ * ========= */
+
+* + section { margin-top: 1.875rem; }
 
 
 /* --- */
