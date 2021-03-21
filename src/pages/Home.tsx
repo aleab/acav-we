@@ -63,6 +63,21 @@ export default function Home() {
             </div>
           </Details>
         </section>
+
+        <section id="donations">
+          <h3 className="lead">Donations</h3>
+          <p className="pb-0">Although absolutely not necessary, if you&apos;d like to financially support me and this project, you can do so by clicking the button below.</p>
+
+          <form className="d-inline-block" action="https://www.paypal.com/donate" method="post" target="_blank">
+            <input type="hidden" name="hosted_button_id" value="4BY2XFJXQ982S" />
+
+            <div className="d-inline-flex flex-row-nowrap flex-align-center gap-x-2">
+              <input className="button" type="submit" name="submit" value="Donate" title="PayPal - The safer, easier way to pay online!" aria-label="Donate with PayPal button" />
+              <img className="unselectable" src="./media/PayPal.svg" alt="PayPal logo" height={24} />
+            </div>
+            <img src="https://www.paypal.com/en_US/i/scr/pixel.gif" alt="" width="1" height="1" style={{ border: 0 }} />
+          </form>
+        </section>
       </>
     );
 }

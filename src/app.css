@@ -163,6 +163,7 @@ h6,.h6 { font-size: 1rem; letter-spacing: 0; }
 .text-align-center { text-align: center; }
 .text-align-end { text-align: end; }
 
+.fw-x { font-weight: unset; }
 .fw-2 { font-weight: 200; }
 .fw-4 { font-weight: 400; }
 .fw-5 { font-weight: 500; }
@@ -183,6 +184,24 @@ input[type='email'], input[type='number'], input[type='password'], input[type='s
 small, .small { font-size: 87.5%; }
 
 .border-0 { border: 0 !important; }
+
+.d-none { display: none !important; }
+.d-block { display: block; }
+.d-inline { display: inline; }
+.d-inline-block { display: inline-block; }
+.d-inline-flex { display: inline-flex; }
+
+.unselectable {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+   -khtml-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+       -o-user-select: none;
+          user-select: none;
+  pointer-events: none;
+  cursor: default;
+}
 
 
 /* =====================
@@ -522,7 +541,7 @@ details > summary {
  *  SECTION
  * ========= */
 
-* + section { margin-top: 1.875rem; }
+* + section { margin-top: 2.5rem; }
 
 
 /* --- */
