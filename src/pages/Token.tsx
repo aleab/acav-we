@@ -3,7 +3,7 @@ import qs from 'qs';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RouteProps } from 'react-router';
 
-import OcticonClippy from '@primer/octicons/build/svg/clippy.svg';
+import { ClippyIcon as OcticonClippy } from '@primer/octicons-react';
 
 import Spinner from '../components/Spinner';
 
@@ -19,9 +19,9 @@ type SpotifyAuthError = { error: string; error_description: string; };
 
 export default function Token(props: { location: RouteProps['location'] }) {
     const _search = props.location?.search;
-    const queryParams: { code: string } | null = useMemo(() => (_search ? qs.parse(_search, { ignoreQueryPrefix: true }) : null), [_search]);
+    const queryParams = useMemo(() => (_search ? qs.parse(_search, { ignoreQueryPrefix: true }) : null), [_search]);
 
-    const code = queryParams?.code;
+    const code = queryParams?.['code'];
 
     const [ token, setToken ] = useState<string | undefined>();
     const [ error, setError ] = useState<string | undefined>();
@@ -114,8 +114,8 @@ export default function Token(props: { location: RouteProps['location'] }) {
           <div className="d-flex flex-row-nowrap gap-x-2">
             <div className="input-group">
               <input ref={inputRef} type="text" value={token ?? ''} disabled={!token} readOnly={!!token} />
-              <button type="button" className="d-flex button-outline" title={token ? 'Copy' : undefined} disabled={!token} onClick={onClipboardButtonClick} aria-label="Copy to Clipboard">
-                <OcticonClippy className="octicon" style={{ fontSize: '1.125rem' }} />
+              <button type="button" className="d-flex flex-align-center button-outline" title={token ? 'Copy' : undefined} disabled={!token} onClick={onClipboardButtonClick} aria-label="Copy to Clipboard">
+                <OcticonClippy size={18} />
               </button>
             </div>
             {

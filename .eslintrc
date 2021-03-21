@@ -12,6 +12,7 @@
         "browser": true
     },
     "rules": {
+        "@typescript-eslint/no-use-before-define": ["error"],
         "@typescript-eslint/semi": ["error"],
         "array-bracket-spacing": ["error", "always", { "singleValue": false }],
         "arrow-body-style": "off",
@@ -37,6 +38,7 @@
         "no-cond-assign": "off",
         "no-console": "off",
         "no-multi-spaces": "off",
+        "no-multiple-empty-lines": "off",
         "no-nested-ternary": "off",
         "no-param-reassign": ["error", { "props": false }],
         "no-plusplus": "off",
@@ -45,6 +47,7 @@
         "no-unused-expressions": "off",
         "no-unused-labels": "off",
         "no-unused-vars": "off",
+        "no-use-before-define": "off", // This must be off; use @typescript-eslint/no-use-before-define instead
         "object-curly-newline": "off",
         "object-curly-spacing": ["error", "always"],
         "operator-linebreak": "off",
@@ -76,6 +79,7 @@
             }
         ],
         "react/no-unused-state": "off",
+        "react/require-default-props": [2, { "forbidDefaultForRequired": false, "ignoreFunctionalComponents": true }],
         "react/sort-comp": [
             "warn",
             {

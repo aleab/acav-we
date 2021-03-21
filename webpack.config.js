@@ -5,6 +5,7 @@ const cssnano = require('cssnano');
 
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const DotenvPlugin = require('webpack-dotenv-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 
@@ -15,7 +16,8 @@ const DIST_PATH = path.resolve(__dirname, 'dist');
  * @type {(env: any, argv: import('webpack').CliConfigOptions) => import('webpack').Configuration}
  */
 function getWebpackConfig(env, argv) {
-    const isProduction = argv.mode !== 'development';
+    const mode = argv.nodeEnv || argv.mode || 'production';
+    const isProduction = mode !== 'development';
 
     // Plugins
     const progressPlugin = new webpack.ProgressPlugin({ profile: true });
@@ -24,15 +26,21 @@ function getWebpackConfig(env, argv) {
         path: './.env.gh-pages',
         allowEmptyValues: false,
     });
-    const copyPlugin = new CopyWebpackPlugin([
-        {
-            from: './public/**/*',
-            transformPath(targetPath) { return path.relative('./public', targetPath); },
-        },
-        {
-            from: './public/.nojekyll',
-        },
-    ]);
+    const copyPlugin = new CopyWebpackPlugin({
+        patterns: [
+            {
+                from: './public/**/*',
+                to({ absoluteFilename }) { return path.relative('./public', absoluteFilename); },
+            },
+            {
+                from: './public/.nojekyll',
+            },
+        ],
+    });
+    const eslintPlugin = new ESLintPlugin({
+        extensions: [ 'js', 'mjs', 'jsx', 'ts', 'tsx' ],
+        exclude: ['node_modules'],
+    });
     const miniCssExtractPlugin = new MiniCssExtractPlugin({
         filename: '[name].css',
         chunkFilename: '[id].css',
@@ -48,9 +56,7 @@ function getWebpackConfig(env, argv) {
 
     /** @type {import('webpack').Configuration} */
     const config = {
-        entry: {
-            main: './src/index.ts',
-        },
+        entry: { main: './src/index.ts' },
         output: {
             path: DIST_PATH,
             filename: '[name].js',
@@ -61,16 +67,6 @@ function getWebpackConfig(env, argv) {
         },
         module: {
             rules: [
-                {
-                    test: /\.(js|mjs|jsx|ts|tsx)$/,
-                    enforce: 'pre',
-                    loader: 'eslint-loader',
-                    include: SRC_PATH,
-                    exclude: [path.resolve(__dirname, 'node_modules')],
-                    options: {
-                        configFile: './.eslintrc',
-                    },
-                },
                 {
                     oneOf: [
                         {
@@ -86,23 +82,18 @@ function getWebpackConfig(env, argv) {
                                 {
                                     loader: 'postcss-loader',
                                     options: {
-                                        plugins: [
-                                            cssnano({ preset: 'default' }),
-                                        ],
+                                        postcssOptions: {
+                                            plugins: [
+                                                cssnano({ preset: 'default' }),
+                                            ],
+                                        },
                                     },
                                 },
                             ],
                         },
                         {
                             test: /\.(png|jpe?g|gif)$/i,
-                            loader: 'file-loader',
-                            options: {
-                                name: '[path][name].[ext]',
-                            },
-                        },
-                        {
-                            test: /\.svg$/,
-                            loader: 'svg-react-loader',
+                            type: 'asset/resource',
                         },
                     ],
                 },
@@ -138,6 +129,7 @@ function getWebpackConfig(env, argv) {
             },
         },
         plugins: [
+            eslintPlugin,
             progressPlugin,         // Report compilation progress
             dotenvPlugin,
             copyPlugin,             // Copy static files to build directory
@@ -196,7 +188,7 @@ function getWebpackConfig(env, argv) {
             port: 3000,
             hot: true,
             open: true,
-            contentBase: SRC_PATH,
+            contentBase: DIST_PATH,
             publicPath: '/',
             historyApiFallback: true,
         },
