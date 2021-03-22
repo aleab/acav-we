@@ -37,9 +37,15 @@ const DEFAULT_OPTIONS: Required<Pick<UseCanvas2dTimeGraphOptions, OptionalKeys<U
  * Plots a value vs time graph on a canvas.
  * @returns A {@link React.RefObject<HTMLCanvasElement>} that needs to be bound to a DOM's canvas element.
  */
-export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOptions) {
+export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOptions): [
+    React.RefObject<HTMLCanvasElement>,
+    { min: React.MutableRefObject<number>, max: React.MutableRefObject<number> }
+] {
     const canvas = useRef<HTMLCanvasElement>(null);
     const context = useRef<CanvasRenderingContext2D>();
+
+    const max = useRef(Number.NEGATIVE_INFINITY);
+    const min = useRef(Number.POSITIVE_INFINITY);
 
     const assertCanvasAndContextAreDefined = useCallback(() => {
         if (canvas.current === null) throw new Error('Canvas ref is not bound to any DOM element!');
@@ -72,8 +78,8 @@ export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOption
         const dt = options.refreshInterval ?? DEFAULT_OPTIONS.refreshInterval;
         const dx = _canvas.width / ((options.duration ?? DEFAULT_OPTIONS.duration) / dt);
 
-        const getPointY = (value: number, max: number) => {
-            const h = max > 0 ? (_canvas.height - 4) * (value / max) : 0;
+        const getPointY = (value: number) => {
+            const h = max.current > 0 ? (_canvas.height - 4) * (value / max.current) : 0;
             return _canvas.height - h - 2;
         };
 
@@ -88,18 +94,19 @@ export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOption
             values.push(value);
 
             if (values.length > 1) {
-                const max = _.max(values) ?? 1;
+                min.current = _.min(values) ?? 1;
+                max.current = _.max(values) ?? 1;
 
                 _context.beginPath();
-                _context.moveTo(0, getPointY(values[0], max));
+                _context.moveTo(0, getPointY(values[0]));
                 for (let i = 1; i < values.length; ++i) {
-                    _context.lineTo(i * dx, getPointY(values[i], max));
+                    _context.lineTo(i * dx, getPointY(values[i]));
                 }
                 _context.stroke();
 
                 if (options.showAverage !== false && (options.showAverage || DEFAULT_OPTIONS.showAverage)) {
                     const _color = _context.strokeStyle;
-                    const meanY = getPointY(_.mean(values) ?? 0, max);
+                    const meanY = getPointY(_.mean(values) ?? 0);
 
                     _context.strokeStyle = _.isString(options.showAverage) ? options.showAverage : DEFAULT_OPTIONS.showAverage;
                     _context.beginPath();
@@ -108,6 +115,9 @@ export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOption
                     _context.stroke();
                     _context.strokeStyle = _color;
                 }
+            } else if (values.length === 1) {
+                min.current = value;
+                max.current = value;
             }
 
             timeoutId = setTimeout(render as TimerHandler, options.refreshInterval);
@@ -121,5 +131,5 @@ export default function useCanvas2dTimeGraph(options: UseCanvas2dTimeGraphOption
         };
     }, [ assertCanvasAndContextAreDefined, options ]);
 
-    return canvas;
+    return [ canvas, { min, max } ];
 }

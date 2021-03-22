@@ -197,14 +197,14 @@ export default function Stats() {
     // const renderTimeCanvas = useCanvas2dTimeGraph(renderTimeCanvasOptions);
 
     const audioSamplesMeanCanvasOptions = useCanvasOptions(resolution, canvasAudioSamplesMean, 50);
-    const audioSamplesMeanCanvas = useCanvas2dTimeGraph(audioSamplesMeanCanvasOptions);
+    const [ audioSamplesMeanCanvas, audioSamplesMeanV ] = useCanvas2dTimeGraph(audioSamplesMeanCanvasOptions);
     const audioSamplesPeakCanvasOptions = useCanvasOptions(resolution, canvasAudioSamplesPeak, 50);
-    const audioSamplesPeakCanvas = useCanvas2dTimeGraph(audioSamplesPeakCanvasOptions);
+    const [ audioSamplesPeakCanvas, audioSamplesPeakV ] = useCanvas2dTimeGraph(audioSamplesPeakCanvasOptions);
 
     const executedAudioListenerCallbackTimeCanvasOptions = useCanvasOptions(resolution, canvasExecutedAudioListenerCallbackTime, 50);
-    const executedAudioListenerCallbackTimeCanvas = useCanvas2dTimeGraph(executedAudioListenerCallbackTimeCanvasOptions);
+    const [ executedAudioListenerCallbackTimeCanvas, executedAudioListenerCallbackTimeV ] = useCanvas2dTimeGraph(executedAudioListenerCallbackTimeCanvasOptions);
     const visualizerRenderTimeCanvasOptions = useCanvasOptions(resolution, canvasVisualizerRenderedTime, 50);
-    const visualizerRenderTimeCanvas = useCanvas2dTimeGraph(visualizerRenderTimeCanvasOptions);
+    const [ visualizerRenderTimeCanvas, visualizerRenderTimeV ] = useCanvas2dTimeGraph(visualizerRenderTimeCanvasOptions);
 
     return (
       <div id="stats" className="overlay p-2" style={{ left: 0, bottom: 30 * resolution, fontSize: 14 * resolution }}>
@@ -238,17 +238,29 @@ export default function Stats() {
           <tbody>
             <tr>
               <th>Size</th>
-              <td colSpan={2}>{`${audioSamplesPerChannel} samples/ch.`}</td>
+              <td colSpan={3}>{`${audioSamplesPerChannel} samples/ch.`}</td>
             </tr>
             <tr>
               <th>Mean</th>
-              <td className="pr-3">{`${audioSamplesMean.toFixed(6)}`}</td>
+              <td className="pr-3">{audioSamplesMean.toFixed(6)}</td>
               <td className="lh-0"><canvas ref={audioSamplesMeanCanvas} width={0} height={0} /></td>
+              <td className="canvas-minmax">
+                <div>
+                  <span>{audioSamplesMeanV.max.current.toFixed(6)}</span>
+                  <span>{audioSamplesMeanV.min.current.toFixed(6)}</span>
+                </div>
+              </td>
             </tr>
             <tr>
               <th>Peak</th>
-              <td className="pr-3">{`${audioSamplesPeak.toFixed(6)}`}</td>
+              <td className="pr-3">{audioSamplesPeak.toFixed(6)}</td>
               <td className="lh-0"><canvas ref={audioSamplesPeakCanvas} width={0} height={0} /></td>
+              <td className="canvas-minmax">
+                <div>
+                  <span>{audioSamplesPeakV.max.current.toFixed(6)}</span>
+                  <span>{audioSamplesPeakV.min.current.toFixed(6)}</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -258,7 +270,7 @@ export default function Stats() {
           <tbody>
             <tr>
               <th>Call Rate</th>
-              <td colSpan={2}>
+              <td colSpan={3}>
                 <span className="mr-2">{`${enteredAudioListenerCallbackRate} calls/s`}</span>
                 {
                     enteredAudioListenerCallbackRate <= AUDIOLISTENER_CALLRATE_LAGGY ? (
@@ -273,6 +285,12 @@ export default function Stats() {
               <th>Execution Time</th>
               <td className="pr-3">{`${executedAudioListenerCallbackTime.toFixed(4)}ms`}</td>
               <td className="lh-0"><canvas ref={executedAudioListenerCallbackTimeCanvas} width={0} height={0} /></td>
+              <td className="canvas-minmax">
+                <div>
+                  <span>{executedAudioListenerCallbackTimeV.max.current.toFixed(4)}</span>
+                  <span>{executedAudioListenerCallbackTimeV.min.current.toFixed(4)}</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -282,12 +300,18 @@ export default function Stats() {
           <tbody>
             <tr>
               <th>Render Rate</th>
-              <td colSpan={2}>{`${visualizerRenderRate}fps`}</td>
+              <td colSpan={3}>{`${visualizerRenderRate}fps`}</td>
             </tr>
             <tr>
               <th>Render Time</th>
               <td className="pr-3">{`${visualizerRenderTime.toFixed(4)}ms`}</td>
               <td className="lh-0"><canvas ref={visualizerRenderTimeCanvas} width={0} height={0} /></td>
+              <td className="canvas-minmax">
+                <div>
+                  <span>{visualizerRenderTimeV.max.current.toFixed(4)}</span>
+                  <span>{visualizerRenderTimeV.min.current.toFixed(4)}</span>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>

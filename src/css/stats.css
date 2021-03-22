@@ -25,3 +25,15 @@
   font-size: .95em;
   font-style: italic;
 }
+
+#stats td.canvas-minmax {
+  height: 1px;
+  font-size: smaller;
+  color: #bcbfc2;
+}
+#stats td.canvas-minmax > div {
+  height: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+}
