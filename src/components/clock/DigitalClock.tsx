@@ -133,7 +133,8 @@ export default function DigitalClock(props: DigitalClockProps) {
             hour: '2-digit',
             minute: '2-digit',
             second: showSeconds ? '2-digit' : undefined,
-            hour12: !locale ? !is24h : locale.toLowerCase().includes('hc-h12'),
+            hourCycle: is24h ? 'h23' : 'h11',
+            hour12: locale?.toLowerCase()?.includes('hc-h12') ? true : undefined,
         };
 
         try {

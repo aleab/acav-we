@@ -34,3 +34,9 @@ interface NodeModule { hot?: any; }
 interface SVGAnimationElement {
     beginElement(): void;
 }
+
+declare module Intl {
+    interface DateTimeFormatOptions {
+        hourCycle?: 'h11' | 'h12' | 'h23' | 'h24';
+    }
+}
