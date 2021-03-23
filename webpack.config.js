@@ -39,7 +39,7 @@ function getWebpackConfig(env, argv) {
     const isProduction = mode !== 'development';
 
     const hot = !!argv.hot;
-    const buildTests = !!argv.buildTests || !isProduction; // --build-tests to include tests in production for ultimate test
+    const buildTests = !isProduction || !!env['BUILD_TESTS']; // `npm run build -- --env BUILD_TESTS` to include tests in production for ultimate test
 
     // Plugins
     const eslintPlugin = new ESLintPlugin({
@@ -359,12 +359,7 @@ function getWebpackConfig(env, argv) {
 
     if (!buildTests) {
         config.plugins = [
-            new webpack.NormalModuleReplacementPlugin(/[\\/]tests[\\/]tests\.ts/, resource => {
-                if (resource.request.endsWith(path.resolve(__dirname, 'src/tests/tests.ts'))) {
-                    resource.request = resource.request.replace(/tests\.ts$/, 'noop.ts');
-                    resource.resource = resource.resource.replace(/tests\.ts$/, 'noop.ts');
-                }
-            }),
+            new webpack.NormalModuleReplacementPlugin(/tests[\\/]tests\.ts/, path.resolve(__dirname, 'src/tests/noop.ts')),
             ...config.plugins,
         ];
     }

@@ -16,8 +16,8 @@
         "distclean": "npm run clean && rimraf ./package-lock.json \"./node_modules/!(rimraf|.bin)\"",
         "prebuild": "npm run clean && babel-node ./build-scripts/pre-build.js",
         "prebuild:dev": "npm run prebuild",
-        "build": "cross-env NODE_ENV=production webpack --node-env production",
-        "build:dev": "cross-env NODE_ENV=development webpack --node-env development",
+        "build": "webpack --node-env production",
+        "build:dev": "webpack --node-env development",
         "start:dev": "npm run build:dev && webpack serve --config ./webpack.config.js --mode development",
         "start:we": "npm run pre-build && babel-node ./webpack-start-we.js",
         "lint": "eslint -c .eslintrc ./src/**/*.ts ./src/**/*.tsx ./src/**/*.js"
