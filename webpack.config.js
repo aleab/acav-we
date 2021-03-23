@@ -1,4 +1,3 @@
-/* eslint-disable import/newline-after-import */
 /* eslint-disable global-require */
 
 const _ = require('lodash');
@@ -9,6 +8,7 @@ const cssnano = require('cssnano');
 const postcssImport = require('postcss-import');
 const purgecss = require('@fullhuman/postcss-purgecss');
 
+const ESLintPlugin = require('eslint-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
@@ -35,11 +35,19 @@ function escapeRegExp(string) {
  * @type {(env: any, argv: import('webpack').CliConfigOptions) => import('webpack').Configuration}
  */
 function getWebpackConfig(env, argv) {
-    const isProduction = argv.mode !== 'development';
+    const mode = argv.nodeEnv || argv.mode || 'production';
+    const isProduction = mode !== 'development';
+
     const hot = !!argv.hot;
     const buildTests = !!argv.buildTests || !isProduction; // --build-tests to include tests in production for ultimate test
 
     // Plugins
+    const eslintPlugin = new ESLintPlugin({
+        files: ['src/**/*'],
+        extensions: [ '.js', '.mjs', '.jsx', '.ts', '.tsx' ],
+        exclude: ['node_modules'],
+        lintDirtyModulesOnly: true,
+    });
     const bundleAnalyzerPlugin = new BundleAnalyzerPlugin({
         analyzerMode: 'static',
         reportFilename: '../bundle-report.html',
@@ -76,27 +84,27 @@ function getWebpackConfig(env, argv) {
         },
         licenseTextOverrides: {
             'musicbrainz-api': '<missing license text>',
-            '@xstate/react': '<missing license text>',
         },
     });
     const lodashPlugin = new LodashPlugin({ cloning: true, exotics: true });
     const threeJsMinifierPlugin = new ThreeMinifierPlugin();
-    const copyPlugin = new CopyWebpackPlugin([
-        { from: './LICENSE.txt' },
-        {
-            from: './static/**/*',
-            transformPath(targetPath) { return path.relative('./static', targetPath); },
-            transform(content, filePath) {
-                if (isProduction) {
+    const copyPlugin = new CopyWebpackPlugin({
+        patterns: [
+            { from: './LICENSE.txt' },
+            {
+                from: './static/**/*',
+                to: ({ absoluteFilename }) => path.relative('./static', absoluteFilename),
+                transform(content, filePath) {
+                    if (isProduction) {
                     // Minify css
-                    if (path.extname(filePath) === '.css') {
-                        return cssnano.process(content).then(v => v.css);
+                        if (path.extname(filePath) === '.css') {
+                            return cssnano.process(content).then(v => v.css);
+                        }
                     }
-                }
-                return content;
+                    return content;
+                },
             },
-        },
-    ]);
+        ] });
     const miniCssExtractPlugin = new MiniCssExtractPlugin({ filename: '[name].css' });
 
     const terserPlugin = new TerserPlugin({
@@ -141,9 +149,7 @@ function getWebpackConfig(env, argv) {
     // ===============
     /** @type {import('webpack').Configuration} */
     const baseConfig = {
-        entry: {
-            main: './src/index.tsx',
-        },
+        entry: { main: './src/index.tsx' },
         output: {
             path: DIST_PATH,
             filename: '[name].js',
@@ -153,19 +159,14 @@ function getWebpackConfig(env, argv) {
             plugins: [
                 threeJsMinifierPlugin.resolver,
             ],
+            fallback: {
+                assert: require.resolve('assert'),
+                net: false,
+                tls: false,
+            },
         },
         module: {
             rules: [
-                {
-                    test: /\.(js|mjs|jsx|ts|tsx)$/,
-                    enforce: 'pre',
-                    loader: 'eslint-loader',
-                    include: SRC_PATH,
-                    exclude: [/node_modules/],
-                    options: {
-                        configFile: './.eslintrc',
-                    },
-                },
                 {
                     oneOf: [
                         {
@@ -182,7 +183,9 @@ function getWebpackConfig(env, argv) {
                                 {
                                     loader: 'postcss-loader',
                                     options: {
-                                        plugins: postcssNoPurgePlugins,
+                                        postcssOptions: {
+                                            plugins: postcssNoPurgePlugins,
+                                        },
                                     },
                                 },
                             ],
@@ -195,7 +198,9 @@ function getWebpackConfig(env, argv) {
                                 {
                                     loader: 'postcss-loader',
                                     options: {
-                                        plugins: postcssPlugins,
+                                        postcssOptions: {
+                                            plugins: postcssPlugins,
+                                        },
                                     },
                                 },
                             ],
@@ -213,11 +218,8 @@ function getWebpackConfig(env, argv) {
                             loader: 'svg-react-loader',
                         },
                         {
-                            loader: 'file-loader',
+                            type: 'asset/resource',
                             exclude: [ /\.(js|mjs|jsx|ts|tsx)$/, /\.json$/, /\.html$/ ],
-                            options: {
-                                name: '[name].[ext]',
-                            },
                         },
                     ],
                 },
@@ -259,7 +261,8 @@ function getWebpackConfig(env, argv) {
                         enforce: true,
                         priority: 1,
                     },
-                    vendors: {
+                    defaultVendors: {
+                        name: 'vendors',
                         test: module => {
                             return !(/\.css$/.test(module.resource))
                                 && /[\\/]node_modules[\\/]/.test(module.resource);
@@ -270,6 +273,7 @@ function getWebpackConfig(env, argv) {
             },
         },
         plugins: [
+            eslintPlugin,
             progressPlugin,         // Report compilation progress
             dotenvPlugin,           // Dotenv plugin + Fail build if required variables are not defined
             licensePlugin,          // Output third party licenses to a file
@@ -304,10 +308,6 @@ function getWebpackConfig(env, argv) {
             version: true,
             warnings: true,
         },
-        node: {
-            net: 'empty',
-            tls: 'empty',
-        },
     };
 
     // ============
@@ -336,7 +336,7 @@ function getWebpackConfig(env, argv) {
             port: 3000,
             hot: true,
             open: true,
-            contentBase: SRC_PATH,
+            contentBase: DIST_PATH,
             publicPath: '/',
         },
         devtool: 'inline-source-map',

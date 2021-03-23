@@ -2,7 +2,7 @@ import Log from '../common/Log';
 
 const Logc = Log.getLogger('Renderer', '#703431');
 
-interface Renderer {
+interface IRenderer {
     readonly setFps: (fps: number) => void;
     readonly start: () => void;
     readonly stop: () => void;
@@ -19,7 +19,7 @@ interface Renderer {
     };
 }
 
-export default function Renderer(fps: number = 0): Renderer {
+export default function Renderer(fps: number = 0): IRenderer {
     let _fps: number = fps;
     let _isRunning: boolean = false;
 

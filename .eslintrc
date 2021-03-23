@@ -1,7 +1,7 @@
 {
     "root": true,
-    "plugins": ["@typescript-eslint", "react", "react-hooks"],
     "extends": ["airbnb", "plugin:react/recommended"],
+    "plugins": ["@typescript-eslint", "react", "react-hooks"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaFeatures": {
@@ -14,6 +14,9 @@
         "es6": true
     },
     "rules": {
+        "@typescript-eslint/no-redeclare": ["error"],
+        "@typescript-eslint/no-shadow": ["error", { "allow": ["_"] }],
+        "@typescript-eslint/no-use-before-define": ["error"],
         "@typescript-eslint/semi": ["error"],
         "@typescript-eslint/type-annotation-spacing": "warn",
         "array-bracket-spacing": ["error", "always", { "singleValue": false }],
@@ -39,14 +42,19 @@
         "no-cond-assign": "off",
         "no-console": "off",
         "no-multi-spaces": "off",
+        "no-multiple-empty-lines": "off",
         "no-nested-ternary": "off",
         "no-param-reassign": ["error", { "props": false }],
         "no-plusplus": "off",
+        "no-redeclare": "off",
+        "no-shadow": "off",
+        "no-undef": "off",
         "no-underscore-dangle": "off",
         "no-unreachable": "warn",
         "no-unused-expressions": "off",
         "no-unused-labels": "off",
         "no-unused-vars": "off",
+        "no-use-before-define": "off", // This must be off; use @typescript-eslint/no-use-before-define instead
         "object-curly-newline": "off",
         "object-curly-spacing": ["error", "always"],
         "operator-linebreak": "off",

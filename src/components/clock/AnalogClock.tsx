@@ -1,5 +1,5 @@
 /* eslint-disable react/no-danger */
-import _, { update } from 'lodash';
+import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -316,6 +316,8 @@ export default function AnalogClock() {
         animations: [number, number, number] | undefined,
         animationRefs: [React.RefObject<SVGAnimationElement>, React.RefObject<SVGAnimationElement>, React.RefObject<SVGAnimationElement>]
     }) => {
+        ((_: any) => {})(ClockHandAnimation); // eslint react-hooks/exhaustive-deps
+
         const a = p.viewWidth / 2;
         const rotations = _calcClockHandsRotations(p.now, p.showSeconds);
 
@@ -344,7 +346,7 @@ export default function AnalogClock() {
             }
           </g>
         );
-    }, []);
+    }, [ClockHandAnimation]);
 
     const halfWidth = useMemo(() => radius + clockBorderStyle.strokeWidth, [ clockBorderStyle.strokeWidth, radius ]);
     const width = useMemo(() => 2 * halfWidth, [halfWidth]);

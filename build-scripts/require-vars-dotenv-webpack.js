@@ -2,6 +2,10 @@
 const chalk = require('chalk');
 const DotenvPlugin = require('dotenv-webpack');
 
+const webpack = require('webpack');
+
+const PLUGIN_NAME = 'RequireVarsDotenvWebpackPlugin';
+
 class RequireVarsDotenvPlugin {
     _environmentVariableNames = [];
     _dotenvOptions = undefined;
@@ -15,15 +19,19 @@ class RequireVarsDotenvPlugin {
         this._dotenvOptions = dotenvOptions;
     }
 
+    /** @param {webpack.Compiler} compiler */
     apply(compiler) {
-        compiler.plugin('environment', (compilation, callback) => {
+        /** @type {DotenvPlugin & { getEnvs: () => { env: { [string]: string } } }} */
+        const dotenv = new DotenvPlugin(this._dotenvOptions);
+
+        compiler.hooks.environment.tap(PLUGIN_NAME, () => {
             console.log('Checking for necessary env variables...');
-            const dotenv = new DotenvPlugin(this._dotenvOptions);
 
             const missingEnvVars = [];
+            const envs = dotenv.getEnvs().env;
             for (let i = 0; i < this._environmentVariableNames.length; ++i) {
                 const env = this._environmentVariableNames[i];
-                if (dotenv.definitions[`process.env.${env}`] === undefined) {
+                if (envs[env] === undefined) {
                     missingEnvVars.push(env);
                 }
             }
@@ -33,9 +41,9 @@ class RequireVarsDotenvPlugin {
                 console.error(chalk.red(`  - ${missingEnvVars.join('\n  * ')}`));
                 throw new Error('Missing env variables. Please see additional logging above');
             }
-
-            dotenv.apply(compiler);
         });
+
+        dotenv.apply(compiler);
     }
 }
 

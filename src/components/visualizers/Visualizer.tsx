@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../../common/Log';
 import CircularBuffer from '../../common/CircularBuffer';
@@ -32,8 +32,11 @@ export default function Visualizer(props: VisualizerProps) {
 
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
 
-    const onRenderedCallback = useRef((e: PerformanceEventArgs) => props.onRendered?.(e));
-    useEffect(() => { onRenderedCallback.current = (e: PerformanceEventArgs) => props.onRendered?.(e); }, [props.onRendered]);
+    const onRendered = useMemo(() => props.onRendered, [props.onRendered]);
+    const onRenderedCallback = useRef((e: PerformanceEventArgs) => { if (onRendered) onRendered(e); });
+    useEffect(() => {
+        onRenderedCallback.current = (e: PerformanceEventArgs) => { if (onRendered) onRendered(e); };
+    }, [onRendered]);
 
     // =====================
     //  PROPERTIES LISTENER
