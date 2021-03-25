@@ -27,10 +27,12 @@ import SpotifyLogo from './SpotifyLogo';
 import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlayProgressBar, { SpotifyOverlayProgressBarProps } from './SpotifyOverlayProgressBar';
-import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
+import SpotifyOverlaySongInfo, { SpotifyOverlaySongInfoProps } from './SpotifyOverlaySongInfo';
 import useClientRect from '../../hooks/useClientRect';
 
 const Logc = Log.getLogger('Spotify', '#1DB954');
+
+const SPOTIFY_LOGO_HEIGHT = 21;
 
 type OverlayStyle = {
     transform: string,
@@ -70,6 +72,7 @@ export default function Spotify(props: SpotifyProps) {
     //  STYLES
     // ========
     //--art
+    const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
     const [ overlayArtType, setOverlayArtType ] = useState(O.current.art.type);
     const [ overlayArtFetchLocalCovers, setOverlayArtFetchLocalCovers ] = useState(O.current.art.fetchLocalCovers);
 
@@ -200,6 +203,7 @@ export default function Spotify(props: SpotifyProps) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
         if (spotifyProps.art !== undefined) {
+            if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
             if (spotifyProps.art.fetchLocalCovers !== undefined) setOverlayArtFetchLocalCovers(spotifyProps.art.fetchLocalCovers);
             if (spotifyProps.art.fetchLocalCacheMaxAge !== undefined) {
@@ -305,6 +309,30 @@ export default function Spotify(props: SpotifyProps) {
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
     }, [ hasNoInternetConnection, isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
+    const OverlayContent = useCallback((_props: {
+        className?: string,
+        width: number,
+        marginLeft?: number,
+        songInfoProps: SpotifyOverlaySongInfoProps,
+        showLogo?: boolean,
+        logoMarginLeft?: number,
+    }) => {
+        const className = 'overlay-content' + (_props.className ? ` ${_props.className}` : '');
+        return (
+          <div className={className} style={{ width: _props.width, marginLeft: _props.marginLeft }}>
+            {
+                _props.showLogo ? (
+                  <SpotifyLogo
+                    src="./images/spotify-logo.png" height={SPOTIFY_LOGO_HEIGHT} style={{ margin: `-6px 0 6px ${_props.logoMarginLeft ?? 0}px` }}
+                    overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement}
+                  />
+                ) : null
+            }
+            <SpotifyOverlaySongInfo {..._props.songInfoProps} />
+          </div>
+        );
+    }, [ props.backgroundElement, spotifyDivRef ]);
+
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle: {
@@ -343,11 +371,28 @@ export default function Spotify(props: SpotifyProps) {
                 );
             }
 
+            // No overlay art
+            if (!showOverlayArt) {
+                const OVERLAY_CONTENT_MARGIN_LEFT = overlayStyle.fontSize - 2;
+                const logoMarginLeft = Math.max(0, SPOTIFY_LOGO_HEIGHT / 2 - OVERLAY_CONTENT_MARGIN_LEFT);
+                return (
+                  <div {...spotifyDivProps}>
+                    <StateIcons />
+                    {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
+                    <div {...songInfoRowProps}>
+                      <OverlayContent
+                        className="align-self-end" width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT}
+                        songInfoProps={songInfoProps} showLogo logoMarginLeft={logoMarginLeft}
+                      />
+                    </div>
+                  </div>
+                );
+            }
+
             switch (overlayArtType) {
                 case SpotifyOverlayArtType.AlbumArt: {
                     const ALBUM_ART_MARGIN = 0.25 * overlayStyle.fontSize;
                     const OVERLAY_CONTENT_MARGIN_LEFT = 0.25 * overlayStyle.fontSize;
-                    const SPOTIFY_LOGO_HEIGHT = 21;
 
                     const artSize = 2 * overlayStyle.fontSize // Track Title + Artist Name
                                   + 2 * overlayStyle.fontSize // .overlay-content's padding
@@ -367,13 +412,10 @@ export default function Spotify(props: SpotifyProps) {
                               preferrectLocalArtChooserElementRef={preferredLocalArtChooserRef}
                               preferrectLocalArtChooserSize={{ width: preferredLocalArtChooserStyle.width, height: preferredLocalArtChooserStyle.maxHeight }}
                             />
-                            <div className="overlay-content align-self-end" style={{ width: overlayStyle.maxWidth, marginLeft: OVERLAY_CONTENT_MARGIN_LEFT }}>
-                              <SpotifyLogo
-                                src="./images/spotify-logo.png" height={SPOTIFY_LOGO_HEIGHT} style={{ margin: `-6px 0 6px ${logoMarginLeft}px` }}
-                                overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement}
-                              />
-                              <SpotifyOverlaySongInfo {...songInfoProps} style={{ width: 'unset' }} />
-                            </div>
+                            <OverlayContent
+                              className="align-self-end" width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT}
+                              songInfoProps={songInfoProps} showLogo logoMarginLeft={logoMarginLeft}
+                            />
                           </div>
                         </div>
                         <div ref={preferredLocalArtChooserRef} style={{ position: 'absolute', ...preferredLocalArtChooserStyle, ...preferredLocalArtChooserPosition }} />
@@ -387,7 +429,7 @@ export default function Spotify(props: SpotifyProps) {
                         {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
                         <div {...songInfoRowProps}>
                           <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
-                          <SpotifyOverlaySongInfo {...songInfoProps} />
+                          <OverlayContent width={overlayStyle.maxWidth} songInfoProps={songInfoProps} />
                         </div>
                       </div>
                     );

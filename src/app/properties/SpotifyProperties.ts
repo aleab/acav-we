@@ -26,6 +26,7 @@ export default interface SpotifyProperties {
         };
     };
     art: {
+        enabled: boolean;
         type: SpotifyOverlayArtType;
         fetchLocalCovers: boolean;
         fetchLocalCacheMaxAge: number;

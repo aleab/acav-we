@@ -16,7 +16,7 @@ function darkenOrLighten(cssColor: string): string {
     return rgba[3] !== 1 ? `rgba(${rgb[0]},${rgb[1]},${rgb[2]},${rgba[3]})` : `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
 }
 
-interface SpotifyOverlaySongInfoProps {
+export interface SpotifyOverlaySongInfoProps {
     currentlyPlaying: SpotifyCurrentlyPlayingObject;
     width: number;
     color: string;
@@ -59,7 +59,7 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     }, [props.currentlyPlaying.item]);
 
     const songInfoStyle = _.merge({}, {
-        width: props.width,
+        //width: props.width,
     }, props.style);
 
     return (
