@@ -104,7 +104,7 @@ type SpotifyLocalTrack = SpotifyTrack & {
         id: null;
         images: [];
     };
-    artist: Array<SpotifyArtist &{
+    artists: Array<SpotifyArtist & {
         href: null;
         id: null;
     }>;

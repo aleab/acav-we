@@ -1,9 +1,10 @@
 import _ from 'lodash';
-import React, { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 
 import SpotifyUtils from '../../app/spotify-utils';
 import { CancellationTokenSource } from '../../common/CancellationToken';
 import { getComputedBackgroundProperties } from '../../common/Css';
+import SpotifyOverlayContext from './SpotifyOverlayContext';
 
 type ComputedBackgroundProperties = ReturnType<typeof getComputedBackgroundProperties>;
 type Color = typeof SpotifyUtils.SPOTIFY_LIGHT_GREEN;
@@ -11,8 +12,6 @@ type Color = typeof SpotifyUtils.SPOTIFY_LIGHT_GREEN;
 interface SpotifyLogoProps {
     src: string;
     height: number;
-    overlayHtmlRef: React.RefObject<HTMLElement>;
-    backgroundHtmlRef: React.RefObject<HTMLElement>;
     style?: React.CSSProperties;
 }
 
@@ -33,6 +32,8 @@ function ColorMatrixFilter(props: { color: Readonly<Color> }) {
 }
 
 export default function SpotifyLogo(props: SpotifyLogoProps) {
+    const context = useContext(SpotifyOverlayContext)!;
+
     const selfRef = useRef<HTMLImageElement>(null);
     const [ logoColor, setLogoColor ] = useReducer((prevColor: Color, newColor: Color) => {
         if (prevColor.hex === newColor.hex) return prevColor;
@@ -45,24 +46,24 @@ export default function SpotifyLogo(props: SpotifyLogoProps) {
         if (prevProps !== null && newProps !== null && _.isMatch(prevProps, newProps)) return prevProps;
         return newProps;
     }, []);
-    const [ overlayBackgroundProperties, setOverlayBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(props.overlayHtmlRef.current));
-    const [ wallpaperBackgroundProperties, setWallpaperBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(props.backgroundHtmlRef.current));
+    const [ overlayBackgroundProperties, setOverlayBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(context.overlayHtmlRef.current));
+    const [ wallpaperBackgroundProperties, setWallpaperBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(context.backgroundHtmlRef.current));
 
     const cts = useRef(new CancellationTokenSource());
     useEffect(() => {
         SpotifyUtils.chooseAppropriateSpotifyColor(
             html2canvasCache,
-            [ props.backgroundHtmlRef, props.overlayHtmlRef ],
+            [ context.backgroundHtmlRef, context.overlayHtmlRef ],
             [ wallpaperBackgroundProperties, overlayBackgroundProperties ],
             selfRef,
             cts,
             color => setLogoColor(color),
         );
-    }, [ html2canvasCache, overlayBackgroundProperties, props.backgroundHtmlRef, props.overlayHtmlRef, wallpaperBackgroundProperties ]);
+    }, [ context.backgroundHtmlRef, context.overlayHtmlRef, html2canvasCache, overlayBackgroundProperties, wallpaperBackgroundProperties ]);
 
     useEffect(() => {
-        setOverlayBackgroundProperties(getComputedBackgroundProperties(props.overlayHtmlRef.current));
-        setWallpaperBackgroundProperties(getComputedBackgroundProperties(props.backgroundHtmlRef.current));
+        setOverlayBackgroundProperties(getComputedBackgroundProperties(context.overlayHtmlRef.current));
+        setWallpaperBackgroundProperties(getComputedBackgroundProperties(context.backgroundHtmlRef.current));
     });
 
     const style = useMemo(() => {

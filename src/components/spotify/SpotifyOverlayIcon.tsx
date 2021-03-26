@@ -1,18 +1,17 @@
 import _ from 'lodash';
-import React, { RefObject, useCallback, useEffect, useReducer, useRef } from 'react';
+import React, { useCallback, useContext, useEffect, useReducer, useRef } from 'react';
 
 import { FaSpotify } from '../../fa';
 import SpotifyUtils from '../../app/spotify-utils';
 import { CancellationTokenSource } from '../../common/CancellationToken';
 import { getComputedBackgroundProperties } from '../../common/Css';
+import SpotifyOverlayContext from './SpotifyOverlayContext';
 
 type ComputedBackgroundProperties = ReturnType<typeof getComputedBackgroundProperties>;
 type Color = typeof SpotifyUtils.SPOTIFY_LIGHT_GREEN;
 
 interface SpotifyOverlayIconProps {
     style?: any;
-    overlayHtmlRef: RefObject<HTMLElement>;
-    backgroundHtmlRef: RefObject<HTMLElement>;
 }
 
 // ===========
@@ -20,6 +19,8 @@ interface SpotifyOverlayIconProps {
 // ===========
 
 export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
+    const context = useContext(SpotifyOverlayContext)!;
+
     // Spotify's Branding Guidelines: https://developer.spotify.com/branding-guidelines/
     const iconRef = useRef<HTMLElement>(null);
     const [ iconColor, setIconColor ] = useReducer((prevColor: Color, newColor: Color) => {
@@ -33,25 +34,25 @@ export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
         if (prevProps !== null && newProps !== null && _.isMatch(prevProps, newProps)) return prevProps;
         return newProps;
     }, []);
-    const [ overlayBackgroundProperties, setOverlayBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(props.overlayHtmlRef.current));
-    const [ wallpaperBackgroundProperties, setWallpaperBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(props.backgroundHtmlRef.current));
+    const [ overlayBackgroundProperties, setOverlayBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(context.overlayHtmlRef.current));
+    const [ wallpaperBackgroundProperties, setWallpaperBackgroundProperties ] = useReducer(computedBackgroundPropertiesReducer, getComputedBackgroundProperties(context.backgroundHtmlRef.current));
 
     // Change the icon's color based on the background to respect Spotify's guidelines
     const cts = useRef(new CancellationTokenSource());
     useEffect(() => {
         SpotifyUtils.chooseAppropriateSpotifyColor(
             html2canvasCache,
-            [ props.backgroundHtmlRef, props.overlayHtmlRef ],
+            [ context.backgroundHtmlRef, context.overlayHtmlRef ],
             [ wallpaperBackgroundProperties, overlayBackgroundProperties ],
             iconRef,
             cts,
             color => setIconColor(color),
         );
-    }, [ html2canvasCache, overlayBackgroundProperties, props.backgroundHtmlRef, props.overlayHtmlRef, wallpaperBackgroundProperties ]);
+    }, [ context.backgroundHtmlRef, context.overlayHtmlRef, html2canvasCache, overlayBackgroundProperties, wallpaperBackgroundProperties ]);
 
     useEffect(() => {
-        setOverlayBackgroundProperties(getComputedBackgroundProperties(props.overlayHtmlRef.current));
-        setWallpaperBackgroundProperties(getComputedBackgroundProperties(props.backgroundHtmlRef.current));
+        setOverlayBackgroundProperties(getComputedBackgroundProperties(context.overlayHtmlRef.current));
+        setWallpaperBackgroundProperties(getComputedBackgroundProperties(context.backgroundHtmlRef.current));
     });
 
     return (

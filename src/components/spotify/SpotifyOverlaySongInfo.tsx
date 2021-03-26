@@ -17,7 +17,7 @@ function darkenOrLighten(cssColor: string): string {
 }
 
 export interface SpotifyOverlaySongInfoProps {
-    currentlyPlaying: SpotifyCurrentlyPlayingObject;
+    currentlyPlaying: SpotifyTrack;
     width: number;
     color: string;
     fontSize: number;
@@ -48,15 +48,15 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
     const TRACK_RENDER_ID = useMemo(() => `SpotifyOverlaySongInfo-ScrollTrack-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const scrollTrackRenderCallback = useCallback((callback: () => void) => context.renderer.queue(TRACK_RENDER_ID, callback), [ TRACK_RENDER_ID, context.renderer ]);
     const scrollTrackCancelRender = useCallback(() => context.renderer.cancel(TRACK_RENDER_ID), [ TRACK_RENDER_ID, context.renderer ]);
-    const track = useMemo(() => (props.currentlyPlaying.item?.name ?? ''), [props.currentlyPlaying.item]);
+    const track = useMemo(() => (props.currentlyPlaying.name ?? ''), [props.currentlyPlaying.name]);
 
     const ARTISTS_RENDER_ID = useMemo(() => `SpotifyOverlaySongInfo-ScrollArtists-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const scrollArtistsRenderCallback = useCallback((callback: () => void) => context.renderer.queue(ARTISTS_RENDER_ID, callback), [ ARTISTS_RENDER_ID, context.renderer ]);
     const scrollArtistsCancelRender = useCallback(() => context.renderer.cancel(ARTISTS_RENDER_ID), [ ARTISTS_RENDER_ID, context.renderer ]);
     const artists = useMemo(() => {
-        if (props.currentlyPlaying.item === null) return '';
-        return props.currentlyPlaying.item.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
-    }, [props.currentlyPlaying.item]);
+        if (props.currentlyPlaying.artists === null) return '';
+        return props.currentlyPlaying.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
+    }, [props.currentlyPlaying.artists]);
 
     const songInfoStyle = _.merge({}, {
         //width: props.width,
