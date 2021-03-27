@@ -1715,5 +1715,10 @@
         "order": 9002,
         "type": "text",
         "text": "ui_note2"
+    },
+    "note3": {
+        "order": 9003,
+        "type": "text",
+        "text": "ui_note3"
     }
 }

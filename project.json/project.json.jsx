@@ -23,21 +23,31 @@ function withPropertyIcon(className, text) {
     return withFAIcon(`propertyIcon ${className}`, text);
 }
 
-function section(name, muted = false, propertyIcon = null) {
+function section(name, muted = false, propertyIcon = null, noteHtml = null) {
     const icon = propertyIcon ? (
       <span className={`${propertyIcon} fa-fw propertyIcon`} />
+    ) : null;
+    const _note = noteHtml ? (
+      <>
+        &nbsp;
+        <sup><small>{Parser(noteHtml)}</small></sup>
+      </>
     ) : null;
     return renderToStaticMarkup(
         muted ? (
           <h3 className="text-muted">
             {icon}
             <ins>{name}</ins>
+            {_note}
           </h3>
         ) : (
-          <h3>
-            {icon}
-            <ins>{name}</ins>
-          </h3>
+          <>
+            <h3>
+              {icon}
+              <ins>{name}</ins>
+              {_note}
+            </h3>
+          </>
         ),
     );
 }
@@ -72,6 +82,7 @@ const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/f0rirujpk8">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
+const spotifyLink = text => `<a href="https://www.spotify.com/">${text}</a>`;
 const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
 const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_language_tag">${text}</a>`;
@@ -325,7 +336,7 @@ function getProjectJson() {
                     ui_taskbar_brightness: indent('Brightness (%)'),
 
                     // [SPOTIFY]
-                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),
+                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify', spotifyLink('[S]')),
                     ui_spotify_backend_url: indent('Backend URL') + asterisk(),
                     ui_spotify_token: indent('Token'),
                     ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a <em>token</em> ${spotifyAuthLink('here')}.`),
@@ -402,6 +413,10 @@ function getProjectJson() {
                     ),
                     ui_note2: note(
                         `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
+                        null,
+                    ),
+                    ui_note3: note(
+                        `<sup>${spotifyLink('[S]')}</sup> GET SPOTIFY FREE`,
                         null,
                     ),
                 },
