@@ -267,6 +267,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.art!, 'type', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
     setProperty(spotifyOptions.art!, 'fetchLocalCovers', raw.spotify_art_fetch_local as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'fetchLocalCacheMaxAge', raw.spotify_art_fetch_local_cache_age as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(spotifyOptions.art!, 'hideMusicbrainzLogo', raw.spotify_art_fetch_local_hideMusicbrainzLogo as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(spotifyOptions.art)) delete spotifyOptions.art;
     // .spotify.scroll
     setProperty(spotifyOptions.scroll!, 'type', raw.spotify_scroll_type as WEProperty<'combo'>, _r => parseComboProperty(_r, TextScrollingType));

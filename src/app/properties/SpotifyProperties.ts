@@ -30,6 +30,7 @@ export default interface SpotifyProperties {
         type: SpotifyOverlayArtType;
         fetchLocalCovers: boolean;
         fetchLocalCacheMaxAge: number;
+        hideMusicbrainzLogo: boolean;
     };
     scroll: {
         type: TextScrollingType;

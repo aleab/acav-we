@@ -76,6 +76,7 @@ const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token"
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
 const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_language_tag">${text}</a>`;
 const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
+const mbLogoImg = () => '<img src="https://raw.githubusercontent.com/metabrainz/metabrainz-logos/master/logos/MusicBrainz/SVG/MusicBrainz_logo_icon.svg" height="18" />';
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -350,7 +351,7 @@ function getProjectJson() {
                     // [SPOTIFY > ART]
                     ui_spotify_art: subSection('Cover Art / Icon'),
                     ui_spotify_art_type: indent('Type', { n: 3 }),
-                    ui_spotify_art_fetch_local: indent('Fetch Local', { n: 3 }),
+                    ui_spotify_art_fetch_local: indent(mbLogoImg() + ' Fetch Local', { n: 3 }),
                     ui_$_spotify_art_fetch_local: note(
                         '<b><u>Experimental</u></b>',
                         `Use an external provider (${musicbrainzLink('musicbrainz.com')}) to fetch cover arts of local files.`,
@@ -364,7 +365,8 @@ function getProjectJson() {
                         '- <em>release-group</em>: an album, single, etc.',
                         '- <em>release</em>: a specific version/issuing of an album, single, etc.',
                     ),
-                    ui_spotify_art_fetch_local_cache_age: indent('Cache (days)', { n: 3 }) + asterisk(),
+                    ui_spotify_art_fetch_local_cache_age: indent(mbLogoImg() + ' Cache (days)', { n: 3 }) + asterisk(),
+                    ui_spotify_art_fetch_local_hideMusicbrainzLogo: indent(mbLogoImg() + ' Hide MusicBrainz Logo', { n: 3 }),
                     //
                     // [SPOTIFY > TEXT SCROLLING]
                     ui_spotify_scroll: subSection('Text Scrolling'),

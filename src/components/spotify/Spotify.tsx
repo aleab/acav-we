@@ -102,6 +102,7 @@ export default function Spotify(props: SpotifyProps) {
     const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
     const [ overlayArtType, setOverlayArtType ] = useState(O.current.art.type);
     const [ overlayArtFetchLocalCovers, setOverlayArtFetchLocalCovers ] = useState(O.current.art.fetchLocalCovers);
+    const [ hideMusicbrainzLogo, setHideMusicbrainzLogo ] = useState(O.current.art.hideMusicbrainzLogo);
 
     //--overlay
     const [ overlayStyle, setOverlayStyle ] = useReducer((prevStyle: OverlayStyle, newStyle: Partial<OverlayStyle>) => {
@@ -238,6 +239,7 @@ export default function Spotify(props: SpotifyProps) {
                     mbClient.current.ttl = Math.round(1000 * 60 * 60 * 24 * spotifyProps.art.fetchLocalCacheMaxAge);
                 }
             }
+            if (spotifyProps.art.hideMusicbrainzLogo !== undefined) setHideMusicbrainzLogo(spotifyProps.art.hideMusicbrainzLogo);
         }
         if (spotifyProps.style !== undefined) {
             const s: Partial<OverlayStyle> = {};
@@ -403,7 +405,7 @@ export default function Spotify(props: SpotifyProps) {
                                 ) : null
                             }
                             <SpotifyOverlayContent
-                              currentlyPlayingTrack={currentlyPlayingTrack}
+                              currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}
                               width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} overlayStyle={overlayStyle}
                               alignSelf={showLogo ? undefined : 'flex-end'} showLogo={showLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
                               logoMarginLeft={getSpotifyLogoMarginLeft(SPOTIFY_LOGO_HEIGHT, ALBUM_ART_MARGIN, OVERLAY_CONTENT_MARGIN_LEFT, showOverlayArt, overlayArtType)}

@@ -1520,6 +1520,13 @@
         "max": 28,
         "condition": "showAdvancedOptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
     },
+    "spotify_art_fetch_local_hideMusicbrainzLogo": {
+        "order": 5036,
+        "type": "bool",
+        "text": "ui_spotify_art_fetch_local_hideMusicbrainzLogo",
+        "value": false,
+        "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
+    },
     //
     // [SPOTIFY > TEXT SCROLLING]
     "spotify_scroll": {
