@@ -114,7 +114,9 @@ export default function Spotify(props: SpotifyProps) {
     // ========
     //  STYLES
     // ========
-    const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.preferMonochromeLogo);
+    const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.logo.preferMonochrome);
+    const [ logoPosition, setLogoPosition ] = useState(O.current.logo.position);
+    const [ logoAlignment, setLogoAlignment ] = useState(O.current.logo.alignment);
 
     //--art
     const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
@@ -249,7 +251,11 @@ export default function Spotify(props: SpotifyProps) {
         if (spotifyProps.token !== undefined && spotifyProps.token) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
-        if (spotifyProps.preferMonochromeLogo !== undefined) setPreferMonochromeLogo(spotifyProps.preferMonochromeLogo);
+        if (spotifyProps.logo !== undefined) {
+            if (spotifyProps.logo.preferMonochrome !== undefined) setPreferMonochromeLogo(spotifyProps.logo.preferMonochrome);
+            if (spotifyProps.logo.position !== undefined) setLogoPosition(spotifyProps.logo.position);
+            if (spotifyProps.logo.alignment !== undefined) setLogoAlignment(spotifyProps.logo.alignment);
+        }
         if (spotifyProps.art !== undefined) {
             if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
@@ -408,6 +414,8 @@ export default function Spotify(props: SpotifyProps) {
                                  + SPOTIFY_LOGO_HEIGHT
                                  - 2 * ALBUM_ART_MARGIN;
             const showLogo = !showOverlayArt || overlayArtType !== SpotifyOverlayArtType.SpotifyIcon;
+            const _logoPosition = logoPosition === Position.Bottom ? 'bottom' : 'top';
+            const _logoAlignment = logoAlignment === Position.Right ? 'right' : 'left';
 
             return (
               <SpotifyOverlayContext.Provider value={spotifyContext}>
@@ -450,8 +458,9 @@ export default function Spotify(props: SpotifyProps) {
                             }
                             <SpotifyOverlayContent
                               width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} marginRight={OVERLAY_CONTENT_MARGIN_RIGHT}
-                              overlayStyle={overlayStyle} alignSelf={showLogo ? undefined : 'flex-end'}
+                              overlayStyle={overlayStyle} alignSelf={showLogo ? undefined : (_logoPosition === 'top' ? 'flex-end' : 'flex-start')}
                               showLogo={showLogo} preferMonochromeLogo={preferMonochromeLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
+                              logoPosition={_logoPosition} logoAlignment={_logoAlignment}
                               logoMarginLeft={getSpotifyLogoMarginLeft(SPOTIFY_LOGO_HEIGHT, ALBUM_ART_MARGIN, OVERLAY_CONTENT_MARGIN_LEFT, showOverlayArt, overlayArtType)}
                               currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}
                               forceRefreshScrollableArea={forceRefreshScrollableArea}

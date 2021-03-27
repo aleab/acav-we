@@ -248,11 +248,10 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(taskbarOptions, 'brightness', raw.taskbar_brightness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     // .spotify
-    const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, art: {}, scroll: {}, progressBar: {} };
+    const spotifyOptions: MappedProperties['spotify'] = { style: { background: {} }, logo: {}, art: {}, scroll: {}, progressBar: {} };
     setProperty(spotifyOptions, 'showOverlay', raw.spotify as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions, 'backendURL', raw.spotify_backend_url as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
-    setProperty(spotifyOptions, 'preferMonochromeLogo', raw.spotify_logo_preferMonochrome as WEProperty<'bool'>, _r => _r.value);
     // .spotify.style
     setProperty(spotifyOptions.style!, 'pivot', raw.spotify_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
     setProperty(spotifyOptions.style!, 'left', raw.spotify_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -267,6 +266,11 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions.style!.background!, 'css', raw.spotify_background_css as WEProperty<'textinput'>, _r => _r.value);
     if (_.isEmpty(spotifyOptions.style!.background)) delete spotifyOptions.style!.background;
     if (_.isEmpty(spotifyOptions.style)) delete spotifyOptions.style;
+    // .spotify.style.logo
+    setProperty(spotifyOptions.logo!, 'preferMonochrome', raw.spotify_logo_preferMonochrome as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions.logo!, 'position', raw.spotify_logo_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
+    setProperty(spotifyOptions.logo!, 'alignment', raw.spotify_logo_alignment as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
+    if (_.isEmpty(spotifyOptions.logo)) delete spotifyOptions.logo;
     // .spotify.art
     setProperty(spotifyOptions.art!, 'enabled', raw.spotify_art as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'type', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));

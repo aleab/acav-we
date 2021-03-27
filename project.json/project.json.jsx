@@ -340,7 +340,6 @@ function getProjectJson() {
                     ui_spotify_width: indent('Width (px)'),
                     ui_spotify_font_size: indent('Font Size (px)'),
                     ui_spotify_text_color: indent('Text Color'),
-                    ui_spotify_logo_preferMonochrome: indent('Prefer Monochrome Logo'),
                     //
                     // [SPOTIFY > BACKGROUND]
                     ui_spotify_background: subSection('Background'),
@@ -369,6 +368,12 @@ function getProjectJson() {
                     ),
                     ui_spotify_art_fetch_local_cache_age: indent(mbLogoImg() + ' Cache (days)', { n: 3 }) + asterisk(),
                     ui_spotify_art_fetch_local_hideMusicbrainzLogo: indent(mbLogoImg() + ' Hide MusicBrainz Logo', { n: 3 }),
+                    //
+                    // [SPOTIFY > LOGO]
+                    ui_spotify_logo: subSection('Logo'),
+                    ui_spotify_logo_preferMonochrome: indent('Prefer Monochrome', { n: 3 }),
+                    ui_spotify_logo_position: indent('Position', { n: 3 }),
+                    ui_spotify_logo_alignment: indent('Alignment', { n: 3 }),
                     //
                     // [SPOTIFY > TEXT SCROLLING]
                     ui_spotify_scroll: subSection('Text Scrolling'),

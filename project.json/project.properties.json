@@ -1430,13 +1430,6 @@
         "value": "1 1 1",
         "condition": "spotify.value"
     },
-    "spotify_logo_preferMonochrome": {
-        "order": 5016,
-        "type": "bool",
-        "text": "ui_spotify_logo_preferMonochrome",
-        "value": false,
-        "condition": "spotify.value"
-    },
     //
     // [SPOTIFY > BACKGROUND]
     "spotify_background": {
@@ -1544,6 +1537,43 @@
         "text": "ui_spotify_art_fetch_local_hideMusicbrainzLogo",
         "value": false,
         "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
+    },
+    //
+    // [SPOTIFY > LOGO]
+    "spotify_logo": {
+        "order": 5150,
+        "type": "text",
+        "text": "ui_spotify_logo",
+        "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
+    },
+    "spotify_logo_preferMonochrome": {
+        "order": 5151,
+        "type": "bool",
+        "text": "ui_spotify_logo_preferMonochrome",
+        "value": false,
+        "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
+    },
+    "spotify_logo_position": {
+        "order": 5152,
+        "type": "combo",
+        "text": "ui_spotify_logo_position",
+        "options": [
+            { "label": "Top", "value": "Top" },
+            { "label": "Bottom", "value": "Bottom" }
+        ],
+        "value": "Top",
+        "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
+    },
+    "spotify_logo_alignment": {
+        "order": 5153,
+        "type": "combo",
+        "text": "ui_spotify_logo_alignment",
+        "options": [
+            { "label": "Left", "value": "Left" },
+            { "label": "Right", "value": "Right" }
+        ],
+        "value": "Left",
+        "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
     },
     //
     // [SPOTIFY > TEXT SCROLLING]
