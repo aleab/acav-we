@@ -10,6 +10,7 @@ type ComputedBackgroundProperties = ReturnType<typeof getComputedBackgroundPrope
 type Color = typeof SpotifyUtils.SPOTIFY_LIGHT_GREEN;
 
 interface SpotifyLogoProps {
+    preferMonochrome: boolean;
     src: string;
     height: number;
     style?: React.CSSProperties;
@@ -56,10 +57,11 @@ export default function SpotifyLogo(props: SpotifyLogoProps) {
             [ context.backgroundHtmlRef, context.overlayHtmlRef ],
             [ wallpaperBackgroundProperties, overlayBackgroundProperties ],
             selfRef,
+            props.preferMonochrome,
             cts,
             color => setLogoColor(color),
         );
-    }, [ context.backgroundHtmlRef, context.overlayHtmlRef, html2canvasCache, overlayBackgroundProperties, wallpaperBackgroundProperties ]);
+    }, [ context.backgroundHtmlRef, context.overlayHtmlRef, html2canvasCache, overlayBackgroundProperties, props.preferMonochrome, wallpaperBackgroundProperties ]);
 
     useEffect(() => {
         setOverlayBackgroundProperties(getComputedBackgroundProperties(context.overlayHtmlRef.current));

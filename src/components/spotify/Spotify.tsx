@@ -98,6 +98,8 @@ export default function Spotify(props: SpotifyProps) {
     // ========
     //  STYLES
     // ========
+    const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.preferMonochromeLogo);
+
     //--art
     const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
     const [ overlayArtType, setOverlayArtType ] = useState(O.current.art.type);
@@ -230,6 +232,7 @@ export default function Spotify(props: SpotifyProps) {
         if (spotifyProps.token !== undefined && spotifyProps.token) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
+        if (spotifyProps.preferMonochromeLogo !== undefined) setPreferMonochromeLogo(spotifyProps.preferMonochromeLogo);
         if (spotifyProps.art !== undefined) {
             if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
@@ -376,7 +379,7 @@ export default function Spotify(props: SpotifyProps) {
                       currentlyPlaying?.item === null || currentlyPlaying?.item === undefined || currentlyPlayingTrack === null ? (
                         <>
                           {/*Show only Spotify's icon when no song is playing*/}
-                          <SpotifyOverlayIcon />
+                          <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
                         </>
                       ) : (
                         <>
@@ -400,15 +403,15 @@ export default function Spotify(props: SpotifyProps) {
                                         preferrectLocalArtChooserSize={{ width: preferredLocalArtChooserStyle.width, height: preferredLocalArtChooserStyle.maxHeight }}
                                       />
                                     ) : overlayArtType === SpotifyOverlayArtType.SpotifyIcon ? (
-                                      <SpotifyOverlayIcon />
+                                      <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
                                     ) : null
                                 ) : null
                             }
                             <SpotifyOverlayContent
-                              currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}
-                              width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} overlayStyle={overlayStyle}
-                              alignSelf={showLogo ? undefined : 'flex-end'} showLogo={showLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
+                              width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} overlayStyle={overlayStyle} alignSelf={showLogo ? undefined : 'flex-end'}
+                              showLogo={showLogo} preferMonochromeLogo={preferMonochromeLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
                               logoMarginLeft={getSpotifyLogoMarginLeft(SPOTIFY_LOGO_HEIGHT, ALBUM_ART_MARGIN, OVERLAY_CONTENT_MARGIN_LEFT, showOverlayArt, overlayArtType)}
+                              currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}
                             />
                           </div>
                         </>
@@ -432,7 +435,7 @@ export default function Spotify(props: SpotifyProps) {
             return (
               <SpotifyOverlayContext.Provider value={spotifyContext}>
                 <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
-                  <SpotifyOverlayIcon />
+                  <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
                   <SpotifyOverlayError message={errorMsg} secondaryMessages={secondaryMessages} color={overlayStyle.color} />
                   <StateIcons />
                 </div>
@@ -446,7 +449,7 @@ export default function Spotify(props: SpotifyProps) {
             return (
               <SpotifyOverlayContext.Provider value={spotifyContext}>
                 <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
-                  <SpotifyOverlayIcon />
+                  <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
                   <SpotifyOverlayError message={errorMsg} secondaryMessages={event?.error ? [event?.error] : undefined} color={overlayStyle.color} />
                   <StateIcons />
                 </div>

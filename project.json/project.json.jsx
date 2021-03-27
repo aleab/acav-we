@@ -340,6 +340,7 @@ function getProjectJson() {
                     ui_spotify_width: indent('Width (px)'),
                     ui_spotify_font_size: indent('Font Size (px)'),
                     ui_spotify_text_color: indent('Text Color'),
+                    ui_spotify_logo_preferMonochrome: indent('Prefer Monochrome Logo'),
                     //
                     // [SPOTIFY > BACKGROUND]
                     ui_spotify_background: subSection('Background'),

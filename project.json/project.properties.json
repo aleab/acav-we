@@ -1430,6 +1430,13 @@
         "value": "1 1 1",
         "condition": "spotify.value"
     },
+    "spotify_logo_preferMonochrome": {
+        "order": 5016,
+        "type": "bool",
+        "text": "ui_spotify_logo_preferMonochrome",
+        "value": false,
+        "condition": "spotify.value"
+    },
     //
     // [SPOTIFY > BACKGROUND]
     "spotify_background": {
@@ -1475,14 +1482,14 @@
     //
     // [SPOTIFY > ART]
     "spotify_art": {
-        "order": 5030,
+        "order": 5100,
         "type": "bool",
         "text": "ui_spotify_art",
         "value": true,
         "condition": "spotify.value"
     },
     "spotify_art_type": {
-        "order": 5031,
+        "order": 5101,
         "type": "combo",
         "text": "ui_spotify_art_type",
         "options": [
@@ -1493,26 +1500,26 @@
         "condition": "spotify.value && spotify_art.value"
     },
     "spotify_art_fetch_local": {
-        "order": 5032,
+        "order": 5122,
         "type": "bool",
         "text": "ui_spotify_art_fetch_local",
         "value": false,
         "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
     },
     "$_spotify_art_fetch_local": {
-        "order": 5033,
+        "order": 5123,
         "type": "text",
         "text": "ui_$_spotify_art_fetch_local",
         "condition": "(spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
     },
     "$_spotify_art_fetch_local_note": {
-        "order": 5034,
+        "order": 5124,
         "type": "text",
         "text": "ui_$_spotify_art_fetch_local_note",
         "condition": "showDescriptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt'"
     },
     "spotify_art_fetch_local_cache_age": {
-        "order": 5035,
+        "order": 5125,
         "type": "slider",
         "text": "ui_spotify_art_fetch_local_cache_age",
         "value": 5,
@@ -1521,7 +1528,7 @@
         "condition": "showAdvancedOptions.value && (spotify.value && spotify_art.value) && spotify_art_type.value === 'AlbumArt' && spotify_art_fetch_local.value"
     },
     "spotify_art_fetch_local_hideMusicbrainzLogo": {
-        "order": 5036,
+        "order": 5126,
         "type": "bool",
         "text": "ui_spotify_art_fetch_local_hideMusicbrainzLogo",
         "value": false,
@@ -1530,13 +1537,13 @@
     //
     // [SPOTIFY > TEXT SCROLLING]
     "spotify_scroll": {
-        "order": 5040,
+        "order": 5240,
         "type": "text",
         "text": "ui_spotify_scroll",
         "condition": "spotify.value"
     },
     "spotify_scroll_type": {
-        "order": 5041,
+        "order": 5241,
         "type": "combo",
         "text": "ui_spotify_scroll_type",
         "options": [
@@ -1547,7 +1554,7 @@
         "condition": "spotify.value"
     },
     "spotify_scroll_speed": {
-        "order": 5042,
+        "order": 5242,
         "type": "slider",
         "text": "ui_spotify_scroll_speed",
         "value": 30,
@@ -1556,7 +1563,7 @@
         "condition": "spotify.value"
     },
     "spotify_scroll_auto_delay": {
-        "order": 5043,
+        "order": 5243,
         "type": "slider",
         "text": "ui_spotify_scroll_auto_delay",
         "value": 3,
@@ -1569,14 +1576,14 @@
     //
     // [SPOTIFY > PROGRESS BAR]
     "spotify_progressbar": {
-        "order": 5100,
+        "order": 5300,
         "type": "bool",
         "text": "ui_spotify_progressbar",
         "value": false,
         "condition": "spotify.value"
     },
     "spotify_progressbar_position": {
-        "order": 5101,
+        "order": 5301,
         "type": "combo",
         "text": "ui_spotify_progressbar_position",
         "options": [
@@ -1587,7 +1594,7 @@
         "condition": "spotify.value && spotify_progressbar.value"
     },
     "spotify_progressbar_color": {
-        "order": 5102,
+        "order": 5302,
         "type": "color",
         "text": "ui_spotify_progressbar_color",
         "value": "0.639215 0.749019 0.698039",

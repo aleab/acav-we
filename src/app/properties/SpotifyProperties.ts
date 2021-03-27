@@ -10,6 +10,7 @@ export default interface SpotifyProperties {
     showOverlay: boolean;
     backendURL: string;
     token: string;
+    preferMonochromeLogo: boolean;
     style: {
         pivot: Pivot;
         left: number;

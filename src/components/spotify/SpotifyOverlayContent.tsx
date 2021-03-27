@@ -15,6 +15,7 @@ export interface SpotifyOverlayContentProps {
     marginLeft?: number;
     overlayStyle: OverlayStyle;
     showLogo?: boolean;
+    preferMonochromeLogo?: boolean;
     logoMarginLeft?: number;
     logoHeight?: number;
     alignSelf?: 'flex-start' | 'flex-end';
@@ -48,7 +49,7 @@ export default function SpotifyOverlayContent(props: SpotifyOverlayContentProps)
                   style={{ margin: `${-6 + (mbMargin ?? 0)}px 0 6px ${props.logoMarginLeft ?? 0}px`, visibility: props.showMusicbrainzLogoOnLocalTrack ? undefined : 'hidden' }}
                 />
               ) : (
-                <SpotifyLogo src="./images/spotify-logo.png" height={logoHeight} style={{ margin: `-6px 0 6px ${props.logoMarginLeft ?? 0}px` }} />
+                <SpotifyLogo preferMonochrome={props.preferMonochromeLogo ?? false} src="./images/spotify-logo.png" height={logoHeight} style={{ margin: `-6px 0 6px ${props.logoMarginLeft ?? 0}px` }} />
               )
             ) : null
         }

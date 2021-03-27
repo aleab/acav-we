@@ -325,9 +325,9 @@ function getComputedBorderPaddingAndFontSize(element: HTMLElement) {
 //  PRIVATE UTILITY FUNCTIONS
 // ===========================
 
-function _chooseColor(backgroundRgb: RGB, isBackgroundImage: boolean = false) {
+function _chooseColor(backgroundRgb: RGB, preferMonochrome: boolean, isBackgroundImage: boolean = false) {
     const hsl = ColorConvert.rgb.hsl(backgroundRgb);
-    if (!isBackgroundImage && ((hsl[2] <= 3 || colorEquals(backgroundRgb, SPOTIFY_BLACK.rgb)) || (hsl[2] > 95))) {
+    if (!preferMonochrome && !isBackgroundImage && ((hsl[2] <= 3 || colorEquals(backgroundRgb, SPOTIFY_BLACK.rgb)) || (hsl[2] > 95))) {
         return SPOTIFY_LIGHT_GREEN;
     }
     return isDark(backgroundRgb) ? SPOTIFY_WHITE : SPOTIFY_BLACK;
@@ -493,6 +493,7 @@ function chooseAppropriateSpotifyColor(
     /** Back to front. */ backgroundRefs: React.RefObject<HTMLElement>[],
     /** Back to front. */ backgroundProps: ComputedBackgroundProperties[],
     selfRef: React.RefObject<HTMLElement>,
+    preferMonochrome: boolean,
     cts: React.MutableRefObject<CancellationTokenSource>,
     callback: (color: { hex: string, rgb: RGB }) => void,
 ) {
@@ -509,11 +510,11 @@ function chooseAppropriateSpotifyColor(
     if (_.some(backgroundProps, p => p?.backgroundImage.toLowerCase() !== PropertyDescriptors.backgroundImage.initialValue)) {
         CacheStorage.attachInstance(html2canvasCache.current);
         _getAverageColorOfBackgrounds(backgroundRefs, backgroundProps, selfRef, cts.current.token).then(rgb => {
-            callback(_chooseColor(rgb));
+            callback(_chooseColor(rgb, preferMonochrome));
         }).catch(() => {}).finally(() => CacheStorage.detachInstance());
     } else {
         const rgb = _lerpBackgroundColors(backgroundProps.length - 1, new Stack<RGBA>(), backgroundProps);
-        callback(_chooseColor(rgb));
+        callback(_chooseColor(rgb, preferMonochrome));
     }
 }
 
