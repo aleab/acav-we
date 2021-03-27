@@ -11,6 +11,7 @@ export default interface SpotifyProperties {
     backendURL: string;
     token: string;
     hideWhenNothingIsPlaying: boolean;
+    preferMonochromeLogo: boolean;
     style: {
         pivot: Pivot;
         left: number;
@@ -27,7 +28,6 @@ export default interface SpotifyProperties {
         };
     };
     logo: {
-        preferMonochrome: boolean;
         position: Position;
         alignment: Position;
     };

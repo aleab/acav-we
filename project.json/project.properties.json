@@ -1667,6 +1667,13 @@
         "value": "1 1 1",
         "condition": "spotify.value"
     },
+    "spotify_preferMonochromeLogo": {
+        "order": 5016,
+        "type": "bool",
+        "text": "ui_spotify_preferMonochromeLogo",
+        "value": false,
+        "condition": "spotify.value"
+    },
     //
     // [SPOTIFY > BACKGROUND]
     "spotify_background": {
@@ -1783,15 +1790,8 @@
         "text": "ui_spotify_logo",
         "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
     },
-    "spotify_logo_preferMonochrome": {
-        "order": 5151,
-        "type": "bool",
-        "text": "ui_spotify_logo_preferMonochrome",
-        "value": false,
-        "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
-    },
     "spotify_logo_position": {
-        "order": 5152,
+        "order": 5151,
         "type": "combo",
         "text": "ui_spotify_logo_position",
         "options": [
@@ -1802,7 +1802,7 @@
         "condition": "spotify.value && (!spotify_art.value || spotify_art_type.value !== 'SpotifyIcon')"
     },
     "spotify_logo_alignment": {
-        "order": 5153,
+        "order": 5152,
         "type": "combo",
         "text": "ui_spotify_logo_alignment",
         "options": [

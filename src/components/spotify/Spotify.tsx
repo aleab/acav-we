@@ -116,7 +116,7 @@ export default function Spotify(props: SpotifyProps) {
     // ========
     //  STYLES
     // ========
-    const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.logo.preferMonochrome);
+    const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.preferMonochromeLogo);
     const [ logoPosition, setLogoPosition ] = useState(O.current.logo.position);
     const [ logoAlignment, setLogoAlignment ] = useState(O.current.logo.alignment);
 
@@ -254,8 +254,8 @@ export default function Spotify(props: SpotifyProps) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
         if (spotifyProps.hideWhenNothingIsPlaying !== undefined) setHideWhenNothingIsPlaying(spotifyProps.hideWhenNothingIsPlaying);
+        if (spotifyProps.preferMonochromeLogo !== undefined) setPreferMonochromeLogo(spotifyProps.preferMonochromeLogo);
         if (spotifyProps.logo !== undefined) {
-            if (spotifyProps.logo.preferMonochrome !== undefined) setPreferMonochromeLogo(spotifyProps.logo.preferMonochrome);
             if (spotifyProps.logo.position !== undefined) setLogoPosition(spotifyProps.logo.position);
             if (spotifyProps.logo.alignment !== undefined) setLogoAlignment(spotifyProps.logo.alignment);
         }

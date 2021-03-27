@@ -285,6 +285,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(spotifyOptions, 'backendURL', raw.spotify_backend_url as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'token', raw.spotify_token as WEProperty<'textinput'>, _r => _r.value);
     setProperty(spotifyOptions, 'hideWhenNothingIsPlaying', raw.spotify_hideWhenNothingIsPlaying as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions, 'preferMonochromeLogo', raw.spotify_preferMonochromeLogo as WEProperty<'bool'>, _r => _r.value);
     // .spotify.style
     setProperty(spotifyOptions.style!, 'pivot', raw.spotify_pivot as WEProperty<'combo'>, _r => parseComboProperty(_r, Pivot));
     setProperty(spotifyOptions.style!, 'left', raw.spotify_position_x as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -300,7 +301,6 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(spotifyOptions.style!.background)) delete spotifyOptions.style!.background;
     if (_.isEmpty(spotifyOptions.style)) delete spotifyOptions.style;
     // .spotify.style.logo
-    setProperty(spotifyOptions.logo!, 'preferMonochrome', raw.spotify_logo_preferMonochrome as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.logo!, 'position', raw.spotify_logo_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
     setProperty(spotifyOptions.logo!, 'alignment', raw.spotify_logo_alignment as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
     if (_.isEmpty(spotifyOptions.logo)) delete spotifyOptions.logo;
