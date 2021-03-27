@@ -17,6 +17,7 @@ import { generateCssStyle as generateBackgroundCss } from '../../app/BackgroundM
 import SpotifyOverlayArtType from '../../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../../app/SpotifyStateMachine';
 import WallpaperContext from '../../app/WallpaperContext';
+import useClientRect from '../../hooks/useClientRect';
 import useSpotifySmartTrackRefresh from '../../hooks/useSpotifySmartTrackRefresh';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
@@ -28,7 +29,6 @@ import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
 import SpotifyOverlayProgressBar from './SpotifyOverlayProgressBar';
 import SpotifyOverlayContent from './SpotifyOverlayContent';
-import useClientRect from '../../hooks/useClientRect';
 
 const Logc = Log.getLogger('Spotify', '#1DB954');
 
@@ -294,8 +294,8 @@ export default function Spotify(props: SpotifyProps) {
         setCurrentlyPlayingTrack(newObject?.item ?? null);
         return newObject;
     }, undefined);
-    const [ lastResponseCode, setLastResponseCode ] = useState(0);
 
+    const [ lastResponseCode, setLastResponseCode ] = useState(0);
     const canRefreshTrack = useCallback(() => state.value === SpotifyStateMachineState.S5HasATIdle, [state.value]);
     const tokenHasExpiredCallback = useCallback(() => send(SpotifyStateMachineEvent.SpotifyTokenExpired), [send]);
     const noInternetConnectionCallback = useCallback(() => send(SpotifyStateMachineEvent.NoInternetConnection), [send]);
@@ -330,26 +330,32 @@ export default function Spotify(props: SpotifyProps) {
     const preferredLocalArtChooserRef = useRef<HTMLDivElement>(null);
     const [ preferredLocalArtChooserPosition, setPreferredLocalArtChooserPosition ] = useState<Pick<CSSProperties, 'left' | 'top' | 'transform'>>({ left: 0, top: 0 });
     const preferredLocalArtChooserStyle = useMemo(() => ({ width: 224, maxHeight: 152 }), []);
-    const [ spotifyOverlayClientRect, spotifyDivRef, spotifyOverlayClientRectCallbackRef ] = useClientRect<HTMLDivElement>();
+
+    // BoundingClientRect
+    const [ spotifyDivRect, spotifyDivRef, spotifyDivRefCallback ] = useClientRect<HTMLDivElement>([
+        // Every property that could change the overlay's position or size is a dependency
+        overlayStyle.left, overlayStyle.top, overlayStyle.maxWidth, overlayStyle.fontSize, overlayStyle.transform,
+        showOverlayArt, overlayArtType, overlayArtFetchLocalCovers, showProgressBar, currentlyPlayingTrack === null,
+    ]);
     useEffect(() => {
-        ((..._args: any[]) => {})(overlayStyle.left, overlayStyle.top, overlayStyle.maxWidth, overlayStyle.fontSize, overlayStyle.transform);
-        if (spotifyOverlayClientRect !== null) {
-            let left = spotifyOverlayClientRect.left;
-            let top = spotifyOverlayClientRect.bottom;
+        const rect = spotifyDivRect;
+        if (rect) {
+            let left = rect.left;
+            let top = rect.bottom;
             const transform: string[] = [];
 
-            if (spotifyOverlayClientRect.left + preferredLocalArtChooserStyle.width >= window.innerWidth - 20) {
-                left = spotifyOverlayClientRect.right;
+            if (rect.left + preferredLocalArtChooserStyle.width >= window.innerWidth - 20) {
+                left = rect.right;
                 transform.push('translateX(-100%)');
             }
-            if (spotifyOverlayClientRect.bottom + preferredLocalArtChooserStyle.maxHeight >= window.innerHeight - 20) {
-                top = spotifyOverlayClientRect.top;
+            if (rect.bottom + preferredLocalArtChooserStyle.maxHeight >= window.innerHeight - 20) {
+                top = rect.top;
                 transform.push('translateY(-100%)');
             }
 
-            setPreferredLocalArtChooserPosition(prev => ({ ...prev, left, top, transform: transform.join(' ') }));
+            setPreferredLocalArtChooserPosition({ left, top, transform: transform.join(' ') });
         }
-    }, [ overlayStyle.fontSize, overlayStyle.left, overlayStyle.maxWidth, overlayStyle.top, overlayStyle.transform, preferredLocalArtChooserStyle.maxHeight, preferredLocalArtChooserStyle.width, spotifyOverlayClientRect ]);
+    }, [ preferredLocalArtChooserStyle.maxHeight, preferredLocalArtChooserStyle.width, spotifyDivRect ]);
 
     // ========
     //  RENDER
@@ -392,10 +398,10 @@ export default function Spotify(props: SpotifyProps) {
 
             return (
               <SpotifyOverlayContext.Provider value={spotifyContext}>
-                <div ref={spotifyOverlayClientRectCallbackRef} id="spotify" className="overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden" style={{ ...overlayStyle, ...overlayBackgroundStyle }}>
+                <div ref={spotifyDivRefCallback} id="spotify" className="overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden" style={{ ...overlayStyle, ...overlayBackgroundStyle }}>
                   <StateIcons />
                   {
-                      currentlyPlaying?.item === null || currentlyPlaying?.item === undefined || currentlyPlayingTrack === null ? (
+                      currentlyPlayingTrack === null ? (
                         <>
                           {/*Show only Spotify's icon when no song is playing*/}
                           <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
