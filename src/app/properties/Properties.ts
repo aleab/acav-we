@@ -45,7 +45,11 @@ export default interface Properties {
 }
 
 function parseComboProperty<TEnum>(prop: WEProperty<'combo'>, EnumType: TEnum): TEnum[keyof TEnum] {
-    return EnumType[prop.value as keyof typeof EnumType];
+    let key = prop.value as keyof typeof EnumType;
+    if (!_.some(prop.options, o => o.value === key)) {
+        key = prop.options[0].value as keyof typeof EnumType;
+    }
+    return EnumType[key];
 }
 
 function parseColorProperty(prop: WEProperty<'color'>): [number, number, number] {
@@ -266,6 +270,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .spotify.art
     setProperty(spotifyOptions.art!, 'enabled', raw.spotify_art as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'type', raw.spotify_art_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyOverlayArtType));
+    setProperty(spotifyOptions.art!, 'position', raw.spotify_art_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
     setProperty(spotifyOptions.art!, 'fetchLocalCovers', raw.spotify_art_fetch_local as WEProperty<'bool'>, _r => _r.value);
     setProperty(spotifyOptions.art!, 'fetchLocalCacheMaxAge', raw.spotify_art_fetch_local_cache_age as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(spotifyOptions.art!, 'hideMusicbrainzLogo', raw.spotify_art_fetch_local_hideMusicbrainzLogo as WEProperty<'bool'>, _r => _r.value);

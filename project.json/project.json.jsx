@@ -352,6 +352,7 @@ function getProjectJson() {
                     // [SPOTIFY > ART]
                     ui_spotify_art: subSection('Cover Art / Icon'),
                     ui_spotify_art_type: indent('Type', { n: 3 }),
+                    ui_spotify_art_position: indent('Position', { n: 3 }),
                     ui_spotify_art_fetch_local: indent(mbLogoImg() + ' Fetch Local', { n: 3 }),
                     ui_$_spotify_art_fetch_local: note(
                         '<b><u>Experimental</u></b>',

@@ -29,6 +29,7 @@ export default interface SpotifyProperties {
     art: {
         enabled: boolean;
         type: SpotifyOverlayArtType;
+        position: Position;
         fetchLocalCovers: boolean;
         fetchLocalCacheMaxAge: number;
         hideMusicbrainzLogo: boolean;

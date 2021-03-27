@@ -1499,6 +1499,17 @@
         "value": "AlbumArt",
         "condition": "spotify.value && spotify_art.value"
     },
+    "spotify_art_position": {
+        "order": 5102,
+        "type": "combo",
+        "text": "ui_spotify_art_position",
+        "options": [
+            { "label": "Left", "value": "Left" },
+            { "label": "Right", "value": "Right" }
+        ],
+        "value": "Left",
+        "condition": "spotify.value && spotify_art.value"
+    },
     "spotify_art_fetch_local": {
         "order": 5122,
         "type": "bool",

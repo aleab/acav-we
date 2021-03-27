@@ -47,8 +47,11 @@ interface SpotifyProps {
     backgroundElement: RefObject<HTMLElement>;
 }
 
-function getOverlayContentMarginLeft(fontSize: number, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType) {
-    if (!showOverlayArt) return fontSize - 2;
+function getOverlayContentMarginLeft(fontSize: number, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType, overlayArtPosition: Position) {
+    if (!showOverlayArt || overlayArtPosition === Position.Right) {
+        return fontSize - 2;
+    }
+
     switch (overlayArtType) {
         case SpotifyOverlayArtType.AlbumArt:
             return 0.25 * fontSize;
@@ -56,6 +59,19 @@ function getOverlayContentMarginLeft(fontSize: number, showOverlayArt: boolean, 
             return undefined;
         default: return undefined;
     }
+}
+function getOverlayContentMarginRight(fontSize: number, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType, overlayArtPosition: Position) {
+    if (!showOverlayArt) return undefined;
+    if (overlayArtPosition === Position.Right) {
+        switch (overlayArtType) {
+            case SpotifyOverlayArtType.AlbumArt:
+                return 0.25 * fontSize;
+            case SpotifyOverlayArtType.SpotifyIcon:
+                return undefined;
+            default: return undefined;
+        }
+    }
+    return undefined;
 }
 function getSpotifyLogoMarginLeft(logoHeight: number, albumArtMargin: number, overlayContentMarginLeft: number | undefined, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType) {
     if (!showOverlayArt) return Math.max(0, logoHeight / 2 - (overlayContentMarginLeft ?? 0));
@@ -103,6 +119,7 @@ export default function Spotify(props: SpotifyProps) {
     //--art
     const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
     const [ overlayArtType, setOverlayArtType ] = useState(O.current.art.type);
+    const [ overlayArtPosition, setOverlayArtPosition ] = useState(O.current.art.position);
     const [ overlayArtFetchLocalCovers, setOverlayArtFetchLocalCovers ] = useState(O.current.art.fetchLocalCovers);
     const [ hideMusicbrainzLogo, setHideMusicbrainzLogo ] = useState(O.current.art.hideMusicbrainzLogo);
 
@@ -236,6 +253,7 @@ export default function Spotify(props: SpotifyProps) {
         if (spotifyProps.art !== undefined) {
             if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
+            if (spotifyProps.art.position !== undefined) setOverlayArtPosition(spotifyProps.art.position);
             if (spotifyProps.art.fetchLocalCovers !== undefined) setOverlayArtFetchLocalCovers(spotifyProps.art.fetchLocalCovers);
             if (spotifyProps.art.fetchLocalCacheMaxAge !== undefined) {
                 if (mbClient.current !== undefined) {
@@ -364,7 +382,8 @@ export default function Spotify(props: SpotifyProps) {
             if (currentlyPlaying === undefined) return null;
 
             const ALBUM_ART_MARGIN = 0.25 * overlayStyle.fontSize;
-            const OVERLAY_CONTENT_MARGIN_LEFT = getOverlayContentMarginLeft(overlayStyle.fontSize, showOverlayArt, overlayArtType);
+            const OVERLAY_CONTENT_MARGIN_LEFT = getOverlayContentMarginLeft(overlayStyle.fontSize, showOverlayArt, overlayArtType, overlayArtPosition);
+            const OVERLAY_CONTENT_MARGIN_RIGHT = getOverlayContentMarginRight(overlayStyle.fontSize, showOverlayArt, overlayArtType, overlayArtPosition);
             const ALBUM_ART_SIZE = 2 * overlayStyle.fontSize // Track Title + Artist Name
                                  + 2 * overlayStyle.fontSize // .overlay-content's padding
                                  + SPOTIFY_LOGO_HEIGHT
@@ -391,7 +410,10 @@ export default function Spotify(props: SpotifyProps) {
                                 />
                               ) : null
                           }
-                          <div className="main d-flex flex-row flex-nowrap align-items-center overflow-hidden" style={{ maxWidth: overlayStyle.maxWidth }}>
+                          <div
+                            className={`main d-flex ${overlayArtPosition === Position.Right ? 'flex-row-reverse' : 'flex-row'} flex-nowrap align-items-center overflow-hidden`}
+                            style={{ maxWidth: overlayStyle.maxWidth }}
+                          >
                             {
                                 showOverlayArt ? (
                                     overlayArtType === SpotifyOverlayArtType.AlbumArt ? (
@@ -408,7 +430,8 @@ export default function Spotify(props: SpotifyProps) {
                                 ) : null
                             }
                             <SpotifyOverlayContent
-                              width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} overlayStyle={overlayStyle} alignSelf={showLogo ? undefined : 'flex-end'}
+                              width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} marginRight={OVERLAY_CONTENT_MARGIN_RIGHT}
+                              overlayStyle={overlayStyle} alignSelf={showLogo ? undefined : 'flex-end'}
                               showLogo={showLogo} preferMonochromeLogo={preferMonochromeLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
                               logoMarginLeft={getSpotifyLogoMarginLeft(SPOTIFY_LOGO_HEIGHT, ALBUM_ART_MARGIN, OVERLAY_CONTENT_MARGIN_LEFT, showOverlayArt, overlayArtType)}
                               currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}

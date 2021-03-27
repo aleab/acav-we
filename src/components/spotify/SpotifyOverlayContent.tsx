@@ -13,6 +13,7 @@ type OverlayStyle = {
 export interface SpotifyOverlayContentProps {
     width: number;
     marginLeft?: number;
+    marginRight?: number;
     overlayStyle: OverlayStyle;
     showLogo?: boolean;
     preferMonochromeLogo?: boolean;
@@ -36,8 +37,9 @@ export default function SpotifyOverlayContent(props: SpotifyOverlayContentProps)
     const style = useMemo<React.CSSProperties>(() => ({
         width: props.width,
         marginLeft: props.marginLeft,
+        marginRight: props.marginRight,
         alignSelf: props.alignSelf,
-    }), [ props.alignSelf, props.marginLeft, props.width ]);
+    }), [ props.alignSelf, props.marginLeft, props.marginRight, props.width ]);
 
     return (
       <div className="overlay-content" style={style}>
