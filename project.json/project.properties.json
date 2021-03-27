@@ -1410,7 +1410,7 @@
         "type": "slider",
         "text": "ui_spotify_width",
         "value": 270,
-        "min": 200,
+        "min": 230,
         "max": 500,
         "condition": "spotify.value"
     },
