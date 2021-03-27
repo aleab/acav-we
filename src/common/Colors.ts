@@ -1,5 +1,5 @@
 import ColorConvert from 'color-convert';
-import { RGB } from 'color-convert/conversions';
+import { LAB, RGB } from 'color-convert/conversions';
 
 export function darkenOrLightenRgbColor(rgb: RGB, brightnessThreshold: number = 0.4): RGB {
     const hsv = ColorConvert.rgb.hsv([ rgb[0], rgb[1], rgb[2] ]);
@@ -21,4 +21,10 @@ export function lerp(color1: RGB, color2: RGB, k: number): RGB {
         Math.round(Math.lerp(color1[1], color2[1], k)),
         Math.round(Math.lerp(color1[2], color2[2], k)),
     ] as RGB;
+}
+
+// Lightness: https://en.wikipedia.org/wiki/Lightness#Lightness_and_human_perception
+export function isDark(rgb: RGB) {
+    const lab: LAB = ColorConvert.rgb.lab(rgb);
+    return lab[0] <= 45;
 }

@@ -23,21 +23,31 @@ function withPropertyIcon(className, text) {
     return withFAIcon(`propertyIcon ${className}`, text);
 }
 
-function section(name, muted = false, propertyIcon = null) {
+function section(name, muted = false, propertyIcon = null, noteHtml = null) {
     const icon = propertyIcon ? (
       <span className={`${propertyIcon} fa-fw propertyIcon`} />
+    ) : null;
+    const _note = noteHtml ? (
+      <>
+        &nbsp;
+        <sup><small>{Parser(noteHtml)}</small></sup>
+      </>
     ) : null;
     return renderToStaticMarkup(
         muted ? (
           <h3 className="text-muted">
             {icon}
             <ins>{name}</ins>
+            {_note}
           </h3>
         ) : (
-          <h3>
-            {icon}
-            <ins>{name}</ins>
-          </h3>
+          <>
+            <h3>
+              {icon}
+              <ins>{name}</ins>
+              {_note}
+            </h3>
+          </>
         ),
     );
 }
@@ -72,11 +82,13 @@ const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/f0rirujpk8">${text}</a>`;
 const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
+const spotifyLink = text => `<a href="https://www.spotify.com/">${text}</a>`;
 const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
 const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
 const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_language_tag">${text}</a>`;
 const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
 const mdnObjectFitLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit">${text}</a>`;
+const mbLogoImg = () => '<img src="https://raw.githubusercontent.com/metabrainz/metabrainz-logos/master/logos/MusicBrainz/SVG/MusicBrainz_logo_icon.svg" height="18" />';
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -360,7 +372,7 @@ function getProjectJson() {
                     ui_taskbar_brightness: indent('Brightness (%)'),
 
                     // [SPOTIFY]
-                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify'),
+                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify', spotifyLink('[S]')),
                     ui_spotify_backend_url: indent('Backend URL') + asterisk(),
                     ui_spotify_token: indent('Token'),
                     ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a <em>token</em> ${spotifyAuthLink('here')}.`),
@@ -386,7 +398,8 @@ function getProjectJson() {
                     // [SPOTIFY > ART]
                     ui_spotify_art: subSection('Cover Art / Icon'),
                     ui_spotify_art_type: indent('Type', { n: 3 }),
-                    ui_spotify_art_fetch_local: indent('Fetch Local', { n: 3 }),
+                    ui_spotify_art_position: indent('Position', { n: 3 }),
+                    ui_spotify_art_fetch_local: indent(mbLogoImg() + ' Fetch Local', { n: 3 }),
                     ui_$_spotify_art_fetch_local: note(
                         '<b><u>Experimental</u></b>',
                         `Use an external provider (${musicbrainzLink('musicbrainz.com')}) to fetch cover arts of local files.`,
@@ -400,7 +413,14 @@ function getProjectJson() {
                         '- <em>release-group</em>: an album, single, etc.',
                         '- <em>release</em>: a specific version/issuing of an album, single, etc.',
                     ),
-                    ui_spotify_art_fetch_local_cache_age: indent('Cache (days)', { n: 3 }) + asterisk(),
+                    ui_spotify_art_fetch_local_cache_age: indent(mbLogoImg() + ' Cache (days)', { n: 3 }) + asterisk(),
+                    ui_spotify_art_fetch_local_hideMusicbrainzLogo: indent(mbLogoImg() + ' Hide MusicBrainz Logo', { n: 3 }),
+                    //
+                    // [SPOTIFY > LOGO]
+                    ui_spotify_logo: subSection('Logo'),
+                    ui_spotify_logo_preferMonochrome: indent('Prefer Monochrome', { n: 3 }),
+                    ui_spotify_logo_position: indent('Position', { n: 3 }),
+                    ui_spotify_logo_alignment: indent('Alignment', { n: 3 }),
                     //
                     // [SPOTIFY > TEXT SCROLLING]
                     ui_spotify_scroll: subSection('Text Scrolling'),
@@ -429,6 +449,10 @@ function getProjectJson() {
                     ),
                     ui_note2: note(
                         `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
+                        null,
+                    ),
+                    ui_note3: note(
+                        `<sup>${spotifyLink('[S]')}</sup> GET SPOTIFY FREE`,
                         null,
                     ),
                 },

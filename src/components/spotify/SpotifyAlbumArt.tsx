@@ -29,6 +29,8 @@ interface SpotifyAlbumArtProps {
 
     preferrectLocalArtChooserElementRef: RefObject<HTMLElement>;
     preferrectLocalArtChooserSize: { width: number; height: number };
+
+    onLoad?: React.ReactEventHandler<HTMLImageElement>;
 }
 
 function testCachedUrl(url: string): Promise<void> {
@@ -200,7 +202,7 @@ export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     return (
       <>
         <div className={classNames.join(' ')} style={{ ...props.style, lineHeight: 0 }} onClick={onClick}>
-          <img style={imgStyle} src={src} alt="" />
+          <img style={imgStyle} src={src} alt="" onLoad={props.onLoad} onError={props.onLoad} />
           {canShowPreferredLocalArtChooser ? (
             <span className={showPreferredCoverArtChooser ? 'chevron up' : 'chevron'}>
               <FaChevronCircleDown />

@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import React, { CSSProperties, RefObject, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { CSSProperties, RefObject, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AnyEventObject } from 'xstate';
 import { useMachine } from '@xstate/react';
 
@@ -17,19 +17,22 @@ import { generateCssStyle as generateBackgroundCss } from '../../app/BackgroundM
 import SpotifyOverlayArtType from '../../app/SpotifyOverlayArtType';
 import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../../app/SpotifyStateMachine';
 import WallpaperContext from '../../app/WallpaperContext';
+import useClientRect from '../../hooks/useClientRect';
 import useSpotifySmartTrackRefresh from '../../hooks/useSpotifySmartTrackRefresh';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
 import MusicbrainzClientCacheDecorator from '../../services/musicbrainz-client-cache-decorator';
 
+import SpotifyOverlayContext, { SpotifyOverlayContextType } from './SpotifyOverlayContext';
 import SpotifyAlbumArt from './SpotifyAlbumArt';
 import SpotifyOverlayError from './SpotifyOverlayError';
 import SpotifyOverlayIcon from './SpotifyOverlayIcon';
-import SpotifyOverlayProgressBar, { SpotifyOverlayProgressBarProps } from './SpotifyOverlayProgressBar';
-import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
-import useClientRect from '../../hooks/useClientRect';
+import SpotifyOverlayProgressBar from './SpotifyOverlayProgressBar';
+import SpotifyOverlayContent from './SpotifyOverlayContent';
 
-const Logc = Log.getLogger('Spofity', '#1DB954');
+const Logc = Log.getLogger('Spotify', '#1DB954');
+
+const SPOTIFY_LOGO_HEIGHT = 21;
 
 type OverlayStyle = {
     transform: string,
@@ -42,6 +45,49 @@ type OverlayStyle = {
 
 interface SpotifyProps {
     backgroundElement: RefObject<HTMLElement>;
+}
+
+function getOverlayContentMarginLeft(fontSize: number, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType, overlayArtPosition: Position) {
+    if (!showOverlayArt || overlayArtPosition === Position.Right) {
+        return fontSize - 2;
+    }
+
+    switch (overlayArtType) {
+        case SpotifyOverlayArtType.AlbumArt:
+            return 0.25 * fontSize;
+        case SpotifyOverlayArtType.SpotifyIcon:
+            return undefined;
+        default: return undefined;
+    }
+}
+function getOverlayContentMarginRight(fontSize: number, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType, overlayArtPosition: Position) {
+    if (!showOverlayArt) return undefined;
+    if (overlayArtPosition === Position.Right) {
+        switch (overlayArtType) {
+            case SpotifyOverlayArtType.AlbumArt:
+                return 0.25 * fontSize;
+            case SpotifyOverlayArtType.SpotifyIcon:
+                return undefined;
+            default: return undefined;
+        }
+    }
+    return undefined;
+}
+function getSpotifyLogoMarginLeft(logoHeight: number, albumArtMargin: number, overlayContentMarginLeft: number | undefined, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType) {
+    if (!showOverlayArt) return Math.max(0, logoHeight / 2 - (overlayContentMarginLeft ?? 0));
+    switch (overlayArtType) {
+        case SpotifyOverlayArtType.AlbumArt:
+            return Math.max(0, logoHeight / 2 - albumArtMargin - (overlayContentMarginLeft ?? 0));
+        case SpotifyOverlayArtType.SpotifyIcon:
+            return undefined;
+        default: return undefined;
+    }
+}
+
+function spotifyTrackEquals(a: SpotifyTrack, b: SpotifyTrack) {
+    if (a.is_local !== b.is_local) return false;
+    if (a.is_local && b.is_local) return a.uri === b.uri;
+    return a.id === b.id;
 }
 
 export default function Spotify(props: SpotifyProps) {
@@ -68,10 +114,16 @@ export default function Spotify(props: SpotifyProps) {
     // ========
     //  STYLES
     // ========
+    const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.logo.preferMonochrome);
+    const [ logoPosition, setLogoPosition ] = useState(O.current.logo.position);
+    const [ logoAlignment, setLogoAlignment ] = useState(O.current.logo.alignment);
+
     //--art
     const [ showOverlayArt, setShowOverlayArt ] = useState(O.current.art.enabled);
     const [ overlayArtType, setOverlayArtType ] = useState(O.current.art.type);
+    const [ overlayArtPosition, setOverlayArtPosition ] = useState(O.current.art.position);
     const [ overlayArtFetchLocalCovers, setOverlayArtFetchLocalCovers ] = useState(O.current.art.fetchLocalCovers);
+    const [ hideMusicbrainzLogo, setHideMusicbrainzLogo ] = useState(O.current.art.hideMusicbrainzLogo);
 
     //--overlay
     const [ overlayStyle, setOverlayStyle ] = useReducer((prevStyle: OverlayStyle, newStyle: Partial<OverlayStyle>) => {
@@ -199,15 +251,22 @@ export default function Spotify(props: SpotifyProps) {
         if (spotifyProps.token !== undefined && spotifyProps.token) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
+        if (spotifyProps.logo !== undefined) {
+            if (spotifyProps.logo.preferMonochrome !== undefined) setPreferMonochromeLogo(spotifyProps.logo.preferMonochrome);
+            if (spotifyProps.logo.position !== undefined) setLogoPosition(spotifyProps.logo.position);
+            if (spotifyProps.logo.alignment !== undefined) setLogoAlignment(spotifyProps.logo.alignment);
+        }
         if (spotifyProps.art !== undefined) {
             if (spotifyProps.art.enabled !== undefined) setShowOverlayArt(spotifyProps.art.enabled);
             if (spotifyProps.art.type !== undefined) setOverlayArtType(spotifyProps.art.type);
+            if (spotifyProps.art.position !== undefined) setOverlayArtPosition(spotifyProps.art.position);
             if (spotifyProps.art.fetchLocalCovers !== undefined) setOverlayArtFetchLocalCovers(spotifyProps.art.fetchLocalCovers);
             if (spotifyProps.art.fetchLocalCacheMaxAge !== undefined) {
                 if (mbClient.current !== undefined) {
                     mbClient.current.ttl = Math.round(1000 * 60 * 60 * 24 * spotifyProps.art.fetchLocalCacheMaxAge);
                 }
             }
+            if (spotifyProps.art.hideMusicbrainzLogo !== undefined) setHideMusicbrainzLogo(spotifyProps.art.hideMusicbrainzLogo);
         }
         if (spotifyProps.style !== undefined) {
             const s: Partial<OverlayStyle> = {};
@@ -231,9 +290,18 @@ export default function Spotify(props: SpotifyProps) {
     //  OVERLAY
     // =========
     // currentlyPlaying is undefined until the first refresh; it's null when no track is playing
-    const [ currentlyPlaying, setCurrentlyPlaying ] = useState<SpotifyCurrentlyPlayingObject | null | undefined>(undefined);
-    const [ lastResponseCode, setLastResponseCode ] = useState(0);
+    const [ currentlyPlayingTrack, setCurrentlyPlayingTrack ] = useReducer((prevTrack: SpotifyTrack | null, newTrack: SpotifyTrack | null) => {
+        if (!prevTrack || !newTrack) return newTrack;
+        if (spotifyTrackEquals(prevTrack, newTrack)) return prevTrack;
+        return newTrack;
+    }, null);
+    const [ currentlyPlaying, setCurrentlyPlaying ] = useReducer((prevO: SpotifyCurrentlyPlayingObject | null | undefined, newO: React.SetStateAction<SpotifyCurrentlyPlayingObject | null | undefined>) => {
+        const newObject = typeof newO === 'function' ? newO(prevO) : newO;
+        setCurrentlyPlayingTrack(newObject?.item ?? null);
+        return newObject;
+    }, undefined);
 
+    const [ lastResponseCode, setLastResponseCode ] = useState(0);
     const canRefreshTrack = useCallback(() => state.value === SpotifyStateMachineState.S5HasATIdle, [state.value]);
     const tokenHasExpiredCallback = useCallback(() => send(SpotifyStateMachineEvent.SpotifyTokenExpired), [send]);
     const noInternetConnectionCallback = useCallback(() => send(SpotifyStateMachineEvent.NoInternetConnection), [send]);
@@ -268,26 +336,32 @@ export default function Spotify(props: SpotifyProps) {
     const preferredLocalArtChooserRef = useRef<HTMLDivElement>(null);
     const [ preferredLocalArtChooserPosition, setPreferredLocalArtChooserPosition ] = useState<Pick<CSSProperties, 'left' | 'top' | 'transform'>>({ left: 0, top: 0 });
     const preferredLocalArtChooserStyle = useMemo(() => ({ width: 224, maxHeight: 152 }), []);
-    const [ spotifyOverlayClientRect, spotifyDivRef, spotifyOverlayClientRectCallbackRef ] = useClientRect<HTMLDivElement>();
+
+    // BoundingClientRect
+    const [ spotifyDivRect, spotifyDivRef, spotifyDivRefCallback ] = useClientRect<HTMLDivElement>([
+        // Every property that could change the overlay's position or size is a dependency
+        overlayStyle.left, overlayStyle.top, overlayStyle.maxWidth, overlayStyle.fontSize, overlayStyle.transform,
+        showOverlayArt, overlayArtType, overlayArtFetchLocalCovers, showProgressBar, currentlyPlayingTrack === null,
+    ]);
     useEffect(() => {
-        ((..._args: any[]) => {})(overlayStyle.left, overlayStyle.top, overlayStyle.maxWidth, overlayStyle.fontSize, overlayStyle.transform);
-        if (spotifyOverlayClientRect !== null) {
-            let left = spotifyOverlayClientRect.left;
-            let top = spotifyOverlayClientRect.bottom;
+        const rect = spotifyDivRect;
+        if (rect) {
+            let left = rect.left;
+            let top = rect.bottom;
             const transform: string[] = [];
 
-            if (spotifyOverlayClientRect.left + preferredLocalArtChooserStyle.width >= window.innerWidth - 20) {
-                left = spotifyOverlayClientRect.right;
+            if (rect.left + preferredLocalArtChooserStyle.width >= window.innerWidth - 20) {
+                left = rect.right;
                 transform.push('translateX(-100%)');
             }
-            if (spotifyOverlayClientRect.bottom + preferredLocalArtChooserStyle.maxHeight >= window.innerHeight - 20) {
-                top = spotifyOverlayClientRect.top;
+            if (rect.bottom + preferredLocalArtChooserStyle.maxHeight >= window.innerHeight - 20) {
+                top = rect.top;
                 transform.push('translateY(-100%)');
             }
 
-            setPreferredLocalArtChooserPosition(prev => ({ ...prev, left, top, transform: transform.join(' ') }));
+            setPreferredLocalArtChooserPosition({ left, top, transform: transform.join(' ') });
         }
-    }, [ overlayStyle.fontSize, overlayStyle.left, overlayStyle.maxWidth, overlayStyle.top, overlayStyle.transform, preferredLocalArtChooserStyle.maxHeight, preferredLocalArtChooserStyle.width, spotifyOverlayClientRect ]);
+    }, [ preferredLocalArtChooserStyle.maxHeight, preferredLocalArtChooserStyle.width, spotifyDivRect ]);
 
     // ========
     //  RENDER
@@ -306,93 +380,103 @@ export default function Spotify(props: SpotifyProps) {
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
     }, [ hasNoInternetConnection, isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
+    // NOTE: If the current track is a local track, the album art will load asynchronously after render.
+    // This messes up with the scrolling text, since it won't receive any info that its own clientWidth changed.
+    // The following code forces an update whenever the img changes.
+    const forceRefreshScrollableArea = useRef<() => void>();
+    const albumArtWidth = useRef(-1);
+    const onAlbumArtLoaded = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
+        if (albumArtWidth.current !== e.currentTarget?.width ?? -1) {
+            albumArtWidth.current = e.currentTarget?.width ?? -1;
+            forceRefreshScrollableArea.current?.();
+        }
+    }, []);
+    useEffect(() => forceRefreshScrollableArea.current?.(), [ overlayArtPosition, overlayArtType, showOverlayArt ]);
+
+    const spotifyContext = useMemo<SpotifyOverlayContextType>(() => {
+        return {
+            logger: Logc,
+            overlayHtmlRef: spotifyDivRef,
+            backgroundHtmlRef: props.backgroundElement,
+        };
+    }, [ props.backgroundElement, spotifyDivRef ]);
+
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
         case SpotifyStateMachineState.S5HasATIdle: {
             if (currentlyPlaying === undefined) return null;
-            const spotifyDivProps = {
-                ref: spotifyOverlayClientRectCallbackRef,
-                id: 'spotify',
-                className: 'overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden',
-                style: { ...overlayStyle, ...overlayBackgroundStyle },
-            };
-            const songInfoRowProps = {
-                className: 'main d-flex flex-row flex-nowrap align-items-center overflow-hidden',
-                style: { maxWidth: overlayStyle.maxWidth },
-            };
-            const songInfoProps = {
-                currentlyPlaying: currentlyPlaying!,
-                width: overlayStyle.maxWidth,
-                color: overlayStyle.color,
-                fontSize: overlayStyle.fontSize,
-            };
-            const progressBarProps: SpotifyOverlayProgressBarProps = {
-                color: progressBarColor,
-                isPlaying: currentlyPlaying?.is_playing ?? false,
-                durationMs: currentlyPlaying?.item?.duration_ms ?? 0,
-                progressMs: currentlyPlaying?.progress_ms ?? 0,
-                className: `${progressBarPosition === Position.Top ? 'top' : 'bottom'}`,
-            };
 
-            if (currentlyPlaying?.item === null || currentlyPlaying?.item === undefined) {
-                // Show only Spotify's icon when no song is playing
-                return (
-                  <div {...spotifyDivProps}>
-                    <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
-                    <StateIcons />
-                  </div>
-                );
-            }
+            const ALBUM_ART_MARGIN = 0.25 * overlayStyle.fontSize;
+            const OVERLAY_CONTENT_MARGIN_LEFT = getOverlayContentMarginLeft(overlayStyle.fontSize, showOverlayArt, overlayArtType, overlayArtPosition);
+            const OVERLAY_CONTENT_MARGIN_RIGHT = getOverlayContentMarginRight(overlayStyle.fontSize, showOverlayArt, overlayArtType, overlayArtPosition);
+            const ALBUM_ART_SIZE = 2 * overlayStyle.fontSize // Track Title + Artist Name
+                                 + 2 * overlayStyle.fontSize // .overlay-content's padding
+                                 + SPOTIFY_LOGO_HEIGHT
+                                 - 2 * ALBUM_ART_MARGIN;
+            const showLogo = !showOverlayArt || overlayArtType !== SpotifyOverlayArtType.SpotifyIcon;
+            const _logoPosition = logoPosition === Position.Bottom ? 'bottom' : 'top';
+            const _logoAlignment = logoAlignment === Position.Right ? 'right' : 'left';
 
-            // No cover art nor icon
-            if (!showOverlayArt) {
-                return (
-                  <div {...spotifyDivProps}>
-                    <StateIcons />
-                    {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
-                    <div {...songInfoRowProps}>
-                      <SpotifyOverlaySongInfo {...songInfoProps} style={{ marginLeft: '1em' }} />
-                    </div>
-                  </div>
-                );
-            }
-
-            switch (overlayArtType) {
-                case SpotifyOverlayArtType.AlbumArt: {
-                    const artWidth = 4 * overlayStyle.fontSize - 2 * 0.25 * overlayStyle.fontSize; // calc(4em - 2 * .25em)
-                    return (
-                      <>
-                        <div {...spotifyDivProps}>
-                          <StateIcons />
-                          {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
-                          <div {...songInfoRowProps}>
-                            <SpotifyAlbumArt
-                              className="flex-shrink-0" style={{ margin: '.25em' }} width={artWidth}
-                              track={currentlyPlaying.item} fetchLocalCovers={overlayArtFetchLocalCovers}
-                              mbClient={mbClient.current} mbClientCache={mbClient.current}
-                              preferrectLocalArtChooserElementRef={preferredLocalArtChooserRef}
-                              preferrectLocalArtChooserSize={{ width: preferredLocalArtChooserStyle.width, height: preferredLocalArtChooserStyle.maxHeight }}
+            return (
+              <SpotifyOverlayContext.Provider value={spotifyContext}>
+                <div ref={spotifyDivRefCallback} id="spotify" className="overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden" style={{ ...overlayStyle, ...overlayBackgroundStyle }}>
+                  <StateIcons />
+                  {
+                      currentlyPlayingTrack === null ? (
+                        <>
+                          {/*Show only Spotify's icon when no song is playing*/}
+                          <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
+                        </>
+                      ) : (
+                        <>
+                          {
+                              showProgressBar ? (
+                                <SpotifyOverlayProgressBar
+                                  className={`${progressBarPosition === Position.Top ? 'top' : 'bottom'}`} color={progressBarColor}
+                                  isPlaying={currentlyPlaying?.is_playing ?? false} durationMs={currentlyPlaying?.item?.duration_ms ?? 0} progressMs={currentlyPlaying?.progress_ms ?? 0}
+                                />
+                              ) : null
+                          }
+                          <div
+                            className={`main d-flex ${overlayArtPosition === Position.Right ? 'flex-row-reverse' : 'flex-row'} flex-nowrap align-items-center overflow-hidden`}
+                            style={{ maxWidth: overlayStyle.maxWidth }}
+                          >
+                            {
+                                showOverlayArt ? (
+                                    overlayArtType === SpotifyOverlayArtType.AlbumArt ? (
+                                      <SpotifyAlbumArt
+                                        className="flex-shrink-0" style={{ margin: ALBUM_ART_MARGIN }} width={ALBUM_ART_SIZE} onLoad={onAlbumArtLoaded}
+                                        track={currentlyPlayingTrack} fetchLocalCovers={overlayArtFetchLocalCovers}
+                                        mbClient={mbClient.current} mbClientCache={mbClient.current}
+                                        preferrectLocalArtChooserElementRef={preferredLocalArtChooserRef}
+                                        preferrectLocalArtChooserSize={{ width: preferredLocalArtChooserStyle.width, height: preferredLocalArtChooserStyle.maxHeight }}
+                                      />
+                                    ) : overlayArtType === SpotifyOverlayArtType.SpotifyIcon ? (
+                                      <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
+                                    ) : null
+                                ) : null
+                            }
+                            <SpotifyOverlayContent
+                              width={overlayStyle.maxWidth} marginLeft={OVERLAY_CONTENT_MARGIN_LEFT} marginRight={OVERLAY_CONTENT_MARGIN_RIGHT}
+                              overlayStyle={overlayStyle} alignSelf={showLogo ? undefined : (_logoPosition === 'top' ? 'flex-end' : 'flex-start')}
+                              showLogo={showLogo} preferMonochromeLogo={preferMonochromeLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
+                              logoPosition={_logoPosition} logoAlignment={_logoAlignment}
+                              logoMarginLeft={getSpotifyLogoMarginLeft(SPOTIFY_LOGO_HEIGHT, ALBUM_ART_MARGIN, OVERLAY_CONTENT_MARGIN_LEFT, showOverlayArt, overlayArtType)}
+                              currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}
+                              forceRefreshScrollableArea={forceRefreshScrollableArea}
                             />
-                            <SpotifyOverlaySongInfo {...songInfoProps} className="align-self-start" style={{ marginLeft: '.25em' }} />
                           </div>
-                        </div>
-                        <div ref={preferredLocalArtChooserRef} style={{ position: 'absolute', ...preferredLocalArtChooserStyle, ...preferredLocalArtChooserPosition }} />
-                      </>
-                    );
+                        </>
+                      )
+                  }
+                </div>
+                {   /* SpotifyOverlayPreferredLocalArtChooser's portal ref */
+                    showOverlayArt && overlayArtType === SpotifyOverlayArtType.AlbumArt ? (
+                      <div ref={preferredLocalArtChooserRef} style={{ position: 'absolute', ...preferredLocalArtChooserStyle, ...preferredLocalArtChooserPosition }} />
+                    ) : null
                 }
-                case SpotifyOverlayArtType.SpotifyIcon:
-                    return (
-                      <div {...spotifyDivProps}>
-                        <StateIcons />
-                        {showProgressBar ? <SpotifyOverlayProgressBar {...progressBarProps} /> : null}
-                        <div {...songInfoRowProps}>
-                          <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
-                          <SpotifyOverlaySongInfo {...songInfoProps} />
-                        </div>
-                      </div>
-                    );
-                default: return null;
-            }
+              </SpotifyOverlayContext.Provider>
+            );
         }
 
         case SpotifyStateMachineState.S6CantGetTokenErrorIdle: {
@@ -401,11 +485,13 @@ export default function Spotify(props: SpotifyProps) {
             const secondaryMessages = event?.error ? [event?.error] : [];
             secondaryMessages.push('Enter a new token');
             return (
-              <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
-                <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
-                <SpotifyOverlayError message={errorMsg} secondaryMessages={secondaryMessages} color={overlayStyle.color} />
-                <StateIcons />
-              </div>
+              <SpotifyOverlayContext.Provider value={spotifyContext}>
+                <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
+                  <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
+                  <SpotifyOverlayError message={errorMsg} secondaryMessages={secondaryMessages} color={overlayStyle.color} />
+                  <StateIcons />
+                </div>
+              </SpotifyOverlayContext.Provider>
             );
         }
 
@@ -413,11 +499,13 @@ export default function Spotify(props: SpotifyProps) {
             const errorMsg = "Couldn't refresh token; retrying shortly...";
             const event: RefreshTokenAfterSecondsEventObject | undefined = state.event.data?.event;
             return (
-              <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
-                <SpotifyOverlayIcon overlayHtmlRef={spotifyDivRef} backgroundHtmlRef={props.backgroundElement} />
-                <SpotifyOverlayError message={errorMsg} secondaryMessages={event?.error ? [event?.error] : undefined} color={overlayStyle.color} />
-                <StateIcons />
-              </div>
+              <SpotifyOverlayContext.Provider value={spotifyContext}>
+                <div id="spotify" className="d-flex flex-nowrap align-items-start overlay" style={{ ...overlayStyle, ...overlayBackgroundStyle, width: overlayStyle.maxWidth }}>
+                  <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
+                  <SpotifyOverlayError message={errorMsg} secondaryMessages={event?.error ? [event?.error] : undefined} color={overlayStyle.color} />
+                  <StateIcons />
+                </div>
+              </SpotifyOverlayContext.Provider>
             );
         }
 

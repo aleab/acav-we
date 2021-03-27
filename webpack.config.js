@@ -28,6 +28,19 @@ function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+/** @returns {import('license-webpack-plugin/dist/LicenseIdentifiedModule').LicenseIdentifiedModule[]} */
+function getAdditionalLicensedResources() {
+    return [
+        {
+            name: 'MusicBrainz Logo (images/musicbrainz-logo.svg)',
+            licenseId: 'CC-BY-SA-4.0',
+            licenseText: 'Copyright (C) 2020 MetaBrainz Foundation and contributors\n\n' +
+                         'The MusicBrainz Logo is licensed under the CC BY-SA 4.0 license <https://creativecommons.org/licenses/by-sa/4.0/>\n' +
+                         'The MusicBrainz Logo is used in its unmodified form <https://github.com/metabrainz/metabrainz-logos/blob/master/logos/MusicBrainz/SVG/MusicBrainz_logo_mini.svg>\n',
+        },
+    ];
+}
+
 // ========
 //  CONFIG
 // ========
@@ -69,8 +82,10 @@ function getWebpackConfig(env, argv) {
             return packageJson.dependencies[packageName] === undefined;
         },
         renderLicenses: modules => {
+            modules.push(...getAdditionalLicensedResources());
+
             let text = '';
-            const M = _.sortBy(modules, m => m.name);
+            const M = _.sortBy(modules, m => m.name.toLowerCase());
             for (let i = 0; i < M.length; ++i) {
                 text += '/**\n' +
                         ` * ${M[i].name}\n` +

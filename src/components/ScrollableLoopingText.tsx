@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useEffect, useMemo } from 'react';
+import React, { CSSProperties, useCallback, useEffect, useMemo, useReducer } from 'react';
 
 import { TextScrollingType } from '../app/TextScrollingType';
 import useLoopingTextScroll from '../hooks/useLoopingTextScroll';
@@ -12,6 +12,7 @@ interface ScrollableLoopingTextProps {
     text: string;
     maxWidth: number;
     fontSize: number;
+    forceRefreshScrollableArea?: React.MutableRefObject<(() => void) | undefined>;
 
     render: (callback: () => void) => void;
     cancelRender: () => void;
@@ -26,6 +27,13 @@ interface ScrollableLoopingTextProps {
 }
 
 export default function ScrollableLoopingText(props: ScrollableLoopingTextProps) {
+    const [ _forceAreaRecalc, forceAreaRecalc ] = useReducer((prev: boolean) => !prev, false);
+    useEffect(() => {
+        if (props.forceRefreshScrollableArea) {
+            props.forceRefreshScrollableArea.current = () => forceAreaRecalc();
+        }
+    }, [props.forceRefreshScrollableArea]);
+
     const scrollOptions = useMemo<UseScrollHTMLElementOptions>(() => {
         return {
             msPerPixelScroll: 1000 / props.scrollSpeed,
@@ -43,7 +51,7 @@ export default function ScrollableLoopingText(props: ScrollableLoopingTextProps)
         props.cancelRender,
         scrollOptions,
         props.loopMarginEm,
-        [ props.maxWidth, props.fontSize ],
+        [ props.maxWidth, props.fontSize, _forceAreaRecalc ],
     );
 
     useEffect(() => {

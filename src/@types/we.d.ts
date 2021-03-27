@@ -5,7 +5,7 @@ type MappedProperties = DeepPartial<import('../app/properties/Properties').defau
 // PROPERTIES
 
 type WEPropertyType = 'color' | 'slider' | 'bool' | 'combo' | 'text' | 'textinput' | 'file' | 'directory';
-type WEProperty<T extends WEPropertyType | string = string> = Readonly<{
+type WEProperty<T extends WEPropertyType | string = string> = DeepReadonly<{
     type: T;
     text: string;
 } & (
@@ -21,6 +21,10 @@ type WEProperty<T extends WEPropertyType | string = string> = Readonly<{
         max: number;
         fraction?: boolean;
         step?: number;
+    } : {}
+) & (
+    T extends 'combo' ? {
+        options: Array<{ label: string; value: string; }>;
     } : {}
 ) & (
     T extends 'file' ? {

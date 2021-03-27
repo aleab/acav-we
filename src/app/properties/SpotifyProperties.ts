@@ -25,14 +25,20 @@ export default interface SpotifyProperties {
             css: string;
         };
     };
+    logo: {
+        preferMonochrome: boolean;
+        position: Position;
+        alignment: Position;
+    };
     art: {
         enabled: boolean;
         type: SpotifyOverlayArtType;
+        position: Position;
         fetchLocalCovers: boolean;
         fetchLocalCacheMaxAge: number;
+        hideMusicbrainzLogo: boolean;
     };
     scroll: {
-        enabled: boolean;
         type: TextScrollingType;
         speed: number;
         autoDelay: number;
