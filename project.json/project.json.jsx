@@ -375,6 +375,7 @@ function getProjectJson() {
                     ui_spotify: section('Spotify', false, 'text-white fab fa-spotify', spotifyLink('[S]')),
                     ui_spotify_backend_url: indent('Backend URL') + asterisk(),
                     ui_spotify_token: indent('Token'),
+                    ui_spotify_hideWhenNothingIsPlaying: indent('Hide when Nothing\'s Playing'),
                     ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a <em>token</em> ${spotifyAuthLink('here')}.`),
                     ui_$_spotify_token_note: note(
                         "<b><u>Note</u></b>: Including your <em>token</em> in shared presets won't leak any potentially private information nor will it " +

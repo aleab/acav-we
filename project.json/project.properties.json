@@ -1595,6 +1595,13 @@
         "text": "ui_$_spotify_token_note",
         "condition": "(showDescriptions.value && showAdvancedOptions.value) && spotify.value && !spotify_backend_url.value"
     },
+    "spotify_hideWhenNothingIsPlaying": {
+        "order": 5005,
+        "type": "bool",
+        "text": "ui_spotify_hideWhenNothingIsPlaying",
+        "value": false,
+        "condition": "spotify.value"
+    },
     "spotify_pivot": {
         "order": 5010,
         "type": "combo",

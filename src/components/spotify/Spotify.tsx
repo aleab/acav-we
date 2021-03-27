@@ -95,6 +95,8 @@ export default function Spotify(props: SpotifyProps) {
     const O = useRef(context.wallpaperProperties.spotify);
     const token = useMemo(() => ({ get current() { return O.current.token; } }), []);
 
+    const [ hideWhenNothingIsPlaying, setHideWhenNothingIsPlaying ] = useState(O.current.hideWhenNothingIsPlaying);
+
     // TODO: Should this be somewhere else? Singleton service?
     const mbClient = useRef<MusicbrainzClientCacheDecorator | undefined>(undefined);
     useEffect(() => {
@@ -251,6 +253,7 @@ export default function Spotify(props: SpotifyProps) {
         if (spotifyProps.token !== undefined && spotifyProps.token) {
             send(SpotifyStateMachineEvent.UserEnteredToken);
         }
+        if (spotifyProps.hideWhenNothingIsPlaying !== undefined) setHideWhenNothingIsPlaying(spotifyProps.hideWhenNothingIsPlaying);
         if (spotifyProps.logo !== undefined) {
             if (spotifyProps.logo.preferMonochrome !== undefined) setPreferMonochromeLogo(spotifyProps.logo.preferMonochrome);
             if (spotifyProps.logo.position !== undefined) setLogoPosition(spotifyProps.logo.position);
@@ -423,10 +426,12 @@ export default function Spotify(props: SpotifyProps) {
                   <StateIcons />
                   {
                       currentlyPlayingTrack === null ? (
-                        <>
-                          {/*Show only Spotify's icon when no song is playing*/}
-                          <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
-                        </>
+                          hideWhenNothingIsPlaying ? null : (
+                            <>
+                              {/*Show only Spotify's icon when no song is playing*/}
+                              <SpotifyOverlayIcon preferMonochrome={preferMonochromeLogo} />
+                            </>
+                          )
                       ) : (
                         <>
                           {
