@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { useCallback, useContext, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { darkenOrLightenRgbColor } from '../../common/Colors';
 import { cssColorToRgba } from '../../common/Css';
@@ -23,6 +23,7 @@ export interface SpotifyOverlaySongInfoProps {
     fontSize: number;
     style?: React.CSSProperties;
     className?: string;
+    forceRefreshScrollableArea?: React.MutableRefObject<(() => void) | undefined>;
 }
 
 // ===========
@@ -58,6 +59,18 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
         return props.currentlyPlaying.artists.reduce((acc, artist) => (acc ? `${acc}, ${artist.name}` : artist.name), '');
     }, [props.currentlyPlaying.artists]);
 
+    // forceRefreshScrollableArea
+    const forceRefreshScrollableAreaTrack = useRef<() => void>();
+    const forceRefreshScrollableAreaArtists = useRef<() => void>();
+    useEffect(() => {
+        if (props.forceRefreshScrollableArea) {
+            props.forceRefreshScrollableArea.current = () => {
+                forceRefreshScrollableAreaTrack.current?.();
+                forceRefreshScrollableAreaArtists.current?.();
+            };
+        }
+    }, [props.forceRefreshScrollableArea]);
+
     const songInfoStyle = _.merge({}, {
         //width: props.width,
     }, props.style);
@@ -69,12 +82,14 @@ export default function SpotifyOverlaySongInfo(props: SpotifyOverlaySongInfoProp
           scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={track} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollTrackRenderCallback} cancelRender={scrollTrackCancelRender}
+          forceRefreshScrollableArea={forceRefreshScrollableAreaTrack}
         />
         <ScrollableLoopingText
           className="lh-0 scrollable-x song-info-mask" textClassName="song-info-field artists" textStyle={{ color: darkenOrLighten(props.color) }}
           scrollType={scrollType} scrollSpeed={scrollSpeed} scrollStartDelayMs={scrollStartDelay} loopMarginEm={2}
           text={artists} maxWidth={props.width} fontSize={props.fontSize}
           render={scrollArtistsRenderCallback} cancelRender={scrollArtistsCancelRender}
+          forceRefreshScrollableArea={forceRefreshScrollableAreaArtists}
         />
       </div>
     );

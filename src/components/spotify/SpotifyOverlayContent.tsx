@@ -1,8 +1,7 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import SpotifyLogo from './SpotifyLogo';
 import SpotifyOverlaySongInfo from './SpotifyOverlaySongInfo';
-import SpotifyOverlayContext from './SpotifyOverlayContext';
 
 type OverlayStyle = {
     maxWidth: number;
@@ -23,6 +22,8 @@ export interface SpotifyOverlayContentProps {
 
     currentlyPlayingTrack: SpotifyTrack;
     showMusicbrainzLogoOnLocalTrack: boolean;
+
+    forceRefreshScrollableArea?: React.MutableRefObject<(() => void) | undefined>;
 }
 
 export default function SpotifyOverlayContent(props: SpotifyOverlayContentProps) {
@@ -55,7 +56,10 @@ export default function SpotifyOverlayContent(props: SpotifyOverlayContentProps)
               )
             ) : null
         }
-        <SpotifyOverlaySongInfo currentlyPlaying={props.currentlyPlayingTrack} width={width} fontSize={fontSize} color={color} style={{ marginTop: mbMargin }} />
+        <SpotifyOverlaySongInfo
+          currentlyPlaying={props.currentlyPlayingTrack} forceRefreshScrollableArea={props.forceRefreshScrollableArea}
+          width={width} fontSize={fontSize} color={color} style={{ marginTop: mbMargin }}
+        />
       </div>
     );
 }

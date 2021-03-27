@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import React, { CSSProperties, RefObject, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { CSSProperties, RefObject, SyntheticEvent, useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { AnyEventObject } from 'xstate';
 import { useMachine } from '@xstate/react';
 
@@ -374,6 +374,19 @@ export default function Spotify(props: SpotifyProps) {
             : stateIconOverlay.props.children !== null && stateIconOverlay.props.children !== undefined ? stateIconOverlay : null;
     }, [ hasNoInternetConnection, isFatalErrorGettingToken, isRateLimited, isRefreshingToken ]);
 
+    // NOTE: If the current track is a local track, the album art will load asynchronously after render.
+    // This messes up with the scrolling text, since it won't receive any info that its own clientWidth changed.
+    // The following code forces an update whenever the img changes.
+    const forceRefreshScrollableArea = useRef<() => void>();
+    const albumArtWidth = useRef(-1);
+    const onAlbumArtLoaded = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
+        if (albumArtWidth.current !== e.currentTarget?.width ?? -1) {
+            albumArtWidth.current = e.currentTarget?.width ?? -1;
+            forceRefreshScrollableArea.current?.();
+        }
+    }, []);
+    useEffect(() => forceRefreshScrollableArea.current?.(), [ overlayArtPosition, overlayArtType, showOverlayArt ]);
+
     const spotifyContext = useMemo<SpotifyOverlayContextType>(() => {
         return {
             logger: Logc,
@@ -424,7 +437,7 @@ export default function Spotify(props: SpotifyProps) {
                                 showOverlayArt ? (
                                     overlayArtType === SpotifyOverlayArtType.AlbumArt ? (
                                       <SpotifyAlbumArt
-                                        className="flex-shrink-0" style={{ margin: ALBUM_ART_MARGIN }} width={ALBUM_ART_SIZE}
+                                        className="flex-shrink-0" style={{ margin: ALBUM_ART_MARGIN }} width={ALBUM_ART_SIZE} onLoad={onAlbumArtLoaded}
                                         track={currentlyPlayingTrack} fetchLocalCovers={overlayArtFetchLocalCovers}
                                         mbClient={mbClient.current} mbClientCache={mbClient.current}
                                         preferrectLocalArtChooserElementRef={preferredLocalArtChooserRef}
@@ -441,6 +454,7 @@ export default function Spotify(props: SpotifyProps) {
                               showLogo={showLogo} preferMonochromeLogo={preferMonochromeLogo} logoHeight={SPOTIFY_LOGO_HEIGHT}
                               logoMarginLeft={getSpotifyLogoMarginLeft(SPOTIFY_LOGO_HEIGHT, ALBUM_ART_MARGIN, OVERLAY_CONTENT_MARGIN_LEFT, showOverlayArt, overlayArtType)}
                               currentlyPlayingTrack={currentlyPlayingTrack} showMusicbrainzLogoOnLocalTrack={overlayArtFetchLocalCovers && !hideMusicbrainzLogo}
+                              forceRefreshScrollableArea={forceRefreshScrollableArea}
                             />
                           </div>
                         </>
