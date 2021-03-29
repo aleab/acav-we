@@ -105,7 +105,7 @@ function getWebpackConfig(env, argv) {
     const threeJsMinifierPlugin = new ThreeMinifierPlugin();
     const copyPlugin = new CopyWebpackPlugin({
         patterns: [
-            { from: './LICENSE.txt' },
+            { from: './LICENSE*.txt' },
             {
                 from: './static/**/*',
                 to: ({ absoluteFilename }) => path.relative('./static', absoluteFilename),
