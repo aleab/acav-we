@@ -1,0 +1,88 @@
+name: Deploy to gh-pages
+on:
+  push:
+    branches:
+      - gh-pages.src
+    paths:
+      - src/**
+      - public/**
+      - package.json
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: gh-pages.src
+    steps:
+      - name: Prepare Runner
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y expect
+
+      - name: Checkout
+        uses: actions/checkout@v2.3.1
+      
+      - name: Create .env
+        env:
+          SPOTIFY_CLIENT_ID: ${{ secrets.SPOTIFY_CLIENT_ID }}
+          SPOTIFY_REDIRECT_URI: ${{ secrets.SPOTIFY_REDIRECT_URI }}
+          SPOTIFY_REDIRECT_URI_DEV: ${{ secrets.SPOTIFY_REDIRECT_URI_DEV }}
+          TOKEN_SERVER_URL: ${{ secrets.TOKEN_SERVER_URL }}
+          TOKEN_SERVER_URL_DEV: ${{ secrets.TOKEN_SERVER_URL_DEV }}
+        run: |
+          [ -z "${SPOTIFY_REDIRECT_URI_DEV}" ] && SPOTIFY_REDIRECT_URI_DEV="${SPOTIFY_REDIRECT_URI}"
+          [ -z "${TOKEN_SERVER_URL_DEV}" ] && TOKEN_SERVER_URL_DEV="${TOKEN_SERVER_URL}"
+          touch .env.gh-pages
+          echo "SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}" >>.env.gh-pages
+          echo "SPOTIFY_REDIRECT_URI=${SPOTIFY_REDIRECT_URI}" >>.env.gh-pages
+          echo "SPOTIFY_REDIRECT_URI_DEV=${SPOTIFY_REDIRECT_URI_DEV}" >>.env.gh-pages
+          echo "TOKEN_SERVER_URL=${TOKEN_SERVER_URL}" >>.env.gh-pages
+          echo "TOKEN_SERVER_URL_DEV=${TOKEN_SERVER_URL_DEV}" >>.env.gh-pages
+
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
+
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v3.1.0
+        with:
+          gpg-private-key: ${{ secrets.GPG_PRIVATE }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git-user-signingkey: true
+          git-commit-gpgsign: true
+
+      - name: Trust GPG key
+        run: expect -c "spawn gpg --edit-key ${{ steps.import_gpg.outputs.fingerprint }} trust quit; send \"5\ry\r\"; expect eof"
+
+      - name: Deploy
+        env:
+          GIT_USER_NAME: ${{ secrets.GIT_USER_NAME }}
+          GIT_USER_EMAIL: ${{ secrets.GIT_USER_EMAIL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          remoteURL="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          currentDir="$(echo -n $PWD)"
+          tmpDir="$(mktemp -d)"
+
+          cd "${tmpDir}"
+          if [ "$(git ls-remote --heads "${remoteURL}" gh-pages | wc -l)" -gt 0 ]; then   `# if remote branch exists`
+            git clone --quiet --branch gh-pages --depth 1 "${remoteURL}" .
+          else
+            git init .
+            git checkout --orphan gh-pages
+          fi
+
+          cp -a "${currentDir}/dist/." "${tmpDir}/"
+          if [ "$(git status --porcelain | wc -l)" -gt 0 ]; then   `# if there are changes`
+            git config user.name "${GIT_USER_NAME}"
+            git config user.email "${GIT_USER_EMAIL}"
+            git config user.signingkey $(echo -n ${{ steps.import_gpg.outputs.fingerprint }} | tail -c16)
+
+            git add . >/dev/null
+            git commit -S --author "${GIT_USER_NAME} <${GIT_USER_EMAIL}>" -m "Deploy to GitHub pages" >/dev/null
+            git show --stat-count=2000 HEAD
+            git push --quiet "${remoteURL}" gh-pages >/dev/null
+          fi
+
+          cd "${currentDir}"
+          rm -rf "${tmpDir}"
