@@ -17,7 +17,7 @@ async function ghGet(url: string) {
 export default function Footer() {
     const [ numberOfContributors, setNumberOfContributors ] = useState(0);
 
-    const [ version, setVersion ] = useState<string>();
+    const [ version, setVersion ] = useState<string>('v1.0');
     const [ latestRelease, setLatestRelease ] = useState<string>();
     const [ license, setLicense ] = useState<string>();
     const [ licenseUrl, setLicenseUrl ] = useState<string>();
