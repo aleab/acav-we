@@ -1,0 +1,330 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '.github/**'
+      - '.vscode/**'
+  pull_request:
+    types: [opened, synchronize]
+    branches-ignore:
+      - 'dependabot/**'
+
+env:
+  SSH_KEY: ${{ secrets.SSH_KEY }}
+  GH_PAT: ${{ secrets.GH_PAT }}
+
+jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: MrSquaare/ssh-setup-action@v1
+        if: ${{ env.SSH_KEY }}
+        with:
+          host: github.com
+          private-key: ${{ env.SSH_KEY }}
+
+      - run: |
+          cat >github-event.json << EOF
+          ${{ toJSON(github.event) }}
+          EOF
+
+      - name: Get changed files
+        run: |
+          : Get changed files
+
+          set -eE -o functrace
+          function failure { echo "::error line=$1::$2"; }
+          trap 'failure ${LINENO} "${BASH_COMMAND}"' ERR
+
+          curlHeaders=( -H "Accept: application/vnd.github.v3+json" )
+          [ -n "${GH_PAT}" ] && curlHeaders+=( -H "Authorization: Bearer ${GH_PAT}" )
+
+          function printFiles { jq '[.[].filename] | unique | .[] | values' "$1" | jq -r .; }
+          function initRepo {
+            local isPrivate="$1"
+            local depth="$2"
+            local sha="$3"
+
+            [ -d repo ] && rm -rf repo
+            mkdir repo && cd repo
+            git init -q
+
+            git config --local "http.https://github.com/.extraheader" "Authorization: Basic ***"
+            sed -Ei "s|^(.*extraheader = Authorization: Basic).*$|\1 $(printf "x-access-token:${GITHUB_TOKEN}" | base64)|" .git/config
+
+            if [ -n "${SSH_KEY}" ]; then
+              git remote add origin "git@github.com:${GITHUB_REPOSITORY}.git"
+            else
+              if [ "${isPrivate}" == "true" ]; then
+                echo "::error::Repository is private; missing SSH_KEY"
+                exit 1
+              fi
+
+              git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+            fi
+
+            git -c protocol.version=2 fetch -q --prune --no-recurse-submodules --depth=${depth} origin ${sha} >/dev/null
+            git checkout -q FETCH_HEAD
+          }
+
+          if [ "${{ github.event_name }}" == "push" ]; then
+
+            compareUrl="https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/$(printf "${{ github.event.compare }}" | sed -E 's|.+/(.+)$|\1|')"
+
+            if [[ "${{ github.event.before }}" =~ ^0+$ ]]; then
+              # Root commit or first commit in a branch
+
+              numberOfCommits="$(jq '.commits | length' github-event.json)"
+
+              if [ "${numberOfCommits}" -eq 1 ]; then
+                initRepo "${{ github.event.repository.private }}" 2 "${GITHUB_SHA}"
+                cmd="git diff-tree --no-commit-id --name-only -r --root ${GITHUB_SHA}"
+              else
+                curl -s "${curlHeaders[@]}" "${compareUrl}" | jq '.files' >files.json
+
+                if [ "$(jq . files.json)" == "null" ]; then
+                  initRepo "${{ github.event.repository.private }}" ${numberOfCommits} "${GITHUB_SHA}"
+                  cmd="git diff-tree --no-commit-id --name-only -r $(git hash-object -t tree /dev/null) ${GITHUB_SHA}"
+                else
+                  cmd="printFiles files.json 2>/dev/null"
+                fi
+              fi
+            else
+              curl -s "${curlHeaders[@]}" "${compareUrl}" | jq '.files' >files.json
+              cmd="printFiles files.json 2>/dev/null"
+            fi
+
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+
+            prAction="${{ github.event.action }}"
+
+            if [ "${prAction}" == "opened" ]; then
+              curl -s "${curlHeaders[@]}" "${{ github.event.pull_request.url }}/files" | jq '. | arrays' >files.json
+              cmd="printFiles files.json 2>/dev/null"
+            elif [ "${prAction}" == "synchronize" ]; then
+              curl -s "${curlHeaders[@]}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/compare/${{ github.event.before }}...${{ github.event.after }}" | jq '.files' >files.json
+              cmd="printFiles files.json 2>/dev/null"
+            fi
+
+          fi
+
+          if [ -n "${cmd}" ]; then
+            eval "${cmd}" >files
+
+            echo "Changed files:"
+            cat files
+          fi
+
+      - name: Check changes
+        id: changes
+        run: |
+          shopt -s extglob
+
+          function setOutput {
+            if [ -n "$2" ]; then
+              local v="$2"
+            else
+              local v="${!1}"
+            fi
+
+            if [ -n "$v" ]; then
+              echo "::set-output name=$1::1"
+              echo "$1"
+            fi
+          }
+
+          if [ -f files ]; then
+            while IFS= read -r f || [[ -n "$f" ]]; do
+              case $f in
+                src/@(*|**/*))        src=1 ;;
+                static/@(*|**/*))     static=1 ;;
+                project.json/*)       project_json=1 ;;
+                package?(-lock).json) package_json=1 ;;
+                @(webpack.config.js|.babelrc|build-scripts/@(*|**/*))) build=1 ;;
+              esac
+            done < files
+
+            echo "Changes:"
+            setOutput src
+            setOutput static
+            setOutput project_json
+            setOutput package_json
+            setOutput build
+            setOutput _any "${src}${static}${project_json}${package_json}${build}"
+          fi
+    outputs:
+      _any: ${{ steps.changes.outputs._any }}
+      src: ${{ steps.changes.outputs.src }}
+      static: ${{ steps.changes.outputs.static }}
+      project_json: ${{ steps.changes.outputs.project_json }}
+      package_json: ${{ steps.changes.outputs.package_json }}
+      build: ${{ steps.changes.outputs.build }}
+
+  lint:
+    needs: check-changes
+    if: needs.check-changes.outputs.src == 1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+
+      - name: Set up npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Set up ssh
+        uses: MrSquaare/ssh-setup-action@v1
+        if: ${{ env.SSH_KEY }}
+        with:
+          host: github.com
+          private-key: ${{ env.SSH_KEY }}
+
+      - name: Set up git
+        if: ${{ !env.SSH_KEY }}
+        run: |
+          # Set up git to use https instead of ssh (for npm's github repo dependencies)
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+  build-pr:
+    needs: check-changes
+    if: |
+      github.event_name == 'pull_request' && (
+        needs.check-changes.outputs.src == 1 ||
+        needs.check-changes.outputs.package_json == 1 ||
+        needs.check-changes.outputs.build == 1
+      )
+    runs-on: ubuntu-latest
+    environment: acav-we
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+
+      - name: Set up npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Set up ssh
+        uses: MrSquaare/ssh-setup-action@v1
+        if: ${{ env.SSH_KEY }}
+        with:
+          host: github.com
+          private-key: ${{ env.SSH_KEY }}
+
+      - name: Set up git
+        if: ${{ !env.SSH_KEY }}
+        run: |
+          # Set up git to use https instead of ssh (for npm's github repo dependencies)
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+      - name: Install
+        run: npm ci
+
+      - name: Create .env
+        env:
+          APP_NAME: ${{ secrets.APP_NAME }}
+          APP_URL: ${{ secrets.APP_URL }}
+          BACKEND_API_BASEURL: ${{ secrets.BACKEND_API_BASEURL }}
+        run: |
+          currentVersion="$(jq -r '.version' ./package.json)"
+          [ "${currentVersion}" == "null" ] && currentVersion=
+          
+          echo "APP_NAME=${APP_NAME:=aCAV-WE}" >.env
+          echo "APP_VERSION=${currentVersion}-$(git rev-parse --short HEAD)" >>.env
+          echo "APP_URL=${APP_URL}" >>.env
+          echo "BACKEND_API_BASEURL=${BACKEND_API_BASEURL}" >>.env
+      
+      - name: Build
+        run: npm run build:dev -- --env NO_LINT
+
+      - name: 'Upload artifact: dist'
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+
+  build:
+    needs: check-changes
+    if: github.event_name == 'push' && needs.check-changes.outputs._any == 1
+    runs-on: ubuntu-latest
+    environment: acav-we
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+
+      - name: Set up npm cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Set up ssh
+        uses: MrSquaare/ssh-setup-action@v1
+        if: ${{ env.SSH_KEY }}
+        with:
+          host: github.com
+          private-key: ${{ env.SSH_KEY }}
+
+      - name: Set up git
+        if: ${{ !env.SSH_KEY }}
+        run: |
+          # Set up git to use https instead of ssh (for npm's github repo dependencies)
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+
+      - name: Install
+        run: npm ci
+
+      - name: Create .env
+        env:
+          APP_NAME: ${{ secrets.APP_NAME }}
+          APP_URL: ${{ secrets.APP_URL }}
+          BACKEND_API_BASEURL: ${{ secrets.BACKEND_API_BASEURL }}
+        run: |
+          currentVersion="$(jq -r '.version' ./package.json)"
+          [ "${currentVersion}" == "null" ] && currentVersion=
+          
+          echo "APP_NAME=${APP_NAME:=aCAV-WE}" >.env
+          echo "APP_VERSION=${currentVersion}" >>.env
+          echo "APP_URL=${APP_URL}" >>.env
+          echo "BACKEND_API_BASEURL=${BACKEND_API_BASEURL}" >>.env
+      
+      - name: Build
+        run: npm run build -- --env NO_LINT
+
+      - name: 'Upload artifact: dist'
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+
+      - name: 'Upload artifact: bundle-report'
+        uses: actions/upload-artifact@v2
+        with:
+          name: bundle-report
+          path: bundle-report.*

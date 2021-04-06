@@ -20,7 +20,7 @@
         "build:dev": "webpack --node-env development",
         "start:dev": "npm run build:dev && webpack serve --config ./webpack.config.js --mode development",
         "start:we": "npm run pre-build && babel-node ./webpack-start-we.js",
-        "lint": "eslint -c .eslintrc ./src/**/*.ts ./src/**/*.tsx ./src/**/*.js"
+        "lint": "eslint -c .eslintrc --ext .js,.jsx,.ts,.tsx,.mjs ./src"
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.3",

@@ -53,6 +53,7 @@ function getWebpackConfig(env, argv) {
 
     const hot = !!argv.hot;
     const buildTests = !isProduction || !!env['BUILD_TESTS']; // `npm run build -- --env BUILD_TESTS` to include tests in production for ultimate test
+    const noLint = !!env['NO_LINT'];
 
     // Plugins
     const eslintPlugin = new ESLintPlugin({
@@ -288,7 +289,6 @@ function getWebpackConfig(env, argv) {
             },
         },
         plugins: [
-            eslintPlugin,
             progressPlugin,         // Report compilation progress
             dotenvPlugin,           // Dotenv plugin + Fail build if required variables are not defined
             licensePlugin,          // Output third party licenses to a file
@@ -324,6 +324,10 @@ function getWebpackConfig(env, argv) {
             warnings: true,
         },
     };
+
+    if (!noLint) {
+        baseConfig.plugins = [ eslintPlugin, ...baseConfig.plugins ];
+    }
 
     // ============
     //  PRODUCTION

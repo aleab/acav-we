@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_PAT: ${{ secrets.GH_PAT }}
+    steps:
+      - name: Fail fast
+        run: |
+          if [ -z "${GH_PAT}" ]; then
+            echo "::error::GH_PATH is not defined!"
+            exit 1
+          fi
+
+      - run: |
+          : Release
+          # Create a draft release for this new tag
+
+          ref="${{ github.ref }}"
+          tagName="${ref#refs/tags/}"
+
+          curlHeaders=(
+            -H "Accept: application/vnd.github.v3+json"
+            -H "Authorization: Bearer ${GH_PAT}"
+          )
+
+          httpCode=$(curl -s -o release.json -w "%{http_code}" "${curlHeaders[@]}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${tagName}")
+
+          if [ "${{ github.event.deleted }}" == "true" ]; then
+            # Do nothing (for now?)
+          elif [ "${{ github.event.created }}" == "true" ]; then
+            if [ ${httpCode} -eq 404 ]; then
+              httpCode=$(
+                curl -s -o /dev/null -w "%{http_code}" "${curlHeaders[@]}" \
+                  -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
+                  -d "{ \"tag_name\": \"${tagName}\", \"name\": \"${tagName}\", \"draft\": true }"
+              )
+
+              if [ ${httpCode} -ne 201 ]; then
+                echo "::error::Failed to create new release; status code: ${httpCode}"
+                exit 1
+              fi
+            else
+              echo "::warning::A release for tag \"${tagName}\" already exists"
+            fi
+          fi
