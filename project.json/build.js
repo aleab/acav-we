@@ -11,14 +11,24 @@ const babelDynamicImportPlugin = require('babel-plugin-dynamic-import-node');
 const DIST_DIR = path.resolve('./dist');
 const PREBUILD_DIR = path.join(DIST_DIR, 'pre-build');
 
-async function buildProjectJson() {
-    if (!fs.existsSync(PREBUILD_DIR)) {
-        fs.mkdirSync(PREBUILD_DIR);
-    }
+/**
+ * @param {{
+ *     outputDir: string;
+ *     prebuildDir: string;
+ *     removePrebuildDir?: boolean;
+ * }} options
+ */
+async function buildProjectJson(options) {
+    const outputDir = options?.outputDir || DIST_DIR;
+    const prebuildDir = options?.prebuildDir || PREBUILD_DIR;
+    const removePrebuildDir = !options || !options.prebuildDir || options.removePrebuildDir || false;
+
+    if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir);
+    if (!fs.existsSync(prebuildDir)) fs.mkdirSync(prebuildDir);
 
     // Transform project.json.jsx
     fs.writeFileSync(
-        path.join(PREBUILD_DIR, 'project.json.js'),
+        path.join(prebuildDir, 'project.json.js'),
         Babel.transform(
             fs.readFileSync('./project.json/project.json.jsx').toString(),
             { presets: [babelReactPreset], plugins: [babelDynamicImportPlugin] },
@@ -27,12 +37,12 @@ async function buildProjectJson() {
 
     // Parse project.properties.json
     fs.writeFileSync(
-        path.join(PREBUILD_DIR, 'project.properties.json'),
+        path.join(prebuildDir, 'project.properties.json'),
         JsoncParser.stripComments(fs.readFileSync('./project.json/project.properties.json').toString()),
     );
 
-    const projectJsonPath = path.join(DIST_DIR, 'project.json');
-    const projectJson = (await import(path.resolve(PREBUILD_DIR, 'project.json.js'))).default();
+    const projectJsonPath = path.join(outputDir, 'project.json');
+    const projectJson = (await import(path.resolve(prebuildDir, 'project.json.js'))).default();
     if (fs.existsSync(projectJsonPath)) {
         fs.unlinkSync(projectJsonPath);
     }
@@ -41,7 +51,9 @@ async function buildProjectJson() {
         JSON.stringify(projectJson, null, 4),
     );
 
-    fs.rmdirSync(PREBUILD_DIR, { recursive: true });
+    if (removePrebuildDir) {
+        fs.rmdirSync(prebuildDir, { recursive: true });
+    }
 }
 
 module.exports = buildProjectJson;

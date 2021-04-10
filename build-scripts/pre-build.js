@@ -7,7 +7,11 @@ const DIST_DIR = path.resolve('./dist');
 
 (async () => {
     if (!fs.existsSync(DIST_DIR)) fs.mkdirSync(DIST_DIR);
-    await buildProjectJson().catch(e => {
+    await buildProjectJson({
+        outputDir: DIST_DIR,
+        prebuildDir: path.join(DIST_DIR, 'pre-build'),
+        removePrebuildDir: true,
+    }).catch(e => {
         console.error(e);
     });
 })();
