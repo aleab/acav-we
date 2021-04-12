@@ -1,6 +1,7 @@
 /* eslint-disable global-require */
 
 const _ = require('lodash');
+const glob = require('glob');
 const path = require('path');
 const webpack = require('webpack');
 
@@ -105,13 +106,19 @@ function getWebpackConfig(env, argv) {
     const threeJsMinifierPlugin = new ThreeMinifierPlugin();
     const copyPlugin = new CopyWebpackPlugin({
         patterns: [
-            { from: './LICENSE*.txt' },
+            ...glob.sync('./LICENSE*.txt').map(file => ({
+                from: file,
+                to: DIST_PATH,
+                toType: 'dir',
+            })),
             {
-                from: './static/**/*',
-                to: ({ absoluteFilename }) => path.relative('./static', absoluteFilename),
+                context: path.resolve(__dirname, 'static'),
+                from: '**/*',
+                to: DIST_PATH,
+                toType: 'dir',
                 transform(content, filePath) {
                     if (isProduction) {
-                    // Minify css
+                        // Minify css
                         if (path.extname(filePath) === '.css') {
                             return cssnano.process(content).then(v => v.css);
                         }
@@ -119,7 +126,8 @@ function getWebpackConfig(env, argv) {
                     return content;
                 },
             },
-        ] });
+        ],
+    });
     const miniCssExtractPlugin = new MiniCssExtractPlugin({ filename: '[name].css' });
 
     const terserPlugin = new TerserPlugin({
@@ -322,6 +330,12 @@ function getWebpackConfig(env, argv) {
             performance: true,
             version: true,
             warnings: true,
+        },
+        watchOptions: {
+            ignored: [
+                '**/node_modules',
+                path.resolve(__dirname, './dist').replace(/\\/g, '/'),
+            ],
         },
     };
 
