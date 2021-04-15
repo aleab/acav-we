@@ -193,6 +193,7 @@ jobs:
         run: |
           # Set up git to use https instead of ssh (for npm's github repo dependencies)
           git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
 
       - name: Install
         run: npm ci
