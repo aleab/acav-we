@@ -5,6 +5,7 @@ import { FaExclamationTriangle, FaSkull } from '../fa';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
+import { RenderEventArgs } from '../app/Renderer';
 import WallpaperContext from '../app/WallpaperContext';
 import useCanvas2dTimeGraph, { UseCanvas2dTimeGraphOptions } from '../hooks/useCanvas2dTimeGraph';
 
@@ -119,13 +120,13 @@ export default function Stats() {
         // ===================
         //  RENDERED CALLBACK
         // ===================
-        const frameRendererCallback = (timestamp: number) => {
+        const frameRendererCallback = (e: RenderEventArgs) => {
             renderCount++;
-            canvasRenderTime.current = prevRenderTimestamp > 0 ? (timestamp - prevRenderTimestamp) : 0;
+            canvasRenderTime.current = prevRenderTimestamp > 0 ? (e.timestamp - prevRenderTimestamp) : 0;
             renderTimeCount += canvasRenderTime.current;
-            prevRenderTimestamp = timestamp;
+            prevRenderTimestamp = e.timestamp;
         };
-        context?.renderer.renderedEvent.subscribe(frameRendererCallback);
+        context?.renderer.onAfterRender.subscribe(frameRendererCallback);
 
         // ========================
         //  AUDIO SAMPLES CALLBACK
@@ -180,7 +181,7 @@ export default function Stats() {
             clearInterval(perSecondIntervalId);
             clearInterval(per150MillisecondsIntervalId);
             cancelAnimationFrame(requestAnimationFrameId);
-            context?.renderer.renderedEvent.unsubscribe(frameRendererCallback);
+            context?.renderer.onAfterRender.unsubscribe(frameRendererCallback);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesCallback);
             context?.wallpaperEvents.onUserPropertiesChanged.unsubscribe(userPropertiesChangedCallback);
             context?.wallpaperEvents.onGeneralPropertiesChanged.unsubscribe(generalPropertiesChangedCallback);

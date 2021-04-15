@@ -21,6 +21,7 @@ import Clock from './clock/Clock';
 import Spotify from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
 import WinTaskBar from './WinTaskBar';
+import EventHandler from '../common/EventHandler';
 
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_CURRENT_VIDEO = 'aleab.acav.bgCurrentVideo';
@@ -28,13 +29,6 @@ const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
 const LOCALSTORAGE_FG_CURRENT_IMAGE = 'aleab.acav.fgCurrentImage';
 
 const Logc = Log.getLogger('App', 'darkgreen');
-
-function createComponentEvent<T extends ComponentEventArgs>(subs: Set<(args: T) => void>): ComponentEvent<T> {
-    return {
-        subscribe: callback => { subs.add(callback); },
-        unsubscribe: callback => { subs.delete(callback); },
-    };
-}
 
 interface AppProps {
     windowEvents: WindowEvents;
@@ -61,25 +55,25 @@ export default function App(props: AppProps) {
     window.acav.getProperties = function getProperties() { return _.cloneDeep(O.current); };
 
     // Observer
-    const onUserPropertiesChangedSubs: Set<(args: UserPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
-    const onGeneralPropertiesChangedSubs: Set<(args: GeneralPropertiesChangedEventArgs) => void> = useMemo(() => new Set(), []);
-    const onAudioSamplesSubs: Set<(args: AudioSamplesEventArgs) => void> = useMemo(() => new Set(), []);
-    const onPausedSubs: Set<(args: PausedEventArgs) => void> = useMemo(() => new Set(), []);
-    const onEnteredAudioListenerCallbackSubs: Set<(args: PerformanceEventArgs) => void> = useMemo(() => new Set(), []);
-    const onExecutedAudioListenerCallbackSubs: Set<(args: PerformanceEventArgs) => void> = useMemo(() => new Set(), []);
-    const onVisualizerRenderedSubs: Set<(args: PerformanceEventArgs) => void> = useMemo(() => new Set(), []);
+    const onUserPropertiesChangedEventHandler = useMemo(() => new EventHandler<UserPropertiesChangedEventArgs>(), []);
+    const onGeneralPropertiesChangedEventHandler = useMemo(() => new EventHandler<GeneralPropertiesChangedEventArgs>(), []);
+    const onAudioSamplesEventHandler = useMemo(() => new EventHandler<AudioSamplesEventArgs>(), []);
+    const onPausedEventHandler = useMemo(() => new EventHandler<PausedEventArgs>(), []);
+    const onEnteredAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
+    const onExecutedAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
+    const onVisualizerRenderedEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
 
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
-        onUserPropertiesChanged: createComponentEvent(onUserPropertiesChangedSubs),
-        onGeneralPropertiesChanged: createComponentEvent(onGeneralPropertiesChangedSubs),
-        onAudioSamples: createComponentEvent(onAudioSamplesSubs),
-        onPaused: createComponentEvent(onPausedSubs),
+        onUserPropertiesChanged: onUserPropertiesChangedEventHandler,
+        onGeneralPropertiesChanged: onGeneralPropertiesChangedEventHandler,
+        onAudioSamples: onAudioSamplesEventHandler,
+        onPaused: onPausedEventHandler,
         stats: {
-            enteredAudioListenerCallback: createComponentEvent(onEnteredAudioListenerCallbackSubs),
-            executedAudioListenerCallback: createComponentEvent(onExecutedAudioListenerCallbackSubs),
-            visualizerRendered: createComponentEvent(onVisualizerRenderedSubs),
+            enteredAudioListenerCallback: onEnteredAudioListenerCallbackEventHandler,
+            executedAudioListenerCallback: onExecutedAudioListenerCallbackEventHandler,
+            visualizerRendered: onVisualizerRenderedEventHandler,
         },
-    }), [ onUserPropertiesChangedSubs, onGeneralPropertiesChangedSubs, onAudioSamplesSubs, onPausedSubs, onEnteredAudioListenerCallbackSubs, onExecutedAudioListenerCallbackSubs, onVisualizerRenderedSubs ]);
+    }), [ onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, onGeneralPropertiesChangedEventHandler, onPausedEventHandler, onUserPropertiesChangedEventHandler, onVisualizerRenderedEventHandler ]);
 
     // Context
     const renderer = useRenderer();
@@ -152,13 +146,13 @@ export default function App(props: AppProps) {
                 }
             }
 
-            onGeneralPropertiesChangedSubs.forEach(callback => callback({ newProps }));
+            onGeneralPropertiesChangedEventHandler.invoke({ newProps });
         };
         return () => {
             //onGeneralPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyGeneralProperties;
         };
-    }, [ onGeneralPropertiesChangedSubs, renderer ]);
+    }, [ onGeneralPropertiesChangedEventHandler, renderer ]);
 
     // =================
     //  USER PROPERTIES
@@ -219,24 +213,24 @@ export default function App(props: AppProps) {
                 if (newProps.icuePlugin.enabled !== undefined) setUseICue(newProps.icuePlugin.enabled);
             }
 
-            onUserPropertiesChangedSubs.forEach(callback => callback({ oldProps, newProps }));
+            onUserPropertiesChangedEventHandler.invoke({ oldProps, newProps });
         };
         return () => {
             //onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onUserPropertiesChangedSubs, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
+    }, [ onUserPropertiesChangedEventHandler, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
 
     // =================
     //  PAUSED LISTENER
     // =================
     useEffect(() => {
-        window.wallpaperPropertyListener!.setPaused = isPaused => onPausedSubs.forEach(callback => callback?.({ isPaused }));
+        window.wallpaperPropertyListener!.setPaused = isPaused => onPausedEventHandler.invoke({ isPaused });
         return () => {
             //onPausedSubs.clear();
             delete window.wallpaperPropertyListener?.setPaused;
         };
-    }, [onPausedSubs]);
+    }, [onPausedEventHandler]);
 
     // =========
     //  PLUGINS
@@ -307,7 +301,7 @@ export default function App(props: AppProps) {
         let samples: AudioSamplesArray | undefined;
         const audioListener: WEAudioListener = rawSamples => {
             const t0 = performance.now();
-            onEnteredAudioListenerCallbackSubs.forEach(callback => callback({ timestamp: t0, time: -1 }));
+            onEnteredAudioListenerCallbackEventHandler.invoke({ timestamp: t0, time: -1 });
 
             if (!listenerIsPaused) {
                 samples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
@@ -316,11 +310,11 @@ export default function App(props: AppProps) {
             if (samples !== undefined) {
                 const _rawSamples = new AudioSamplesArray(rawSamples, 2);
                 const audioSamplesEventArgs: AudioSamplesEventArgs = { rawSamples: _rawSamples, samples: samples!, samplesBuffer, peak, mean };
-                onAudioSamplesSubs.forEach(callback => callback(audioSamplesEventArgs));
+                onAudioSamplesEventHandler.invoke(audioSamplesEventArgs);
             }
 
             const t1 = performance.now();
-            onExecutedAudioListenerCallbackSubs.forEach(callback => callback({ timestamp: t1, time: t1 - t0 }));
+            onExecutedAudioListenerCallbackEventHandler.invoke({ timestamp: t1, time: t1 - t0 });
         };
         window.wallpaperRegisterAudioListener(audioListener);
 
@@ -333,11 +327,11 @@ export default function App(props: AppProps) {
             window.wallpaperRegisterAudioListener(null);
             delete window.acav.togglePauseAudioListener;
         };
-    }, [ onAudioSamplesSubs, onEnteredAudioListenerCallbackSubs, onExecutedAudioListenerCallbackSubs, samplesBuffer, wallpaperContext.pluginManager ]);
+    }, [ onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, samplesBuffer ]);
 
     const onVisualizerRendered = useCallback((e: PerformanceEventArgs) => {
-        onVisualizerRenderedSubs.forEach(callback => callback({ timestamp: e.timestamp, time: e.time }));
-    }, [onVisualizerRenderedSubs]);
+        onVisualizerRenderedEventHandler.invoke({ timestamp: e.timestamp, time: e.time });
+    }, [onVisualizerRenderedEventHandler]);
 
     const wallpaperRef = useRef<HTMLDivElement>(null);
     return (

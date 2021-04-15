@@ -1,6 +1,9 @@
 import Log from '../common/Log';
+import EventHandler from '../common/EventHandler';
 
 const Logc = Log.getLogger('Renderer', '#703431');
+
+export type RenderEventArgs = { timestamp: number; };
 
 interface IRenderer {
     readonly setFps: (fps: number) => void;
@@ -9,14 +12,9 @@ interface IRenderer {
     readonly queue: (id: string, callback: (timestamp: number) => void) => void;
     readonly cancel: (id: string) => void;
 
-    readonly renderingEvent: {
-        readonly subscribe: (callback: (timestamp: number) => void) => void;
-        readonly unsubscribe: (callback: (timestamp: number) => void) => void;
-    };
-    readonly renderedEvent: {
-        readonly subscribe: (callback: (timestamp: number) => void) => void;
-        readonly unsubscribe: (callback: (timestamp: number) => void) => void;
-    };
+    readonly onBeforeRender: IEventHandler<RenderEventArgs>;
+    readonly onRender: IEventHandler<RenderEventArgs>;
+    readonly onAfterRender: IEventHandler<RenderEventArgs>;
 }
 
 export default function Renderer(fps: number = 0): IRenderer {
@@ -26,8 +24,9 @@ export default function Renderer(fps: number = 0): IRenderer {
     const renderQueue: Map<string, (timestamp: number) => void> = new Map();
     let _animationFrameId = 0;
 
-    const renderingEventSubscribers: Set<(timestamp: number) => void> = new Set();
-    const renderedEventSubscribers: Set<(timestamp: number) => void> = new Set();
+    const onBeforeRenderEventHandler = new EventHandler<RenderEventArgs>();
+    const onRenderEventHandler = new EventHandler<RenderEventArgs>();
+    const onAfterRenderEventHandler = new EventHandler<RenderEventArgs>();
 
     /**
      * Execute all queued render jobs.
@@ -35,15 +34,16 @@ export default function Renderer(fps: number = 0): IRenderer {
      */
     function flushRenderQueue(timestamp: number) {
         if (!_isRunning) return;
-        renderingEventSubscribers.forEach(callback => callback(timestamp));
-        renderQueue.forEach((renderCallback, k, m) => {
-            m.delete(k);
+
+        onBeforeRenderEventHandler.invoke({ timestamp });
+
+        onRenderEventHandler.invoke({ timestamp });
+        renderQueue.forEach((renderCallback, id, m) => {
+            m.delete(id);
             renderCallback(timestamp);
         });
 
-        if (renderedEventSubscribers.size > 0) {
-            renderedEventSubscribers.forEach(callback => callback(timestamp));
-        }
+        onAfterRenderEventHandler.invoke({ timestamp });
     }
 
     let prevRenderTimestamp = 0;
@@ -85,13 +85,8 @@ export default function Renderer(fps: number = 0): IRenderer {
                 renderQueue.delete(id);
             }
         },
-        renderingEvent: {
-            subscribe(callback) { renderingEventSubscribers.add(callback); },
-            unsubscribe(callback) { renderingEventSubscribers.delete(callback); },
-        },
-        renderedEvent: {
-            subscribe(callback) { renderedEventSubscribers.add(callback); },
-            unsubscribe(callback) { renderedEventSubscribers.delete(callback); },
-        },
+        onBeforeRender: onBeforeRenderEventHandler,
+        onRender: onRenderEventHandler,
+        onAfterRender: onAfterRenderEventHandler,
     };
 }

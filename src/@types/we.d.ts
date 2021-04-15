@@ -77,14 +77,14 @@ type PausedEventArgs = {
 };
 type PerformanceEventArgs = { timestamp: number; time: number; };
 type WallpaperEvents = {
-    onUserPropertiesChanged: ComponentEvent<UserPropertiesChangedEventArgs>;
-    onGeneralPropertiesChanged: ComponentEvent<GeneralPropertiesChangedEventArgs>;
-    onAudioSamples: ComponentEvent<AudioSamplesEventArgs>;
-    onPaused: ComponentEvent<PausedEventArgs>;
+    onUserPropertiesChanged: IEventHandler<UserPropertiesChangedEventArgs>;
+    onGeneralPropertiesChanged: IEventHandler<GeneralPropertiesChangedEventArgs>;
+    onAudioSamples: IEventHandler<AudioSamplesEventArgs>;
+    onPaused: IEventHandler<PausedEventArgs>;
     stats: {
-        enteredAudioListenerCallback: ComponentEvent<PerformanceEventArgs>;
-        executedAudioListenerCallback: ComponentEvent<PerformanceEventArgs>;
-        visualizerRendered: ComponentEvent<PerformanceEventArgs>;
+        enteredAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
+        executedAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
+        visualizerRendered: IEventHandler<PerformanceEventArgs>;
     };
 };
 

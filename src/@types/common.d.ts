@@ -1,13 +1,12 @@
 type RGBA = [number, number, number, number];
 
-type ComponentEventArgs = {};
-type ComponentEvent<T extends ComponentEventArgs> = {
+interface IEventHandler<T extends {}> {
     subscribe(callback: (args: T) => void): void;
     unsubscribe(callback: (args: T) => void): void;
-};
+}
 
 type WindowEvents = {
-    onresize: ComponentEvent<{}>;
+    onresize: IEventHandler<{}>;
 };
 
 interface Math {
