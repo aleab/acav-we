@@ -10,11 +10,14 @@ import { useMachine } from '@xstate/react';
 import { FaCircleNotch, FaFilter, FaPlug, FaSkull } from '../../fa';
 
 import Log from '../../common/Log';
+import { CancellationTokenSource } from '../../common/CancellationToken';
 import { checkInternetConnection } from '../../common/Network';
 import { calculatePivotTransform } from '../../common/Pivot';
 import { Position } from '../../common/Position';
 import { generateCssStyle as generateBackgroundCss } from '../../app/BackgroundMode';
 import SpotifyOverlayArtType from '../../app/SpotifyOverlayArtType';
+import { SpotifyProgressBarColorMatcher } from '../../app/SpotifyProgressBarColorMatchType';
+import { SpotifyProgressBarColorPreference } from '../../app/SpotifyProgressBarColorPreference';
 import SpotifyStateMachine, { CouldntGetBackendTokenFatalErrorEventObject, LOCALSTORAGE_SPOTIFY_TOKEN, RefreshTokenAfterSecondsEventObject, SpotifyStateMachineEvent, SpotifyStateMachineState } from '../../app/SpotifyStateMachine';
 import WallpaperContext from '../../app/WallpaperContext';
 import useClientRect from '../../hooks/useClientRect';
@@ -90,6 +93,13 @@ function spotifyTrackEquals(a: SpotifyTrack, b: SpotifyTrack) {
     return a.id === b.id;
 }
 
+function toHexColor(color: RGB | [number, number, number] | null) {
+    if (color) {
+        return `#${ColorConvert.rgb.hex(color as RGB)}`;
+    }
+    return null;
+}
+
 export default function Spotify(props: SpotifyProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
@@ -113,9 +123,10 @@ export default function Spotify(props: SpotifyProps) {
         };
     }, []);
 
-    // ========
-    //  STYLES
-    // ========
+
+    // =======
+    //  STATE
+    // =======
     const [ preferMonochromeLogo, setPreferMonochromeLogo ] = useState(O.current.preferMonochromeLogo);
     const [ logoPosition, setLogoPosition ] = useState(O.current.logo.position);
     const [ logoAlignment, setLogoAlignment ] = useState(O.current.logo.alignment);
@@ -152,8 +163,54 @@ export default function Spotify(props: SpotifyProps) {
 
     //--progressBar
     const [ showProgressBar, setShowProgressBar ] = useState(O.current.progressBar.enabled);
-    const [ progressBarColor, setProgressBarColor ] = useState(`#${ColorConvert.rgb.hex(O.current.progressBar.color as RGB)}`);
     const [ progressBarPosition, setProgressBarPosition ] = useState(O.current.progressBar.position);
+    const [ progressBarBaseColor, setProgressBarBaseColor ] = useState(toHexColor(O.current.progressBar.color as RGB));
+    const progressBarUsesAlbumColor = useRef(O.current.progressBar.matchAlbumArtColor);
+    const progressBarUsesAlbumColorType = useRef(O.current.progressBar.matchAlbumArtColorType);
+    const [ progressBarColorPreference, setProgressBarColorPreference ] = useState(O.current.progressBar.colorPreference);
+
+    // ProgressBar: Adaptive color
+    // TODO: All of this is currently unnecessarily running even when the progress bar is disabled or the color is static. FIX
+    const albumArtImageData = useRef<ImageData>();
+    const [ albumArtColor, setAlbumArtColor ] = useState<RGB | null>(null);
+    const [ progressBarColor, setProgressBarColor ] = useState(progressBarUsesAlbumColor ? toHexColor(albumArtColor) : progressBarBaseColor);
+    const refreshProgressBarCTS = useRef<CancellationTokenSource>();
+    const refreshProgressBarColor = useCallback((image: boolean = false) => {
+        refreshProgressBarCTS.current?.cancel();
+        refreshProgressBarCTS.current = new CancellationTokenSource();
+
+        if (!progressBarUsesAlbumColor.current) {
+            setProgressBarColor(progressBarBaseColor);
+        } else if (image) {
+            if (albumArtImageData.current === undefined) {
+                setAlbumArtColor(null);
+            } else {
+                SpotifyProgressBarColorMatcher.withOptions({
+                    kmeansIterations: 400,
+                }).getColor(
+                    progressBarUsesAlbumColorType.current,
+                    albumArtImageData.current,
+                    refreshProgressBarCTS.current.token,
+                    () => setProgressBarColor(progressBarBaseColor),
+                ).then(rgb => {
+                    if (rgb !== null && refreshProgressBarCTS.current?.token?.isCancelled() === false) {
+                        setAlbumArtColor(rgb);
+                        Logc.info('AlbumArt color evaluated:', { color: `#${ColorConvert.rgb.hex(rgb)}`, type: progressBarUsesAlbumColorType.current });
+                    }
+                });
+            }
+        } else if (albumArtColor !== null) {
+            setProgressBarColor(progressBarUsesAlbumColor.current ? toHexColor(albumArtColor) : progressBarBaseColor);
+        } else {
+            refreshProgressBarColor(true);
+        }
+    }, [ albumArtColor, progressBarBaseColor ]);
+    const refreshProgressBarColorRef = useRef(refreshProgressBarColor);
+    useEffect(() => {
+        refreshProgressBarColorRef.current = refreshProgressBarColor;
+        refreshProgressBarColor();
+    }, [refreshProgressBarColor]);
+
 
     // ===============
     //  STATE MACHINE
@@ -232,6 +289,7 @@ export default function Spotify(props: SpotifyProps) {
         };
     }, [ send, service ]);
 
+
     // =====================
     //  PROPERTIES LISTENER
     // =====================
@@ -278,16 +336,33 @@ export default function Spotify(props: SpotifyProps) {
             if (spotifyProps.style.top !== undefined) s.top = window.innerHeight * (spotifyProps.style.top / 100);
             if (spotifyProps.style.width !== undefined) s.maxWidth = spotifyProps.style.width;
             if (spotifyProps.style.fontSize !== undefined) s.fontSize = spotifyProps.style.fontSize;
-            if (spotifyProps.style.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(spotifyProps.style.textColor as RGB)}`;
+            if (spotifyProps.style.textColor !== undefined) s.color = toHexColor(spotifyProps.style.textColor as RGB) ?? undefined;
             if (spotifyProps.style.background !== undefined) setOverlayBackgroundStyle();
             setOverlayStyle(s);
         }
         if (spotifyProps.progressBar !== undefined) {
             if (spotifyProps.progressBar.enabled !== undefined) setShowProgressBar(spotifyProps.progressBar.enabled);
-            if (spotifyProps.progressBar.color !== undefined) setProgressBarColor(`#${ColorConvert.rgb.hex(spotifyProps.progressBar.color as RGB)}`);
             if (spotifyProps.progressBar.position !== undefined) setProgressBarPosition(spotifyProps.progressBar.position);
+            if (spotifyProps.progressBar.color !== undefined) setProgressBarBaseColor(toHexColor(spotifyProps.progressBar.color as RGB));
+
+            let refreshColor = 0;
+            if (spotifyProps.progressBar.matchAlbumArtColor !== undefined) {
+                progressBarUsesAlbumColor.current = spotifyProps.progressBar.matchAlbumArtColor;
+                if (!spotifyProps.progressBar.matchAlbumArtColor) {
+                    setAlbumArtColor(null);
+                }
+                refreshColor = 1;
+            }
+            if (spotifyProps.progressBar.matchAlbumArtColorType !== undefined) {
+                progressBarUsesAlbumColorType.current = spotifyProps.progressBar.matchAlbumArtColorType;
+                refreshColor = 2;
+            }
+            if (spotifyProps.progressBar.colorPreference !== undefined) setProgressBarColorPreference(spotifyProps.progressBar.colorPreference);
+
+            if (refreshColor > 0) refreshProgressBarColorRef.current(refreshColor === 2);
         }
     }, [send]);
+
 
     // =========
     //  OVERLAY
@@ -333,6 +408,7 @@ export default function Spotify(props: SpotifyProps) {
     const isFatalErrorGettingToken = useMemo(() => state.value === SpotifyStateMachineState.S6CantGetTokenErrorIdle, [state.value]);
     const hasNoInternetConnection = useMemo(() => state.value === SpotifyStateMachineState.SNNoInternetConnection, [state.value]);
 
+
     // ========================================
     //  SpotifyOverlayPreferredLocalArtChooser
     // ========================================
@@ -366,6 +442,7 @@ export default function Spotify(props: SpotifyProps) {
         }
     }, [ preferredLocalArtChooserStyle.maxHeight, preferredLocalArtChooserStyle.width, spotifyDivRect ]);
 
+
     // ========
     //  RENDER
     // ========
@@ -385,15 +462,32 @@ export default function Spotify(props: SpotifyProps) {
 
     // NOTE: If the current track is a local track, the album art will load asynchronously after render.
     // This messes up with the scrolling text, since it won't receive any info that its own clientWidth changed.
-    // The following code forces an update whenever the img changes.
+    // The following code (#1) forces an update whenever the img changes.
     const forceRefreshScrollableArea = useRef<() => void>();
     const albumArtWidth = useRef(-1);
-    const onAlbumArtLoaded = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
+    const _onAlbumArtLoaded = useCallback((progressBarEnabled: boolean, e: SyntheticEvent<HTMLImageElement>) => {
+        // (#1)
         if (albumArtWidth.current !== e.currentTarget?.width ?? -1) {
             albumArtWidth.current = e.currentTarget?.width ?? -1;
             forceRefreshScrollableArea.current?.();
         }
+
+        // current albumArtImageData
+        albumArtImageData.current = undefined;
+        if (e.currentTarget && e.currentTarget.width > 0 && e.currentTarget.height > 0) {
+            const canvas = new OffscreenCanvas(e.currentTarget.width, e.currentTarget.height);
+            const canvasContext = canvas.getContext('2d');
+            if (canvasContext) {
+                canvasContext.drawImage(e.currentTarget, 0, 0, canvas.width, canvas.height);
+                albumArtImageData.current = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        if (progressBarEnabled) {
+            refreshProgressBarColorRef.current(true);
+        }
     }, []);
+    const onAlbumArtLoaded = useMemo(() => _onAlbumArtLoaded.bind(null, showProgressBar), [ _onAlbumArtLoaded, showProgressBar ]);
     useEffect(() => forceRefreshScrollableArea.current?.(), [ overlayArtPosition, overlayArtType, showOverlayArt ]);
 
     const spotifyContext = useMemo<SpotifyOverlayContextType>(() => {
@@ -403,6 +497,7 @@ export default function Spotify(props: SpotifyProps) {
             backgroundHtmlRef: props.backgroundElement,
         };
     }, [ props.backgroundElement, spotifyDivRef ]);
+
 
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
@@ -437,7 +532,9 @@ export default function Spotify(props: SpotifyProps) {
                           {
                               showProgressBar ? (
                                 <SpotifyOverlayProgressBar
-                                  className={`${progressBarPosition === Position.Top ? 'top' : 'bottom'}`} color={progressBarColor}
+                                  className={`${progressBarPosition === Position.Top ? 'top' : 'bottom'}`}
+                                  color={(currentlyPlayingTrack.is_local && !overlayArtFetchLocalCovers ? progressBarBaseColor : (progressBarColor ?? progressBarBaseColor)) ?? '#FFFFFF'}
+                                  colorPreference={progressBarUsesAlbumColor ? progressBarColorPreference : SpotifyProgressBarColorPreference.None}
                                   isPlaying={currentlyPlaying?.is_playing ?? false} durationMs={currentlyPlaying?.item?.duration_ms ?? 0} progressMs={currentlyPlaying?.progress_ms ?? 0}
                                 />
                               ) : null

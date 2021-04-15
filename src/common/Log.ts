@@ -11,6 +11,8 @@ export default class Log {
     static readonly warn = console.warn;
     static readonly error = console.error;
 
+    static readonly GenericVerboseStyle = { color: '#FAFFE2', extraStyles: 'background-color: #756B89' };
+
     static getLogger(caller: string | null, color: string, extraStyles?: string): Logger {
         const style = `color:${color}` + (extraStyles ? `;${extraStyles}` : '');
         const args: any[] = caller ? [

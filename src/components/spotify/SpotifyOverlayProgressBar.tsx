@@ -6,6 +6,7 @@ import React, { CSSProperties, useContext, useEffect, useMemo, useRef, useState 
 import ProgressBar from '../ProgressBar';
 import { contrast, darkenOrLightenRgbColor } from '../../common/Colors';
 import { cssColorToRgba } from '../../common/Css';
+import { SpotifyProgressBarColorPreference } from '../../app/SpotifyProgressBarColorPreference';
 import WallpaperContext from '../../app/WallpaperContext';
 import Log from '../../common/Log';
 
@@ -16,6 +17,7 @@ export interface SpotifyOverlayProgressBarProps {
     durationMs: number;
     progressMs: number;
     color: string;
+    colorPreference: SpotifyProgressBarColorPreference;
     className?: string;
     style?: CSSProperties;
 }
@@ -34,8 +36,11 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
     const [ progressPercent, setProgressPercent ] = useState(calcProgressPercent(props.progressMs, props.durationMs));
     const isPlaying = useRef(props.isPlaying);
 
+    const isContainerColorDarker = useRef(false);
     const containerColor = useMemo(() => {
         let _containerColor: string | undefined;
+        isContainerColorDarker.current = false;
+
         const primaryRgba = cssColorToRgba(props.color);
         if (primaryRgba !== undefined) {
             let secondaryRgb = darkenOrLightenRgbColor([ primaryRgba[0], primaryRgba[1], primaryRgba[2] ], 0.6);
@@ -118,10 +123,36 @@ export default function SpotifyOverlayProgressBar(props: SpotifyOverlayProgressB
         };
     }, [ RENDER_ID, context.renderer, props.durationMs, props.progressMs ]);
 
-    const style = useMemo<CSSProperties & { [k: string]: string | undefined; }>(() => ({
-        '--bar-color': containerColor,
-        '--value-color': props.color,
-    }), [ containerColor, props.color ]);
+    const style = useMemo<CSSProperties & { [k: string]: string | undefined; }>(() => {
+        if (containerColor === undefined) return {};
+
+        switch (props.colorPreference) {
+            case SpotifyProgressBarColorPreference.LightOnDark:
+                return isContainerColorDarker.current ? {
+                    '--bar-color': containerColor,
+                    '--value-color': props.color,
+                } : {
+                    '--bar-color': props.color,
+                    '--value-color': containerColor,
+                };
+
+            case SpotifyProgressBarColorPreference.DarkOnLight:
+                return !isContainerColorDarker.current ? {
+                    '--bar-color': containerColor,
+                    '--value-color': props.color,
+                } : {
+                    '--bar-color': props.color,
+                    '--value-color': containerColor,
+                };
+
+            case SpotifyProgressBarColorPreference.None:
+            default:
+                return {
+                    '--bar-color': containerColor,
+                    '--value-color': props.color,
+                };
+        }
+    }, [ containerColor, props.color, props.colorPreference ]);
 
     return (
       <div className={_.join([ 'spotify-progress-bar', props.className ], ' ').trim()} style={{ ...style, ...props.style }}>

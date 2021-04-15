@@ -12,6 +12,8 @@ import { CssObjectFit } from '../CssObjectFit';
 import { FrequencyRange } from '../FrequencyRange';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
+import { SpotifyProgressBarColorMatchType } from '../SpotifyProgressBarColorMatchType';
+import { SpotifyProgressBarColorPreference } from '../SpotifyProgressBarColorPreference';
 import { TaskbarPosition } from '../TaskbarPosition';
 import { TextScrollingType } from '../TextScrollingType';
 import { VisualizerType } from '../VisualizerType';
@@ -319,8 +321,11 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(spotifyOptions.scroll)) delete spotifyOptions.scroll;
     // .spotify.progressBar
     setProperty(spotifyOptions.progressBar!, 'enabled', raw.spotify_progressbar as WEProperty<'bool'>, _r => _r.value);
-    setProperty(spotifyOptions.progressBar!, 'color', raw.spotify_progressbar_color as WEProperty<'color'>, _r => parseColorProperty(_r));
     setProperty(spotifyOptions.progressBar!, 'position', raw.spotify_progressbar_position as WEProperty<'combo'>, _r => parseComboProperty(_r, Position));
+    setProperty(spotifyOptions.progressBar!, 'color', raw.spotify_progressbar_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(spotifyOptions.progressBar!, 'matchAlbumArtColor', raw.spotify_progressbar_color_matchAlbumArt as WEProperty<'bool'>, _r => _r.value);
+    setProperty(spotifyOptions.progressBar!, 'matchAlbumArtColorType', raw.spotify_progressbar_color_matchAlbumArt_type as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyProgressBarColorMatchType));
+    setProperty(spotifyOptions.progressBar!, 'colorPreference', raw.spotify_progressbar_color_matchAlbumArt_colorPreference as WEProperty<'combo'>, _r => parseComboProperty(_r, SpotifyProgressBarColorPreference));
     if (_.isEmpty(spotifyOptions.progressBar)) delete spotifyOptions.progressBar;
 
     // .icue
