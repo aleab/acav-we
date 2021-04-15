@@ -1,4 +1,4 @@
-export default class CurcularBuffer<T extends any> {
+export default class CircularBuffer<T extends any> {
     private readonly _raw: T[] = [];
     /** Returns a copy of the wrapped array.  */
     get raw(): T[] { return this._raw.slice(); }
