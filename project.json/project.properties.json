@@ -1,3 +1,7 @@
+////==========================================
+//// VS CODE: [CTRL+K, CTRL+2] to fold all
+////          [CTRL+K, CTRL+J] to unfold all
+////==========================================
 {
     "schemecolor": {
         "order": 0,
@@ -1877,6 +1881,36 @@
         "text": "ui_spotify_progressbar_color",
         "value": "0.639215 0.749019 0.698039",
         "condition": "spotify.value && spotify_progressbar.value"
+    },
+    "spotify_progressbar_color_matchAlbumArt": {
+        "order": 5303,
+        "type": "bool",
+        "text": "ui_spotify_progressbar_color_matchAlbumArt",
+        "value": false,
+        "condition": "spotify.value && spotify_progressbar.value && (spotify_art.value && spotify_art_type.value === 'AlbumArt')"
+    },
+    "spotify_progressbar_color_matchAlbumArt_type": {
+        "order": 5304,
+        "type": "combo",
+        "text": "ui_spotify_progressbar_color_matchAlbumArt_type",
+        "options": [
+            { "label": "Dominant Color", "value": "Dominant" },
+            { "label": "Average Color", "value": "Average" }
+        ],
+        "value": "Average",
+        "condition": "spotify.value && spotify_progressbar.value && (spotify_art.value && spotify_art_type.value === 'AlbumArt') && spotify_progressbar_color_matchAlbumArt.value"
+    },
+    "spotify_progressbar_color_matchAlbumArt_colorPreference": {
+        "order": 5305,
+        "type": "combo",
+        "text": "ui_spotify_progressbar_color_matchAlbumArt_colorPreference",
+        "options": [
+            { "label": "None", "value": "None" },
+            { "label": "Light on Dark", "value": "LightOnDark" },
+            { "label": "Dark on Light", "value": "DarkOnLight" }
+        ],
+        "value": "LightOnDark",
+        "condition": "spotify.value && spotify_progressbar.value && (spotify_art.value && spotify_art_type.value === 'AlbumArt') && spotify_progressbar_color_matchAlbumArt.value"
     },
     
     "___spotify": {

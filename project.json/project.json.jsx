@@ -433,6 +433,9 @@ function getProjectJson() {
                     ui_spotify_progressbar: subSection('Progress Bar'),
                     ui_spotify_progressbar_position: indent('Position', { n: 3 }),
                     ui_spotify_progressbar_color: indent('Color', { n: 3 }),
+                    ui_spotify_progressbar_color_matchAlbumArt: indent('Match Album Art Color', { n: 3 }),
+                    ui_spotify_progressbar_color_matchAlbumArt_type: indent('Match', { n: 3 }),
+                    ui_spotify_progressbar_color_matchAlbumArt_colorPreference: indent('Color Preference', { n: 3 }),
 
                     // [iCUE]
                     ui_icue: section('iCUE'),

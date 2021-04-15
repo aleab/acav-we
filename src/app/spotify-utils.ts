@@ -26,7 +26,7 @@ import {
 import Log from '../common/Log';
 import Bounds from '../common/Bounds';
 import { CancellationToken, CancellationTokenSource } from '../common/CancellationToken';
-import { colorEquals, lerp as colorLerp, isDark } from '../common/Colors';
+import { calcAverageColor, colorEquals, lerp as colorLerp, isDark } from '../common/Colors';
 import { cssColorToRgba, getComputedBackgroundProperties } from '../common/Css';
 import Stack from '../common/Stack';
 
@@ -401,21 +401,7 @@ async function _getAverageColorOfBackgrounds(
             selfRect.width + margin.left + margin.right,
             selfRect.height + margin.top + margin.bottom,
         );
-        const rgb: RGB = [ 0, 0, 0 ];
-        for (let i = 0; i < imageData.width; ++i) {
-            for (let j = 0; j < imageData.height; ++j) {
-                const ipx = j * (imageData.width * 4) + i * 4;
-                rgb[0] += imageData.data[ipx + 0];
-                rgb[1] += imageData.data[ipx + 1];
-                rgb[2] += imageData.data[ipx + 2];
-            }
-        }
-        const npx = imageData.width * imageData.height;
-        rgb[0] /= npx;
-        rgb[1] /= npx;
-        rgb[2] /= npx;
-
-        return rgb;
+        return calcAverageColor(imageData);
     }
 
     return [ 0, 0, 0 ] as RGB;

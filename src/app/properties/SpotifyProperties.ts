@@ -4,6 +4,8 @@ import { Pivot } from '../../common/Pivot';
 import { Position } from '../../common/Position';
 import { BackgroundMode } from '../BackgroundMode';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
+import { SpotifyProgressBarColorMatchType } from '../SpotifyProgressBarColorMatchType';
+import { SpotifyProgressBarColorPreference } from '../SpotifyProgressBarColorPreference';
 import { TextScrollingType } from '../TextScrollingType';
 
 export default interface SpotifyProperties {
@@ -46,7 +48,10 @@ export default interface SpotifyProperties {
     };
     progressBar: {
         enabled: boolean;
-        color: RGB;
         position: Position;
+        color: RGB;
+        matchAlbumArtColor: boolean;
+        matchAlbumArtColorType: SpotifyProgressBarColorMatchType;
+        colorPreference: SpotifyProgressBarColorPreference;
     };
 }
