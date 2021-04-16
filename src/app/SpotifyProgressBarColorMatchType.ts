@@ -1,3 +1,4 @@
+import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 
 import { CancellationToken } from '../common/CancellationToken';
@@ -8,103 +9,18 @@ const kmeansLog = Log.getLogger('kmeans', Log.GenericVerboseStyle.color, Log.Gen
 
 export enum SpotifyProgressBarColorMatchType { Dominant, Average }
 
-type Centroid = {
-    count: number;
-    color: RGBA;
-};
-
-// https://en.wikipedia.org/wiki/K-means_clustering
-// https://nextjournal.com/lazarus/extracting-dominant-colours-from-pictures
-// https://github.com/NathanEpstein/clusters/blob/19aeb890f05216be2728f522631dc60ef3fdcfa7/clusters.js
-function kmeans(data: ImageData, k: number, iterations: number, ct: CancellationToken): Centroid[] | null {
-    if (ct.isCancelled()) return null;
-
-    const t0 = performance.now();
-
-    const npx = data.width * data.height;
-
-    const centroids = new Array<Centroid>(k);
-    for (let i = 0; i < k; ++i) {
-        const a = Math.round(Math.random() * (npx - 1));
-        const ipx = a * 4;
-        centroids[i] = {
-            count: 0,
-            color: [
-                data.data[ipx + 0],
-                data.data[ipx + 1],
-                data.data[ipx + 2],
-                data.data[ipx + 3],
-            ],
-        };
-    }
-
-    const labels = new Array<number>(npx);
-
-    for (let it = 0; it < iterations; ++it) {
-        if (ct.isCancelled()) return null;
-
-        // update each pixel's label
-        for (let i = 0; i < npx; ++i) {
-            if (ct.isCancelled()) return null;
-
-            const ipx = i * 4;
-            const arrayOfSquaredEuclideanDistances = centroids.map(c => {
-                const d0 = (c.color[0] - data.data[ipx + 0]) ** 2;
-                const d1 = (c.color[1] - data.data[ipx + 1]) ** 2;
-                const d2 = (c.color[2] - data.data[ipx + 2]) ** 2;
-                const d3 = (c.color[3] - data.data[ipx + 3]) ** 2;
-                return d0 + d1 + d2 + d3;
-            });
-            let [ indexOfMin, min ] = [ 0, arrayOfSquaredEuclideanDistances[0] ];
-            for (let j = 1; j < arrayOfSquaredEuclideanDistances.length; ++j) {
-                if (arrayOfSquaredEuclideanDistances[j] < min) {
-                    indexOfMin = j;
-                    min = arrayOfSquaredEuclideanDistances[j];
-                }
-            }
-            labels[i] = indexOfMin;
-        }
-
-        // update centroids
-        for (let i = 0; i < centroids.length; ++i) {
-            // calculate the new average location of the points of this cluster
-            const total = [ 0, 0, 0, 0 ];
-            let n = 0;
-
-            for (let j = 0; j < npx; ++j) {
-                if (labels[j] === i) {
-                    const ipx = j * 4;
-                    total[0] += data.data[ipx + 0];
-                    total[1] += data.data[ipx + 1];
-                    total[2] += data.data[ipx + 2];
-                    total[3] += data.data[ipx + 3];
-                    n++;
-                }
-            }
-
-            centroids[i].count = n;
-            centroids[i].color[0] = Math.round(total[0] / n);
-            centroids[i].color[1] = Math.round(total[1] / n);
-            centroids[i].color[2] = Math.round(total[2] / n);
-            centroids[i].color[3] = Math.round(total[3] / n);
-        }
-    }
-
-    const t1 = performance.now();
-    kmeansLog.debug(`Execution Time: ${(t1 - t0).toFixed(4)}ms`);
-
-    return centroids.sort((c1, c2) => c2.count - c1.count);
-}
-
 type SpotifyProgressBarColorMatcherOptions = {
     kmeansIterations: number;
+    kmeansClusters: number;
 };
 class _SpotifyProgressBarColorMatcher {
     private kmeansIterations: number = 600;
+    private kmeansClusters: number = 3;
 
     withOptions(options: SpotifyProgressBarColorMatcherOptions) {
         const x = new _SpotifyProgressBarColorMatcher();
         x.kmeansIterations = options.kmeansIterations;
+        x.kmeansClusters = options.kmeansClusters;
         return {
             getColor: x.getColor.bind(x),
         };
@@ -112,19 +28,60 @@ class _SpotifyProgressBarColorMatcher {
 
     async getColor(
         type: SpotifyProgressBarColorMatchType,
-        imageData: ImageData,
+        imageCanvas: OffscreenCanvas,
         ct: CancellationToken,
         onLongRunning?: () => void,
         onLongRunningEnded?: () => void,
     ): Promise<RGB | null> {
+        const canvasContext = imageCanvas.getContext('2d');
+        if (canvasContext === null) return null;
+
+        const imageData = canvasContext.getImageData(0, 0, imageCanvas.width, imageCanvas.height);
         switch (type) {
-            case SpotifyProgressBarColorMatchType.Dominant:
-                return Promise.resolve().then(() => {
+            case SpotifyProgressBarColorMatchType.Dominant: {
+                const worker = new Worker('./web-workers/kmeans.js', { name: `kmeans-${(Math.random() * 100000).toFixed(0)}` });
+                return new Promise<RGB | null>(resolve => {
+                    worker.addEventListener('message', (msg: MessageEvent<KmeansWorkerMessageData<'worker-result'>>) => {
+                        if (msg.data.action === 'worker-result') {
+                            let result: RGB | null = null;
+                            if (msg.data.result !== null && !ct.isCancelled()) {
+                                result = msg.data.result[0].value.slice(0, 3) as RGB;
+
+                                if (Log.debug !== Log.NullLogFunction) {
+                                    const arg = {
+                                        executionTime: Number(msg.data.executionTime.toFixed(4)),
+                                        result: msg.data.result.map(c => ({
+                                            count: c.count,
+                                            value: `#${ColorConvert.rgb.hex(c.value as unknown as RGB)}`,
+                                        })),
+                                    };
+                                    kmeansLog.debug('Finished work:', arg);
+                                    Log.debug(
+                                        `             Colors:${arg.result.map((_, i) => `%c\u3000${i}%c  `).join('')}`,
+                                        ...arg.result.map(a => [ 'background-color: unset', `background-color: ${a.value}; border: 1px solid black; border-radius: 8px; margin-left: 2px` ]).reduce((acc, curr) => acc.concat(...curr), []),
+                                    );
+                                }
+                            }
+                            onLongRunningEnded?.();
+                            resolve(result);
+                        }
+                    });
+
+                    ct.onCancelled.subscribe(() => worker.postMessage({ action: 'cancel' } as KmeansWorkerMessageData<'cancel'>));
+
                     onLongRunning?.();
-                    const clusters = kmeans(imageData, 3, this.kmeansIterations, ct);
-                    onLongRunningEnded?.();
-                    return clusters === null || ct.isCancelled() ? null : clusters[0].color.slice(0, 3) as RGB;
+                    worker.postMessage({
+                        action: 'run',
+                        dataBuffer: imageData.data.buffer,
+                        dataWidth: imageData.width,
+                        dataHeight: imageData.height,
+                        k: this.kmeansClusters,
+                        iterations: this.kmeansIterations,
+                    } as KmeansWorkerMessageData<'run'>, [imageData.data.buffer]);
+                }).finally(() => {
+                    worker.terminate();
                 });
+            }
 
             case SpotifyProgressBarColorMatchType.Average:
             default:

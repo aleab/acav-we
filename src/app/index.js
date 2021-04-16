@@ -10,8 +10,8 @@ if (!process.env['NODE_ENV']) {
     process.env['NODE_ENV'] = 'development';
 }
 if (process.env['NODE_ENV'] === 'production') {
-    Log.debug = () => {};
-    Log.info = () => {};
+    Log.debug = Log.NullLogFunction;
+    Log.info = Log.NullLogFunction;
 }
 
 window.acav = {};

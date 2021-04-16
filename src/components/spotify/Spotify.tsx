@@ -171,7 +171,7 @@ export default function Spotify(props: SpotifyProps) {
 
     // ProgressBar: Adaptive color
     // TODO: All of this is currently unnecessarily running even when the progress bar is disabled or the color is static. FIX
-    const albumArtImageData = useRef<ImageData>();
+    const albumArtOffscreenCanvas = useRef<OffscreenCanvas>();
     const [ albumArtColor, setAlbumArtColor ] = useState<RGB | null>(null);
     const [ progressBarColor, setProgressBarColor ] = useState(progressBarUsesAlbumColor ? toHexColor(albumArtColor) : progressBarBaseColor);
     const refreshProgressBarCTS = useRef<CancellationTokenSource>();
@@ -182,14 +182,15 @@ export default function Spotify(props: SpotifyProps) {
         if (!progressBarUsesAlbumColor.current) {
             setProgressBarColor(progressBarBaseColor);
         } else if (image) {
-            if (albumArtImageData.current === undefined) {
+            if (albumArtOffscreenCanvas.current === undefined) {
                 setAlbumArtColor(null);
             } else {
                 SpotifyProgressBarColorMatcher.withOptions({
                     kmeansIterations: 400,
+                    kmeansClusters: 5,
                 }).getColor(
                     progressBarUsesAlbumColorType.current,
-                    albumArtImageData.current,
+                    albumArtOffscreenCanvas.current,
                     refreshProgressBarCTS.current.token,
                     () => setProgressBarColor(progressBarBaseColor),
                 ).then(rgb => {
@@ -473,13 +474,13 @@ export default function Spotify(props: SpotifyProps) {
         }
 
         // current albumArtImageData
-        albumArtImageData.current = undefined;
+        albumArtOffscreenCanvas.current = undefined;
         if (e.currentTarget && e.currentTarget.width > 0 && e.currentTarget.height > 0) {
             const canvas = new OffscreenCanvas(e.currentTarget.width, e.currentTarget.height);
             const canvasContext = canvas.getContext('2d');
             if (canvasContext) {
                 canvasContext.drawImage(e.currentTarget, 0, 0, canvas.width, canvas.height);
-                albumArtImageData.current = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                albumArtOffscreenCanvas.current = canvas;
             }
         }
 
