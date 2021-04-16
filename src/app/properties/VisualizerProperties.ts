@@ -59,10 +59,12 @@ export interface CircularVisualizerProperties {
         width: number;
         height: number;
         minHeight: number;
+        showMirror: boolean;
     };
     blocks: {
         width: number;
         height: number;
+        showMirror: boolean;
         thickness: number;
         hideWhenSilent: boolean;
     };

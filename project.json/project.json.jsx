@@ -261,11 +261,13 @@ function getProjectJson() {
                     ui_circularVisualizer_bars_width: indent('Width (%)'),
                     ui_circularVisualizer_bars_height: indent('Height (%)'),
                     ui_circularVisualizer_bars_minHeight: indent('Min Height (px)'),
+                    ui_circularVisualizer_bars_showMirror: indent('Mirror'),
                     //
                     // [CIRCULAR VISUALIZER > BLOCKS]
                     ui_circularVisualizer_blocks: subSection('Blocks'),
                     ui_circularVisualizer_blocks_width: indent('Width (%)'),
                     ui_circularVisualizer_blocks_height: indent('Height (%)'),
+                    ui_circularVisualizer_blocks_showMirror: indent('Mirror'),
                     ui_circularVisualizer_blocks_thickness: indent('Thickness (px)'),
                     ui_circularVisualizer_blocks_hideWhenSilent: indent('Hide when Silent'),
                     //

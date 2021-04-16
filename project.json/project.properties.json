@@ -842,6 +842,13 @@
         "editable": false,
         "condition": "visualizer_type.value === 'CircularBars'"
     },
+    "circularVisualizer_bars_showMirror": {
+        "order": 1124,
+        "type": "bool",
+        "text": "ui_circularVisualizer_bars_showMirror",
+        "value": false,
+        "condition": "visualizer_type.value === 'CircularBars'"
+    },
     //
     // [CIRCULAR VISUALIZER > BLOCKS]
     "circularVisualizer_blocks": {
@@ -870,8 +877,15 @@
         "editable": false,
         "condition": "visualizer_type.value === 'CircularBlocks'"
     },
-    "circularVisualizer_blocks_thickness": {
+    "circularVisualizer_blocks_showMirror": {
         "order": 1123,
+        "type": "bool",
+        "text": "ui_circularVisualizer_blocks_showMirror",
+        "value": false,
+        "condition": "visualizer_type.value === 'CircularBlocks'"
+    },
+    "circularVisualizer_blocks_thickness": {
+        "order": 1124,
         "type": "slider",
         "text": "ui_circularVisualizer_blocks_thickness",
         "value": 2,
@@ -881,7 +895,7 @@
         "condition": "visualizer_type.value === 'CircularBlocks'"
     },
     "circularVisualizer_blocks_hideWhenSilent": {
-        "order": 1124,
+        "order": 1125,
         "type": "bool",
         "text": "ui_circularVisualizer_blocks_hideWhenSilent",
         "value": false,
