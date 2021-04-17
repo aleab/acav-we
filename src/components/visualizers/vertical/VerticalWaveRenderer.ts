@@ -1,6 +1,7 @@
 import { RGB } from 'color-convert/conversions';
 
 import AudioSamplesArray from '../../../common/AudioSamplesArray';
+import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { VerticalVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
 import VerticalRenderer, { VisualizerParams } from './VerticalRenderer';
@@ -79,7 +80,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
 
         const {
             canvasContext,
-            flipFrequencies,
+            flip,
             visualizerPosition,
             alignment,
             height,
@@ -94,15 +95,14 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             canvasContext.canvas.height - visualizerPosition - 0.5 * (1 + alignment) * (sample[1] * height),
         ];
 
-        const index = flipFrequencies ? (samples.length - 1 - i) : i;
-        const dx = spacing / 2 + index * spacing;
+        const dx = this.getSampleDx(samples.length, i, flip, spacing);
         const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
         return {
             fillColor,
             position: [
-                { x: canvasContext.canvas.width / 2 - dx, y: y[0] },
-                { x: canvasContext.canvas.width / 2 + dx, y: y[1] },
+                { x: canvasContext.canvas.width / 2 - dx[0], y: y[0] },
+                { x: canvasContext.canvas.width / 2 + dx[1], y: y[1] },
             ],
             height: [ sample[0] * height, sample[1] * height ],
         };
@@ -117,7 +117,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         const {
             canvasContext,
             N: N_BARS,
-            flipFrequencies,
+            flip,
             visualizerWidth,
             alignment,
         } = visualizerParams;
@@ -130,6 +130,8 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         const spacing = visualizerWidth / N_BARS;
 
         let prev: { x: number, y: number, height: number }[] | null = null;
+        let first: { x: number, y: number, height: number }[] | null = null;
+        let second: { x: number, y: number, height: number }[] | null = null;
         args.samples.forEach((sample, i, samples) => {
             const sampleRenderProps = this.getSampleRenderProps(samples, i, visualizerParams, args, spacing);
             if (sampleRenderProps === null) return;
@@ -146,6 +148,12 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
                 { x: nextSampleRenderProps.position[1].x, y: nextSampleRenderProps.position[1].y, height: nextSampleRenderProps.height[1] },
             ] : null;
 
+            if (first === null) {
+                first = current;
+            } else if (second === null) {
+                second = current;
+            }
+
             // Render left and right samples
             canvasContext.save();
 
@@ -161,11 +169,41 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
 
             prev = current;
 
-            // Link first left sample with first right sample
-            if ((i === 0 && !flipFrequencies) || (i === samples.length - 1 && flipFrequencies)) {
-                renderWave(canvasContext, current[0].x, current[0].y, current[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, current[1], next?.[0] ?? null);
-                renderWave(canvasContext, current[1].x, current[1].y, current[1].height, alignment, waveThickness, smoothness, showMirrorWave, fill, current[0], next?.[1] ?? null);
+            const q: Array<[ typeof current[0], typeof current[0] | null, typeof current[0] | null ]> = [];
+            switch (flip) {
+                case VisualizerFlipType.LeftChannel:
+                    // Link last L to first R
+                    if (i === samples.length - 1) {
+                        q.push([ current[0], prev![0], first![1] ], [ first![1], current[0], second![1] ]);
+                    }
+                    break;
+
+                case VisualizerFlipType.RightChannel:
+                    // Link first L to last R
+                    if (i === samples.length - 1) {
+                        q.push([ first![0], second![0], current[1] ], [ current[1], first![0], prev![1] ]);
+                    }
+                    break;
+
+                case VisualizerFlipType.Both:
+                    // Link last L to last R
+                    if (i === samples.length - 1) {
+                        q.push([ current[0], prev![0], current[1] ], [ current[1], current[0], prev![1] ]);
+                    }
+                    break;
+
+                case VisualizerFlipType.None:
+                    // Link first L to first R
+                    if (i === 0) {
+                        q.push([ current[0], next![0], current[1] ], [ current[1], next![1], current[0] ]);
+                    }
+                    break;
+                default: break;
             }
+
+            q.forEach(o => {
+                renderWave(canvasContext, o[0].x, o[0].y, o[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, o[1], o[2]);
+            });
 
             canvasContext.restore();
         });

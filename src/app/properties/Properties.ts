@@ -16,6 +16,7 @@ import { SpotifyProgressBarColorMatchType } from '../SpotifyProgressBarColorMatc
 import { SpotifyProgressBarColorPreference } from '../SpotifyProgressBarColorPreference';
 import { TaskbarPosition } from '../TaskbarPosition';
 import { TextScrollingType } from '../TextScrollingType';
+import { VisualizerFlipType } from '../VisualizerFlipType';
 import { VisualizerType } from '../VisualizerType';
 
 import AudioSamplesProperties from './AudioSamplesProperties';
@@ -130,7 +131,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     // .visualizer
     const visualizerOptions: MappedProperties['visualizer'] = {};
     setProperty(visualizerOptions, 'type', raw.visualizer_type as WEProperty<'combo'>, _r => parseComboProperty(_r, VisualizerType));
-    setProperty(visualizerOptions, 'flipFrequencies', raw.visualizer_flipFrequencies as WEProperty<'bool'>, _r => _r.value);
+    setProperty(visualizerOptions, 'flip', raw.visualizer_flip as WEProperty<'combo'>, _r => parseComboProperty(_r, VisualizerFlipType));
     setProperty(visualizerOptions, 'smoothing', raw.visualizer_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     setProperty(visualizerOptions, 'responseType', raw.visualizer_color_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));

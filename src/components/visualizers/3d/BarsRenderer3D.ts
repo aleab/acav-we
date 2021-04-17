@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { BoxGeometry, Mesh, MeshLambertMaterial, PointLight } from 'three';
 
+import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { ThreeDimensionalVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
 import Renderer3D, { VisualizerParams } from './Renderer3D';
@@ -154,7 +155,7 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
         const O = this.options.options;
 
         const {
-            flipFrequencies,
+            flip,
             zoom,
             height,
             colorRgb,
@@ -195,8 +196,14 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
         args.samples.forEach((sample, i) => {
             if (this.leftBars === undefined || this.rightBars === undefined) return;
 
-            const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
-            const t = (λ / 2 + (s + λ) * index) / D;
+            const index = [
+                flip === VisualizerFlipType.LeftChannel || flip === VisualizerFlipType.Both ? args.samples!.length - 1 - i : i,
+                flip === VisualizerFlipType.RightChannel || flip === VisualizerFlipType.Both ? args.samples!.length - 1 - i : i,
+            ];
+            const t = [
+                (λ / 2 + (s + λ) * index[0]) / D,
+                (λ / 2 + (s + λ) * index[1]) / D,
+            ];
 
             const color = [ colorRgb, colorRgb ];
             if (colorReaction !== undefined) {
@@ -209,9 +216,9 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
 
             // right
             const rPosition = [
-                p0[0] + t * (p1[0] - p0[0]),
-                p0[1] + t * (p1[1] - p0[1]),
-                p0[2] + t * (p1[2] - p0[2]),
+                p0[0] + t[1] * (p1[0] - p0[0]),
+                p0[1] + t[1] * (p1[1] - p0[1]),
+                p0[2] + t[1] * (p1[2] - p0[2]),
             ];
             {
                 const value = Math.max(sample[1], Number.EPSILON);
@@ -235,7 +242,11 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
             }
 
             // left
-            const lPosition = [ -rPosition[0], rPosition[1], rPosition[2] ];
+            const lPosition = [
+                -(p0[0] + t[0] * (p1[0] - p0[0])),
+                p0[1] + t[0] * (p1[1] - p0[1]),
+                p0[2] + t[0] * (p1[2] - p0[2]),
+            ];
             {
                 const value = Math.max(sample[0], Number.EPSILON);
                 const left = this.leftBars[i];

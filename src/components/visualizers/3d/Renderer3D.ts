@@ -5,6 +5,7 @@ import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { ThreeDVisualizerProperties } from '../../../app/properties/VisualizerProperties';
 import { AudioResponsiveValueProviderFactory, AudioResponsiveValueProviderFunction } from '../../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';
+import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { ThreeDimensionalVisualizerType } from '../../../app/VisualizerType';
 import { WallpaperContextType } from '../../../app/WallpaperContext';
 
@@ -20,7 +21,7 @@ export type Renderer3DOptions<T extends ThreeDimensionalVisualizerType> = Visual
 
 export interface VisualizerParams {
     N: number;
-    flipFrequencies: boolean;
+    flip: VisualizerFlipType;
     zoom: number;
     height: number;
     colorRgb: Readonly<RGB>;
@@ -93,7 +94,7 @@ export default abstract class Renderer3D<T extends ThreeDimensionalVisualizerTyp
                 return renderReturnArgs;
             }
 
-            const flipFrequencies = Ov.current.flipFrequencies;
+            const flipFrequencies = Ov.current.flip;
             const zoom = Math.clamp(O.zoom / 100, 0.001, 1);
 
             const colorRgba = this.getColor(args);
@@ -111,7 +112,7 @@ export default abstract class Renderer3D<T extends ThreeDimensionalVisualizerTyp
 
             this.renderSamples(timestamp, args, {
                 N,
-                flipFrequencies,
+                flip: flipFrequencies,
                 zoom,
                 height,
                 colorRgb,

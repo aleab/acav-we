@@ -63,7 +63,7 @@ export default class CircularBlocksRenderer extends CircularRenderer<CircularVis
             canvasContext,
             N: N_BARS,
             angularDelta,
-            flipFrequencies,
+            flip,
             x,
             y,
             radius,
@@ -79,21 +79,20 @@ export default class CircularBlocksRenderer extends CircularRenderer<CircularVis
         const blockThickness = O.thickness;
 
         args.samples.forEach((sample, i) => {
-            const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
-            const angle = angularDelta / 2 + index * angularDelta;
+            const angle = this.getSampleAngle(args.samples!.length, i, flip, angularDelta);
             const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
             canvasContext.save();
 
             canvasContext.setFillColorRgb(fillColor[0] as RGB);
             canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderBlock(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, blockThickness, height, angularDelta, showMirror);
+            renderBlock(canvasContext, x, y, radius, rotation - angle[0], width, sample[0] * height, blockThickness, height, angularDelta, showMirror);
 
             if (fillColor.length > 0) {
                 canvasContext.setFillColorRgb(fillColor[1] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            renderBlock(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, blockThickness, height, angularDelta, showMirror);
+            renderBlock(canvasContext, x, y, radius, rotation + angle[1], width, sample[1] * height, blockThickness, height, angularDelta, showMirror);
 
             canvasContext.restore();
         });

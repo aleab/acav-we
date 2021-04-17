@@ -391,11 +391,17 @@
         ],
         "value": "VerticalBars"
     },
-    "visualizer_flipFrequencies": {
+    "visualizer_flip": {
         "order": 1002,
-        "type": "bool",
-        "text": "ui_visualizer_flipFrequencies",
-        "value": false
+        "type": "combo",
+        "text": "ui_visualizer_flip",
+        "options": [
+            { "label": "None", "value": "None" },
+            { "label": "Left Channel", "value": "LeftChannel" },
+            { "label": "Right Channel", "value": "RightChannel" },
+            { "label": "Both", "value": "Both" }
+        ],
+        "value": "None"
     },
     "visualizer_smoothing": {
         "order": 1003,

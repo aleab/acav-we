@@ -27,7 +27,7 @@ export default class VerticalBlocksRenderer extends VerticalRenderer<VerticalVis
         const {
             canvasContext,
             N: N_BARS,
-            flipFrequencies,
+            flip,
             visualizerPosition,
             visualizerWidth,
             alignment,
@@ -48,8 +48,7 @@ export default class VerticalBlocksRenderer extends VerticalRenderer<VerticalVis
                 canvasContext.canvas.height - visualizerPosition - 0.5 * (1 + alignment) * (sample[1] * height),
             ];
 
-            const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
-            const dx = spacing / 2 + index * (width + spacing);
+            const dx = this.getSampleDx(args.samples!.length, i, flip, spacing, width);
             const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
             // Render left and right samples
@@ -57,13 +56,13 @@ export default class VerticalBlocksRenderer extends VerticalRenderer<VerticalVis
 
             canvasContext.setFillColorRgb(fillColor[0] as RGB);
             canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderBlock(canvasContext, canvasContext.canvas.width / 2 - dx - width, y[0], width, sample[0] * height, blockThickness);
+            renderBlock(canvasContext, canvasContext.canvas.width / 2 - dx[0] - width, y[0], width, sample[0] * height, blockThickness);
 
             if (fillColor.length > 0) {
                 canvasContext.setFillColorRgb(fillColor[1] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            renderBlock(canvasContext, canvasContext.canvas.width / 2 + dx, y[1], width, sample[1] * height, blockThickness);
+            renderBlock(canvasContext, canvasContext.canvas.width / 2 + dx[1], y[1], width, sample[1] * height, blockThickness);
 
             canvasContext.restore();
         });

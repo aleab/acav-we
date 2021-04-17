@@ -64,7 +64,7 @@ export default class CircularBarsRenderer extends CircularRenderer<CircularVisua
             canvasContext,
             N: N_BARS,
             angularDelta,
-            flipFrequencies,
+            flip,
             x,
             y,
             radius,
@@ -79,21 +79,20 @@ export default class CircularBarsRenderer extends CircularRenderer<CircularVisua
         const showMirror = O.showMirror;
 
         args.samples.forEach((sample, i) => {
-            const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
-            const angle = angularDelta / 2 + index * angularDelta;
+            const angle = this.getSampleAngle(args.samples!.length, i, flip, angularDelta);
             const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
             canvasContext.save();
 
             canvasContext.setFillColorRgb(fillColor[0] as RGB);
             canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderBar(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, O.minHeight, height, angularDelta, showMirror);
+            renderBar(canvasContext, x, y, radius, rotation - angle[0], width, sample[0] * height, O.minHeight, height, angularDelta, showMirror);
 
             if (fillColor.length > 0) {
                 canvasContext.setFillColorRgb(fillColor[1] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            renderBar(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, O.minHeight, height, angularDelta, showMirror);
+            renderBar(canvasContext, x, y, radius, rotation + angle[1], width, sample[1] * height, O.minHeight, height, angularDelta, showMirror);
 
             canvasContext.restore();
         });

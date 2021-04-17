@@ -179,7 +179,7 @@ function getProjectJson() {
                     // [VISUALIZER]
                     ui_visualizer: section('Visualizer'),
                     ui_visualizer_type: indent('Type'),
-                    ui_visualizer_flipFrequencies: indent('Flip Frequencies'),
+                    ui_visualizer_flip: indent('Flip'),
                     ui_visualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
 
                     ui_visualizer_type_VerticalBars: withFAIcon('far fa-horizontal-rule fa-sm', ' Vertical, Bars'),

@@ -1,8 +1,10 @@
 import { RGB } from 'color-convert/conversions';
 
+import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VerticalVisualizerProperties } from '../../../app/properties/VisualizerProperties';
 import { AudioResponsiveValueProviderFactory, AudioResponsiveValueProviderFunction } from '../../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';
+import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { VerticalVisualizerType } from '../../../app/VisualizerType';
 
 import VisualizerBaseRenderer, { VisualizerRendererOptions } from '../VisualizerBaseRenderer';
@@ -20,7 +22,7 @@ export type VerticalRendererOptions<T extends VerticalVisualizerType> = Visualiz
 export interface VisualizerParams {
     canvasContext: CanvasRenderingContext2D;
     N: number;
-    flipFrequencies: boolean;
+    flip: VisualizerFlipType;
     visualizerPosition: number;
     visualizerWidth: number;
     alignment: number;
@@ -38,6 +40,17 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
         return (args.isSilent && O.useSilentColor ? O.silentColor : O.color) as Readonly<RGBA>;
     }
 
+    protected getSampleDx(numberOfSamples: number, i: number, flip: VisualizerFlipType, spacing: number, width: number = 0) {
+        const index = [
+            flip === VisualizerFlipType.LeftChannel || flip === VisualizerFlipType.Both ? numberOfSamples - 1 - i : i,
+            flip === VisualizerFlipType.RightChannel || flip === VisualizerFlipType.Both ? numberOfSamples - 1 - i : i,
+        ];
+        return [
+            spacing / 2 + index[0] * (width + spacing),
+            spacing / 2 + index[1] * (width + spacing),
+        ];
+    }
+
     render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
         const canvasContext = this.canvas.current?.getContext('2d');
         if (!canvasContext) return null;
@@ -53,7 +66,7 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
             const Ov = this.options.visualizerOptions;
             const O = this.options.commonOptions;
 
-            const flipFrequencies = Ov.current.flipFrequencies;
+            const flipFrequencies = Ov.current.flip;
             const visualizerPosition = canvasContext.canvas.height * (O.position / 100);
             const visualizerWidth = canvasContext.canvas.width * (O.width / 100);
             const alignment = O.alignment;
@@ -82,7 +95,7 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
             this.renderSamples(args, {
                 canvasContext,
                 N,
-                flipFrequencies,
+                flip: flipFrequencies,
                 visualizerPosition,
                 visualizerWidth,
                 alignment,

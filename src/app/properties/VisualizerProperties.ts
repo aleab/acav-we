@@ -1,12 +1,13 @@
 import { RGB } from 'color-convert/conversions';
-import { VisualizerType } from '../VisualizerType';
 
-import { ColorReactionType } from '../ColorReactionType';
+import { VisualizerType } from '../VisualizerType';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
+import { ColorReactionType } from '../ColorReactionType';
+import { VisualizerFlipType } from '../VisualizerFlipType';
 
 export interface VisualizerProperties {
     type: VisualizerType;
-    flipFrequencies: boolean;
+    flip: VisualizerFlipType;
     smoothing: number;
 
     responseType: ColorReactionType;

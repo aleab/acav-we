@@ -3,6 +3,7 @@ import { RGB } from 'color-convert/conversions';
 import { CircularVisualizerProperties } from '../../../app/properties/VisualizerProperties';
 import { AudioResponsiveValueProviderFactory, AudioResponsiveValueProviderFunction } from '../../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';
+import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { CircularVisualizerType } from '../../../app/VisualizerType';
 
 import VisualizerBaseRenderer, { VisualizerRendererOptions } from '../VisualizerBaseRenderer';
@@ -22,7 +23,7 @@ export interface VisualizerParams {
     N: number;
     visualizerAngle: number;
     angularDelta: number;
-    flipFrequencies: boolean;
+    flip: VisualizerFlipType;
     x: number;
     y: number;
     radius: number;
@@ -39,6 +40,17 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
     protected getColor(args: VisualizerRenderArgs): Readonly<RGBA> {
         const O = this.options.commonOptions;
         return (args.isSilent && O.useSilentColor ? O.silentColor : O.color) as Readonly<RGBA>;
+    }
+
+    protected getSampleAngle(numberOfSamples: number, i: number, flip: VisualizerFlipType, angularDelta: number) {
+        const index = [
+            flip === VisualizerFlipType.LeftChannel || flip === VisualizerFlipType.Both ? numberOfSamples - 1 - i : i,
+            flip === VisualizerFlipType.RightChannel || flip === VisualizerFlipType.Both ? numberOfSamples - 1 - i : i,
+        ];
+        return [
+            angularDelta / 2 + index[0] * angularDelta,
+            angularDelta / 2 + index[1] * angularDelta,
+        ];
     }
 
     render(timestamp: number, args: VisualizerRenderArgs): VisualizerRenderReturnArgs | null {
@@ -60,7 +72,7 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
             const visualizerAngle = O.angle;
             const angularDelta = (visualizerAngle * Math.DEG2RAD) / N;
 
-            const flipFrequencies = Ov.current.flipFrequencies;
+            const flipFrequencies = Ov.current.flip;
             const x = canvasContext.canvas.width * (O.x / 100);
             const y = canvasContext.canvas.height * (O.y / 100);
             const radius = minDimension * (O.radius / 100);
@@ -89,7 +101,7 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
                 N,
                 visualizerAngle,
                 angularDelta,
-                flipFrequencies,
+                flip: flipFrequencies,
                 x,
                 y,
                 radius,
