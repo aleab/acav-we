@@ -13,12 +13,22 @@ function renderBar(
     x: number, y: number,
     radius: number, angle: number,
     barWidth: number, barHeight: number,
-    minHeight: number,
+    minHeight: number, maxHeight: number,
+    angularDelta: number,
+    showMirror: boolean,
 ) {
     const stdAngle = -(angle - Math.PI_2);
-    const start = getBarSegmentPoints(0, stdAngle, radius, { x, y }, barWidth);
 
     if (barHeight > minHeight) {
+        let startDistance = 0;
+        if (showMirror) {
+            const maxMirrorHeight = radius - (barWidth / (2 * Math.sin(angularDelta / 2)));
+            if (maxMirrorHeight > 0) {
+                startDistance = -Math.clamp((barHeight * maxMirrorHeight) / maxHeight, 0, maxMirrorHeight);
+            }
+        }
+
+        const start = getBarSegmentPoints(startDistance, stdAngle, radius, { x, y }, barWidth);
         const end = getBarSegmentPoints(barHeight, stdAngle, radius, { x, y }, barWidth);
 
         canvasContext.beginPath();
@@ -29,6 +39,7 @@ function renderBar(
         canvasContext.closePath();
         canvasContext.fill();
     } else {
+        const start = getBarSegmentPoints(0, stdAngle, radius, { x, y }, barWidth);
         canvasContext.lineCap = 'butt';
         canvasContext.lineWidth = minHeight;
         canvasContext.beginPath();
@@ -65,6 +76,7 @@ export default class CircularBarsRenderer extends CircularRenderer<CircularVisua
         } = visualizerParams;
 
         const width = (2 * radius * Math.sin(angularDelta / 2)) * (O.width / 100);
+        const showMirror = O.showMirror;
 
         args.samples.forEach((sample, i) => {
             const index = flipFrequencies ? (args.samples!.length - 1 - i) : i;
@@ -75,13 +87,13 @@ export default class CircularBarsRenderer extends CircularRenderer<CircularVisua
 
             canvasContext.setFillColorRgb(fillColor[0] as RGB);
             canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderBar(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, O.minHeight);
+            renderBar(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, O.minHeight, height, angularDelta, showMirror);
 
             if (fillColor.length > 0) {
                 canvasContext.setFillColorRgb(fillColor[1] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            renderBar(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, O.minHeight);
+            renderBar(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, O.minHeight, height, angularDelta, showMirror);
 
             canvasContext.restore();
         });

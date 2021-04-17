@@ -183,10 +183,12 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions.bars!, 'width', raw.circularVisualizer_bars_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.bars!, 'height', raw.circularVisualizer_bars_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.bars!, 'minHeight', raw.circularVisualizer_bars_minHeight as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.bars!, 'showMirror', raw.circularVisualizer_bars_showMirror as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.bars)) delete circularVisualizerOptions.bars;
     // .circularVisualizer.blocks
     setProperty(circularVisualizerOptions.blocks!, 'width', raw.circularVisualizer_blocks_width as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.blocks!, 'height', raw.circularVisualizer_blocks_height as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(circularVisualizerOptions.blocks!, 'showMirror', raw.circularVisualizer_blocks_showMirror as WEProperty<'bool'>, _r => _r.value);
     setProperty(circularVisualizerOptions.blocks!, 'thickness', raw.circularVisualizer_blocks_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.blocks!, 'hideWhenSilent', raw.circularVisualizer_blocks_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.blocks)) delete circularVisualizerOptions.blocks;

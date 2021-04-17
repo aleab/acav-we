@@ -8,10 +8,27 @@ import CircularRenderer, { VisualizerParams, getBarSegmentPoints } from './Circu
  * @param {number} x x coordinate of the center of the circle.
  * @param {number} y y coordinate of the center of the circle.
  */
-function renderBlock(canvasContext: CanvasRenderingContext2D, x: number, y: number, radius: number, angle: number, barWidth: number, barHeight: number, blockThickness: number) {
+function renderBlock(
+    canvasContext: CanvasRenderingContext2D,
+    x: number, y: number,
+    radius: number, angle: number,
+    barWidth: number, barHeight: number,
+    blockThickness: number,
+    maxHeight: number,
+    angularDelta: number,
+    showMirror: boolean,
+) {
     const stdAngle = -(angle - Math.PI_2);
 
-    const start = getBarSegmentPoints(0, stdAngle, radius, { x, y }, barWidth);
+    let startDistance = 0;
+    if (showMirror) {
+        const maxMirrorHeight = radius - (barWidth / (2 * Math.sin(angularDelta / 2)));
+        if (maxMirrorHeight > 0) {
+            startDistance = -Math.clamp((barHeight * maxMirrorHeight) / maxHeight, 0, maxMirrorHeight);
+        }
+    }
+
+    const start = getBarSegmentPoints(startDistance, stdAngle, radius, { x, y }, barWidth);
     const blockStart = getBarSegmentPoints(barHeight, stdAngle, radius, { x, y }, barWidth);
     const blockEnd = getBarSegmentPoints(barHeight + blockThickness, stdAngle, radius, { x, y }, barWidth);
 
@@ -58,6 +75,7 @@ export default class CircularBlocksRenderer extends CircularRenderer<CircularVis
         } = visualizerParams;
 
         const width = (2 * radius * Math.sin(angularDelta / 2)) * (O.width / 100);
+        const showMirror = O.showMirror;
         const blockThickness = O.thickness;
 
         args.samples.forEach((sample, i) => {
@@ -69,13 +87,13 @@ export default class CircularBlocksRenderer extends CircularRenderer<CircularVis
 
             canvasContext.setFillColorRgb(fillColor[0] as RGB);
             canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderBlock(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, blockThickness);
+            renderBlock(canvasContext, x, y, radius, rotation - angle, width, sample[0] * height, blockThickness, height, angularDelta, showMirror);
 
             if (fillColor.length > 0) {
                 canvasContext.setFillColorRgb(fillColor[1] as RGB);
                 canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
             }
-            renderBlock(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, blockThickness);
+            renderBlock(canvasContext, x, y, radius, rotation + angle, width, sample[1] * height, blockThickness, height, angularDelta, showMirror);
 
             canvasContext.restore();
         });

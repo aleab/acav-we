@@ -261,11 +261,15 @@ function getProjectJson() {
                     ui_circularVisualizer_bars_width: indent('Width (%)'),
                     ui_circularVisualizer_bars_height: indent('Height (%)'),
                     ui_circularVisualizer_bars_minHeight: indent('Min Height (px)'),
+                    ui_circularVisualizer_bars_showMirror: indent('Mirror'),
+                    ui_$_circularVisualizer_bars_showMirror_$_max_width: withTextColor('span', 'warning', '<strong>FYI</strong> ') + note('The maximum length of the mirrored bars depends on their width; at maximum width that length is 0.'),
                     //
                     // [CIRCULAR VISUALIZER > BLOCKS]
                     ui_circularVisualizer_blocks: subSection('Blocks'),
                     ui_circularVisualizer_blocks_width: indent('Width (%)'),
                     ui_circularVisualizer_blocks_height: indent('Height (%)'),
+                    ui_circularVisualizer_blocks_showMirror: indent('Mirror'),
+                    ui_$_circularVisualizer_blocks_showMirror_$_max_width: withTextColor('span', 'warning', '<strong>FYI</strong> ') + note('The maximum height of the mirrored blocks depends on their width; at maximum width that height is 0.'),
                     ui_circularVisualizer_blocks_thickness: indent('Thickness (px)'),
                     ui_circularVisualizer_blocks_hideWhenSilent: indent('Hide when Silent'),
                     //
