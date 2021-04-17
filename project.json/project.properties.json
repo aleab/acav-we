@@ -849,6 +849,12 @@
         "value": false,
         "condition": "visualizer_type.value === 'CircularBars'"
     },
+    "$_circularVisualizer_bars_showMirror_$_max_width": {
+        "order": 1125,
+        "type": "text",
+        "text": "ui_$_circularVisualizer_bars_showMirror_$_max_width",
+        "condition": "visualizer_type.value === 'CircularBars' && circularVisualizer_bars_showMirror.value && circularVisualizer_bars_width.value >= 0.9 * circularVisualizer_bars_width.max"
+    },
     //
     // [CIRCULAR VISUALIZER > BLOCKS]
     "circularVisualizer_blocks": {
@@ -884,8 +890,14 @@
         "value": false,
         "condition": "visualizer_type.value === 'CircularBlocks'"
     },
-    "circularVisualizer_blocks_thickness": {
+    "$_circularVisualizer_blocks_showMirror_$_max_width": {
         "order": 1124,
+        "type": "text",
+        "text": "ui_$_circularVisualizer_blocks_showMirror_$_max_width",
+        "condition": "visualizer_type.value === 'CircularBlocks' && circularVisualizer_blocks_showMirror.value && circularVisualizer_blocks_width.value >= 0.9 * circularVisualizer_blocks_width.max"
+    },
+    "circularVisualizer_blocks_thickness": {
+        "order": 1125,
         "type": "slider",
         "text": "ui_circularVisualizer_blocks_thickness",
         "value": 2,
@@ -895,7 +907,7 @@
         "condition": "visualizer_type.value === 'CircularBlocks'"
     },
     "circularVisualizer_blocks_hideWhenSilent": {
-        "order": 1125,
+        "order": 1126,
         "type": "bool",
         "text": "ui_circularVisualizer_blocks_hideWhenSilent",
         "value": false,
