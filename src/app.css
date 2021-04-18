@@ -602,6 +602,8 @@ details > summary {
 
 .navbar + * { padding-top: 1.5rem; }
 
+#root > main { margin-bottom: 3rem; }
+
 .footer {
   margin-top: auto;
   background-color: var(--black);
