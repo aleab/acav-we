@@ -12,7 +12,7 @@ class ListNode<T> {
     }
 }
 
-export default class LinkedList<T> {
+export default class LinkedList<T> implements Iterable<T> {
     private _length: number = 0;
     get length() { return this._length; }
 
@@ -110,8 +110,8 @@ export default class LinkedList<T> {
         return this.at(i)?.value;
     }
 
-    findCouple(fn: (prev: T, next: T) => boolean, fromTail: boolean = false): { prev: T | undefined, next: T | undefined, i: number } {
-        const x = this.findCoupleInternal(fn, fromTail);
+    findAdjacent(fn: (prev: T, next: T) => boolean, fromTail: boolean = false): { prev: T | undefined, next: T | undefined, i: number } {
+        const x = this.findAdjacentInternal(fn, fromTail);
         return {
             prev: x.prev?.value,
             next: x.next?.value,
@@ -133,7 +133,7 @@ export default class LinkedList<T> {
         if (dt >= this._length) i = this._length;
 
         if (i === -1) {
-            const { prev, next, i: _i } = this.findCoupleInternal(
+            const { prev, next, i: _i } = this.findAdjacentInternal(
                 (a, b) => compareFn(value, a) >= 0 && compareFn(value, b) < 0,
                 Math.abs(dh) >= Math.abs(dt),
             );
@@ -150,6 +150,18 @@ export default class LinkedList<T> {
             return i;
         }
         return -1;
+    }
+
+    findAll(fn: (value: T) => boolean): T[] {
+        if (!fn) return [];
+
+        const result: T[] = [];
+        let n = this.head;
+        while (n !== undefined) {
+            if (fn(n.value)) result.push(n.value);
+            n = n.next;
+        }
+        return result;
     }
 
     private at(i: number): ListNode<T> | undefined {
@@ -179,7 +191,7 @@ export default class LinkedList<T> {
         return n;
     }
 
-    private findCoupleInternal(fn: (prev: T, next: T) => boolean, fromTail: boolean = false): {
+    private findAdjacentInternal(fn: (prev: T, next: T) => boolean, fromTail: boolean = false): {
         prev: ListNode<T> | undefined,
         next: ListNode<T> | undefined,
         i: number,
@@ -213,5 +225,26 @@ export default class LinkedList<T> {
         }
 
         return { prev, next, i };
+    }
+
+    // Iterable<T>
+
+    getIterator(fromTail: boolean = false): Iterator<T> {
+        let currentNode = fromTail ? this.tail : this.head;
+        const next = (node: ListNode<T> | undefined) => (fromTail ? node?.prev : node?.next);
+        return {
+            next: () => {
+                const n = next(currentNode);
+                if (n === undefined) return { value: undefined, done: true };
+
+                const value = currentNode!.value;
+                currentNode = n;
+                return { value, done: false };
+            },
+        };
+    }
+
+    [Symbol.iterator](): Iterator<T> {
+        return this.getIterator();
     }
 }
