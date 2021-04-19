@@ -9,6 +9,9 @@ export default class AudioSamplesArray implements Iterable<number[]> {
     readonly length: number;
     readonly channels: number;
 
+    private static readonly identityFilter = [ 0, 0, 1, 0, 0 ];
+    private static readonly gaussianFilter = [ 0.25, 16, 64, 16, 0.25 ];
+
     constructor(rawArray: number[], channels: number) {
         this.length = rawArray.length / channels;
         if (!Number.isFinite(this.length) || this.length * channels !== rawArray.length) throw new Error('Wrong number of samples.');
@@ -40,20 +43,21 @@ export default class AudioSamplesArray implements Iterable<number[]> {
 
     /**
      * Spatial smoothing using a 1D convolution
-     * @param factor ∈ [0,1] where 0 applies a linear blur and 1 applies a gaussian blur
+     * @param factor ∈ [0,1] where 0 applies an identity filter and 1 applies a gaussian blur
      * @link https://www.desmos.com/calculator/ozwbtoednm
-     * @link https://en.wikipedia.org/wiki/Box_blur
      * @link https://en.wikipedia.org/wiki/Gaussian_blur
      */
     smooth(factor: number): void {
-        // 1D convolution
-        /*               ₘ
+        /* 1D convolution
+         *               ₘ
          * (f ∗ g)(i) =  ∑ g(j)∙f(i+j)
          *              ʲ⁼⁻ᵐ
          */
 
+        if (factor === 0) return;
+
         const k = Math.clamp(factor, 0, 1);
-        const g = [ 0.25, 16, 64, 16, 0.25 ].map(v => Math.lerp(1, v, k));
+        const g = AudioSamplesArray.gaussianFilter.map((v, i) => Math.lerp(AudioSamplesArray.identityFilter[i], v, k));
         const m = Math.floor(g.length / 2);
         const m1 = g.length % 2 === 1 ? m : m - 1;
 

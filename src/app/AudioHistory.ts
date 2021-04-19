@@ -5,7 +5,15 @@ type AudioHistoryItem = {
     timestamp: number;
     data: AudioSamplesArray;
 };
-export class AudioHistory {
+
+export interface IReadonlyAudioHistory {
+    readonly delay: number;
+    getAudioFrame(timestamp: number): [ DeepReadonly<AudioSamplesArray> | null, number ];
+    getSince(timestamp: number): DeepReadonly<AudioHistoryItem>[];
+    getAudioFramesSince(timestamp: number): DeepReadonly<AudioSamplesArray>[];
+}
+
+export default class AudioHistory implements IReadonlyAudioHistory {
     private readonly frames: LinkedList<AudioHistoryItem>;
 
     private _delay: number = 10;
@@ -27,9 +35,8 @@ export class AudioHistory {
 
         if (this.frames.length >= 2) {
             const { prev: a, next: b } = this.frames.findAdjacent(() => true, true);
-            let dt = 1 + b!.timestamp + a!.timestamp;
-            if (dt > 200) dt = 200;
-            this._delay = dt > this._delay ? dt : this._delay - 1;
+            const dt = Math.max(b!.timestamp - a!.timestamp, 1);
+            this._delay = dt > this._delay ? dt : Math.round(Math.lerp(dt, this._delay, 0.69)); // nice!
         }
 
         this.deleteOlderThan(timestamp - 1000);
@@ -42,10 +49,10 @@ export class AudioHistory {
         }
     }
 
-    getAudioFrame(timestamp: number): AudioSamplesArray | null {
-        if (this.frames.length === 0) return null;
-        if (this.frames.length === 1 || timestamp <= this.frames.first!.timestamp) return this.frames.first!.data;
-        if (timestamp >= this.frames.last!.timestamp) return this.frames.last!.data;
+    getAudioFrame(timestamp: number): [ AudioSamplesArray | null, number ] {
+        if (this.frames.length === 0) return [ null, -1 ];
+        if (this.frames.length === 1 || timestamp <= this.frames.first!.timestamp) return [ this.frames.first!.data, this.frames.first!.timestamp ];
+        if (timestamp >= this.frames.last!.timestamp) return [ this.frames.last!.data, this.frames.last!.timestamp ];
 
         const { prev, next } = this.frames.findAdjacent(
             (a, b) => timestamp >= a.timestamp && timestamp < b.timestamp,
@@ -61,10 +68,10 @@ export class AudioHistory {
                 raw[i] = Math.lerp(raw[i], raw1[i], k);
             }
 
-            return new AudioSamplesArray(raw, prev.data.channels);
+            return [ new AudioSamplesArray(raw, prev.data.channels), timestamp ];
         }
 
-        return null;
+        return [ null, -1 ];
     }
 
     getSince(timestamp: number): AudioHistoryItem[] {
@@ -76,7 +83,7 @@ export class AudioHistory {
         while (!(itr = it.next()).done && itr.value.timestamp >= timestamp) {
             result.push(itr.value);
         }
-        return result;
+        return result.reverse();
     }
 
     getAudioFramesSince(timestamp: number): AudioSamplesArray[] {

@@ -164,6 +164,10 @@ export default class LinkedList<T> implements Iterable<T> {
         return result;
     }
 
+    toArray(): T[] {
+        return this.findAll(() => true);
+    }
+
     private at(i: number): ListNode<T> | undefined {
         if (i < 0 || i >= this._length) return undefined;
 
