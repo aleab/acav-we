@@ -31,6 +31,9 @@ export default interface Properties {
     audioprocessing: boolean;
     showStats: boolean;
     limitFps: boolean;
+    useCustomFpsLimit: boolean;
+    customFpsLimit: number;
+
     background: BackgroundProperties;
     foreground: ForegroundProperties;
     audioSamples: AudioSamplesProperties;
@@ -90,6 +93,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r?.value);
     setProperty(rootOptions, 'showStats', raw.showStats as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'limitFps', raw.limitFps as WEProperty<'bool'>, _r => _r.value);
+    setProperty(rootOptions, 'useCustomFpsLimit', raw.customFpsLimit as WEProperty<'bool'>, _r => _r.value);
+    setProperty(rootOptions, 'customFpsLimit', raw.customFpsLimit_value as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     // .background
     const backgroundOptions: MappedProperties['background'] = {};

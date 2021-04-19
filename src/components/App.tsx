@@ -91,7 +91,17 @@ export default function App(props: AppProps) {
         };
     }, [ props.windowEvents, wallpaperEvents, renderer ]);
 
-    const targetFps = useRef(0);
+    // FPS
+    const [ limitFps, setLimitFps ] = useState(O.current.limitFps);
+    const [ weFpsLimit, setWeFpsLimit ] = useState(-1);
+    const [ useCustomFpsLimit, setUseCustomFpsLimit ] = useState(O.current.useCustomFpsLimit);
+    const [ customFpsLimit, setCustomFpsLimit ] = useState(O.current.customFpsLimit);
+    const targetFps = useMemo(() => {
+        if (!limitFps) return 0;
+        if (useCustomFpsLimit && customFpsLimit >= 0) return customFpsLimit;
+        return weFpsLimit > 0 ? weFpsLimit : 0;
+    }, [ customFpsLimit, limitFps, useCustomFpsLimit, weFpsLimit ]);
+    useEffect(() => renderer.setFps(targetFps), [ renderer, targetFps ]);
 
     useEffect(() => {
         window.wallpaperPropertyListener = {};
@@ -140,12 +150,7 @@ export default function App(props: AppProps) {
             if (_.isEmpty(newProps)) return;
             Logc.debug('General properties applied', newProps);
 
-            if (newProps.fps !== undefined) {
-                targetFps.current = newProps.fps;
-                if (O.current.limitFps) {
-                    renderer.setFps(targetFps.current);
-                }
-            }
+            if (newProps.fps !== undefined) setWeFpsLimit(newProps.fps);
 
             onGeneralPropertiesChangedEventHandler.invoke({ newProps });
         };
@@ -167,7 +172,10 @@ export default function App(props: AppProps) {
             Logc.debug('User properties applied', newProps);
 
             if (newProps.showStats !== undefined) setShowStats(newProps.showStats);
-            if (newProps.limitFps !== undefined) renderer.setFps(newProps.limitFps ? targetFps.current : 0);
+
+            if (newProps.limitFps !== undefined) setLimitFps(newProps.limitFps);
+            if (newProps.useCustomFpsLimit !== undefined) setUseCustomFpsLimit(newProps.useCustomFpsLimit);
+            if (newProps.customFpsLimit !== undefined) setCustomFpsLimit(newProps.customFpsLimit);
 
             if (newProps.background !== undefined) {
                 const { playlistTimerMinutes: _playlistTimerMinutes, ..._background } = newProps.background;

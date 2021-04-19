@@ -112,6 +112,8 @@ function getProjectJson() {
                     ui_showAdvancedOptions: 'Show Advanced Options' + asterisk(),
                     ui_showStats: 'Show Stats' + asterisk(),
                     ui_limitFps: 'Limit FPS' + asterisk(),
+                    ui_customFpsLimit: 'Custom FPS Limit' + asterisk(),
+                    ui_customFpsLimit_value: '',
 
                     // [BACKGROUND]
                     ui_background: section('Background'),
