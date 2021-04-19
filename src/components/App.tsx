@@ -64,7 +64,7 @@ export default function App(props: AppProps) {
     const onPausedEventHandler = useMemo(() => new EventHandler<PausedEventArgs>(), []);
     const onEnteredAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
     const onExecutedAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
-    const onVisualizerRenderedEventHandler = useMemo(() => new EventHandler<[PerformanceEventArgs, PerformanceEventArgs]>(), []);
+    const onVisualizerRenderedEventHandler = useMemo(() => new EventHandler<[PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]>(), []);
 
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
         onUserPropertiesChanged: onUserPropertiesChangedEventHandler,
@@ -241,9 +241,11 @@ export default function App(props: AppProps) {
     //  PLUGINS
     // =========
     usePlugin(wallpaperContext.pluginManager, 'cue', useICue && weCuePluginLoaded, {
+        fpsLimit: 22,
         getOptions: () => O.current.icuePlugin,
     });
     const taskbarPlugin = usePlugin(wallpaperContext.pluginManager, 'taskbar', useTaskbarPlugin, {
+        fpsLimit: 30,
         getOptions: () => O.current.taskbar,
     });
 
@@ -342,10 +344,11 @@ export default function App(props: AppProps) {
         };
     }, [ audioHistory, onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, renderer.onRender ]);
 
-    const onVisualizerRendered = useCallback((e: [PerformanceEventArgs, PerformanceEventArgs]) => {
+    const onVisualizerRendered = useCallback((e: [PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]) => {
         onVisualizerRenderedEventHandler.invoke([
             { timestamp: e[0].timestamp, time: e[0].time },
             { timestamp: e[1].timestamp, time: e[1].time },
+            { timestamp: e[2].timestamp, time: e[2].time },
         ]);
     }, [onVisualizerRenderedEventHandler]);
 

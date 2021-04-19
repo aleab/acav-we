@@ -15,7 +15,7 @@ import get3dVisualizerRenderer from './get3dVisualizerRenderer';
 const Logc = Log.getLogger('Visualizer', 'darkblue');
 
 interface VisualizerProps {
-    onRendered?: (e: [PerformanceEventArgs, PerformanceEventArgs]) => void;
+    onRendered?: (e: [PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]) => void;
 }
 
 export default function Visualizer(props: VisualizerProps) {
@@ -31,9 +31,9 @@ export default function Visualizer(props: VisualizerProps) {
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
 
     const onRendered = useMemo(() => props.onRendered, [props.onRendered]);
-    const onRenderedCallback = useRef((e: [PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); });
+    const onRenderedCallback = useRef((e: [PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); });
     useEffect(() => {
-        onRenderedCallback.current = (e: [PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); };
+        onRenderedCallback.current = (e: [PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); };
     }, [onRendered]);
 
     // =====================
@@ -159,16 +159,17 @@ export default function Visualizer(props: VisualizerProps) {
             const t0 = performance.now();
             const visualizerReturnArgs = visualizerRenderer.render(e.eventTimestamp, renderArgs);
             const t1 = performance.now();
-            onRenderedCallback.current([
-                { timestamp: t1, time: t0 - e.eventTimestamp },
-                { timestamp: t1, time: t1 - t0 },
-            ]);
-
-            // TODO: Implement FPS limit for plugins
-            context.pluginManager.processAudioData(renderArgs);
+            context.pluginManager.processAudioData(e.eventTimestamp, renderArgs);
             if (canvas.current !== null && visualizerReturnArgs !== null) {
-                context.pluginManager.processVisualizerSamplesData(visualizerReturnArgs, samplesBuffer);
+                context.pluginManager.processVisualizerSamplesData(e.eventTimestamp, visualizerReturnArgs, samplesBuffer);
             }
+            const t2 = performance.now();
+
+            onRenderedCallback.current([
+                { timestamp: t2, time: t0 - e.eventTimestamp },
+                { timestamp: t2, time: t1 - t0 },
+                { timestamp: t2, time: t2 - t1 },
+            ]);
         };
         context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
 

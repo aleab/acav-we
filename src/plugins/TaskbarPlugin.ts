@@ -9,7 +9,7 @@ import { getClosestFrequencyIndex } from '../app/freq-utils';
 import { AudioResponsiveValueProvider, AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
 import { ColorReactionType } from '../app/ColorReactionType';
 import { getFrequencyRange } from '../app/FrequencyRange';
-import IPlugin from './IPlugin';
+import AbstractPlugin from './AbstractPlugin';
 
 export type TaskbarPluginCtorArgs = {
     getOptions: () => TaskbarProperties;
@@ -17,13 +17,14 @@ export type TaskbarPluginCtorArgs = {
 
 type SamplesColor = [readonly [number, number, number], readonly [number, number, number]];
 
-export default class TaskbarPlugin implements IPlugin {
+export default class TaskbarPlugin extends AbstractPlugin<'taskbar'> {
     private readonly getOptions: () => TaskbarProperties;
     private readonly subscibers = new Set<(samples: AudioSamplesArray, colors: SamplesColor[]) => void>();
 
     public readonly id = Math.random();
 
     constructor(args: TaskbarPluginCtorArgs) {
+        super(args);
         this.getOptions = args.getOptions;
     }
 
@@ -35,9 +36,11 @@ export default class TaskbarPlugin implements IPlugin {
         this.subscibers.delete(callback);
     }
 
-    processAudioData(_args: VisualizerRenderArgs): Promise<void> { return Promise.resolve(); }
+    processAudioData(_timestamp: number, _args: VisualizerRenderArgs): Promise<void> { return Promise.resolve(); }
 
-    async processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Promise<void> {
+    async processVisualizerSamplesData(timestamp: number, visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Promise<void> {
+        if (this.limitFps(timestamp)) return;
+
         const samples = visualizerReturnArgs.samples;
         if (samples === undefined) return;
 

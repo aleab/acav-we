@@ -84,7 +84,7 @@ type WallpaperEvents = {
     stats: {
         enteredAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
         executedAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
-        visualizerRendered: IEventHandler<[PerformanceEventArgs, PerformanceEventArgs]>;
+        visualizerRendered: IEventHandler<[PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]>; // [ pre-processing time, render time, plugins render time ]
     };
 };
 

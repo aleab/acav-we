@@ -41,6 +41,7 @@ export default function Stats() {
     const [ visualizerRenderRate, setVisualizerRenderRate ] = useState(0);
     const [ visualizerPreProcessingTime, setVisualizerPreProcessingTime ] = useState(0);
     const [ visualizerRenderTime, setVisualizerRenderTime ] = useState(0);
+    const [ visualizerPluginsRenderTime, setVisualizerPluginsRenderTime ] = useState(0);
 
     // These refs are used in the graphs
     const canvasRenderTime = useRef(0);
@@ -49,6 +50,7 @@ export default function Stats() {
     const canvasExecutedAudioListenerCallbackTime = useRef(0);
     const canvasVisualizerPreProcessingTime = useRef(0);
     const canvasVisualizerRenderTime = useRef(0);
+    const canvasVisualizerPluginsRenderTime = useRef(0);
 
     useEffect(() => {
         Logc.info('Initializing component...');
@@ -67,6 +69,7 @@ export default function Stats() {
         let visualizerRenderedCount = 0;
         let visualizerRenderedPreProcessingTimeCount = [ 0, 0 ];
         let visualizerRenderedRenderTimeCount = [ 0, 0 ];
+        let visualizerRenderedPluginsRenderTimeCount = [ 0, 0 ];
 
         // Every 1000ms
         const perSecondIntervalId = setInterval((() => {
@@ -112,6 +115,10 @@ export default function Stats() {
             canvasVisualizerRenderTime.current = visualizerRenderedRenderTimeCount[1] > 0 ? visualizerRenderedRenderTimeCount[0] / visualizerRenderedRenderTimeCount[1] : 0;
             setVisualizerRenderTime(canvasVisualizerRenderTime.current);
             visualizerRenderedRenderTimeCount = [ 0, 0 ];
+
+            canvasVisualizerPluginsRenderTime.current = visualizerRenderedPluginsRenderTimeCount[1] > 0 ? visualizerRenderedPluginsRenderTimeCount[0] / visualizerRenderedPluginsRenderTimeCount[1] : 0;
+            setVisualizerPluginsRenderTime(canvasVisualizerPluginsRenderTime.current);
+            visualizerRenderedPluginsRenderTimeCount = [ 0, 0 ];
         }) as TimerHandler, 150);
 
         // =======================
@@ -160,12 +167,14 @@ export default function Stats() {
             executedAudioListenerCallbackCount[1]++;
         };
         context?.wallpaperEvents.stats.executedAudioListenerCallback.subscribe(executedAudioListenerCallbackCallback);
-        const visualizerRenderedCallback = (args: [PerformanceEventArgs, PerformanceEventArgs]) => {
+        const visualizerRenderedCallback = (args: [PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]) => {
             visualizerRenderedCount++;
             visualizerRenderedPreProcessingTimeCount[0] += args[0].time;
             visualizerRenderedPreProcessingTimeCount[1]++;
             visualizerRenderedRenderTimeCount[0] += args[1].time;
             visualizerRenderedRenderTimeCount[1]++;
+            visualizerRenderedPluginsRenderTimeCount[0] += args[2].time;
+            visualizerRenderedPluginsRenderTimeCount[1]++;
         };
         context?.wallpaperEvents.stats.visualizerRendered.subscribe(visualizerRenderedCallback);
 
@@ -217,6 +226,8 @@ export default function Stats() {
     const [ visualizerPreProcessingTimeCanvas, visualizerPreProcessingTimeV ] = useCanvas2dTimeGraph(visualizerPreProcessingTimeCanvasOptions);
     const visualizerRenderTimeCanvasOptions = useCanvasOptions(resolution, canvasVisualizerRenderTime, 50);
     const [ visualizerRenderTimeCanvas, visualizerRenderTimeV ] = useCanvas2dTimeGraph(visualizerRenderTimeCanvasOptions);
+    const visualizerPluginsRenderTimeCanvasOptions = useCanvasOptions(resolution, canvasVisualizerPluginsRenderTime, 50);
+    const [ visualizerPluginsRenderTimeCanvas, visualizerPluginsRenderTimeV ] = useCanvas2dTimeGraph(visualizerPluginsRenderTimeCanvasOptions);
 
     return (
       <div id="stats" className="overlay p-2" style={{ left: 0, bottom: 30 * resolution, fontSize: 14 * resolution }}>
@@ -333,6 +344,17 @@ export default function Stats() {
                 <div>
                   <span>{visualizerPreProcessingTimeV.max.current.toFixed(4)}</span>
                   <span>{visualizerPreProcessingTimeV.min.current.toFixed(4)}</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Plugins Render Time</th>
+              <td className="pr-3">{`${visualizerPluginsRenderTime.toFixed(4)}ms`}</td>
+              <td className="lh-0"><canvas ref={visualizerPluginsRenderTimeCanvas} width={0} height={0} /></td>
+              <td className="canvas-minmax">
+                <div>
+                  <span>{visualizerPluginsRenderTimeV.max.current.toFixed(4)}</span>
+                  <span>{visualizerPluginsRenderTimeV.min.current.toFixed(4)}</span>
                 </div>
               </td>
             </tr>

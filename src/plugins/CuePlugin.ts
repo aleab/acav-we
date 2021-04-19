@@ -5,9 +5,9 @@ import Log from '../common/Log';
 import VisualizerRenderArgs from '../components/visualizers/VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRenderReturnArgs';
 
-import IPlugin from './IPlugin';
 import { ColorReactionType } from '../app/ColorReactionType';
 import { AudioResponsiveValueProvider, AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
+import AbstractPlugin from './AbstractPlugin';
 
 const Logc = Log.getLogger('iCUE Plugin', 'black');
 
@@ -23,7 +23,7 @@ export type CueCtorArgs = {
 type CueDevice = { i: number; info: CorsairDeviceInfo };
 
 // https://wallpaper-engine.fandom.com/wiki/Web_Wallpaper_iCUE_Reference
-export default class CuePlugin implements IPlugin {
+export default class CuePlugin extends AbstractPlugin<'cue'> {
     private readonly keyboardCanvas: HTMLCanvasElement;
     private readonly mouseCanvas: HTMLCanvasElement;
     private readonly nodeCanvas: HTMLCanvasElement;
@@ -31,6 +31,7 @@ export default class CuePlugin implements IPlugin {
     private readonly getOptions: () => CueOptions;
 
     constructor(args: CueCtorArgs) {
+        super(args);
         this.getOptions = args.getOptions;
 
         this.keyboardCanvas = document.createElement('canvas');
@@ -90,9 +91,11 @@ export default class CuePlugin implements IPlugin {
         });
     }
 
-    processAudioData(_args: VisualizerRenderArgs): Promise<void> { return Promise.resolve(); }
+    processAudioData(_timestamp: number, _args: VisualizerRenderArgs): Promise<void> { return Promise.resolve(); }
 
-    async processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs): Promise<void> {
+    async processVisualizerSamplesData(timestamp: number, visualizerReturnArgs: VisualizerRenderReturnArgs): Promise<void> {
+        if (this.limitFps(timestamp)) return;
+
         if (window.cue === undefined) return;
         if (visualizerReturnArgs.samples === undefined) return;
 

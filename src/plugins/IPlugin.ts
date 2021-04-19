@@ -3,6 +3,6 @@ import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRend
 import AudioSamplesArray from '../common/AudioSamplesArray';
 
 export default interface IPlugin {
-    processAudioData(args: VisualizerRenderArgs): Promise<void>;
-    processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Promise<void>;
+    processAudioData(timestamp: number, args: VisualizerRenderArgs): Promise<void>;
+    processVisualizerSamplesData(timestamp: number, visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Promise<void>;
 }
