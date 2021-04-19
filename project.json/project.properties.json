@@ -371,7 +371,7 @@
         "order": 122,
         "type": "slider",
         "text": "ui_audioSamples_temporalSmoothing_factor",
-        "value": 30,
+        "value": 50,
         "min": 0,
         "max": 100
     },
