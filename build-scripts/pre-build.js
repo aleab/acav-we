@@ -13,5 +13,6 @@ const DIST_DIR = path.resolve('./dist');
         removePrebuildDir: true,
     }).catch(e => {
         console.error(e);
+        process.exit(1);
     });
 })();
