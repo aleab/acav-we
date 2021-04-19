@@ -1,10 +1,9 @@
 import Log from '../common/Log';
-import CircularBuffer from '../common/CircularBuffer';
 import AudioSamplesArray from '../common/AudioSamplesArray';
 
 export enum AudioResponsiveValueProvider { Value, ValueNormalized, Change, ChangeAbsolute }
 
-export type AudioResponsiveValueProviderFunctionArgs = { samplesBuffer?: CircularBuffer<AudioSamplesArray>, peak?: number };
+export type AudioResponsiveValueProviderFunctionArgs = { samplesBuffer?: AudioSamplesArray[], peak?: number };
 
 const AudioResponsiveValueProviders: {
     [k in AudioResponsiveValueProvider]: (sample: [ number, number ], i: number, gain: number, args: AudioResponsiveValueProviderFunctionArgs) => [ number, number ];
@@ -23,14 +22,14 @@ const AudioResponsiveValueProviders: {
         ];
     },
     [AudioResponsiveValueProvider.Change]: (sample, i, gain, { samplesBuffer }) => {
-        const s = samplesBuffer?.get(0).getSample(i) ?? sample;
+        const s = samplesBuffer?.[0]?.getSample(i) ?? sample;
         return [
             Math.clamp(gain * (sample[0] - s[0]), -1, 1),
             Math.clamp(gain * (sample[1] - s[1]), -1, 1),
         ];
     },
     [AudioResponsiveValueProvider.ChangeAbsolute]: (sample, i, gain, { samplesBuffer }) => {
-        const s = samplesBuffer?.get(0).getSample(i) ?? sample;
+        const s = samplesBuffer?.[0]?.getSample(i) ?? sample;
         return [
             Math.clamp(gain * Math.abs(sample[0] - s[0]), 0, 1),
             Math.clamp(gain * Math.abs(sample[1] - s[1]), 0, 1),

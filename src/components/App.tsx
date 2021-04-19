@@ -4,10 +4,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import CircularBuffer from '../common/CircularBuffer';
+import AudioHistory from '../app/AudioHistory';
 import { BackgroundMode } from '../app/BackgroundMode';
-import Properties, { applyUserProperties } from '../app/properties/Properties';
 import { PINK_NOISE } from '../app/noise';
+import Properties, { applyUserProperties } from '../app/properties/Properties';
+import { RenderEventArgs } from '../app/Renderer';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
 import WallpaperContext, { WallpaperContextType } from '../app/WallpaperContext';
 import { usePlugin } from '../hooks/usePlugin';
@@ -52,6 +53,8 @@ export default function App(props: AppProps) {
     const [ taskbarPosition, setTaskbarPosition ] = useState(O.current.taskbar.position);
     const [ taskbarBrightness, setTaskbarBrightness ] = useState(O.current.taskbar.brightness);
 
+    const temporalSmoothingBufferLengthMs = useRef(500);
+
     window.acav.getProperties = function getProperties() { return _.cloneDeep(O.current); };
 
     // Observer
@@ -61,7 +64,7 @@ export default function App(props: AppProps) {
     const onPausedEventHandler = useMemo(() => new EventHandler<PausedEventArgs>(), []);
     const onEnteredAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
     const onExecutedAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
-    const onVisualizerRenderedEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
+    const onVisualizerRenderedEventHandler = useMemo(() => new EventHandler<[PerformanceEventArgs, PerformanceEventArgs]>(), []);
 
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
         onUserPropertiesChanged: onUserPropertiesChangedEventHandler,
@@ -88,9 +91,7 @@ export default function App(props: AppProps) {
         };
     }, [ props.windowEvents, wallpaperEvents, renderer ]);
 
-    // Shared state
     const targetFps = useRef(0);
-    const samplesBuffer = useMemo(() => new CircularBuffer<AudioSamplesArray>(1 + O.current.audioSamples.bufferLength ?? 0), []);
 
     useEffect(() => {
         window.wallpaperPropertyListener = {};
@@ -188,10 +189,6 @@ export default function App(props: AppProps) {
                 if (!_.isEmpty(_foreground)) updateForeground();
             }
 
-            if (newProps.audioSamples?.bufferLength !== undefined) {
-                samplesBuffer.resize(1 + newProps.audioSamples.bufferLength);
-            }
-
             if (newProps.clock !== undefined) {
                 if (newProps.clock.enabled !== undefined) setShowClock(newProps.clock.enabled);
             }
@@ -219,7 +216,7 @@ export default function App(props: AppProps) {
             //onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onUserPropertiesChangedEventHandler, renderer, samplesBuffer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
+    }, [ onUserPropertiesChangedEventHandler, renderer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
 
     // =================
     //  PAUSED LISTENER
@@ -247,11 +244,14 @@ export default function App(props: AppProps) {
     // ================
     // All preliminary operations that need to be applied to the audio samples and shared by all the
     // audio-responsive elements of the wallpaper, such as filters and peak calculations, are done here.
+    const audioHistory = useMemo(() => new AudioHistory(), []);
     useEffect(() => {
         Logc.info('Registering wallpaperRegisterAudioListener callback...');
 
-        let peak = 0;
         let mean = 0;
+        let peak = 0;
+        let lerpPeak = 1;
+        let listenerIsPaused = false;
 
         // == preProcessSamples()
         function preProcessSamples(_samples: number[]): number[] {
@@ -271,20 +271,12 @@ export default function App(props: AppProps) {
             });
 
             peak = _.max(filteredSamples) ?? 0;
+            lerpPeak = Math.lerp(lerpPeak, peak, 0.69);
 
             if (O.current.audioSamples.normalize) {
-                let totalWeight = 1;
-                const peaks = samplesBuffer.raw.map((v, i, arr) => {
-                    const w = 6 ** (i / arr.length - 1);
-                    totalWeight += w;
-                    return v.max() * w;
-                }).concat(peak);
-
-                peak = _.sum(peaks) / totalWeight;
+                peak = lerpPeak;
                 if (peak > 0) {
-                    filteredSamples.forEach((_v, i) => {
-                        filteredSamples[i] /= peak;                                             // NORMALIZE
-                    });
+                    filteredSamples.forEach((_v, i) => { filteredSamples[i] /= peak; });        // NORMALIZE
                 }
             }
 
@@ -292,25 +284,15 @@ export default function App(props: AppProps) {
             return filteredSamples;
         }
 
-        let listenerIsPaused = false;
-        window.acav.togglePauseAudioListener = function togglePauseAudioListener() {
-            listenerIsPaused = !listenerIsPaused;
-        };
+        let latestSamples: AudioSamplesArray | undefined;
 
-        // The samples array is declared outside the callback to let the previous samples pass throught if listenerIsPaused is true
-        let samples: AudioSamplesArray | undefined;
         const audioListener: WEAudioListener = rawSamples => {
             const t0 = performance.now();
             onEnteredAudioListenerCallbackEventHandler.invoke({ timestamp: t0, time: -1 });
 
             if (!listenerIsPaused) {
-                samples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
-                samplesBuffer.push(samples);
-            }
-            if (samples !== undefined) {
-                const _rawSamples = new AudioSamplesArray(rawSamples, 2);
-                const audioSamplesEventArgs: AudioSamplesEventArgs = { rawSamples: _rawSamples, samples: samples!, samplesBuffer, peak, mean };
-                onAudioSamplesEventHandler.invoke(audioSamplesEventArgs);
+                latestSamples = new AudioSamplesArray(preProcessSamples(rawSamples), 2);
+                audioHistory.push(t0, latestSamples);
             }
 
             const t1 = performance.now();
@@ -318,19 +300,45 @@ export default function App(props: AppProps) {
         };
         window.wallpaperRegisterAudioListener(audioListener);
 
-        window.acav.resetAudioListener = function resetAudioListener() {
-            window.wallpaperRegisterAudioListener(audioListener);
+        window.acav.togglePauseAudioListener = () => { listenerIsPaused = !listenerIsPaused; };
+        window.acav.resetAudioListener = () => window.wallpaperRegisterAudioListener(audioListener);
+
+        const onRender = (e: RenderEventArgs) => {
+            const [ samples, frameTimestamp ] = audioHistory.getAudioFrame(e.timestamp - audioHistory.delay);
+            if (samples !== null && frameTimestamp > 0) {
+                const samplesBuffer: AudioSamplesArray[] = [];
+                if (temporalSmoothingBufferLengthMs.current > 0) {
+                    const audioHistoryItems = audioHistory.getSince(frameTimestamp - temporalSmoothingBufferLengthMs.current);
+                    for (let i = 0; i < audioHistoryItems.length; ++i) {
+                        if (audioHistoryItems[i].timestamp >= frameTimestamp) break;
+                        samplesBuffer.push(audioHistoryItems[i].data);
+                    }
+                }
+
+                const audioSamplesEventArgs: AudioSamplesEventArgs = { eventTimestamp: e.timestamp, samples, samplesBuffer, peak, mean };
+                onAudioSamplesEventHandler.invoke(audioSamplesEventArgs);
+            } else if (latestSamples !== undefined) {
+                // The app is most likely paused: keep rendering the latest samples
+                const audioSamplesEventArgs: AudioSamplesEventArgs = { eventTimestamp: e.timestamp, samples: latestSamples, samplesBuffer: [], peak, mean };
+                onAudioSamplesEventHandler.invoke(audioSamplesEventArgs);
+            }
         };
+        renderer.onRender.subscribe(onRender);
 
         return () => {
             //onAudioSamplesSubs.clear();
             window.wallpaperRegisterAudioListener(null);
             delete window.acav.togglePauseAudioListener;
+            delete window.acav.resetAudioListener;
+            renderer.onRender.unsubscribe(onRender);
         };
-    }, [ onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, samplesBuffer ]);
+    }, [ audioHistory, onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, renderer.onRender ]);
 
-    const onVisualizerRendered = useCallback((e: PerformanceEventArgs) => {
-        onVisualizerRenderedEventHandler.invoke({ timestamp: e.timestamp, time: e.time });
+    const onVisualizerRendered = useCallback((e: [PerformanceEventArgs, PerformanceEventArgs]) => {
+        onVisualizerRenderedEventHandler.invoke([
+            { timestamp: e[0].timestamp, time: e[0].time },
+            { timestamp: e[1].timestamp, time: e[1].time },
+        ]);
     }, [onVisualizerRenderedEventHandler]);
 
     const wallpaperRef = useRef<HTMLDivElement>(null);

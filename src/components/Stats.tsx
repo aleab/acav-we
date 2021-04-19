@@ -39,6 +39,7 @@ export default function Stats() {
     const [ enteredAudioListenerCallbackRate, setEnteredAudioListenerCallbackRate ] = useState(0);
     const [ executedAudioListenerCallbackTime, setExecutedAudioListenerCallbackTime ] = useState(0);
     const [ visualizerRenderRate, setVisualizerRenderRate ] = useState(0);
+    const [ visualizerPreProcessingTime, setVisualizerPreProcessingTime ] = useState(0);
     const [ visualizerRenderTime, setVisualizerRenderTime ] = useState(0);
 
     // These refs are used in the graphs
@@ -46,7 +47,8 @@ export default function Stats() {
     const canvasAudioSamplesMean = useRef(0);
     const canvasAudioSamplesPeak = useRef(0);
     const canvasExecutedAudioListenerCallbackTime = useRef(0);
-    const canvasVisualizerRenderedTime = useRef(0);
+    const canvasVisualizerPreProcessingTime = useRef(0);
+    const canvasVisualizerRenderTime = useRef(0);
 
     useEffect(() => {
         Logc.info('Initializing component...');
@@ -63,7 +65,8 @@ export default function Stats() {
         let enteredAudioListenerCallbackCount = 0;
         let executedAudioListenerCallbackCount = [ 0, 0 ];
         let visualizerRenderedCount = 0;
-        let visualizerRenderedTimeCount = [ 0, 0 ];
+        let visualizerRenderedPreProcessingTimeCount = [ 0, 0 ];
+        let visualizerRenderedRenderTimeCount = [ 0, 0 ];
 
         // Every 1000ms
         const perSecondIntervalId = setInterval((() => {
@@ -102,9 +105,13 @@ export default function Stats() {
             setExecutedAudioListenerCallbackTime(canvasExecutedAudioListenerCallbackTime.current);
             executedAudioListenerCallbackCount = [ 0, 0 ];
 
-            canvasVisualizerRenderedTime.current = visualizerRenderedTimeCount[1] > 0 ? visualizerRenderedTimeCount[0] / visualizerRenderedTimeCount[1] : 0;
-            setVisualizerRenderTime(canvasVisualizerRenderedTime.current);
-            visualizerRenderedTimeCount = [ 0, 0 ];
+            canvasVisualizerPreProcessingTime.current = visualizerRenderedPreProcessingTimeCount[1] > 0 ? visualizerRenderedPreProcessingTimeCount[0] / visualizerRenderedPreProcessingTimeCount[1] : 0;
+            setVisualizerPreProcessingTime(canvasVisualizerPreProcessingTime.current);
+            visualizerRenderedPreProcessingTimeCount = [ 0, 0 ];
+
+            canvasVisualizerRenderTime.current = visualizerRenderedRenderTimeCount[1] > 0 ? visualizerRenderedRenderTimeCount[0] / visualizerRenderedRenderTimeCount[1] : 0;
+            setVisualizerRenderTime(canvasVisualizerRenderTime.current);
+            visualizerRenderedRenderTimeCount = [ 0, 0 ];
         }) as TimerHandler, 150);
 
         // =======================
@@ -153,10 +160,12 @@ export default function Stats() {
             executedAudioListenerCallbackCount[1]++;
         };
         context?.wallpaperEvents.stats.executedAudioListenerCallback.subscribe(executedAudioListenerCallbackCallback);
-        const visualizerRenderedCallback = (args: PerformanceEventArgs) => {
+        const visualizerRenderedCallback = (args: [PerformanceEventArgs, PerformanceEventArgs]) => {
             visualizerRenderedCount++;
-            visualizerRenderedTimeCount[0] += args.time;
-            visualizerRenderedTimeCount[1]++;
+            visualizerRenderedPreProcessingTimeCount[0] += args[0].time;
+            visualizerRenderedPreProcessingTimeCount[1]++;
+            visualizerRenderedRenderTimeCount[0] += args[1].time;
+            visualizerRenderedRenderTimeCount[1]++;
         };
         context?.wallpaperEvents.stats.visualizerRendered.subscribe(visualizerRenderedCallback);
 
@@ -204,7 +213,9 @@ export default function Stats() {
 
     const executedAudioListenerCallbackTimeCanvasOptions = useCanvasOptions(resolution, canvasExecutedAudioListenerCallbackTime, 50);
     const [ executedAudioListenerCallbackTimeCanvas, executedAudioListenerCallbackTimeV ] = useCanvas2dTimeGraph(executedAudioListenerCallbackTimeCanvasOptions);
-    const visualizerRenderTimeCanvasOptions = useCanvasOptions(resolution, canvasVisualizerRenderedTime, 50);
+    const visualizerPreProcessingTimeCanvasOptions = useCanvasOptions(resolution, canvasVisualizerPreProcessingTime, 50);
+    const [ visualizerPreProcessingTimeCanvas, visualizerPreProcessingTimeV ] = useCanvas2dTimeGraph(visualizerPreProcessingTimeCanvasOptions);
+    const visualizerRenderTimeCanvasOptions = useCanvasOptions(resolution, canvasVisualizerRenderTime, 50);
     const [ visualizerRenderTimeCanvas, visualizerRenderTimeV ] = useCanvas2dTimeGraph(visualizerRenderTimeCanvasOptions);
 
     return (
@@ -311,6 +322,17 @@ export default function Stats() {
                 <div>
                   <span>{visualizerRenderTimeV.max.current.toFixed(4)}</span>
                   <span>{visualizerRenderTimeV.min.current.toFixed(4)}</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th>Pre-Processing Time</th>
+              <td className="pr-3">{`${visualizerPreProcessingTime.toFixed(4)}ms`}</td>
+              <td className="lh-0"><canvas ref={visualizerPreProcessingTimeCanvas} width={0} height={0} /></td>
+              <td className="canvas-minmax">
+                <div>
+                  <span>{visualizerPreProcessingTimeV.max.current.toFixed(4)}</span>
+                  <span>{visualizerPreProcessingTimeV.min.current.toFixed(4)}</span>
                 </div>
               </td>
             </tr>

@@ -2,15 +2,12 @@ import _ from 'lodash';
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import Log from '../../common/Log';
-import CircularBuffer from '../../common/CircularBuffer';
 import AudioSamplesArray from '../../common/AudioSamplesArray';
 import { CircularVisualizerType, ThreeDimensionalVisualizerType, VerticalVisualizerType, VisualizerType } from '../../app/VisualizerType';
 import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
 import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
-import VisualizerRenderArgs from './VisualizerRenderArgs';
-import VisualizerRenderReturnArgs from './VisualizerRenderReturnArgs';
 import getVerticalBarsVisualizerRenderer from './getVerticalBarsVisualizerRenderer';
 import getCircularVisualizerRenderer from './getCircularVisualizerRenderer';
 import get3dVisualizerRenderer from './get3dVisualizerRenderer';
@@ -18,7 +15,7 @@ import get3dVisualizerRenderer from './get3dVisualizerRenderer';
 const Logc = Log.getLogger('Visualizer', 'darkblue');
 
 interface VisualizerProps {
-    onRendered?: (e: PerformanceEventArgs) => void;
+    onRendered?: (e: [PerformanceEventArgs, PerformanceEventArgs]) => void;
 }
 
 export default function Visualizer(props: VisualizerProps) {
@@ -26,6 +23,7 @@ export default function Visualizer(props: VisualizerProps) {
     const context = useContext(WallpaperContext)!;
 
     const O = useRef(context.wallpaperProperties.visualizer);
+    const audioSamplesOptions = useRef(context.wallpaperProperties.audioSamples);
     const verticalVisualizerOptions = useRef(context.wallpaperProperties.verticalVisualizer);
     const circularVisualizerOptions = useRef(context.wallpaperProperties.circularVisualizer);
     const threeDVisualizerOptions = useRef(context.wallpaperProperties.threeDVisualizer);
@@ -33,9 +31,9 @@ export default function Visualizer(props: VisualizerProps) {
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
 
     const onRendered = useMemo(() => props.onRendered, [props.onRendered]);
-    const onRenderedCallback = useRef((e: PerformanceEventArgs) => { if (onRendered) onRendered(e); });
+    const onRenderedCallback = useRef((e: [PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); });
     useEffect(() => {
-        onRenderedCallback.current = (e: PerformanceEventArgs) => { if (onRendered) onRendered(e); };
+        onRenderedCallback.current = (e: [PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); };
     }, [onRendered]);
 
     // =====================
@@ -92,13 +90,12 @@ export default function Visualizer(props: VisualizerProps) {
     useEffect(() => {
         Logc.info('Registering onAudioSamples and render callbacks...');
 
-        const reduxSamplesWeightedMean = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
+        const weightFn = (n: number, k: number) => (n < 1 ? (6 ** ((n - 1) / k)) : 1);
+        const reduceSamplesBufferToArrayOfWeightedMeans = (_samples: AudioSamplesArray[], _smoothFactor: number): number[] => {
             let totalWeight = 0;
             return _samples.reduce<number[]>((acc, curr, i, arr) => {
                 const x = i / (arr.length - 1);
-                const w = arr.length > 1
-                    ? x < 1 ? (6 ** ((x - 1) / _smoothFactor)) : 1
-                    : 1;
+                const w = arr.length > 1 ? weightFn(x, _smoothFactor) : 1;
                 totalWeight += w;
 
                 curr.raw.forEach((v, j) => {
@@ -113,21 +110,18 @@ export default function Visualizer(props: VisualizerProps) {
             return _samples.raw.map((v, i) => Math.lerp(_prevRaw[i], v, 1 - s));
         };
 
-        let samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined;
+        let samplesBuffer: AudioSamplesArray[] | undefined;
         let samples: AudioSamplesArray | undefined;
         let peak = 1;
 
-        let prevSamples: AudioSamplesArray | undefined;
-        let prevSamplesCount = 0;
-
         // Audio samples callback
-        const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
-            samplesBuffer = args.samplesBuffer;
+        const audioSamplesEventCallback = (e: AudioSamplesEventArgs) => {
+            samplesBuffer = e.samplesBuffer;
 
-            if (args.peak > 1) {
+            if (e.peak > 1) {
                 Log.warn('Current peak > 1!', {
-                    peak: args.peak,
-                    samples: args.samples.raw,
+                    peak: e.peak,
+                    samples: e.samples.raw,
                 });
             }
 
@@ -136,19 +130,17 @@ export default function Visualizer(props: VisualizerProps) {
             //   L = [f₀ f₁ ... fₙ]
             //   R = [f₀ f₁ ... fₙ]
             //   fᵢ: weighted mean of frequency i samples
-            const smoothFactor = O.current.smoothing / 100;
-            const smoothSamples = samplesBuffer.size > 1
-                ? reduxSamplesWeightedMean(samplesBuffer.raw, smoothFactor)
-                : prevSamples !== undefined && samplesBuffer.size === 1
-                    ? lerpSamples(args.samples, prevSamples, smoothFactor)
-                    : args.samples.raw;
+            const smoothFactor = audioSamplesOptions.current.temporalSmoothingFactor;                       // TEMPORAL SMOOTHING
+            const smoothSamples = samplesBuffer.length > 1
+                ? reduceSamplesBufferToArrayOfWeightedMeans(samplesBuffer.concat(e.samples), smoothFactor)
+                : samplesBuffer.length === 1
+                    ? lerpSamples(e.samples, samplesBuffer[0], smoothFactor)
+                    : e.samples.raw;
 
             // If any value is above 1, normalize
             const max = _.max(smoothSamples) ?? 0;
             if (max > 1) {
-                smoothSamples.forEach((_v, i) => {
-                    smoothSamples[i] /= max;
-                });
+                smoothSamples.forEach((_v, i) => { smoothSamples[i] /= max; });
             }
 
             // Find peak and whether there is any non-null sample
@@ -158,34 +150,33 @@ export default function Visualizer(props: VisualizerProps) {
                 peak = v > peak ? v : peak;
                 isSilent = isSilent && v <= 0;
             });
+
             samples = new AudioSamplesArray(smoothSamples, 2);
-            if (++prevSamplesCount >= 2) {
-                prevSamples = args.samples;
-                prevSamplesCount = 0;
-            }
+            samples.smooth(audioSamplesOptions.current.spatialSmoothingFactor);                             // SPATIAL SMOOTHING
 
-            // Queue render job
+            // render job
             const renderArgs = { samplesBuffer, samples, peak, isSilent };
-            context.renderer.queue(RENDER_ID, ts => {
-                const t0 = performance.now();
-                const visualizerReturnArgs = visualizerRenderer.render(ts, renderArgs);
-                const t1 = performance.now();
-                onRenderedCallback.current({ timestamp: t1, time: t1 - t0 });
+            const t0 = performance.now();
+            const visualizerReturnArgs = visualizerRenderer.render(e.eventTimestamp, renderArgs);
+            const t1 = performance.now();
+            onRenderedCallback.current([
+                { timestamp: t1, time: t0 - e.eventTimestamp },
+                { timestamp: t1, time: t1 - t0 },
+            ]);
 
-                context.pluginManager.processAudioData(renderArgs);
-                if (canvas.current !== null && visualizerReturnArgs !== null) {
-                    context.pluginManager.processVisualizerSamplesData(visualizerReturnArgs, samplesBuffer);
-                }
-            });
+            // TODO: Implement FPS limit for plugins
+            context.pluginManager.processAudioData(renderArgs);
+            if (canvas.current !== null && visualizerReturnArgs !== null) {
+                context.pluginManager.processVisualizerSamplesData(visualizerReturnArgs, samplesBuffer);
+            }
         };
         context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
 
         return () => {
-            context?.renderer.cancel(RENDER_ID);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
             visualizerRenderer.clear();
         };
-    }, [ RENDER_ID, context, visualizerRenderer ]);
+    }, [ context.pluginManager, context?.wallpaperEvents.onAudioSamples, visualizerRenderer ]);
 
     const is3d = useMemo(() => visualizerType === VisualizerType['3DBars'], [visualizerType]);
     return (

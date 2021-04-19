@@ -4,7 +4,6 @@ import VisualizerRenderArgs from '../components/visualizers/VisualizerRenderArgs
 import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRenderReturnArgs';
 
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import CircularBuffer from '../common/CircularBuffer';
 import TaskbarProperties from '../app/properties/TaskbarProperties';
 import { getClosestFrequencyIndex } from '../app/freq-utils';
 import { AudioResponsiveValueProvider, AudioResponsiveValueProviderFactory } from '../app/AudioResponsiveValueProvider';
@@ -38,7 +37,7 @@ export default class TaskbarPlugin implements IPlugin {
 
     processAudioData(_args: VisualizerRenderArgs): Promise<void> { return Promise.resolve(); }
 
-    async processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined): Promise<void> {
+    async processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Promise<void> {
         const samples = visualizerReturnArgs.samples;
         if (samples === undefined) return;
 

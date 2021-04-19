@@ -7,7 +7,6 @@ import TaskbarPlugin, { TaskbarPluginCtorArgs } from './TaskbarPlugin';
 import VisualizerRenderArgs from '../components/visualizers/VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRenderReturnArgs';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import CircularBuffer from '../common/CircularBuffer';
 
 class NoopPlugin implements IPlugin {
     processAudioData(_args: VisualizerRenderArgs) { return Promise.resolve(); }
@@ -38,7 +37,7 @@ export default class PluginManager {
         return promises;
     }
 
-    processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined): Array<Promise<void>> {
+    processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Array<Promise<void>> {
         const promises: Array<Promise<void>> = [];
         this.plugins.forEach(p => {
             if (!p.enabled) return;
