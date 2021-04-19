@@ -66,9 +66,9 @@ type UserPropertiesChangedEventArgs = {
 };
 type GeneralPropertiesChangedEventArgs = { newProps: Partial<DeepReadonly<WEGeneralProperties>>; };
 type AudioSamplesEventArgs = {
-    rawSamples: import('../common/AudioSamplesArray').default;
+    eventTimestamp: number;
     samples: import('../common/AudioSamplesArray').default;
-    samplesBuffer: import('../common/CircularBuffer').default<import('../common/AudioSamplesArray').default>;
+    samplesBuffer: Array<import('../common/AudioSamplesArray').default>;
     peak: number;
     mean: number;
 };
@@ -84,7 +84,7 @@ type WallpaperEvents = {
     stats: {
         enteredAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
         executedAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
-        visualizerRendered: IEventHandler<PerformanceEventArgs>;
+        visualizerRendered: IEventHandler<[PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]>; // [ pre-processing time, render time, plugins render time ]
     };
 };
 

@@ -31,6 +31,9 @@ export default interface Properties {
     audioprocessing: boolean;
     showStats: boolean;
     limitFps: boolean;
+    useCustomFpsLimit: boolean;
+    customFpsLimit: number;
+
     background: BackgroundProperties;
     foreground: ForegroundProperties;
     audioSamples: AudioSamplesProperties;
@@ -90,6 +93,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r?.value);
     setProperty(rootOptions, 'showStats', raw.showStats as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'limitFps', raw.limitFps as WEProperty<'bool'>, _r => _r.value);
+    setProperty(rootOptions, 'useCustomFpsLimit', raw.customFpsLimit as WEProperty<'bool'>, _r => _r.value);
+    setProperty(rootOptions, 'customFpsLimit', raw.customFpsLimit_value as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     // .background
     const backgroundOptions: MappedProperties['background'] = {};
@@ -115,7 +120,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(audioSamplesOptions, 'audioVolumeGain', raw.audioSamples_volumeGain as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(audioSamplesOptions, 'audioFreqThreshold', raw.audioSamples_freqThreshold as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(audioSamplesOptions, 'normalize', raw.audioSamples_normalize as WEProperty<'bool'>, _r => _r.value);
-    setProperty(audioSamplesOptions, 'bufferLength', raw.audioSamples_buffer as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r) * 28));
+    setProperty(audioSamplesOptions, 'temporalSmoothingFactor', raw.audioSamples_temporalSmoothing_factor as WEProperty<'slider'>, _r => parseSliderProperty(_r) / 100);
+    setProperty(audioSamplesOptions, 'spatialSmoothingFactor', raw.audioSamples_spatialSmoothing_factor as WEProperty<'slider'>, _r => parseSliderProperty(_r) / 100);
     // .audioSamples.scale
     setProperty(audioSamplesOptions.scale!, 'function', raw.audioSamples_scale as WEProperty<'combo'>, _r => parseComboProperty(_r, ScaleFunction));
     setProperty(audioSamplesOptions.scale!, 'powExponent', raw.audioSamples_scale_Power_exponent as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -132,7 +138,6 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     const visualizerOptions: MappedProperties['visualizer'] = {};
     setProperty(visualizerOptions, 'type', raw.visualizer_type as WEProperty<'combo'>, _r => parseComboProperty(_r, VisualizerType));
     setProperty(visualizerOptions, 'flip', raw.visualizer_flip as WEProperty<'combo'>, _r => parseComboProperty(_r, VisualizerFlipType));
-    setProperty(visualizerOptions, 'smoothing', raw.visualizer_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
 
     setProperty(visualizerOptions, 'responseType', raw.visualizer_color_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));
     setProperty(visualizerOptions, 'responseProvider', raw.visualizer_color_responseProvider as WEProperty<'combo'>, _r => parseComboProperty(_r, AudioResponsiveValueProvider));

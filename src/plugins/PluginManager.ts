@@ -7,17 +7,20 @@ import TaskbarPlugin, { TaskbarPluginCtorArgs } from './TaskbarPlugin';
 import VisualizerRenderArgs from '../components/visualizers/VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../components/visualizers/VisualizerRenderReturnArgs';
 import AudioSamplesArray from '../common/AudioSamplesArray';
-import CircularBuffer from '../common/CircularBuffer';
 
 class NoopPlugin implements IPlugin {
-    processAudioData(_args: VisualizerRenderArgs) { return Promise.resolve(); }
-    processVisualizerSamplesData(_visualizerReturnArgs: VisualizerRenderReturnArgs) { return Promise.resolve(); }
+    processAudioData(_timestamp: number, _args: VisualizerRenderArgs) { return Promise.resolve(); }
+    processVisualizerSamplesData(_timestamp: number, _visualizerReturnArgs: VisualizerRenderReturnArgs) { return Promise.resolve(); }
 }
 
 export type PluginName = 'cue' | 'taskbar';
-export type PluginArgs<T extends PluginName> = T extends 'cue' ? CueCtorArgs
-    : T extends 'taskbar' ? TaskbarPluginCtorArgs
-    : never;
+export type PluginArgs<T extends PluginName> = {
+    fpsLimit?: number;
+} & (
+    T extends 'cue' ? CueCtorArgs
+        : T extends 'taskbar' ? TaskbarPluginCtorArgs
+        : never
+);
 
 export default class PluginManager {
     private readonly plugins: Map<string, { plugin: IPlugin; enabled: boolean }>;
@@ -27,23 +30,23 @@ export default class PluginManager {
         this.plugins = new Map<string, { plugin: IPlugin; enabled: boolean }>();
     }
 
-    processAudioData(args: VisualizerRenderArgs): Array<Promise<void>> {
+    processAudioData(timestamp: number, args: VisualizerRenderArgs): Array<Promise<void>> {
         const promises: Array<Promise<void>> = [];
         this.plugins.forEach(p => {
             if (!p.enabled) return;
             promises.push(new Promise((resolve, reject) => {
-                p.plugin.processAudioData(args).then(() => resolve()).catch(err => reject(err));
+                p.plugin.processAudioData(timestamp, args).then(() => resolve()).catch(err => reject(err));
             }));
         });
         return promises;
     }
 
-    processVisualizerSamplesData(visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: CircularBuffer<AudioSamplesArray> | undefined): Array<Promise<void>> {
+    processVisualizerSamplesData(timestamp: number, visualizerReturnArgs: VisualizerRenderReturnArgs, samplesBuffer: AudioSamplesArray[] | undefined): Array<Promise<void>> {
         const promises: Array<Promise<void>> = [];
         this.plugins.forEach(p => {
             if (!p.enabled) return;
             promises.push(new Promise((resolve, reject) => {
-                p.plugin.processVisualizerSamplesData(visualizerReturnArgs, samplesBuffer).then(() => resolve()).catch(err => reject(err));
+                p.plugin.processVisualizerSamplesData(timestamp, visualizerReturnArgs, samplesBuffer).then(() => resolve()).catch(err => reject(err));
             }));
         });
         return promises;

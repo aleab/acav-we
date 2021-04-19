@@ -8,7 +8,6 @@ import { VisualizerFlipType } from '../VisualizerFlipType';
 export interface VisualizerProperties {
     type: VisualizerType;
     flip: VisualizerFlipType;
-    smoothing: number;
 
     responseType: ColorReactionType;
     responseProvider: AudioResponsiveValueProvider;

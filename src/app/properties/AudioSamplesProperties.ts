@@ -6,5 +6,6 @@ export default interface AudioSamplesProperties {
     audioFreqThreshold: number;
     scale: AudioSamplesScaleProperties;
     normalize: boolean;
-    bufferLength: number;
+    temporalSmoothingFactor: number;
+    spatialSmoothingFactor: number;
 }

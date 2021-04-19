@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import IPlugin from '../plugins/IPlugin';
 import PluginManager, { PluginArgs, PluginName } from '../plugins/PluginManager';

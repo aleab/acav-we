@@ -52,8 +52,16 @@ function section(name, muted = false, propertyIcon = null, noteHtml = null) {
     );
 }
 
-function subSection(name) {
-    return renderToStaticMarkup(<h5><ins><b>{name}</b></ins></h5>);
+function subSection(name, propertyIcon = null) {
+    const icon = propertyIcon ? (
+      <span className={`${propertyIcon} fa-fw propertyIcon`} />
+    ) : null;
+    return renderToStaticMarkup(
+      <h5>
+        {icon}
+        <ins><b>{name}</b></ins>
+      </h5>,
+    );
 }
 
 function note(...textLines) {
@@ -80,7 +88,6 @@ function samp(text) { return `<samp>${text}</samp>`; }
 
 const asterisk = () => '<sup class="text-warning">*</sup>';
 const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/f0rirujpk8">${text}</a>`;
-const smoothingLink = text => `<a href="https://www.desmos.com/calculator/4ozdtjxb3r">${text}</a>`;
 const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
 const spotifyLink = text => `<a href="https://www.spotify.com/">${text}</a>`;
 const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
@@ -105,6 +112,8 @@ function getProjectJson() {
                     ui_showAdvancedOptions: 'Show Advanced Options' + asterisk(),
                     ui_showStats: 'Show Stats' + asterisk(),
                     ui_limitFps: 'Limit FPS' + asterisk(),
+                    ui_customFpsLimit: 'Custom FPS Limit' + asterisk(),
+                    ui_customFpsLimit_value: '',
 
                     // [BACKGROUND]
                     ui_background: section('Background'),
@@ -130,8 +139,10 @@ function getProjectJson() {
                     ui_audioSamples_correct: withPropertyIcon('fas fa-filter', 'Correct Samples') + asterisk(),
                     ui_audioSamples_volumeGain: withPropertyIcon('fas fa-microphone', 'Linear Gain'),
                     ui_audioSamples_freqThreshold: withPropertyIcon('far fa-tachometer-slowest', 'Threshold'),
-                    ui_audioSamples_buffer: withPropertyIcon('fas fa-stream', 'Buffer Length (s)') + asterisk(),
                     ui_audioSamples_normalize: withPropertyIcon('far fa-balance-scale', 'Normalize') + asterisk(),
+                    ui_audioSamples_smoothing: subSection('Smoothing', 'text-white fas fa-wave-sine'),
+                    ui_audioSamples_temporalSmoothing_factor: indent('Temporal Smoothing', { n: 3 }),
+                    ui_audioSamples_spatialSmoothing_factor: indent('Spatial Smoothing', { n: 3 }),
                     //
                     // [AUDIO SAMPLES > SCALE]
                     ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;<sup>${scalingFunctionsLink('[1]')}</sup>`,
@@ -180,7 +191,6 @@ function getProjectJson() {
                     ui_visualizer: section('Visualizer'),
                     ui_visualizer_type: indent('Type'),
                     ui_visualizer_flip: indent('Flip'),
-                    ui_visualizer_smoothing: indent('Smoothing') + asterisk() + `&nbsp;<sup>${smoothingLink('[2]')}</sup>`,
 
                     ui_visualizer_type_VerticalBars: withFAIcon('far fa-horizontal-rule fa-sm', ' Vertical, Bars'),
                     ui_visualizer_type_VerticalBlocks: withFAIcon('far fa-horizontal-rule fa-sm', ' Vertical, Blocks'),
@@ -190,7 +200,7 @@ function getProjectJson() {
                     ui_visualizer_type_CircularWave: withFAIcon('far fa-circle', ' Circular, Wave'),
                     ui_visualizer_type_3DBars: withFAIcon('fas fa-cube', ' 3D, Bars'),
 
-                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,
+                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[2]')}</sup>`,
                     ui_visualizer_color_responseProvider: indent('React to', { n: 3 }) + asterisk(),
                     ui_visualizer_color_responseValueGain: indent('Gain', { n: 3 }) + asterisk(),
                     ui_visualizer_color_responseRange: indent('Range', { n: 3 }),
@@ -453,15 +463,8 @@ function getProjectJson() {
                     ui_notes: section('Notes', true),
                     ui_note1: note(
                         `<sup>${scalingFunctionsLink('[1]')}</sup> Graphical comparison of the scaling functions.`,
-                        `<sup>${smoothingLink('[2]')}</sup> Graphical visualization of the smoothing function.`,
-                    ),
-                    ui_note2: note(
-                        `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
-                        null,
-                    ),
-                    ui_note3: note(
+                        `<sup>${colorizerLink('[2]')}</sup> Color spaces comparison and conversions.`,
                         `<sup>${spotifyLink('[S]')}</sup> GET SPOTIFY FREE`,
-                        null,
                     ),
                 },
             },

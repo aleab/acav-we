@@ -35,6 +35,23 @@
         "value": true,
         "condition": "showAdvancedOptions.value"
     },
+    "customFpsLimit": {
+        "order": 5,
+        "type": "bool",
+        "text": "ui_customFpsLimit",
+        "value": false,
+        "condition": "showAdvancedOptions.value && limitFps.value"
+    },
+    "customFpsLimit_value": {
+        "order": 6,
+        "type": "slider",
+        "text": "ui_customFpsLimit_value",
+        "value": 60,
+        "min": 15,
+        "max": 144,
+        "editable": true,
+        "condition": "showAdvancedOptions.value && limitFps.value && customFpsLimit.value"
+    },
 
     // [BACKGROUND]
     "background": {
@@ -200,7 +217,6 @@
         "step": 0.1,
         "editable": false
     },
-    //
     // [AUDIO SAMPLES > SCALE]
     "audioSamples_scale": {
         "order": 110,
@@ -339,29 +355,33 @@
     },
     //
     // --[AUDIO SAMPLES]
-    "audioSamples_buffer": {
-        "order": 120,
-        "type": "slider",
-        "text": "ui_audioSamples_buffer",
-        "value": 0.4,
-        "min": 0,
-        "max": 1,
-        "fraction": true,
-        "step": 0.1,
-        "condition": "showAdvancedOptions.value"
-    },
-    "$_audioSamples_buffer": {
-        "order": 121,
-        "type": "text",
-        "text": "ui_$_audioSamples_buffer",
-        "condition": "(showAdvancedOptions.value && showDescriptions.value)"
-    },
     "audioSamples_normalize": {
-        "order": 122,
+        "order": 120,
         "type": "bool",
         "text": "ui_audioSamples_normalize",
         "value": false,
-        "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
+        "condition": "showAdvancedOptions.value"
+    },
+    "audioSamples_smoothing": {
+        "order": 121,
+        "type": "text",
+        "text": "ui_audioSamples_smoothing"
+    },
+    "audioSamples_temporalSmoothing_factor": {
+        "order": 122,
+        "type": "slider",
+        "text": "ui_audioSamples_temporalSmoothing_factor",
+        "value": 30,
+        "min": 0,
+        "max": 100
+    },
+    "audioSamples_spatialSmoothing_factor": {
+        "order": 123,
+        "type": "slider",
+        "text": "ui_audioSamples_spatialSmoothing_factor",
+        "value": 0,
+        "min": 0,
+        "max": 100
     },
     
     "___audioSamples": {
@@ -402,15 +422,6 @@
             { "label": "Both", "value": "Both" }
         ],
         "value": "None"
-    },
-    "visualizer_smoothing": {
-        "order": 1003,
-        "type": "slider",
-        "text": "ui_visualizer_smoothing",
-        "value": 38,
-        "min": 0,
-        "max": 100,
-        "condition": "showAdvancedOptions.value && audioSamples_buffer.value > 0"
     },
 
     "visualizer_color_responseType": {
@@ -2011,17 +2022,6 @@
     "note1": {
         "order": 9001,
         "type": "text",
-        "text": "ui_note1",
-        "condition": "showAdvancedOptions.value"
-    },
-    "note2": {
-        "order": 9002,
-        "type": "text",
-        "text": "ui_note2"
-    },
-    "note3": {
-        "order": 9003,
-        "type": "text",
-        "text": "ui_note3"
+        "text": "ui_note1"
     }
 }
