@@ -2005,17 +2005,6 @@
     "note1": {
         "order": 9001,
         "type": "text",
-        "text": "ui_note1",
-        "condition": "showAdvancedOptions.value"
-    },
-    "note2": {
-        "order": 9002,
-        "type": "text",
-        "text": "ui_note2"
-    },
-    "note3": {
-        "order": 9003,
-        "type": "text",
-        "text": "ui_note3"
+        "text": "ui_note1"
     }
 }

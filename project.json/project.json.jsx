@@ -198,7 +198,7 @@ function getProjectJson() {
                     ui_visualizer_type_CircularWave: withFAIcon('far fa-circle', ' Circular, Wave'),
                     ui_visualizer_type_3DBars: withFAIcon('fas fa-cube', ' 3D, Bars'),
 
-                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[3]')}</sup>`,
+                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[2]')}</sup>`,
                     ui_visualizer_color_responseProvider: indent('React to', { n: 3 }) + asterisk(),
                     ui_visualizer_color_responseValueGain: indent('Gain', { n: 3 }) + asterisk(),
                     ui_visualizer_color_responseRange: indent('Range', { n: 3 }),
@@ -461,15 +461,8 @@ function getProjectJson() {
                     ui_notes: section('Notes', true),
                     ui_note1: note(
                         `<sup>${scalingFunctionsLink('[1]')}</sup> Graphical comparison of the scaling functions.`,
-                        null,
-                    ),
-                    ui_note2: note(
-                        `<sup>${colorizerLink('[3]')}</sup> Color spaces comparison and conversions.`,
-                        null,
-                    ),
-                    ui_note3: note(
+                        `<sup>${colorizerLink('[2]')}</sup> Color spaces comparison and conversions.`,
                         `<sup>${spotifyLink('[S]')}</sup> GET SPOTIFY FREE`,
-                        null,
                     ),
                 },
             },
