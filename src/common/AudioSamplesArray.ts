@@ -10,7 +10,7 @@ export default class AudioSamplesArray implements Iterable<number[]> {
     readonly channels: number;
 
     private static readonly identityFilter = [ 0, 0, 1, 0, 0 ];
-    private static readonly gaussianFilter = [ 0.25, 16, 64, 16, 0.25 ];
+    private static readonly gaussianFilter = [ 1.265625, 24, 64, 24, 1.265625 ];
 
     constructor(rawArray: number[], channels: number) {
         this.length = rawArray.length / channels;
@@ -56,7 +56,7 @@ export default class AudioSamplesArray implements Iterable<number[]> {
 
         if (factor === 0) return;
 
-        const k = Math.clamp(factor, 0, 1);
+        const k = (69 ** Math.clamp(factor, 0, 1) - 1) / 68;
         const g = AudioSamplesArray.gaussianFilter.map((v, i) => Math.lerp(AudioSamplesArray.identityFilter[i], v, k));
         const m = Math.floor(g.length / 2);
         const m1 = g.length % 2 === 1 ? m : m - 1;
