@@ -73,7 +73,7 @@ export default function Clock() {
 
             const currSample = args.samples.slice(0, bassIndex + 1).raw;
             const currentMean = _.mean(currSample);
-            const smoothedPrevMean = args.samplesBuffer.raw.reduce((avg, samples, i, rawArray) => {
+            const smoothedPrevMean = args.samplesBuffer.reduce((avg, samples, i, rawArray) => {
                 return avg + _.mean(samples.slice(0, bassIndex + 1).raw) / rawArray.length;
             }, 0);
 
