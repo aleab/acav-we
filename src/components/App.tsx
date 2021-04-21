@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
+import { Pivot } from '../common/Pivot';
 import AudioHistory from '../app/AudioHistory';
 import { BackgroundMode } from '../app/BackgroundMode';
 import { PINK_NOISE } from '../app/noise';
@@ -18,12 +19,14 @@ import useWallpaperForeground from '../hooks/useWallpaperForeground';
 import PluginManager, { PluginName } from '../plugins/PluginManager';
 
 import Stats from './Stats';
+import ModalDialog from './ModalDialog';
 import Clock from './clock/Clock';
 import Spotify from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
 import WinTaskBar from './WinTaskBar';
 import EventHandler from '../common/EventHandler';
 
+const LOCALSTORAGE_APP_VERSION = 'aleab.acav.version';
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
 const LOCALSTORAGE_BG_CURRENT_VIDEO = 'aleab.acav.bgCurrentVideo';
 const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
@@ -42,6 +45,7 @@ export default function App(props: AppProps) {
     const [ showStats, setShowStats ] = useState(O.current.showStats);
     const [ showSpotify, setShowSpotify ] = useState(O.current.spotify.showOverlay);
     const [ showClock, setShowClock ] = useState(O.current.clock.enabled);
+    const [ showUpdatenoticePopup, setShowUpdatenoticePopup ] = useState(false);
 
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
     const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
@@ -353,20 +357,71 @@ export default function App(props: AppProps) {
     }, [onVisualizerRenderedEventHandler]);
 
     const wallpaperRef = useRef<HTMLDivElement>(null);
+    const clockRef = useRef<HTMLDivElement>(null);
+    const spotifyRef = useRef<HTMLDivElement | null>(null);
+
+    // Check app version
+    useEffect(() => {
+        const timeout = setTimeout((() => {
+            if (!O.current.enableUpdateNoticePopup || !process.env.APP_VERSION) return;
+            const lsVersion = localStorage.getItem(LOCALSTORAGE_APP_VERSION);
+
+            const versionRegex = /^([0-9]+)\.([0-9]+)\.?.*$/;
+            const cV = versionRegex.exec(process.env.APP_VERSION)?.map((v, i) => (i > 0 ? Number(v) : v)) as [string, number, number] | undefined;
+            const kV = lsVersion !== null ? versionRegex.exec(lsVersion)?.map((v, i) => (i > 0 ? Number(v) : v)) as [string, number, number] | undefined : undefined;
+
+            if (cV && Number.isInteger(cV[1]) && Number.isInteger(cV[2])) {
+                if (kV && Number.isInteger(kV[1]) && Number.isInteger(kV[2])) {
+                    if (cV[1] > kV[1] || cV[2] > kV[2]) {
+                        setShowUpdatenoticePopup(true);
+                    }
+                } else if (process.env.APP_VERSION === '1.6.0') {
+                    setShowUpdatenoticePopup(true);
+                }
+
+                localStorage.setItem(LOCALSTORAGE_APP_VERSION, process.env.APP_VERSION);
+            }
+        }) as TimerHandler, 5000);
+
+        return () => {
+            clearTimeout(timeout);
+        };
+    }, []);
+    const versionPopupPosition = useMemo(() => {
+        const element = clockRef.current ?? spotifyRef.current;
+        const r = element ? element.getBoundingClientRect() : undefined;
+        if (r === undefined) {
+            return {
+                top: window.innerHeight - 42,
+                left: Math.round(window.innerWidth / 2),
+                pivot: Pivot.Bottom,
+            };
+        }
+
+        const top = r.top > window.innerHeight - r.bottom ? r.top - 8 : r.bottom + 8;
+        return {
+            top,
+            left: r.left + 0.5 * r.width,
+            pivot: top > r.top ? Pivot.Top : Pivot.Bottom,
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [showUpdatenoticePopup]);
+    const justUpdatedVersionOnTimeoutCallback = useCallback(() => { setShowUpdatenoticePopup(false); }, []);
+
     return (
       <>
         {
-          O.current.background.mode === BackgroundMode.Video ? (
-            <video id="background-video" autoPlay loop playsInline muted src={videoSource ?? ''} style={videoStyle} />
-          ) : null
+            O.current.background.mode === BackgroundMode.Video ? (
+              <video id="background-video" autoPlay loop playsInline muted src={videoSource ?? ''} style={videoStyle} />
+            ) : null
         }
         <div ref={wallpaperRef} style={style}>
           <WallpaperContext.Provider value={wallpaperContext}>
             {showForeground ? <div id="foreground" style={fgStyle} /> : null}
             {showStats ? <Stats /> : null}
             <Visualizer onRendered={onVisualizerRendered} />
-            {showSpotify ? <Spotify backgroundElement={wallpaperRef} /> : null}
-            {showClock ? <Clock /> : null}
+            {showSpotify ? <Spotify _ref={spotifyRef} backgroundElement={wallpaperRef} /> : null}
+            {showClock ? <Clock _ref={clockRef} /> : null}
             {
               useTaskbarPlugin ? (
                 <WinTaskBar
@@ -377,6 +432,22 @@ export default function App(props: AppProps) {
             }
           </WallpaperContext.Provider>
         </div>
+        {
+            showUpdatenoticePopup ? (
+              <ModalDialog
+                top={versionPopupPosition.top} left={versionPopupPosition.left} pivot={versionPopupPosition.pivot} maxWidth={325}
+                id="ju" title={`Major Update (v${process.env.APP_VERSION})`} timeout={12000} onTimeoutCallback={justUpdatedVersionOnTimeoutCallback}
+              >
+                <>
+                  <p className="mt-0">
+                    <span className="d-block">This wallpaper has just been updated.</span>
+                    <span>You can check the changelog on the Steam&nbsp;Workshop page.</span>
+                  </p>
+                  <span className="text-muted">You can permanently disable this popup.</span>
+                </>
+              </ModalDialog>
+            ) : null
+        }
       </>
     );
 }

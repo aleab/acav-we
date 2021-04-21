@@ -30,6 +30,7 @@ import { CircularVisualizerProperties, ThreeDVisualizerProperties, VerticalVisua
 export default interface Properties {
     audioprocessing: boolean;
     showStats: boolean;
+    enableUpdateNoticePopup: boolean;
     limitFps: boolean;
     useCustomFpsLimit: boolean;
     customFpsLimit: number;
@@ -92,6 +93,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     const rootOptions: MappedProperties = {};
     setProperty(rootOptions, 'audioprocessing', raw.audioprocessing as WEProperty<'bool'>, _r => _r?.value);
     setProperty(rootOptions, 'showStats', raw.showStats as WEProperty<'bool'>, _r => _r.value);
+    setProperty(rootOptions, 'enableUpdateNoticePopup', raw.enableUpdateNoticePopup as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'limitFps', raw.limitFps as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'useCustomFpsLimit', raw.customFpsLimit as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'customFpsLimit', raw.customFpsLimit_value as WEProperty<'slider'>, _r => parseSliderProperty(_r));

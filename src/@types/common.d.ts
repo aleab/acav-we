@@ -29,6 +29,13 @@ interface CanvasRenderingContext2D {
 
 // HotModuleReplacementPlugin
 interface NodeModule { hot?: any; }
+declare namespace NodeJS {
+    interface ProcessEnv {
+        NODE_ENV: string;
+        APP_VERSION: string;
+        BACKEND_API_BASEURL: string;
+    }
+}
 
 interface SVGAnimationElement {
     beginElement(): void;

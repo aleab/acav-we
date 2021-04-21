@@ -230,7 +230,7 @@ export default function Stats() {
     const [ visualizerPluginsRenderTimeCanvas, visualizerPluginsRenderTimeV ] = useCanvas2dTimeGraph(visualizerPluginsRenderTimeCanvasOptions);
 
     return (
-      <div id="stats" className="overlay p-2" style={{ left: 0, bottom: 30 * resolution, fontSize: 14 * resolution }}>
+      <div id="stats" className="overlay bg-noise p-2" style={{ left: 0, bottom: 30 * resolution, fontSize: 14 * resolution }}>
         <div className="h">Renderer</div>
         <table>
           <tbody>

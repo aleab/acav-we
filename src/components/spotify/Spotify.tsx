@@ -47,6 +47,7 @@ type OverlayStyle = {
 };
 
 interface SpotifyProps {
+    _ref?: React.MutableRefObject<HTMLDivElement | null>;
     backgroundElement: RefObject<HTMLElement>;
 }
 
@@ -499,6 +500,13 @@ export default function Spotify(props: SpotifyProps) {
         };
     }, [ props.backgroundElement, spotifyDivRef ]);
 
+    const onHtmlRefCallback = useCallback((node: HTMLDivElement) => {
+        spotifyDivRefCallback?.(node);
+        if (props._ref) {
+            props._ref.current = node;
+        }
+    }, [ props._ref, spotifyDivRefCallback ]);
+
 
     switch (state.value) {
         case SpotifyStateMachineState.S4CheckingAT:
@@ -518,7 +526,7 @@ export default function Spotify(props: SpotifyProps) {
 
             return (
               <SpotifyOverlayContext.Provider value={spotifyContext}>
-                <div ref={spotifyDivRefCallback} id="spotify" className="overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden" style={{ ...overlayStyle, ...overlayBackgroundStyle }}>
+                <div ref={onHtmlRefCallback} id="spotify" className="overlay d-flex flex-column flex-nowrap align-items-start overflow-hidden" style={{ ...overlayStyle, ...overlayBackgroundStyle }}>
                   <StateIcons />
                   {
                       currentlyPlayingTrack === null ? (
