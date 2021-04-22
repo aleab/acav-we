@@ -17,7 +17,11 @@ type ClockStyle = {
     transform: string;
 };
 
-export default function Clock() {
+interface ClockProps {
+    _ref?: React.RefObject<HTMLDivElement>;
+}
+
+export default function Clock(props: ClockProps) {
     const RENDER_ID = useMemo(() => `Clock-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const context = useContext(WallpaperContext)!;
 
@@ -101,7 +105,7 @@ export default function Clock() {
     }, [ clockType, parsedCustomCss ]);
 
     return (
-      <div id="clock" style={{ ...style, transform: `perspective(1px) translateZ(0) ${style.transform} scale(${bassEffectEnabled ? 1 + bass : 1})` }}>
+      <div ref={props._ref} id="clock" style={{ ...style, transform: `perspective(1px) translateZ(0) ${style.transform} scale(${bassEffectEnabled ? 1 + bass : 1})` }}>
         <ClockComponent />
       </div>
     );

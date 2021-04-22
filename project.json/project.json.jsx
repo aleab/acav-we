@@ -110,6 +110,7 @@ function getProjectJson() {
                 'en-us': {
                     ui_showDescriptions: 'Show Descriptions',
                     ui_showAdvancedOptions: 'Show Advanced Options' + asterisk(),
+                    ui_enableUpdateNoticePopup: 'Enable <em>Update notice</em> Popup',
                     ui_showStats: 'Show Stats' + asterisk(),
                     ui_limitFps: 'Limit FPS' + asterisk(),
                     ui_customFpsLimit: 'Custom FPS Limit' + asterisk(),
