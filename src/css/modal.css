@@ -8,8 +8,15 @@
   border-radius: 4px;
   z-index: 999;
 
+  animation: .75s ease-in 0s 1 normal both running modal-fadein;
+
   --modal-padding: .75rem;
   --modal-padding-: calc(-1 * var(--modal-padding));
+}
+
+.modal.fade-out {
+  opacity: 1;
+  animation: .5s ease-in 0s 1 normal both running modal-fadeout;
 }
 
 .modal > .modal-header {
@@ -37,3 +44,6 @@
 }
 .modal .title > .close:before { right: calc(5px + var(--modal-padding)); }
 .modal .title > .close:after { right: calc(-6px + var(--modal-padding)); }
+
+@keyframes modal-fadein { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-fadeout { from { opacity: 1; } to { opacity: 0; } }

@@ -45,7 +45,7 @@ export default function App(props: AppProps) {
     const [ showStats, setShowStats ] = useState(O.current.showStats);
     const [ showSpotify, setShowSpotify ] = useState(O.current.spotify.showOverlay);
     const [ showClock, setShowClock ] = useState(O.current.clock.enabled);
-    const [ showUpdatenoticePopup, setShowUpdatenoticePopup ] = useState(false);
+    const [ showUpdateNoticePopup, setShowUpdateNoticePopup ] = useState(false);
 
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
     const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
@@ -373,10 +373,10 @@ export default function App(props: AppProps) {
             if (cV && Number.isInteger(cV[1]) && Number.isInteger(cV[2])) {
                 if (kV && Number.isInteger(kV[1]) && Number.isInteger(kV[2])) {
                     if (cV[1] > kV[1] || cV[2] > kV[2]) {
-                        setShowUpdatenoticePopup(true);
+                        setShowUpdateNoticePopup(true);
                     }
                 } else if (process.env.APP_VERSION === '1.6.0') {
-                    setShowUpdatenoticePopup(true);
+                    setShowUpdateNoticePopup(true);
                 }
 
                 localStorage.setItem(LOCALSTORAGE_APP_VERSION, process.env.APP_VERSION);
@@ -405,8 +405,8 @@ export default function App(props: AppProps) {
             pivot: top > r.top ? Pivot.Top : Pivot.Bottom,
         };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showUpdatenoticePopup]);
-    const justUpdatedVersionOnTimeoutCallback = useCallback(() => { setShowUpdatenoticePopup(false); }, []);
+    }, [showUpdateNoticePopup]);
+    const justUpdatedVersionOnTimeoutCallback = useCallback(() => { setShowUpdateNoticePopup(false); }, []);
 
     return (
       <>
@@ -433,10 +433,11 @@ export default function App(props: AppProps) {
           </WallpaperContext.Provider>
         </div>
         {
-            showUpdatenoticePopup ? (
+            showUpdateNoticePopup ? (
               <ModalDialog
-                top={versionPopupPosition.top} left={versionPopupPosition.left} pivot={versionPopupPosition.pivot} maxWidth={325}
-                id="ju" title={`Major Update (v${process.env.APP_VERSION})`} timeout={12000} onTimeoutCallback={justUpdatedVersionOnTimeoutCallback}
+                top={versionPopupPosition.top} left={versionPopupPosition.left} pivot={versionPopupPosition.pivot}
+                id="ju" title={`Major Update (v${process.env.APP_VERSION})`} maxWidth={325}
+                fadein={600} fadeout={200} timeout={12000} onTimeoutCallback={justUpdatedVersionOnTimeoutCallback}
               >
                 <>
                   <p className="mt-0">
