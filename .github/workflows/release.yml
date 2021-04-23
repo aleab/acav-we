@@ -39,7 +39,7 @@ jobs:
               httpCode=$(
                 curl -s -o /dev/null -w "%{http_code}" "${curlHeaders[@]}" \
                   -X POST "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases" \
-                  -d "{ \"tag_name\": \"${tagName}\", \"name\": \"${tagName}\", \"draft\": true }"
+                  -d "{ \"tag_name\": \"${tagName}\", \"name\": \"${tagName}\", \"draft\": true, \"body\": \"### Removed Features\n\n### Additions/Changes\n\n### Bug Fixes\n\" }"
               )
 
               if [ ${httpCode} -ne 201 ]; then
