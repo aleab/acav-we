@@ -409,6 +409,7 @@ export default function App(props: AppProps) {
     }, [showUpdateNoticePopup]);
     const justUpdatedVersionOnTimeoutCallback = useCallback(() => { setShowUpdateNoticePopup(false); }, []);
 
+    const APP_VERSION = useMemo(() => process.env.APP_VERSION.replace(/^([0-9]+\.[0-9]+)(?:\..*)?$/, '$1.x'), []);
     return (
       <>
         {
@@ -437,7 +438,7 @@ export default function App(props: AppProps) {
             showUpdateNoticePopup ? (
               <ModalDialog
                 top={versionPopupPosition.top} left={versionPopupPosition.left} pivot={versionPopupPosition.pivot}
-                id="ju" title={`Major Update (v${process.env.APP_VERSION})`} maxWidth={325}
+                id="ju" title={`Major Update (v${APP_VERSION})`} maxWidth={325}
                 fadein={600} fadeout={200} timeout={12000} onTimeoutCallback={justUpdatedVersionOnTimeoutCallback}
               >
                 <>
