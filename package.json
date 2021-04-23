@@ -1,7 +1,7 @@
 {
     "name": "acav-we",
     "displayName": "aCAV-WE",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "description": "A highly customizable audio visualizer for Wallpaper Engine",
     "author": "aleab (https://github.com/aleab)",
     "private": true,
@@ -12,6 +12,7 @@
     },
     "scripts": {
         "update-latest": "ncu -u && npm install",
+        "change-version": "node ./build-scripts/change-version.js",
         "clean": "rimraf ./dist/**/* ./bundle-report.html ./bundle-stats.json",
         "distclean": "npm run clean && rimraf ./package-lock.json \"./node_modules/!(rimraf|.bin)\"",
         "prebuild": "npm run clean && npm run test && babel-node ./build-scripts/pre-build.js",
