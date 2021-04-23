@@ -33,7 +33,7 @@ jobs:
           httpCode=$(curl -s -o release.json -w "%{http_code}" "${curlHeaders[@]}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/releases/tags/${tagName}")
 
           if [ "${{ github.event.deleted }}" == "true" ]; then
-            # Do nothing (for now?)
+            : # Do nothing (for now?)
           elif [ "${{ github.event.created }}" == "true" ]; then
             if [ ${httpCode} -eq 404 ]; then
               httpCode=$(
