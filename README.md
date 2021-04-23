@@ -7,12 +7,9 @@
 
 ## Contributing
 
-### Requirements
-Wallpaper Engine, `npm`, `git`
-
 ### Getting Started
 1. `npm install`
-2. Create a file named **`.env`** in the root folder and add the following variables in the form `NAME=VALUE`:
+2. Duplicate the file named **`.env_template`** and rename it to **`.env`**. The following variables are required:
 
 Variable name         | Description
 --------------------- | ---------------------
