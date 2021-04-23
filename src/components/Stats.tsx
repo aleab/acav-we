@@ -42,6 +42,7 @@ export default function Stats() {
     const [ visualizerPreProcessingTime, setVisualizerPreProcessingTime ] = useState(0);
     const [ visualizerRenderTime, setVisualizerRenderTime ] = useState(0);
     const [ visualizerPluginsRenderTime, setVisualizerPluginsRenderTime ] = useState(0);
+    const [ visualizerRenderDelay, setVisualizerRenderDelay ] = useState(0);
 
     // These refs are used in the graphs
     const canvasRenderTime = useRef(0);
@@ -119,6 +120,8 @@ export default function Stats() {
             canvasVisualizerPluginsRenderTime.current = visualizerRenderedPluginsRenderTimeCount[1] > 0 ? visualizerRenderedPluginsRenderTimeCount[0] / visualizerRenderedPluginsRenderTimeCount[1] : 0;
             setVisualizerPluginsRenderTime(canvasVisualizerPluginsRenderTime.current);
             visualizerRenderedPluginsRenderTimeCount = [ 0, 0 ];
+
+            setVisualizerRenderDelay(context?.audioHistory.delay ?? 0);
         }) as TimerHandler, 150);
 
         // =======================
@@ -357,6 +360,10 @@ export default function Stats() {
                   <span>{visualizerPluginsRenderTimeV.min.current.toFixed(4)}</span>
                 </div>
               </td>
+            </tr>
+            <tr>
+              <th>Render Delay</th>
+              <td colSpan={3}>{`${visualizerRenderDelay.toFixed(0)}ms`}</td>
             </tr>
           </tbody>
         </table>

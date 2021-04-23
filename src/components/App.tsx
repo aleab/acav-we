@@ -84,6 +84,7 @@ export default function App(props: AppProps) {
 
     // Context
     const renderer = useRenderer();
+    const audioHistory = useMemo(() => new AudioHistory(), []);
     const wallpaperContext = useMemo<WallpaperContextType>(() => {
         Logc.info('Creating WallpaperContext...');
         return {
@@ -91,9 +92,10 @@ export default function App(props: AppProps) {
             wallpaperEvents,
             wallpaperProperties: O.current,
             renderer,
+            audioHistory,
             pluginManager: new PluginManager(),
         };
-    }, [ props.windowEvents, wallpaperEvents, renderer ]);
+    }, [ props.windowEvents, wallpaperEvents, renderer, audioHistory ]);
 
     // FPS
     const [ limitFps, setLimitFps ] = useState(O.current.limitFps);
@@ -258,7 +260,6 @@ export default function App(props: AppProps) {
     // ================
     // All preliminary operations that need to be applied to the audio samples and shared by all the
     // audio-responsive elements of the wallpaper, such as filters and peak calculations, are done here.
-    const audioHistory = useMemo(() => new AudioHistory(), []);
     useEffect(() => {
         Logc.info('Registering wallpaperRegisterAudioListener callback...');
 
