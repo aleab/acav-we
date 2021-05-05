@@ -82,6 +82,8 @@ export default function Visualizer(props: VisualizerProps) {
 
             case VisualizerType['3DBars']:
                 return get3dVisualizerRenderer(context, canvas3d, O, threeDVisualizerOptions, ThreeDimensionalVisualizerType.Bars);
+            case VisualizerType['3DParametricGeometry']:
+                return get3dVisualizerRenderer(context, canvas3d, O, threeDVisualizerOptions, ThreeDimensionalVisualizerType.ParametricGeometry);
 
             default: return NullRenderer;
         }
@@ -179,7 +181,7 @@ export default function Visualizer(props: VisualizerProps) {
         };
     }, [ context.pluginManager, context?.wallpaperEvents.onAudioSamples, visualizerRenderer ]);
 
-    const is3d = useMemo(() => visualizerType === VisualizerType['3DBars'], [visualizerType]);
+    const is3d = useMemo(() => visualizerType === VisualizerType['3DBars'] || visualizerType === VisualizerType['3DParametricGeometry'], [visualizerType]);
     return (
       <>
         <canvas id="2dCanvas" ref={canvas} style={{ display: is3d ? 'none' : undefined }} />

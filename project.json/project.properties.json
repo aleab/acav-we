@@ -413,7 +413,8 @@
             { "label": "ui_visualizer_type_CircularBars", "value": "CircularBars" },
             { "label": "ui_visualizer_type_CircularBlocks", "value": "CircularBlocks" },
             { "label": "ui_visualizer_type_CircularWave", "value": "CircularWave" },
-            { "label": "ui_visualizer_type_3DBars", "value": "3DBars" }
+            { "label": "ui_visualizer_type_3DBars", "value": "3DBars" },
+            { "label": "ui_visualizer_type_3DParametricGeometry", "value": "3DParametricGeometry" }
         ],
         "value": "VerticalBars"
     },
@@ -1156,6 +1157,60 @@
         "text": "ui_3dVisualizer_bars_light_color",
         "value": "1 1 1",
         "condition": "visualizer_type.value === '3DBars'"
+    },
+    //
+    // [3D VISUALIZER > PARAMETRIC]
+    "3dVisualizer_parametric": {
+        "order": 1120,
+        "type": "text",
+        "text": "ui_3dVisualizer_parametric",
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    "3dVisualizer_parametric_geometry": {
+        "order": 1121,
+        "type": "combo",
+        "text": "ui_3dVisualizer_parametric_geometry",
+        "options": [
+            { "label": "Sphere", "value": "Sphere" },
+            { "label": "Mobius", "value": "Mobius" }
+        ],
+        "value": "Sphere",
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    //
+    // [3D VISUALIZER > PARAMETRIC > LIGHT]
+    "3dVisualizer_parametric_light": {
+        "order": 1900,
+        "type": "text",
+        "text": "ui_3dVisualizer_parametric_light",
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    "3dVisualizer_parametric_light_angleX": {
+        "order": 1901,
+        "type": "slider",
+        "text": "ui_3dVisualizer_parametric_light_angleX",
+        "value": 35,
+        "min": 0,
+        "max": 360,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    "3dVisualizer_parametric_light_power": {
+        "order": 1902,
+        "type": "slider",
+        "text": "ui_3dVisualizer_parametric_light_power",
+        "value": 85,
+        "min": 25,
+        "max": 125,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    "3dVisualizer_parametric_light_color": {
+        "order": 1903,
+        "type": "color",
+        "text": "ui_3dVisualizer_parametric_light_color",
+        "value": "1 1 1",
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
     },
     
     "___visualizer": {

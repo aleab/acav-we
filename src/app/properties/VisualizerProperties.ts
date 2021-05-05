@@ -3,6 +3,7 @@ import { RGB } from 'color-convert/conversions';
 import { VisualizerType } from '../VisualizerType';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { ColorReactionType } from '../ColorReactionType';
+import { Visualizer3DParametricGeometries } from '../Visualizer3DParametricGeometries';
 import { VisualizerFlipType } from '../VisualizerFlipType';
 
 export interface VisualizerProperties {
@@ -92,6 +93,14 @@ export interface ThreeDVisualizerProperties {
         y0: number;
         deltaX: number;
         deltaY: number;
+        light: {
+            angleX: number;
+            power: number;
+            color: RGB;
+        };
+    };
+    parametric: {
+        geometry: Visualizer3DParametricGeometries;
         light: {
             angleX: number;
             power: number;

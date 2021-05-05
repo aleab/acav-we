@@ -14,8 +14,9 @@ import VisualizerRenderArgs from '../VisualizerRenderArgs';
 import VisualizerRenderReturnArgs from '../VisualizerRenderReturnArgs';
 
 export type Renderer3DOptions<T extends ThreeDimensionalVisualizerType> = VisualizerRendererOptions<
-    Omit<ThreeDVisualizerProperties, 'bars' | 'concircles'>,
+    Omit<ThreeDVisualizerProperties, 'bars' | 'parametric'>,
     T extends ThreeDimensionalVisualizerType.Bars ? ThreeDVisualizerProperties['bars']
+        : T extends ThreeDimensionalVisualizerType.ParametricGeometry ? ThreeDVisualizerProperties['parametric']
         : never
 >;
 
@@ -63,6 +64,7 @@ export default abstract class Renderer3D<T extends ThreeDimensionalVisualizerTyp
     }
 
     abstract renderSamples(timestamp: number, args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void;
+    protected renderTimed(timestamp: number) {}
 
     protected getColor(args: VisualizerRenderArgs): Readonly<RGBA> {
         const O = this.options.commonOptions;
@@ -120,6 +122,7 @@ export default abstract class Renderer3D<T extends ThreeDimensionalVisualizerTyp
                 colorReaction,
                 colorReactionValueProvider,
             });
+            this.renderTimed(timestamp);
 
             this.renderer.render(this.scene, this.camera);
 

@@ -200,6 +200,7 @@ function getProjectJson() {
                     ui_visualizer_type_CircularBlocks: withFAIcon('far fa-circle', ' Circular, Blocks'),
                     ui_visualizer_type_CircularWave: withFAIcon('far fa-circle', ' Circular, Wave'),
                     ui_visualizer_type_3DBars: withFAIcon('fas fa-cube', ' 3D, Bars'),
+                    ui_visualizer_type_3DParametricGeometry: withFAIcon('fas fa-cube', ' 3D, Parametric'),
 
                     ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[2]')}</sup>`,
                     ui_visualizer_color_responseProvider: indent('React to', { n: 3 }) + asterisk(),
@@ -311,12 +312,20 @@ function getProjectJson() {
                     ui_3dVisualizer_bars_y0: indent('<var>y<sub>0</sub></var> (%)'),
                     ui_3dVisualizer_bars_deltaX: indent('<sample>&#120575;<sub>x</sub></sample> (%)'),
                     ui_3dVisualizer_bars_deltaY: indent('<sample>&#120575;<sub>y</sub></sample> (%)'),
-                    //
                     // [3D VISUALIZER > BARS > LIGHT]
                     ui_3dVisualizer_bars_light: subSection('Light'),
                     ui_3dVisualizer_bars_light_angleX: indent('<sample>&#120599;<sub>x</sub></sample> (deg)'),
                     ui_3dVisualizer_bars_light_power: indent('Power'),
                     ui_3dVisualizer_bars_light_color: indent('Color'),
+                    //
+                    // [3D VISUALIZER > PARAMETRIC]
+                    ui_3dVisualizer_parametric: subSection('Parametric Geometry'),
+                    ui_3dVisualizer_parametric_geometry: indent('Type'),
+                    // [3D VISUALIZER > PARAMETRIC > LIGHT]
+                    ui_3dVisualizer_parametric_light: subSection('Light'),
+                    ui_3dVisualizer_parametric_light_angleX: indent('<sample>&#120599;<sub>x</sub></sample> (deg)'),
+                    ui_3dVisualizer_parametric_light_power: indent('Power'),
+                    ui_3dVisualizer_parametric_light_color: indent('Color'),
 
                     // [CLOCK]
                     ui_clock: section('Clock', false, 'far fa-clock'),

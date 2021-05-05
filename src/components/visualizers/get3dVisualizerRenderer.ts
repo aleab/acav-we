@@ -6,6 +6,7 @@ import { ThreeDVisualizerProperties, VisualizerProperties } from '../../app/prop
 
 import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
 import BarsRenderer3D from './3d/BarsRenderer3D';
+import ParametricGeometryRenderer3D from './3d/ParametricGeometryRenderer3D';
 
 export default function getVerticalBarsVisualizerRenderer(
     context: WallpaperContextType,
@@ -23,6 +24,14 @@ export default function getVerticalBarsVisualizerRenderer(
                 visualizerOptions,
                 get commonOptions() { return O.current; },
                 get options() { return O.current.bars; },
+            });
+            break;
+
+        case ThreeDimensionalVisualizerType.ParametricGeometry:
+            renderer = new ParametricGeometryRenderer3D(context, canvas, {
+                visualizerOptions,
+                get commonOptions() { return O.current; },
+                get options() { return O.current.parametric; },
             });
             break;
 

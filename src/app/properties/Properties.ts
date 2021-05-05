@@ -16,6 +16,7 @@ import { SpotifyProgressBarColorMatchType } from '../SpotifyProgressBarColorMatc
 import { SpotifyProgressBarColorPreference } from '../SpotifyProgressBarColorPreference';
 import { TaskbarPosition } from '../TaskbarPosition';
 import { TextScrollingType } from '../TextScrollingType';
+import { Visualizer3DParametricGeometries } from '../Visualizer3DParametricGeometries';
 import { VisualizerFlipType } from '../VisualizerFlipType';
 import { VisualizerType } from '../VisualizerType';
 
@@ -210,13 +211,14 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
 
     // .threeDVisualizer
-    const threeDVisualizerOptions: MappedProperties['threeDVisualizer'] = { bars: { light: {} } };
+    const threeDVisualizerOptions: MappedProperties['threeDVisualizer'] = { bars: {}, parametric: {} };
     setProperty(threeDVisualizerOptions, 'color', raw['3dVisualizer_color'] as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     setProperty(threeDVisualizerOptions, 'zoom', raw['3dVisualizer_zoom'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions, 'useSilentColor', raw['_3dVisualizer_silentColor_bool'] as WEProperty<'bool'>, _r => _r.value);
     setProperty(threeDVisualizerOptions, 'silentColor', raw['3dVisualizer_silentColor'] as WEProperty<'color'>, _r => toRgbaColor(parseColorProperty(_r)));
     setProperty(threeDVisualizerOptions, 'hideWhenSilent', raw['3dVisualizer_hideWhenSilent'] as WEProperty<'bool'>, _r => _r.value);
     // .threeDVisualizer.bars
+    threeDVisualizerOptions.bars = { light: {} };
     setProperty(threeDVisualizerOptions.bars!, 'width', raw['3dVisualizer_bars_width'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!, 'height', raw['3dVisualizer_bars_height'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.bars!, 'phiX', raw['3dVisualizer_bars_phiX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
@@ -230,6 +232,15 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(threeDVisualizerOptions.bars!.light!, 'color', raw['3dVisualizer_bars_light_color'] as WEProperty<'color'>, _r => parseColorProperty(_r));
     if (_.isEmpty(threeDVisualizerOptions.bars!.light)) delete threeDVisualizerOptions.bars!.light;
     if (_.isEmpty(threeDVisualizerOptions.bars)) delete threeDVisualizerOptions.bars;
+    // .threeDVisualizer.parametric
+    threeDVisualizerOptions.parametric = { light: {} };
+    setProperty(threeDVisualizerOptions.parametric!, 'geometry', raw['3dVisualizer_parametric_geometry'] as WEProperty<'combo'>, _r => parseComboProperty(_r, Visualizer3DParametricGeometries));
+    // .threeDVisualizer.parametric.light
+    setProperty(threeDVisualizerOptions.parametric!.light!, 'angleX', raw['3dVisualizer_parametric_light_angleX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.parametric!.light!, 'power', raw['3dVisualizer_parametric_light_power'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(threeDVisualizerOptions.parametric!.light!, 'color', raw['3dVisualizer_parametric_light_color'] as WEProperty<'color'>, _r => parseColorProperty(_r));
+    if (_.isEmpty(threeDVisualizerOptions.parametric!.light)) delete threeDVisualizerOptions.parametric!.light;
+    if (_.isEmpty(threeDVisualizerOptions.parametric)) delete threeDVisualizerOptions.parametric;
 
     // .clock
     const clockOptions: MappedProperties['clock'] = { digital: {}, analog: {}, bassEffect: {} };
