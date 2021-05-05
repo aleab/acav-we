@@ -8,7 +8,7 @@ import Renderer3D, { VisualizerParams } from './Renderer3D';
 
 const SET_MATERIAL_COLOR_EVENT_NAME = 'setMaterialColor';
 function setMaterialColor(material: MeshLambertMaterial, color: readonly [number, number, number]) {
-    material.color.setRGB(color[0] / 255, color[1] / 255, color[2] / 255);
+    material.color.setRGB(color[0] / 255, color[1] / 255, color[2] / 255).convertSRGBToLinear();
 }
 
 export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualizerType.Bars> {
@@ -190,7 +190,7 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
 
             this.light.power = O.light.power;
             this.light.distance = 2 * (this.camera.position.z + Math.abs(z1));
-            this.light.color.setRGB(O.light.color[0] / 255, O.light.color[1] / 255, O.light.color[2] / 255);
+            this.light.color.setRGB(O.light.color[0] / 255, O.light.color[1] / 255, O.light.color[2] / 255).convertSRGBToLinear();
         }
 
         args.samples.forEach((sample, i) => {

@@ -1,6 +1,6 @@
 import { RGB } from 'color-convert/conversions';
 import { RefObject } from 'react';
-import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { PerspectiveCamera, Scene, WebGLRenderer, sRGBEncoding } from 'three';
 
 import { ThreeDVisualizerProperties } from '../../../app/properties/VisualizerProperties';
 import { AudioResponsiveValueProviderFactory, AudioResponsiveValueProviderFunction } from '../../../app/AudioResponsiveValueProvider';
@@ -42,6 +42,7 @@ export default abstract class Renderer3D<T extends ThreeDimensionalVisualizerTyp
                 precision: 'highp',
             });
             this._renderer.physicallyCorrectLights = true;
+            this._renderer.outputEncoding = sRGBEncoding;
             this._renderer.setSize(this.canvas.current.width, this.canvas.current.height);
             this._renderer.setClearColor(0, 0);
         }
