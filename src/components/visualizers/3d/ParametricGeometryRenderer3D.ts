@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Color, Material, Mesh, MeshLambertMaterial, PointLight, SphereGeometry, Vector3 } from 'three';
+import { Color, Material, Matrix3, Mesh, PointLight, Vector3 } from 'three';
 
 import { Visualizer3DParametricGeometries } from '../../../app/Visualizer3DParametricGeometries';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
@@ -9,6 +9,7 @@ import Renderer3D, { VisualizerParams } from './Renderer3D';
 
 import SphereRenderer from './ParametricRenderers/Sphere';
 import MobiusRenderer from './ParametricRenderers/Mobius';
+import { ParametricGeometryRendererCameraPath } from '../../../app/ParametricGeometryRendererCameraPath';
 
 const SET_MATERIAL_COLOR_EVENT_NAME = 'setMaterialColor';
 function setMaterialColor(material: Material & { color: Color }, color: readonly [number, number, number]) {
@@ -72,6 +73,7 @@ export default class ParametricGeometryRenderer3D extends Renderer3D<ThreeDimens
         const O = this.options.options;
 
         this.camera.position.z = 1;
+        if (this.prevCameraPosition.equals(new Vector3(0, 0, 0))) this.prevCameraPosition.copy(this.camera.position);
 
         if (this.light === undefined) {
             this.light = new PointLight(0xFFFFFF, 1, 12, 2);
@@ -104,24 +106,96 @@ export default class ParametricGeometryRenderer3D extends Renderer3D<ThreeDimens
     }
 
     private t0: number = -1;
-    private cameraRevolutionTime: number = 10 * 1000;
+    private prevTimestamp = -1;
+    private prevCameraPath = ParametricGeometryRendererCameraPath.Static;;
+    private prevCameraPosition = new Vector3();
+    private prevϑ = 0;
 
     protected renderTimed(timestamp: number) {
         super.renderTimed(timestamp);
 
-        if (this.t0 < 0) this.t0 = timestamp;
+        if (this.t0 < 0) {
+            this.t0 = timestamp;
+            this.prevTimestamp = timestamp;
+        }
 
-        const dϑ = (2 * Math.PI) / this.cameraRevolutionTime;
+        const path = this.options.options.camera.path;
+
+        const D = 2 * this.radius;
+        const P = new Vector3().copy(this.prevCameraPosition);
+        const rpy = new Vector3(); // [roll, pitch, yaw] rotation vector
+
         const t = timestamp - this.t0;
-        const ϑ = dϑ * t;
+        const dt = timestamp - this.prevTimestamp;
+        const dϑ = (2 * Math.PI) / (this.options.options.camera.time * 1000);
+        const ϑ = this.prevCameraPath !== path ? 0 : this.prevϑ + dϑ * dt;
 
-        this.camera.position.set(
-            2 * this.radius * Math.cos(ϑ),
-            2 * this.radius * Math.cos(ϑ) * Math.sin(ϑ),
-            2 * this.radius * (Math.sin(ϑ) ** 2) - (2 * this.radius - 1),
-        );
+        // https://www.math3d.org/LV9M5uzb
+        switch (path) {
+            case ParametricGeometryRendererCameraPath.Path1: {
+                P.set(
+                    D * Math.cos(ϑ),
+                    D * Math.cos(ϑ) * Math.sin(ϑ),
+                    D * (Math.sin(ϑ) ** 2) - (D - 1),
+                );
+                break;
+            }
 
+            case ParametricGeometryRendererCameraPath.Path2: {
+                P.set(
+                    D * Math.cos(ϑ),
+                    D * Math.sin(ϑ),
+                    D * ((Math.sin(ϑ) ** 2) / 2) - (D - 1),
+                );
+                break;
+            }
+
+            case ParametricGeometryRendererCameraPath.Path3: {
+                P.set(
+                    D * Math.cos(ϑ),
+                    D * Math.sin(ϑ),
+                    D * (-(Math.sin(ϑ) ** 3) / 2) - (D - 1),
+                );
+                rpy.setX(Math.PI / 6);
+                break;
+            }
+
+            case ParametricGeometryRendererCameraPath.Path4: {
+                P.set(
+                    D * (Math.cos(ϑ) ** 6),
+                    D * ((Math.sin(ϑ) ** 3) / 2),
+                    D * (Math.cos(ϑ) ** 2) * Math.sin(ϑ) - (D - 1),
+                );
+                rpy.setY(-Math.PI_2);
+                break;
+            }
+
+            case ParametricGeometryRendererCameraPath.Path5: {
+                P.set(
+                    D * (Math.clausen(2, ϑ, false, 10) / 1.25),
+                    D * ((Math.sin(ϑ) ** 4) / 1.8),
+                    D * (Math.cos(ϑ) * (Math.sin(ϑ) ** 3) + Math.cos(3 * ϑ) / 9),
+                );
+                rpy.setX(Math.PI_2);
+                break;
+            }
+
+            case ParametricGeometryRendererCameraPath.Static:
+            default:
+                P.set(0, 0, 1);
+                break;
+        }
+
+        const rotationMatrix = new Matrix3();
+        rotationMatrix.set(...Math.calculateRotationMatrix3(rpy.z, rpy.y, rpy.x));
+
+        this.prevCameraPosition.copy(P);
+        this.camera.position.copy(P.applyMatrix3(rotationMatrix));
         this.camera.lookAt(this.position);
+
+        this.prevTimestamp = timestamp;
+        this.prevCameraPath = path;
+        this.prevϑ = ϑ;
     }
 
     renderSamples(_timestamp: number, args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void {

@@ -20,6 +20,8 @@ interface Math {
     median(array: readonly number[], isSorted?: boolean): number;
     formatBytes(bytes: number, decimals?: number): string;
     lgamma(z: number): number;
+    calculateRotationMatrix3(yaw: number, pitch: number, roll: number): [number, number, number, number, number, number, number, number, number];
+    clausen(z: number, theta: number, cos?: boolean, K?: number): number;
 }
 
 interface CanvasRenderingContext2D {

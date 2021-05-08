@@ -10,6 +10,7 @@ import { ClockFontFamily } from '../ClockFontFamily';
 import { ClockType } from '../ClockType';
 import { CssObjectFit } from '../CssObjectFit';
 import { FrequencyRange } from '../FrequencyRange';
+import { ParametricGeometryRendererCameraPath } from '../ParametricGeometryRendererCameraPath';
 import { ScaleFunction } from '../ScaleFunction';
 import SpotifyOverlayArtType from '../SpotifyOverlayArtType';
 import { SpotifyProgressBarColorMatchType } from '../SpotifyProgressBarColorMatchType';
@@ -233,13 +234,17 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     if (_.isEmpty(threeDVisualizerOptions.bars!.light)) delete threeDVisualizerOptions.bars!.light;
     if (_.isEmpty(threeDVisualizerOptions.bars)) delete threeDVisualizerOptions.bars;
     // .threeDVisualizer.parametric
-    threeDVisualizerOptions.parametric = { light: {} };
+    threeDVisualizerOptions.parametric = { light: {}, camera: {} };
     setProperty(threeDVisualizerOptions.parametric!, 'geometry', raw['3dVisualizer_parametric_geometry'] as WEProperty<'combo'>, _r => parseComboProperty(_r, Visualizer3DParametricGeometries));
     // .threeDVisualizer.parametric.light
     setProperty(threeDVisualizerOptions.parametric!.light!, 'angleX', raw['3dVisualizer_parametric_light_angleX'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.parametric!.light!, 'power', raw['3dVisualizer_parametric_light_power'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(threeDVisualizerOptions.parametric!.light!, 'color', raw['3dVisualizer_parametric_light_color'] as WEProperty<'color'>, _r => parseColorProperty(_r));
     if (_.isEmpty(threeDVisualizerOptions.parametric!.light)) delete threeDVisualizerOptions.parametric!.light;
+    // .threeDVisualizer.parametric.camera
+    setProperty(threeDVisualizerOptions.parametric!.camera!, 'path', raw['_3dVisualizer_parametric_camera_path'] as WEProperty<'combo'>, _r => parseComboProperty(_r, ParametricGeometryRendererCameraPath));
+    setProperty(threeDVisualizerOptions.parametric!.camera!, 'time', raw['3dVisualizer_parametric_camera_path_time'] as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    if (_.isEmpty(threeDVisualizerOptions.parametric!.camera)) delete threeDVisualizerOptions.parametric!.camera;
     if (_.isEmpty(threeDVisualizerOptions.parametric)) delete threeDVisualizerOptions.parametric;
 
     // .clock

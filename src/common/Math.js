@@ -65,3 +65,32 @@ Math.lgamma = function lgamma(z) {
     const t = z + gamma.g_ln + 0.5;
     return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x) - Math.log(z);
 };
+
+function cs(a) { return [ Math.cos(a), Math.sin(a) ]; }
+Math.calculateRotationMatrix3 = function calculateRotationMatrix3(yaw, pitch, roll) {
+    if (yaw === 0 && pitch === 0 && roll === 0) return [ 1, 0, 0, 0, 1, 0, 0, 0, 1 ];
+
+    const [ ca, sa ] = cs(yaw);
+    const [ cb, sb ] = cs(pitch);
+    const [ cc, sc ] = cs(roll);
+
+    if (yaw !== 0 && pitch === 0 && roll === 0) return [ ca, -sa, 0, sa, ca, 0, 0, 0, 1 ]; // Z
+    if (yaw === 0 && pitch !== 0 && roll === 0) return [ cb, 0, sb, 0, 1, 0, -sb, 0, cb ]; // Y
+    if (yaw === 0 && pitch === 0 && roll !== 0) return [ 1, 0, 0, 0, cc, -sc, 0, sc, cc ]; // X
+
+    return [
+        ca * cb, ca * sb * sc - sa * cc, ca * sb * cc + sa * sc,
+        sa * cb, sa * sb * sc + ca * cc, sa * sb * cc - ca * sc,
+        -sb, cb * sc, cb * cc,
+    ];
+};
+
+Math.clausen = function clausen(z, theta, cos = false, K = 10) {
+    const iterations = K > 0 ? K : 10;
+    const f = cos ? Math.cos : Math.sin;
+    let sum = 0;
+    for (let k = 1; k <= iterations; ++k) {
+        sum += f(k * theta) / (k ** z);
+    }
+    return sum;
+};

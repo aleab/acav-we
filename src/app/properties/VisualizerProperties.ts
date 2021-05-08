@@ -5,6 +5,7 @@ import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { ColorReactionType } from '../ColorReactionType';
 import { Visualizer3DParametricGeometries } from '../Visualizer3DParametricGeometries';
 import { VisualizerFlipType } from '../VisualizerFlipType';
+import { ParametricGeometryRendererCameraPath } from '../ParametricGeometryRendererCameraPath';
 
 export interface VisualizerProperties {
     type: VisualizerType;
@@ -105,6 +106,10 @@ export interface ThreeDVisualizerProperties {
             angleX: number;
             power: number;
             color: RGB;
+        };
+        camera: {
+            path: ParametricGeometryRendererCameraPath;
+            time: number;
         };
     };
 }

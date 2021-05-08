@@ -1212,6 +1212,39 @@
         "value": "1 1 1",
         "condition": "visualizer_type.value === '3DParametricGeometry'"
     },
+    //
+    // [3D VISUALIZER > PARAMETRIC > CAMERA]
+    "3dVisualizer_parametric_camera": {
+        "order": 1950,
+        "type": "text",
+        "text": "ui_3dVisualizer_parametric_camera",
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    "_3dVisualizer_parametric_camera_path": {
+        "order": 1951,
+        "type": "combo",
+        "text": "ui_3dVisualizer_parametric_camera_path",
+        "options": [
+            { "label": "ui_3dVisualizer_parametric_camera_path_Static", "value": "Static" },
+            { "label": "ui_3dVisualizer_parametric_camera_path_Path1", "value": "Path1" },
+            { "label": "ui_3dVisualizer_parametric_camera_path_Path2", "value": "Path2" },
+            { "label": "ui_3dVisualizer_parametric_camera_path_Path3", "value": "Path3" },
+            { "label": "ui_3dVisualizer_parametric_camera_path_Path4", "value": "Path4" },
+            { "label": "ui_3dVisualizer_parametric_camera_path_Path5", "value": "Path5" }
+        ],
+        "value": "Path1",
+        "condition": "visualizer_type.value === '3DParametricGeometry'"
+    },
+    "3dVisualizer_parametric_camera_path_time": {
+        "order": 1952,
+        "type": "slider",
+        "text": "ui_3dVisualizer_parametric_camera_path_time",
+        "value": 10,
+        "min": 10,
+        "max": 20,
+        "editable": false,
+        "condition": "visualizer_type.value === '3DParametricGeometry' && _3dVisualizer_parametric_camera_path.value !== 'Static'"
+    },
     
     "___visualizer": {
         "order": 1999,

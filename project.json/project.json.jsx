@@ -96,6 +96,7 @@ const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_langu
 const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
 const mdnObjectFitLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit">${text}</a>`;
 const mbLogoImg = () => '<img src="https://raw.githubusercontent.com/metabrainz/metabrainz-logos/master/logos/MusicBrainz/SVG/MusicBrainz_logo_icon.svg" height="18" />';
+const cameraPathsGraphLink = text => `<a href="https://www.math3d.org/LV9M5uzb">${text}</a>`;
 
 function getProjectJson() {
     const projectJsonProperties = JSON.parse(
@@ -326,6 +327,17 @@ function getProjectJson() {
                     ui_3dVisualizer_parametric_light_angleX: indent('<sample>&#120599;<sub>x</sub></sample> (deg)'),
                     ui_3dVisualizer_parametric_light_power: indent('Power'),
                     ui_3dVisualizer_parametric_light_color: indent('Color'),
+                    // [3D VISUALIZER > PARAMETRIC > CAMERA]
+                    ui_3dVisualizer_parametric_camera: subSection('Camera'),
+                    ui_3dVisualizer_parametric_camera_path: indent('Path') + `&nbsp;<sup>${cameraPathsGraphLink('[3]')}</sup>`,
+                    ui_3dVisualizer_parametric_camera_path_time: indent('Duration (s)'),
+                    // [3D VISUALIZER > PARAMETRIC > CAMERA > PATH]
+                    ui_3dVisualizer_parametric_camera_path_Static: 'Static',
+                    ui_3dVisualizer_parametric_camera_path_Path1: withFAIcon('far fa-infinity', ''),
+                    ui_3dVisualizer_parametric_camera_path_Path2: withFAIcon('far fa-circle', ' #1'),
+                    ui_3dVisualizer_parametric_camera_path_Path3: withFAIcon('far fa-circle', ' #2'),
+                    ui_3dVisualizer_parametric_camera_path_Path4: 'C1',
+                    ui_3dVisualizer_parametric_camera_path_Path5: 'C2',
 
                     // [CLOCK]
                     ui_clock: section('Clock', false, 'far fa-clock'),
@@ -474,6 +486,7 @@ function getProjectJson() {
                     ui_note1: note(
                         `<sup>${scalingFunctionsLink('[1]')}</sup> Graphical comparison of the scaling functions.`,
                         `<sup>${colorizerLink('[2]')}</sup> Color spaces comparison and conversions.`,
+                        `<sup>${cameraPathsGraphLink('[3]')}</sup> Visualization of the different 3D camera paths.`,
                         `<sup>${spotifyLink('[S]')}</sup> GET SPOTIFY FREE`,
                     ),
                 },
