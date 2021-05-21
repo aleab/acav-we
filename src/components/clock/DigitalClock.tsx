@@ -31,43 +31,6 @@ function toHex(n: number) {
     return `0${n.toString(16)}`.slice(-2).toUpperCase();
 }
 
-function getMimeType(byteArray: ArrayBuffer) {
-    let header = '';
-    let headerArray = new Uint8Array(byteArray).subarray(0, 4);
-    headerArray.forEach(v => { header += toHex(v); });
-
-    let mimeType = null;
-    switch (header) {
-        case '00000000':
-            // This may be EOT; we need the following 30 bytes to be sure.
-            header = '';
-            headerArray = (new Uint8Array(byteArray)).subarray(0, 34);
-            headerArray.forEach(v => { header += toHex(v); });
-            if (header.endsWith('4C50')) { mimeType = FontMimeTypes.EOT; }
-            break;
-        case '00010000': mimeType = FontMimeTypes.TTF; break;
-        case '4F54544F': mimeType = FontMimeTypes.OTF; break;
-        case '774F4646': mimeType = FontMimeTypes.WOFF; break;
-        case '774F4632': mimeType = FontMimeTypes.WOFF2; break;
-        default: break;
-    }
-
-    return mimeType;
-}
-
-function setCachedLocalClockFont(dataUrl: string | null) {
-    if (dataUrl === null) {
-        window.localStorage.removeItem('aleab.acav.clock.font');
-    } else {
-        window.localStorage.setItem('aleab.acav.clock.font', dataUrl);
-    }
-}
-
-async function getCachedLocalClockFont() {
-    const dataUrl = localStorage.getItem('aleab.acav.clock.font');
-    return dataUrl !== null && dataUrl.startsWith('data:') ? fetch(dataUrl).then(res => res.blob()) : null;
-}
-
 const LOCALSTORAGE_FONT = 'aleab.acav.clock_digital.font';
 
 export default function DigitalClock(props: DigitalClockProps) {
