@@ -16,6 +16,6 @@ fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 4).replace(/
 fs.writeFileSync(packageJsonLockPath, JSON.stringify(packageLockJson, null, 4).replace(/\r\n|\r|\n/mg, os.EOL).concat(os.EOL), { encoding: 'utf8' });
 
 if (fs.existsSync(dotenvPath)) {
-    const content = fs.readFileSync(dotenvPath, { encoding: 'utf8' }).toString().replace(/^APP_VERSION=.*$/, `APP_VERSION=${process.argv[2]}`);
+    const content = fs.readFileSync(dotenvPath, { encoding: 'utf8' }).toString().replace(/APP_VERSION=[^\r\n]*(\r|\n)/mg, `APP_VERSION=${process.argv[2]}$1`);
     fs.writeFileSync(dotenvPath, content, { encoding: 'utf8' });
 }
