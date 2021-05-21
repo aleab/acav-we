@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
-import React, { useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 
 import { ClockFontFamily } from '../../app/ClockFontFamily';
 import WallpaperContext from '../../app/WallpaperContext';
@@ -55,18 +55,17 @@ export default function DigitalClock(props: DigitalClockProps) {
     // NOTE: Compatibility with older versions
     useEffect(() => {
         const value = window.localStorage.getItem('aleab.acav.clock.font');
-        if (value) {
+        window.localStorage.removeItem('aleab.acav.clock.font');
+        if (value && value.startsWith('data:')) {
             window.localStorage.setItem(LOCALSTORAGE_FONT, value);
-            window.localStorage.removeItem('aleab.acav.clock.font');
         }
     }, []);
-    const [ showBrowseFontButton, setShowBrowseFontButton, localFontBlobUrl, onLocalFontChange ] = useLocalFontFile(
-        O.current.font === ClockFontFamily.LocalFont,
-        LOCALSTORAGE_FONT,
-        () => setLoaded(true),
-        () => setStyle({ fontFamily: ClockFontFamily.LocalFont }),
-        () => setStyle({ fontFamily: 'inherit' }),
-    );
+
+    const _shouldUseLocalFontFile = O.current.font === ClockFontFamily.LocalFont;
+    const _onLoaded = useCallback(() => setLoaded(true), []);
+    const _onLocalFontSet = useCallback(() => setStyle({ fontFamily: ClockFontFamily.LocalFont }), []);
+    const _onLocalFontUnset = useCallback(() => setStyle({ fontFamily: 'inherit' }), []);
+    const [ showBrowseFontButton, setShowBrowseFontButton, localFontBlobUrl, onLocalFontChange ] = useLocalFontFile(_shouldUseLocalFontFile, LOCALSTORAGE_FONT, _onLoaded, _onLocalFontSet, _onLocalFontUnset);
 
     // =====================
     //  PROPERTIES LISTENER
