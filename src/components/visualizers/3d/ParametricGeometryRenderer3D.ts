@@ -9,6 +9,7 @@ import Renderer3D, { VisualizerParams } from './Renderer3D';
 
 import SphereRenderer from './ParametricRenderers/Sphere';
 import MobiusRenderer from './ParametricRenderers/Mobius';
+import HeartRenderer from './ParametricRenderers/Heart';
 import { ParametricGeometryRendererCameraPath } from '../../../app/ParametricGeometryRendererCameraPath';
 
 const SET_MATERIAL_COLOR_EVENT_NAME = 'setMaterialColor';
@@ -44,6 +45,7 @@ export default class ParametricGeometryRenderer3D extends Renderer3D<ThreeDimens
     private parametricRenderers = {
         sphere: new SphereRenderer(),
         mobius: new MobiusRenderer(),
+        heart: new HeartRenderer(),
     };
 
     getHeight(maxHeight: number): number {
@@ -95,6 +97,11 @@ export default class ParametricGeometryRenderer3D extends Renderer3D<ThreeDimens
 
                 case Visualizer3DParametricGeometries.Mobius: {
                     this.parametricRenderers.mobius.init(nSamples, this.position, 64, this.left, this.right, { radius: this.radius, width: 1 }, addSampleColorListener);
+                    break;
+                }
+
+                case Visualizer3DParametricGeometries.Heart: {
+                    this.parametricRenderers.heart.init(nSamples, this.position, 64, this.left, this.right, { size: this.radius }, addSampleColorListener);
                     break;
                 }
 

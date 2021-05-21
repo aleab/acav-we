@@ -1,1 +1,1 @@
-export enum Visualizer3DParametricGeometries { Sphere, Mobius }
+export enum Visualizer3DParametricGeometries { Sphere, Mobius, Heart }
