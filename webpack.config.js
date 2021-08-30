@@ -203,7 +203,7 @@ function getWebpackConfig(env, argv) {
                             test: /[\\/](simplebar)\.css$/,
                             use: [
                                 MiniCssExtractPlugin.loader,
-                                { loader: 'css-loader', options: { importLoaders: 1 } },
+                                { loader: 'css-loader', options: { importLoaders: 1, url: false } },
                                 {
                                     loader: 'postcss-loader',
                                     options: {
@@ -218,7 +218,7 @@ function getWebpackConfig(env, argv) {
                             test: /\.css$/,
                             use: [
                                 MiniCssExtractPlugin.loader,
-                                { loader: 'css-loader', options: { importLoaders: 1 } },
+                                { loader: 'css-loader', options: { importLoaders: 1, url: false } },
                                 {
                                     loader: 'postcss-loader',
                                     options: {

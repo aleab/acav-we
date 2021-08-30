@@ -1,11 +1,14 @@
 {
+    "assumptions": {
+        "setPublicClassFields": true
+    },
     "presets": [
         ["@babel/preset-env", { "corejs": 3, "targets": "Chrome >= 78", "useBuiltIns": "usage" }],
         "@babel/preset-react",
         ["@babel/preset-typescript", { "allExtensions": true, "isTSX": true }]
     ],
     "plugins": [
-        ["@babel/plugin-proposal-class-properties", { "loose": true }],
+        "@babel/plugin-proposal-class-properties",
         "@babel/plugin-proposal-object-rest-spread",
         "@babel/plugin-syntax-dynamic-import",
         "dynamic-import-node",
