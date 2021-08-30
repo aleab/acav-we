@@ -91,6 +91,7 @@
         "lodash-webpack-plugin": "^0.11.6",
         "mini-css-extract-plugin": "^2.2.0",
         "npm-check-updates": "^11.8.3",
+        "postcss": "^8.3.6",
         "postcss-import": "^14.0.2",
         "postcss-loader": "^6.1.1",
         "rimraf": "latest",

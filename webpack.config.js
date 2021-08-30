@@ -6,6 +6,7 @@ const path = require('path');
 const webpack = require('webpack');
 
 const cssnano = require('cssnano');
+const postcss = require('postcss');
 const postcssImport = require('postcss-import');
 const purgecss = require('@fullhuman/postcss-purgecss');
 
@@ -121,7 +122,7 @@ function getWebpackConfig(env, argv) {
                     if (isProduction) {
                         // Minify css
                         if (path.extname(filePath) === '.css') {
-                            return cssnano.process(content).then(v => v.css);
+                            return postcss([cssnano({ preset: 'default' })]).process(content).then(v => v.css);
                         }
                     }
                     return content;
