@@ -69,6 +69,8 @@ export default function App(props: AppProps) {
     const onEnteredAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
     const onExecutedAudioListenerCallbackEventHandler = useMemo(() => new EventHandler<PerformanceEventArgs>(), []);
     const onVisualizerRenderedEventHandler = useMemo(() => new EventHandler<[PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]>(), []);
+    const onSpotifyStateChangedHandler = useMemo(() => new EventHandler<SpotifyStateChangedEventArgs>(), []);
+    const onSpotifyCurrentlyPlayingChangedHandler = useMemo(() => new EventHandler<SpotifyCurrentlyPlayingChangedEventArgs>(), []);
 
     const wallpaperEvents: WallpaperEvents = useMemo(() => ({
         onUserPropertiesChanged: onUserPropertiesChangedEventHandler,
@@ -80,7 +82,11 @@ export default function App(props: AppProps) {
             executedAudioListenerCallback: onExecutedAudioListenerCallbackEventHandler,
             visualizerRendered: onVisualizerRenderedEventHandler,
         },
-    }), [ onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, onGeneralPropertiesChangedEventHandler, onPausedEventHandler, onUserPropertiesChangedEventHandler, onVisualizerRenderedEventHandler ]);
+        spotify: {
+            stateChanged: onSpotifyStateChangedHandler,
+            currentlyPlayingChanged: onSpotifyCurrentlyPlayingChangedHandler,
+        },
+    }), [ onAudioSamplesEventHandler, onEnteredAudioListenerCallbackEventHandler, onExecutedAudioListenerCallbackEventHandler, onGeneralPropertiesChangedEventHandler, onPausedEventHandler, onSpotifyCurrentlyPlayingChangedHandler, onSpotifyStateChangedHandler, onUserPropertiesChangedEventHandler, onVisualizerRenderedEventHandler ]);
 
     // Context
     const renderer = useRenderer();
@@ -217,7 +223,10 @@ export default function App(props: AppProps) {
             }
 
             if (newProps.spotify !== undefined) {
-                if (newProps.spotify.showOverlay !== undefined) setShowSpotify(newProps.spotify.showOverlay);
+                if (newProps.spotify.showOverlay !== undefined) {
+                    setShowSpotify(newProps.spotify.showOverlay);
+                    if (!newProps.spotify.showOverlay) onSpotifyStateChangedHandler.invoke({ newState: null });
+                }
             }
 
             if (newProps.icuePlugin !== undefined) {
@@ -230,7 +239,7 @@ export default function App(props: AppProps) {
             //onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onUserPropertiesChangedEventHandler, renderer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
+    }, [ onSpotifyStateChangedHandler, onUserPropertiesChangedEventHandler, renderer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
 
     // =================
     //  PAUSED LISTENER
@@ -356,6 +365,8 @@ export default function App(props: AppProps) {
             { timestamp: e[2].timestamp, time: e[2].time },
         ]);
     }, [onVisualizerRenderedEventHandler]);
+    const onSpotifyStateChanged = useCallback((e: SpotifyStateChangedEventArgs) => { onSpotifyStateChangedHandler.invoke(e); }, [onSpotifyStateChangedHandler]);
+    const onSpotifyCurrentlyPlayingChanged = useCallback((e: SpotifyCurrentlyPlayingChangedEventArgs) => { onSpotifyCurrentlyPlayingChangedHandler.invoke(e); }, [onSpotifyCurrentlyPlayingChangedHandler]);
 
     const wallpaperRef = useRef<HTMLDivElement>(null);
     const clockRef = useRef<HTMLDivElement>(null);
@@ -422,7 +433,7 @@ export default function App(props: AppProps) {
             {showForeground ? <div id="foreground" style={fgStyle} /> : null}
             {showStats ? <Stats /> : null}
             <Visualizer onRendered={onVisualizerRendered} />
-            {showSpotify ? <Spotify _ref={spotifyRef} backgroundElement={wallpaperRef} /> : null}
+            {showSpotify ? <Spotify _ref={spotifyRef} backgroundElement={wallpaperRef} stateChangedEventInvoke={onSpotifyStateChanged} currentlyPlayingChangedEventInvoke={onSpotifyCurrentlyPlayingChanged} /> : null}
             {showClock ? <Clock _ref={clockRef} /> : null}
             {
               useTaskbarPlugin ? (

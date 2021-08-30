@@ -2,6 +2,11 @@ type ProjectJsonProperties = typeof import('../../project.json/project.propertie
 type RawWallpaperProperties = Partial<ProjectJsonProperties & WEUserProperties>;
 type MappedProperties = DeepPartial<import('../app/properties/Properties').default>;
 
+type SpotifyState = import('xstate').State<import('../app/SpotifyStateMachine').SpotifyStateMachineContext, import('xstate').AnyEventObject, any, {
+    value: any,
+    context: import('../app/SpotifyStateMachine').SpotifyStateMachineContext
+}>;
+
 // PROPERTIES
 
 type WEPropertyType = 'color' | 'slider' | 'bool' | 'combo' | 'text' | 'textinput' | 'file' | 'directory';
@@ -76,6 +81,8 @@ type PausedEventArgs = {
     isPaused: boolean;
 };
 type PerformanceEventArgs = { timestamp: number; time: number; };
+type SpotifyStateChangedEventArgs = { newState: SpotifyState | null };
+type SpotifyCurrentlyPlayingChangedEventArgs = { res: number, item: SpotifyTrack | null };
 type WallpaperEvents = {
     onUserPropertiesChanged: IEventHandler<UserPropertiesChangedEventArgs>;
     onGeneralPropertiesChanged: IEventHandler<GeneralPropertiesChangedEventArgs>;
@@ -85,6 +92,10 @@ type WallpaperEvents = {
         enteredAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
         executedAudioListenerCallback: IEventHandler<PerformanceEventArgs>;
         visualizerRendered: IEventHandler<[PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]>; // [ pre-processing time, render time, plugins render time ]
+    };
+    spotify: {
+        stateChanged: IEventHandler<SpotifyStateChangedEventArgs>;
+        currentlyPlayingChanged: IEventHandler<SpotifyCurrentlyPlayingChangedEventArgs>;
     };
 };
 

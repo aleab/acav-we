@@ -6,6 +6,7 @@ import { FaExclamationTriangle, FaSkull } from '../fa';
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
 import { RenderEventArgs } from '../app/Renderer';
+import { SpotifyStateMachineState } from '../app/SpotifyStateMachine';
 import WallpaperContext from '../app/WallpaperContext';
 import useCanvas2dTimeGraph, { UseCanvas2dTimeGraphOptions } from '../hooks/useCanvas2dTimeGraph';
 
@@ -43,6 +44,10 @@ export default function Stats() {
     const [ visualizerRenderTime, setVisualizerRenderTime ] = useState(0);
     const [ visualizerPluginsRenderTime, setVisualizerPluginsRenderTime ] = useState(0);
     const [ visualizerRenderDelay, setVisualizerRenderDelay ] = useState(0);
+
+    const [ spotifyState, setSpotifyState ] = useState<SpotifyStateMachineState | null>(null);
+    const [ spotifyCurrentlyPlaying, setSpotifyCurrentlyPlaying ] = useState<string | null>(null);
+    const [ spotifyLastStatusCode, setSpotifyLastStatusCode ] = useState(0);
 
     // These refs are used in the graphs
     const canvasRenderTime = useRef(0);
@@ -181,6 +186,19 @@ export default function Stats() {
         };
         context?.wallpaperEvents.stats.visualizerRendered.subscribe(visualizerRenderedCallback);
 
+        // ==========================
+        //  SPOTIFY EVENTS CALLBACKS
+        // ==========================
+        const spotifyStateChangedCallback = (args: SpotifyStateChangedEventArgs) => {
+            setSpotifyState(args.newState === null ? null : args.newState.value as SpotifyStateMachineState);
+        };
+        context?.wallpaperEvents.spotify.stateChanged.subscribe(spotifyStateChangedCallback);
+        const spotifyCurrentlyPlayingChangedCallback = (args: SpotifyCurrentlyPlayingChangedEventArgs) => {
+            setSpotifyCurrentlyPlaying(args.item?.uri ?? null);
+            setSpotifyLastStatusCode(args.res);
+        };
+        context?.wallpaperEvents.spotify.currentlyPlayingChanged.subscribe(spotifyCurrentlyPlayingChangedCallback);
+
         // =============================
         //  PROPERTIES CHANGED CALLBACK
         // =============================
@@ -209,6 +227,8 @@ export default function Stats() {
             context?.wallpaperEvents.stats.enteredAudioListenerCallback.unsubscribe(enteredAudioListenerCallbackCallback);
             context?.wallpaperEvents.stats.executedAudioListenerCallback.unsubscribe(executedAudioListenerCallbackCallback);
             context?.wallpaperEvents.stats.visualizerRendered.unsubscribe(visualizerRenderedCallback);
+            context?.wallpaperEvents.spotify.stateChanged.unsubscribe(spotifyStateChangedCallback);
+            context?.wallpaperEvents.spotify.currentlyPlayingChanged.unsubscribe(spotifyCurrentlyPlayingChangedCallback);
         };
     }, [context]);
 
@@ -367,6 +387,29 @@ export default function Stats() {
             </tr>
           </tbody>
         </table>
+
+        {
+            spotifyState !== null ? (
+              <>
+                <div className="h">Spotify</div>
+                <table>
+                  <tbody>
+                    <tr>
+                      <th>State</th>
+                      <td colSpan={2}>{spotifyState}</td>
+                    </tr>
+                    <tr style={{ height: 24 }}>
+                      <th>Currently Playing</th>
+                      <td>{`(${spotifyLastStatusCode})`}</td>
+                      <td style={{ maxWidth: 350, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {spotifyCurrentlyPlaying !== null ? decodeURI(spotifyCurrentlyPlaying).replace('spotify:', '') : 'null'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </>
+            ) : null
+        }
       </div>
     );
 }

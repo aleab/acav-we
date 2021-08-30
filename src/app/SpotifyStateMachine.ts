@@ -460,5 +460,6 @@ const SpotifyStateMachine = Machine<SsmContext>({
 export {
     SsmState as SpotifyStateMachineState,
     SsmEvent as SpotifyStateMachineEvent,
+    SsmContext as SpotifyStateMachineContext,
 };
 export default SpotifyStateMachine;

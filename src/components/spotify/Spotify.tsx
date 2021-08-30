@@ -49,6 +49,8 @@ type OverlayStyle = {
 interface SpotifyProps {
     _ref?: React.MutableRefObject<HTMLDivElement | null>;
     backgroundElement: RefObject<HTMLElement>;
+    stateChangedEventInvoke: (e: SpotifyStateChangedEventArgs) => void;
+    currentlyPlayingChangedEventInvoke: (e: SpotifyCurrentlyPlayingChangedEventArgs) => void;
 }
 
 function getOverlayContentMarginLeft(fontSize: number, showOverlayArt: boolean, overlayArtType: SpotifyOverlayArtType, overlayArtPosition: Position) {
@@ -105,6 +107,9 @@ export default function Spotify(props: SpotifyProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
     const token = useMemo(() => ({ get current() { return O.current.token; } }), []);
+
+    const stateChangedEventInvoke = useMemo(() => props.stateChangedEventInvoke, [props.stateChangedEventInvoke]);
+    const currentlyPlayingChangedEventInvoke = useMemo(() => props.currentlyPlayingChangedEventInvoke, [props.currentlyPlayingChangedEventInvoke]);
 
     const [ hideWhenNothingIsPlaying, setHideWhenNothingIsPlaying ] = useState(O.current.hideWhenNothingIsPlaying);
 
@@ -280,6 +285,7 @@ export default function Spotify(props: SpotifyProps) {
 
                 default: break;
             }
+            stateChangedEventInvoke({ newState });
         });
 
         return () => {
@@ -289,7 +295,7 @@ export default function Spotify(props: SpotifyProps) {
                 Logc.debug(`Timeout cancelled: ${tname} (#${tid})`);
             });
         };
-    }, [ send, service ]);
+    }, [ send, service, stateChangedEventInvoke ]);
 
 
     // =====================
@@ -398,6 +404,11 @@ export default function Spotify(props: SpotifyProps) {
         noInternetConnectionCallback,
         Logc,
     );
+
+    // currentlyPlayingEventInvoke
+    useEffect(() => {
+        currentlyPlayingChangedEventInvoke({ res: lastResponseCode, item: currentlyPlayingTrack });
+    }, [ currentlyPlayingChangedEventInvoke, currentlyPlayingTrack, lastResponseCode ]);
 
     // SM and network states
     const isRefreshingToken = useMemo(() => state.value === SpotifyStateMachineState.S4CheckingAT, [state.value]);
