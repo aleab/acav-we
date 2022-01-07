@@ -1,7 +1,7 @@
 {
     "root": true,
     "extends": ["airbnb", "plugin:react/recommended"],
-    "plugins": ["@typescript-eslint", "react", "react-hooks"],
+    "plugins": ["@typescript-eslint", "react", "react-hooks", "unused-imports"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
         "ecmaFeatures": {
@@ -24,6 +24,8 @@
         "arrow-parens": ["error", "as-needed"],
         "class-methods-use-this": "off",
         "dot-notation": "off",
+        "function-call-argument-newline": "off",
+        "function-paren-newline": "off",
         "import/extensions": "off",
         "import/no-unresolved": "off",
         "import/prefer-default-export": "off",
@@ -41,6 +43,7 @@
         "no-bitwise": "off",
         "no-cond-assign": "off",
         "no-console": "off",
+        "no-loss-of-precision": "off",
         "no-multi-spaces": "off",
         "no-multiple-empty-lines": "off",
         "no-nested-ternary": "off",
@@ -72,6 +75,7 @@
         "react/jsx-key": ["warn", { "checkFragmentShorthand": true }],
         "react/jsx-filename-extension": [1, { "extensions": [".jsx", ".tsx"] }],
         "react/jsx-max-props-per-line": [1, { "maximum": 4, "when": "multiline" }],
+        "react/jsx-no-useless-fragment": ["error", { "allowExpressions": true }],
         "react/jsx-props-no-spreading": "off",
         "react/jsx-wrap-multilines": [
             "error",
@@ -86,6 +90,7 @@
             }
         ],
         "react/no-unused-state": "off",
+        "react/prop-types": ["error", { "ignore": ["className"] }],
         "react/require-default-props": [0, { "forbidDefaultForRequired": true, "ignoreFunctionalComponents": true }],
         "react/sort-comp": [
             "warn",
@@ -120,6 +125,7 @@
         "react-hooks/rules-of-hooks": "error",
         "semi": "off",
         "sort-imports": ["error", { "ignoreDeclarationSort": true }],
-        "spaced-comment": "off"
+        "spaced-comment": "off",
+        "unused-imports/no-unused-imports": "warn"
     }
 }

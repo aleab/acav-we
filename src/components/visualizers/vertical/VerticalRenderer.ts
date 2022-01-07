@@ -1,6 +1,5 @@
 import { RGB } from 'color-convert/conversions';
 
-import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VerticalVisualizerProperties } from '../../../app/properties/VisualizerProperties';
 import { AudioResponsiveValueProviderFactory, AudioResponsiveValueProviderFunction } from '../../../app/AudioResponsiveValueProvider';
 import { ColorReactionFactory, ColorReactionType } from '../../../app/ColorReactionType';

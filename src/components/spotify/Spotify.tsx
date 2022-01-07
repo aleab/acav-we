@@ -23,7 +23,7 @@ import WallpaperContext from '../../app/WallpaperContext';
 import useClientRect from '../../hooks/useClientRect';
 import useSpotifySmartTrackRefresh from '../../hooks/useSpotifySmartTrackRefresh';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
-import MusicbrainzClient, { MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
+import MusicbrainzClient from '../../services/musicbrainz-client';
 import MusicbrainzClientCacheDecorator from '../../services/musicbrainz-client-cache-decorator';
 
 import SpotifyOverlayContext, { SpotifyOverlayContextType } from './SpotifyOverlayContext';
@@ -223,7 +223,8 @@ export default function Spotify(props: SpotifyProps) {
     //  STATE MACHINE
     // ===============
     const backendUrl = O.current.backendURL ? O.current.backendURL : process.env.BACKEND_API_BASEURL!;
-    const [ state, send, service ] = useMachine(SpotifyStateMachine.withContext({ token, backendUrl }));
+    const machine = useMemo(() => SpotifyStateMachine.withContext({ token, backendUrl }), [ backendUrl, token ]);
+    const [ state, send, service ] = useMachine(machine);
     useEffect(() => { // window.acav.refreshSpotifyToken()
         window.acav.refreshSpotifyToken = function refreshSpotifyToken() {
             const lsSpotifyToken = localStorage.getItem(LOCALSTORAGE_SPOTIFY_TOKEN);

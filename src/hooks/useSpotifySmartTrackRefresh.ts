@@ -1,7 +1,6 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-lonely-if */
 
-import _ from 'lodash';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import Log, { Logger } from '../common/Log';

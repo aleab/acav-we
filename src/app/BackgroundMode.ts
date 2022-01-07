@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
 
 import { parseCustomCss } from '../common/Css';

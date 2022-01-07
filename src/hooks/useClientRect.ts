@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import React, { MutableRefObject, useCallback, useReducer, useRef, useState } from 'react';
+import React, { MutableRefObject, useCallback, useReducer, useRef } from 'react';
 
 type UseClientRectReturnType<T extends HTMLElement> = [
     DOMRect | null,

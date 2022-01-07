@@ -1,5 +1,4 @@
 /* eslint-disable react/no-danger */
-import _ from 'lodash';
 import ColorConvert from 'color-convert';
 import { RGB } from 'color-convert/conversions';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -244,7 +243,7 @@ export default function AnalogClock() {
     useEffect(() => clockHandMinutesAnimationRef.current?.beginElement(), [clockHandMinutesAnimationRef]);
     useEffect(() => clockHandSecondsAnimationRef.current?.beginElement(), [clockHandSecondsAnimationRef]);
 
-    // eslint-disable-next-line react/display-name
+    // eslint-disable-next-line react/display-name, react/no-unused-prop-types
     const ClockHandAnimation = React.forwardRef<SVGAnimationElement, { dur: number, rotation: number, a: number }>((p, ref) => (
       <animateTransform ref={ref} attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur={`${p.dur.toFixed(3)}s`} fill="freeze" to={`${p.rotation} ${p.a} ${p.a}`} />
     ));

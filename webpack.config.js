@@ -185,9 +185,10 @@ function getWebpackConfig(env, argv) {
                 threeJsMinifierPlugin.resolver,
             ],
             fallback: {
-                assert: require.resolve('assert'),
+                assert: require.resolve('assert/'),
                 net: false,
                 tls: false,
+                url: require.resolve('url'),
             },
         },
         module: {

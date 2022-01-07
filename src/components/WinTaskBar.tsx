@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { RGB } from 'color-convert/conversions';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 

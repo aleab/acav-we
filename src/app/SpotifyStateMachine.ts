@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { AnyEventObject, EventObject, Machine, RaiseAction, SendAction } from 'xstate';
+import { AnyEventObject, EventObject, RaiseAction, SendAction, createMachine } from 'xstate';
 import { raise } from 'xstate/lib/actions';
 
 import Log from '../common/Log';
@@ -171,7 +171,7 @@ async function fetchToken(context: SsmContext, retry: number = 3): Promise<Raise
             return raise(SsmEvent.NoInternetConnection);
         }
         // TODO: Is it fine to sleep? Does it block everything?
-        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchToken(context, retry - 1));
+        return new Promise(resolve => { setTimeout(resolve, 1000); }).then(() => fetchToken(context, retry - 1));
     }
 }
 
@@ -254,11 +254,11 @@ async function fetchRefreshToken(context: SsmContext, spotifyToken: SpotifyToken
             return raise(SsmEvent.NoInternetConnection);
         }
         // TODO: Is it fine to sleep? Does it block everything?
-        return new Promise(resolve => setTimeout(resolve, 1000)).then(() => fetchRefreshToken(context, spotifyToken, retry - 1));
+        return new Promise(resolve => { setTimeout(resolve, 1000); }).then(() => fetchRefreshToken(context, spotifyToken, retry - 1));
     }
 }
 
-const SpotifyStateMachine = Machine<SsmContext>({
+const SpotifyStateMachine = createMachine<SsmContext>({
     id: 'spotify',
     initial: SsmState.S0Unknown,
     entry(ctx) {

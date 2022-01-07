@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { BoxGeometry, Mesh, MeshLambertMaterial, PointLight } from 'three';
 
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';

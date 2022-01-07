@@ -1,3 +1,4 @@
+/* eslint-disable no-constructor-return */
 if (!window.OffscreenCanvas) {
     window.OffscreenCanvas = class OffscreenCanvas {
         constructor(width, height) {

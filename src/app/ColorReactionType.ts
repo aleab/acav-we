@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import ColorConvert from 'color-convert';
-import { HSL, HSV, LAB, RGB } from 'color-convert/conversions';
+import { LAB, RGB } from 'color-convert/conversions';
 import Log from '../common/Log';
 
 export enum ColorReactionType { None, Hue, Saturation, HsvBrightness, HslLightness, LabLightness, LabA, LabB }
