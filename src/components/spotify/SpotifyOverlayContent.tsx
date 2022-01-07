@@ -71,7 +71,7 @@ export default function SpotifyOverlayContent(props: SpotifyOverlayContentProps)
                   style={{ margin: logoMargin, visibility: props.showMusicbrainzLogoOnLocalTrack ? undefined : 'hidden', alignSelf: logoAlignSelf }}
                 />
               ) : (
-                <SpotifyLogo preferMonochrome={props.preferMonochromeLogo ?? false} src="./images/spotify-logo.png" height={logoHeight} style={{ margin: logoMargin, alignSelf: logoAlignSelf }} />
+                <SpotifyLogo preferMonochrome={props.preferMonochromeLogo ?? false} src="./images/spotify-logo.svg" height={logoHeight} style={{ margin: logoMargin, alignSelf: logoAlignSelf }} />
               )
             ) : null
         }
