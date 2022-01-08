@@ -145,10 +145,11 @@ export default function Spotify(props: SpotifyProps) {
     const [ hideMusicbrainzLogo, setHideMusicbrainzLogo ] = useState(O.current.art.hideMusicbrainzLogo);
 
     //--overlay
-    const [ overlayStyle, setOverlayStyle ] = useReducer((prevStyle: OverlayStyle, newStyle: Partial<OverlayStyle>) => {
+    const setOverlayStyleReducer = useCallback((prevStyle: OverlayStyle, newStyle: Partial<OverlayStyle>) => {
         if (_.isMatch(prevStyle, newStyle)) return prevStyle;
         return _.merge({}, prevStyle, newStyle);
-    }, {
+    }, []);
+    const [ overlayStyle, setOverlayStyle ] = useReducer(setOverlayStyleReducer, {
         transform: calculatePivotTransform(O.current.style.pivot).transform,
         left: window.innerWidth * (O.current.style.left / 100),
         top: window.innerHeight * (O.current.style.top / 100),
@@ -158,14 +159,14 @@ export default function Spotify(props: SpotifyProps) {
     });
 
     //--background
-    const setOverlayBackgroundStyleInit = useCallback(() => {
+    const setOverlayBackgroundStyleReducer = useCallback(() => {
         return generateBackgroundCss(O.current.style.background.mode, {
             color: O.current.style.background.color as RGB,
             alpha: O.current.style.background.colorAlpha / 100,
             css: O.current.style.background.css,
         });
     }, []);
-    const [ overlayBackgroundStyle, setOverlayBackgroundStyle ] = useReducer(setOverlayBackgroundStyleInit, undefined, setOverlayBackgroundStyleInit);
+    const [ overlayBackgroundStyle, setOverlayBackgroundStyle ] = useReducer(setOverlayBackgroundStyleReducer, undefined, setOverlayBackgroundStyleReducer);
 
     //--progressBar
     const [ showProgressBar, setShowProgressBar ] = useState(O.current.progressBar.enabled);
@@ -376,17 +377,15 @@ export default function Spotify(props: SpotifyProps) {
     // =========
     //  OVERLAY
     // =========
-    // currentlyPlaying is undefined until the first refresh; it's null when no track is playing
-    const [ currentlyPlayingTrack, setCurrentlyPlayingTrack ] = useReducer((prevTrack: SpotifyTrack | null, newTrack: SpotifyTrack | null) => {
-        if (!prevTrack || !newTrack) return newTrack;
-        if (spotifyTrackEquals(prevTrack, newTrack)) return prevTrack;
-        return newTrack;
-    }, null);
-    const [ currentlyPlaying, setCurrentlyPlaying ] = useReducer((prevO: SpotifyCurrentlyPlayingObject | null | undefined, newO: React.SetStateAction<SpotifyCurrentlyPlayingObject | null | undefined>) => {
+    const [ currentlyPlayingTrack, setCurrentlyPlayingTrack ] = useState<SpotifyTrack | null>(null);
+    const setCurrentlyPlayingReducer = useCallback((prevO: SpotifyCurrentlyPlayingObject | null | undefined, newO: React.SetStateAction<SpotifyCurrentlyPlayingObject | null | undefined>) => {
         const newObject = typeof newO === 'function' ? newO(prevO) : newO;
-        setCurrentlyPlayingTrack(newObject?.item ?? null);
+        if (!prevO?.item || !newObject?.item || !spotifyTrackEquals(prevO.item, newObject.item)) {
+            setCurrentlyPlayingTrack(newObject?.item ?? null);
+        }
         return newObject;
-    }, undefined);
+    }, []);
+    const [ currentlyPlaying, setCurrentlyPlaying ] = useReducer(setCurrentlyPlayingReducer, undefined);
 
     const [ lastResponseCode, setLastResponseCode ] = useState(0);
     const canRefreshTrack = useCallback(() => state.value === SpotifyStateMachineState.S5HasATIdle, [state.value]);

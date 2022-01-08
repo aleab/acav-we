@@ -26,10 +26,15 @@ export default function useSpotifySmartTrackRefresh(
 ) {
     const Logc = useMemo(() => (logger !== undefined ? logger : Log.getLogger('useSpotifySmartTrackRefresh', '#1DB954')), [logger]);
 
+    const lastChangedMsRef = useRef(0);
     const setCurrentlyPlayingStateAction = useCallback((prev: SpotifyCurrentlyPlayingObject | null | undefined, current: SpotifyCurrentlyPlayingObject | null) => {
         const newUrl = (current?.item?.external_urls?.['spotify'] ?? current?.item?.uri);
         if (newUrl !== (prev?.item?.external_urls?.['spotify'] ?? prev?.item?.uri)) {
-            Logc.debug('Currently playing:', current);
+            const ms = Date.now();
+            if (ms - lastChangedMsRef.current > 500) {
+                lastChangedMsRef.current = ms;
+                Logc.debug('Currently playing:', current);
+            }
         }
         return current;
     }, [Logc]);
