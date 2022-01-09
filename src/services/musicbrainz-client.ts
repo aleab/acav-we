@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Fuse from 'fuse.js';
-import { IRecording, IRecordingList, IRecordingMatch, IReleaseGroup, IReleaseGroupList, IReleaseGroupMatch, MusicBrainzApi } from 'musicbrainz-api';
+import { IArtistList, IArtistMatch, IRecording, IRecordingList, IRecordingMatch, IReleaseGroup, IReleaseGroupList, IReleaseGroupMatch, MusicBrainzApi } from 'musicbrainz-api';
 
 import Log from '../common/Log';
 import MusicTrack from '../app/MusicTrack';
@@ -25,6 +25,11 @@ function luceneProximitySearchBasedOnNumberOfWords(search: string, k: number = 0
         proximitySearch = `"${search}"~${Math.round(words.length * k)}`;
     }
     return [ proximitySearch, words ];
+}
+function luceneOR(terms: [string, number][], boost?: (b: number) => number): string | undefined {
+    if (terms.length === 0) return undefined;
+    const query = terms.map(([ _q, _b ]) => `${_q}^${boost ? boost(_b) : _b}`).join(' OR ');
+    return terms.length > 1 ? `(${query})` : query;
 }
 
 const LUCENE_WORDS_PROXIMITY = 0.75; // [0..1]
@@ -89,6 +94,71 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
 
     private logVerbose(...args: any[]) {}
 
+    private getLuceneQueryForAlbum(album: string): [ [string, number][], [string, number][] ] {
+        const releasegroupQuery: [string, number][] = [];
+        const releaseQuery: [string, number][] = [];
+
+        releasegroupQuery.push([ `releasegroup:"${album}"`, 100 ]);
+        releaseQuery.push([ `release:"${album}"`, 90 ]);
+
+        const [ albumProximitySearch, albumWords ] = luceneProximitySearchBasedOnNumberOfWords(album, LUCENE_WORDS_PROXIMITY);
+        if (albumProximitySearch !== undefined) {
+            releasegroupQuery.push([ `releasegroup:${albumProximitySearch}`, 70 ]);
+            releaseQuery.push([ `release:${albumProximitySearch}`, 60 ]);
+        }
+
+        if (albumWords.length > 5) {
+            // Also perform partial search on each half of the string if there are more than 5 words
+            const [t2] = luceneProximitySearchBasedOnNumberOfWords(albumWords.slice(0, Math.ceil(albumWords.length / 2)).join(' '), LUCENE_WORDS_PROXIMITY);
+            if (t2 !== undefined) {
+                releasegroupQuery.push([ `releasegroup:${t2}`, 65 ]);
+                releaseQuery.push([ `release:${t2}`, 55 ]);
+            }
+
+            const [t3] = luceneProximitySearchBasedOnNumberOfWords(albumWords.slice(Math.ceil(albumWords.length / 2)).join(' '), LUCENE_WORDS_PROXIMITY);
+            if (t3 !== undefined) {
+                releasegroupQuery.push([ `releasegroup:${t3}`, 64 ]);
+                releaseQuery.push([ `release:${t3}`, 54 ]);
+            }
+        }
+
+        return [ releasegroupQuery, releaseQuery ];
+    }
+
+    private async getLuceneQueryForArtists(artists: string[] | undefined, album: string): Promise<[ [string, number][], boolean ]> {
+        const artistQuery: [string, number][] = [];
+        let withArtistId = false;
+
+        if (artists !== undefined && !isNullUndefinedOrEmpty(artists[0])) {
+            if (album.split(' ').filter(s => s.length > 0).length <= 2) {
+                // The album name has 2 words or less, so it's probably pretty common.
+                // If the given artist name is an alias rather than their real name, we could potentially have to
+                //   page through the results to find the album we are actually looking for (since its name is assumed to be a common one);
+                //   in this case it's preferable to search for the artist id first.
+                let mbSearchResult: IArtistList;
+                try {
+                    const query = `artist:"${artists[0]}"^100 OR primary_alias:"${artists[0]}"^10 OR alias:"${artists[0]}"`;
+                    this.logVerbose('--> searchArtist()', { query });
+                    mbSearchResult = await this.api.searchArtist(query, 0, MUSICBRAINZ_SEARCH_LIMIT);
+                    this.logVerbose('    mbSearchResult:', mbSearchResult);
+
+                    const artist: IArtistMatch | null = mbSearchResult.artists?.[0] ?? null;
+                    if (artist) {
+                        artistQuery.push([ `arid:${artist.id}`, 80 ]);
+                        withArtistId = true;
+                    }
+                } catch (err) {
+                    Logc.error('ERROR', err);
+                }
+            }
+            if (artistQuery.length === 0) {
+                artistQuery.push([ `artist:"${artists[0]}"`, 80 ]);
+            }
+        }
+
+        return [ artistQuery, withArtistId ];
+    }
+
     // NOTE: Resources:
     // Musicbrainz search: https://musicbrainz.org/doc/Development/XML_Web_Service/Version_2/Search
     // Lucene search: https://lucene.apache.org/core/7_7_2/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#package.description
@@ -102,98 +172,59 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
     async findCoverArtByReleaseGroup(track: MusicTrack): Promise<MusicbrainzReleaseCoverArt[] | undefined | null> {
         if (isNullUndefinedOrEmpty(track.album)) return undefined;
 
-        const _album = luceneEscape(track.album);
+        const _album = luceneEscape(track.album)!;
         const _artists = track.artists?.map(artist => luceneEscape(artist)!);
+
+        Logc.debug('findCoverArt', track);
 
         //  Build Lucene query string
         // ===========================
-        const releasegroupQuery: [string, number][] = [];
-        const releaseQuery: [string, number][] = [];
-        const artistQuery: [string, number][] = [];
-
-        // releasegroup and release query terms
-        if (!isNullUndefinedOrEmpty(_album)) {
-            releasegroupQuery.push([ `releasegroup:"${_album}"`, 100 ]);
-            releaseQuery.push([ `release:"${_album}"`, 90 ]);
-
-            const [ t1, words ] = luceneProximitySearchBasedOnNumberOfWords(_album, LUCENE_WORDS_PROXIMITY);
-            if (t1 !== undefined) {
-                releasegroupQuery.push([ `releasegroup:${t1}`, 70 ]);
-                releaseQuery.push([ `release:${t1}`, 60 ]);
-            }
-
-            if (words.length > 5) {
-                // Also perform partial search on each half of the string if there are more than 5 words
-                const [t2] = luceneProximitySearchBasedOnNumberOfWords(words.slice(0, Math.ceil(words.length / 2)).join(' '), LUCENE_WORDS_PROXIMITY);
-                if (t2 !== undefined) {
-                    releasegroupQuery.push([ `releasegroup:${t2}`, 65 ]);
-                    releaseQuery.push([ `release:${t2}`, 55 ]);
-                }
-
-                const [t3] = luceneProximitySearchBasedOnNumberOfWords(words.slice(Math.ceil(words.length / 2)).join(' '), LUCENE_WORDS_PROXIMITY);
-                if (t3 !== undefined) {
-                    releasegroupQuery.push([ `releasegroup:${t3}`, 64 ]);
-                    releaseQuery.push([ `release:${t3}`, 54 ]);
-                }
-            }
-        }
-
-        if (_artists !== undefined && !isNullUndefinedOrEmpty(_artists[0])) {
-            artistQuery.push([ `artist:"${_artists[0]}"`, 80 ]);
-        }
-
-        const __q = (q: [string, number][], b: (b: number) => number) => {
-            if (q.length === 0) return undefined;
-            const query = q.map(([ _q, _b ]) => `${_q}^${b(_b)}`).join(' OR ');
-            return q.length > 1 ? `(${query})` : query;
-        };
-
-        // ((releasegroup OR release) AND (artist))
-        let q1 = [
-            __q(releasegroupQuery, b => b * 2),
-            __q(releaseQuery, b => b * 2),
-        ].filter(x => x !== undefined).join(' OR ');
-        q1 = [
-            !isNullUndefinedOrEmpty(q1) ? `(${q1})` : undefined,
-            __q(artistQuery, b => b),
-        ].filter(x => x !== undefined).join(' AND ');
-
-        // (releasegroup OR release)
-        // NOTE: `orQueryTerms2` is the same query as above except without artist.
-        //   The query is refined later using fuse.js to handle the cases where the provided artist name
-        //   is an alias or the romanization of e.g. a japanese name
-        // A perfect match for the artist in `orQueryTerms1` is given a higher priority anyway.
-        const q2 = [
-            __q(releasegroupQuery, b => b),
-            __q(releaseQuery, b => b),
-        ].filter(x => x !== undefined).join(' OR ');
+        const [ rgQueryTerms, rQueryTerms ] = this.getLuceneQueryForAlbum(_album);
+        const [ aQueryTerms, withArtistId ] = await this.getLuceneQueryForArtists(_artists, _album);
 
         const queryTerms: string[] = [];
-        queryTerms.push(`(${q1})`, `(${q2})`);
+        if (aQueryTerms.length > 0 && !withArtistId) {
+            // ((releasegroup OR release) AND (artist))
+            const albumQuery1 = `(${luceneOR(rgQueryTerms, b => b * 2)} OR ${luceneOR(rQueryTerms, b => b * 2)})`;
+            const query1 = `(${albumQuery1} AND ${luceneOR(aQueryTerms)})`;
+
+            // (releasegroup OR release)
+            // NOTE: `query2` is the same query as above except without artist.
+            //   The query is refined later using fuse.js to handle the cases where the provided artist name
+            //   is an alias or the romanization of e.g. a japanese name
+            // A perfect match for the artist in `query1` is given a higher priority anyway.
+            const query2 = `(${luceneOR(rgQueryTerms)} OR ${luceneOR(rQueryTerms)})`;
+
+            queryTerms.push(query1, query2);
+        } else if (aQueryTerms.length > 0 && withArtistId) {
+            queryTerms.push(`((${luceneOR(rgQueryTerms)} OR ${luceneOR(rQueryTerms)}) AND ${luceneOR(aQueryTerms)})`);
+        } else {
+            queryTerms.push(`(${luceneOR(rgQueryTerms)} OR ${luceneOR(rQueryTerms)})`);
+        }
+
         const query = queryTerms.join(' OR ');
+        this.logVerbose('--> searchReleaseGroup()');
+        this.logVerbose('    queryTerms:', queryTerms);
 
-        if (queryTerms.length === 0) return null;
-        Logc.debug('findCoverArt', track);
-        this.logVerbose('--> queryTerms', queryTerms);
-
-        //  Search for MB recording
-        // =========================
+        //  Search for MB release group
+        // =============================
         let mbReleaseGroup: IReleaseGroup | null = null;
         let mbSearchResult: IReleaseGroupList;
         try {
             mbSearchResult = await this.api.searchReleaseGroup(query, 0, MUSICBRAINZ_SEARCH_LIMIT);
-            this.logVerbose('-- mbSearchResult', mbSearchResult);
+            this.logVerbose('    mbSearchResult:', mbSearchResult);
         } catch (err) {
             Logc.error('ERROR', err);
             return null;
         }
 
-        // Refine the search using artist information with fuse.js
+        //  Refine the search with fuse.js using artist information
+        // =========================================================
         if (mbSearchResult['release-groups'].length > 0) {
-            if (_artists !== undefined && _artists.length > 0) {
+            if (_artists !== undefined && _artists.length > 0 && !withArtistId) {
                 const fuse = new Fuse(mbSearchResult['release-groups'], this.releaseGroupsFuseOptions);
                 const fuseResult = fuse.search(_artists[0]);
-                this.logVerbose('--> fuseResult', fuseResult);
+                this.logVerbose('--> fuseResult:', fuseResult);
 
                 if (fuseResult.length > 0) {
                     // Sort by combined score: mbScore * (1 - fuseScore)
@@ -214,7 +245,7 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
         }
 
         const mbReleases = mbReleaseGroup?.releases;
-        Logc.debug('--> mbReleases', mbReleases);
+        Logc.debug('--> mbReleases:', mbReleases);
 
         //  Search for cover arts
         // =======================
@@ -246,7 +277,7 @@ export default class MusicbrainzClient implements IMusicbrainzClient {
                 }
             });
 
-            Logc.debug('--> releasesCoverArts', releasesCoverArts);
+            Logc.debug('--> releasesCoverArts:', releasesCoverArts);
             return releasesCoverArts.length > 0 ? releasesCoverArts : null;
         }
 
