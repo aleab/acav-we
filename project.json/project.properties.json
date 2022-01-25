@@ -2017,16 +2017,32 @@
         "text": "ui_$_icue_spectrum_width",
         "condition": "showDescriptions.value && icue.value"
     },
+    
+    "___icue": {
+        "order": 6099,
+        "type": "text",
+        "text": "&nbsp;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;&#9602;",
+        "condition": "icue.value"
+    },
+
+    // ---
+    "_clearLocalStorage": {
+        "order": 9000,
+        "type": "bool",
+        "text": "ui__clearLocalStorage",
+        "value": false,
+        "condition": "showAdvancedOptions.value"
+    },
 
 
     // [NOTES]
     "notes": {
-        "order": 9000,
+        "order": 9990,
         "type": "text",
         "text": "ui_notes"
     },
     "note1": {
-        "order": 9001,
+        "order": 9991,
         "type": "text",
         "text": "ui_note1"
     }

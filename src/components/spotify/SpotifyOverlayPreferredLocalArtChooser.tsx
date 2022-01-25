@@ -1,4 +1,3 @@
-import { DBSchema } from 'idb';
 import React, { RefObject, useCallback, useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import SimpleBar from 'simplebar-react';
@@ -7,13 +6,6 @@ import { FaCheckCircle } from '../../fa';
 import MusicTrack, { getAlbumHashCode } from '../../app/MusicTrack';
 import PreferredLocalArtStore from '../../app/PreferredLocalArtStore';
 import { MusicbrainzReleaseCoverArt } from '../../services/musicbrainz-client';
-
-interface PreferredLocalArtDB extends DBSchema {
-    'preferences': {
-        key: number;
-        value: string | undefined;
-    };
-}
 
 export interface SpotifyOverlayPreferredLocalArtChooserProps {
     track: MusicTrack | undefined;

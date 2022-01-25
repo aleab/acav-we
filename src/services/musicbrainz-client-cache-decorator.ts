@@ -6,7 +6,7 @@ import { IMusicbrainzClient, MusicbrainzReleaseCoverArt } from './musicbrainz-cl
 
 const Logc = Log.getLogger('MusicbrainzClientCache', '#EC74C0', 'background-color: #1E1A23');
 
-interface MusicbrainzDB extends DBSchema {
+export interface MusicbrainzDB extends DBSchema {
     'musicbrainz-covers': {
         key: number;
         value: {

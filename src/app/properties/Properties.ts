@@ -51,6 +51,8 @@ export default interface Properties {
         spectrumStart: number;
         spectrumWidth: number;
     };
+
+    clearLocalStorage: boolean;
 }
 
 function parseComboProperty<TEnum>(prop: WEProperty<'combo'>, EnumType: TEnum): TEnum[keyof TEnum] {
@@ -97,6 +99,8 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(rootOptions, 'limitFps', raw.limitFps as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'useCustomFpsLimit', raw.customFpsLimit as WEProperty<'bool'>, _r => _r.value);
     setProperty(rootOptions, 'customFpsLimit', raw.customFpsLimit_value as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+
+    setProperty(rootOptions, 'clearLocalStorage', raw._clearLocalStorage as WEProperty<'bool'>, _r => _r.value);
 
     // .background
     const backgroundOptions: MappedProperties['background'] = {};

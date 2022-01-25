@@ -61,10 +61,12 @@ function followRedirectsAndCacheFinalUrl(
     });
 }
 
+export const IDB_PREFERRED_COVERS = 'aleab.acav.preferred-covers';
+
 export default function SpotifyAlbumArt(props: SpotifyAlbumArtProps) {
     const { mbClient, mbClientCache, fetchLocalCovers, preferrectLocalArtChooserElementRef, preferrectLocalArtChooserSize } = props;
 
-    const preferredLocalArtStore = useMemo(() => new PreferredLocalArtStore('aleab.acav.preferred-covers', 1), []);
+    const preferredLocalArtStore = useMemo(() => new PreferredLocalArtStore(IDB_PREFERRED_COVERS, 1), []);
 
     const spotifySrc = useMemo(() => {
         if (props.track.is_local) return '';

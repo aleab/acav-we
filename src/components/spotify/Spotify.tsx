@@ -103,6 +103,8 @@ function toHexColor(color: RGB | [number, number, number] | null) {
     return null;
 }
 
+export const IDB_MB_CACHE = 'aleab.acav.mb-cache';
+
 export default function Spotify(props: SpotifyProps) {
     const context = useContext(WallpaperContext)!;
     const O = useRef(context.wallpaperProperties.spotify);
@@ -117,7 +119,7 @@ export default function Spotify(props: SpotifyProps) {
     const mbClient = useRef<MusicbrainzClientCacheDecorator | undefined>(undefined);
     useEffect(() => {
         mbClient.current = new MusicbrainzClientCacheDecorator(new MusicbrainzClient(process.env.NODE_ENV === 'development'), {
-            cacheName: 'aleab.acav.mb-cache',
+            cacheName: IDB_MB_CACHE,
             ttlMs: Math.round(1000 * 60 * 60 * 24 * O.current.art.fetchLocalCacheMaxAge),
             cacheMaintenanceInterval: 1000 * 60 * 30,
         });

@@ -450,6 +450,8 @@ function getProjectJson() {
                     ui_icue_spectrum_width: indent('Spectrum Width (%)'),
                     ui_$_icue_spectrum_width: note('The amount of audio samples to use.', null),
 
+                    ui__clearLocalStorage: withTextColor('span', 'muted', 'Clear Local Storage') + asterisk(),
+
                     // [NOTES]
                     ui_notes: section('Notes', true),
                     ui_note1: note(

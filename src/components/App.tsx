@@ -1,6 +1,7 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { openDB } from 'idb';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
@@ -8,6 +9,7 @@ import { Pivot } from '../common/Pivot';
 import AudioHistory from '../app/AudioHistory';
 import { BackgroundMode } from '../app/BackgroundMode';
 import { PINK_NOISE } from '../app/noise';
+import { PreferredLocalArtDB } from '../app/PreferredLocalArtStore';
 import Properties, { applyUserProperties } from '../app/properties/Properties';
 import { RenderEventArgs } from '../app/Renderer';
 import { ScaleFunctionFactory } from '../app/ScaleFunction';
@@ -17,11 +19,15 @@ import { useRenderer } from '../hooks/useRenderer';
 import useWallpaperBackground from '../hooks/useWallpaperBackground';
 import useWallpaperForeground from '../hooks/useWallpaperForeground';
 import PluginManager, { PluginName } from '../plugins/PluginManager';
+import { MusicbrainzDB } from '../services/musicbrainz-client-cache-decorator';
+
+import { LOCALSTORAGE_SPOTIFY_TOKEN } from '../app/SpotifyStateMachine';
+import { IDB_PREFERRED_COVERS } from './spotify/SpotifyAlbumArt';
 
 import Stats from './Stats';
 import ModalDialog from './ModalDialog';
 import Clock from './clock/Clock';
-import Spotify from './spotify/Spotify';
+import Spotify, { IDB_MB_CACHE } from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
 import WinTaskBar from './WinTaskBar';
 import EventHandler from '../common/EventHandler';
@@ -33,6 +39,21 @@ const LOCALSTORAGE_BG_PLAYLIST_TIMER = 'aleab.acav.bgPlaylistImageChangedTime';
 const LOCALSTORAGE_FG_CURRENT_IMAGE = 'aleab.acav.fgCurrentImage';
 
 const Logc = Log.getLogger('App', 'darkgreen');
+
+function clearLocalStorage() {
+    localStorage.removeItem(LOCALSTORAGE_APP_VERSION);
+    localStorage.removeItem(LOCALSTORAGE_SPOTIFY_TOKEN);
+    localStorage.removeItem(LOCALSTORAGE_BG_CURRENT_IMAGE);
+    localStorage.removeItem(LOCALSTORAGE_BG_CURRENT_VIDEO);
+    localStorage.removeItem(LOCALSTORAGE_BG_PLAYLIST_TIMER);
+    localStorage.removeItem(LOCALSTORAGE_FG_CURRENT_IMAGE);
+
+    openDB<MusicbrainzDB>(IDB_MB_CACHE).then(async db => {
+        await db.clear('musicbrainz-covers');
+        await db.clear('musicbrainz-cover-urls');
+    });
+    openDB<PreferredLocalArtDB>(IDB_PREFERRED_COVERS).then(db => db.clear('preferences'));
+}
 
 interface AppProps {
     windowEvents: WindowEvents;
@@ -182,6 +203,8 @@ export default function App(props: AppProps) {
             const newProps = applyUserProperties(O.current, _props);
             if (_.isEmpty(newProps)) return;
             Logc.debug('User properties applied', newProps);
+
+            if (!oldProps.clearLocalStorage && newProps.clearLocalStorage) clearLocalStorage();
 
             if (newProps.showStats !== undefined) setShowStats(newProps.showStats);
 
