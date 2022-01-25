@@ -41,13 +41,11 @@ function section(name, muted = false, propertyIcon = null, noteHtml = null) {
             {_note}
           </h3>
         ) : (
-          <>
-            <h3>
-              {icon}
-              <ins>{name}</ins>
-              {_note}
-            </h3>
-          </>
+          <h3>
+            {icon}
+            <ins>{name}</ins>
+            {_note}
+          </h3>
         ),
     );
 }
@@ -87,14 +85,6 @@ function withTextColor(tag, color, text) {
 function samp(text) { return `<samp>${text}</samp>`; }
 
 const asterisk = () => '<sup class="text-warning">*</sup>';
-const scalingFunctionsLink = text => `<a href="https://www.desmos.com/calculator/f0rirujpk8">${text}</a>`;
-const colorizerLink = text => `<a href="http://colorizer.org/">${text}</a>`;
-const spotifyLink = text => `<a href="https://www.spotify.com/">${text}</a>`;
-const spotifyAuthLink = text => `<a href="https://aleab.github.io/acav-we/token">${text}</a>`;
-const musicbrainzLink = text => `<a href="https://musicbrainz.org/search">${text}</a>`;
-const bcp47WikiLink = text => `<a href="https://en.wikipedia.org/wiki/IETF_language_tag">${text}</a>`;
-const mdnLocaleLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/DateTimeFormat/DateTimeFormat#Syntax">${text}</a>`;
-const mdnObjectFitLink = text => `<a href="https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit">${text}</a>`;
 const mbLogoImg = () => '<img src="https://raw.githubusercontent.com/metabrainz/metabrainz-logos/master/logos/MusicBrainz/SVG/MusicBrainz_logo_icon.svg" height="18" />';
 
 function getProjectJson() {
@@ -122,7 +112,7 @@ function getProjectJson() {
                     ui_background_color: indent(withPropertyIcon('fas fa-palette', 'Color')),
                     ui_background_image: indent(withPropertyIcon('fas fa-image', 'Image')),
                     ui_background_video: indent(withPropertyIcon('fas fa-video', 'Video')),
-                    ui_background_videoObjectFit: indent(withPropertyIcon('far fa-compress-arrows-alt', 'object-fit')) + `&nbsp;<sup>${mdnObjectFitLink('(?)')}</sup>`,
+                    ui_background_videoObjectFit: indent(withPropertyIcon('far fa-compress-arrows-alt', 'object-fit')) + `&nbsp;${withTextColor('sup', 'primary', '[4]')}`,
                     ui_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS')),
                     ui_background_playlist: indent(withPropertyIcon('fas fa-images', 'Playlist')),
                     ui_background_playlistTimer: indent(withPropertyIcon('far fa-stopwatch', 'Interval (hours)')),
@@ -146,7 +136,7 @@ function getProjectJson() {
                     ui_audioSamples_spatialSmoothing_factor: indent('Spatial Smoothing', { n: 3 }),
                     //
                     // [AUDIO SAMPLES > SCALE]
-                    ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;<sup>${scalingFunctionsLink('[1]')}</sup>`,
+                    ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;${withTextColor('sup', 'primary', '[1]')}`,
                     ui_audioSamples_scale_Linear: 'x',
                     ui_audioSamples_scale_Power: 'x<sup>n</sup>',
                     ui_audioSamples_scale_Exponential: 'n<sup>x</sup>',
@@ -201,7 +191,7 @@ function getProjectJson() {
                     ui_visualizer_type_CircularWave: withFAIcon('far fa-circle', ' Circular, Wave'),
                     ui_visualizer_type_3DBars: withFAIcon('fas fa-cube', ' 3D, Bars'),
 
-                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;<sup>${colorizerLink('[2]')}</sup>`,
+                    ui_visualizer_color_responseType: indent('Color Response') + `&nbsp;${withTextColor('sup', 'primary', '[2]')}`,
                     ui_visualizer_color_responseProvider: indent('React to', { n: 3 }) + asterisk(),
                     ui_visualizer_color_responseValueGain: indent('Gain', { n: 3 }) + asterisk(),
                     ui_visualizer_color_responseRange: indent('Range', { n: 3 }),
@@ -334,7 +324,7 @@ function getProjectJson() {
                     ui_clock_digital_locale: indent('Locale') + asterisk(),
                     ui_clock_digital_24h: indent('24H'),
                     ui_$_clock_digital_locale: note(
-                        `A ${bcp47WikiLink('BCP 47 language tag')}; unicode extensions are supported. The documentation of the formatting function used is ${mdnLocaleLink('here')}.`,
+                        `A <em>BCP 47 language tag</em> ${withTextColor('sup', 'primary', '[3]')}; unicode extensions are supported. The documentation of the formatting function used is available at <u>https://mzl.la/3rLerLe</u>`,
                     ),
                     ui_$_clock_digital_locale2: note(
                         'For example, <code>th-TH-u-nu-thai-hc-h12</code> changes the formatting to use the thai language (<em>th-TH</em>), the thai numerals (<em>nu-thai</em>) and a 12-hour clock (<em>hc-h12</em>).',
@@ -387,11 +377,11 @@ function getProjectJson() {
                     ui_taskbar_brightness: indent('Brightness (%)'),
 
                     // [SPOTIFY]
-                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify', spotifyLink('[S]')),
+                    ui_spotify: section('Spotify', false, 'text-white fab fa-spotify', withTextColor('span', 'primary', '[S]')),
                     ui_spotify_backend_url: indent('Backend URL') + asterisk(),
                     ui_spotify_token: indent('Token'),
                     ui_spotify_hideWhenNothingIsPlaying: indent('Hide when Nothing\'s Playing'),
-                    ui_$_spotify_token: note(`To use Spotify's overlay you need an access token. You can request a <em>token</em> ${spotifyAuthLink('here')}.`),
+                    ui_$_spotify_token: note('To use the Spotify overlay you need an access token. You can request a <em>token</em> at <u>https://bit.ly/3GZMSUW</u> or <u>https://aleab.github.io/acav-we/token</u>.'),
                     ui_$_spotify_token_note: note(
                         "<b><u>Note</u></b>: Including your <em>token</em> in shared presets won't leak any potentially private information nor will it " +
                           'let other users use your access token (<samp>AT</samp>). The <em>token</em> is encrypted and only valid for a couple of minutes ' +
@@ -419,11 +409,11 @@ function getProjectJson() {
                     ui_spotify_art_fetch_local: indent(mbLogoImg() + ' Fetch Local', { n: 3 }),
                     ui_$_spotify_art_fetch_local: note(
                         '<b><u>Experimental</u></b>',
-                        `Use an external provider (${musicbrainzLink('musicbrainz.com')}) to fetch cover arts of local files.`,
+                        'Use an external provider (musicbrainz.com) to fetch cover arts of local files.',
                     ),
                     ui_$_spotify_art_fetch_local_note: note(
                         'Local files must contain album and artist(s) metadata, which should match as closely as possible the information ' +
-                          `provided by ${musicbrainzLink('musicbrainz.com')}, especially in regard to romanized names and titles; ` +
+                          'provided by musicbrainz.com, especially in regard to romanized names and titles; ' +
                           'proximity, fuzzy and partial searches will be performed nonetheless in order to always find the best match.',
                         "<u>MusicBrainz's terminology</u>",
                         '- <em>recording</em>: a song',
@@ -463,9 +453,11 @@ function getProjectJson() {
                     // [NOTES]
                     ui_notes: section('Notes', true),
                     ui_note1: note(
-                        `<sup>${scalingFunctionsLink('[1]')}</sup> Graphical comparison of the scaling functions.`,
-                        `<sup>${colorizerLink('[2]')}</sup> Color spaces comparison and conversions.`,
-                        `<sup>${spotifyLink('[S]')}</sup> GET SPOTIFY FREE`,
+                        `${withTextColor('sup', 'primary', '[1]')} Graphical comparison of the scaling functions: <u>https://www.desmos.com/calculator/f0rirujpk8</u>.`,
+                        `${withTextColor('sup', 'primary', '[2]')} Color spaces comparison and conversions: <u>http://colorizer.org</u>.`,
+                        `${withTextColor('sup', 'primary', '[3]')} BCP 47 language tag: <u>https://w.wiki/Y7A</u>.`,
+                        `${withTextColor('sup', 'primary', '[4]')} <code>object-fit</code>: <u>https://mzl.la/35kOOtg</u>.`,
+                        `${withTextColor('sup', 'primary', '[S]')} GET SPOTIFY FREE: <u>https://www.spotify.com</u>`,
                     ),
                 },
             },
