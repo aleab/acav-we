@@ -6,6 +6,7 @@ import SpotifyUtils from '../../app/spotify-utils';
 import { CancellationTokenSource } from '../../common/CancellationToken';
 import { getComputedBackgroundProperties } from '../../common/Css';
 import SpotifyOverlayContext from './SpotifyOverlayContext';
+import Bounds from '../../common/Bounds';
 
 type ComputedBackgroundProperties = ReturnType<typeof getComputedBackgroundProperties>;
 type Color = typeof SpotifyUtils.SPOTIFY_LIGHT_GREEN;
@@ -29,7 +30,7 @@ export default function SpotifyOverlayIcon(props: SpotifyOverlayIconProps) {
         return newColor;
     }, SpotifyUtils.SPOTIFY_LIGHT_GREEN);
 
-    const html2canvasCache = SpotifyUtils.useHtml2canvasCache('SpotifyOverlayIcon');
+    const html2canvasCache = SpotifyUtils.useHtml2canvasCache(new Bounds(0, 0, window.innerWidth, window.innerHeight));
 
     const computedBackgroundPropertiesReducer = useCallback((prevProps: ComputedBackgroundProperties, newProps: ComputedBackgroundProperties) => {
         if (prevProps !== null && newProps !== null && _.isMatch(prevProps, newProps)) return prevProps;

@@ -10,12 +10,12 @@ import {
     BACKGROUND_CLIP,
     BACKGROUND_ORIGIN,
     BackgroundParser,
-    CacheStorage,
     Color,
+    Context,
+    ContextOptions,
     Gradient,
     ICSSImage,
     LengthPercentage,
-    Logger,
     PropertyDescriptors,
     calculateBackgroundSize,
     isLinearGradient,
@@ -30,7 +30,6 @@ import { calcAverageColor, colorEquals, lerp as colorLerp, isDark } from '../com
 import { cssColorToRgba, getComputedBackgroundProperties } from '../common/Css';
 import Stack from '../common/Stack';
 
-type Cache = ReturnType<typeof CacheStorage.create>;
 type ComputedBackgroundProperties = ReturnType<typeof getComputedBackgroundProperties>;
 type DrawDimensions = {
     sx: number; sy: number; sw: number; sh: number; // source coordinates and size
@@ -53,6 +52,7 @@ function setCanvasSize(canvas: OffscreenCanvas | HTMLCanvasElement, width: numbe
 }
 
 function renderToCanvas(
+    html2canvasCache: React.MutableRefObject<Context | undefined>,
     canvas: HTMLCanvasElement | OffscreenCanvas,
     backgroundImage: ICSSImage[],
     props: NonNullable<ComputedBackgroundProperties>,
@@ -64,6 +64,7 @@ function renderToCanvas(
 ): Promise<void> {
     const ctx = canvas.getContext('2d');
     if (ctx === null) return Promise.reject();
+    if (html2canvasCache.current === undefined) return Promise.reject();
 
     if (props.backgroundColor !== PropertyDescriptors.backgroundColor.initialValue) {
         ctx.save();
@@ -76,11 +77,11 @@ function renderToCanvas(
         return Promise.resolve();
     }
 
-    const backgroundClip = BackgroundParser.parseBackgroundClip(props.backgroundClip);
-    const backgroundOrigin = BackgroundParser.parseBackgroundOrigin(props.backgroundOrigin);
-    const backgroundPosition = BackgroundParser.parseBackgroundPosition(props.backgroundPosition);
-    const backgroundRepeat = BackgroundParser.parseBackgroundRepeat(props.backgroundRepeat);
-    const backgroundSize = BackgroundParser.parseBackgroundSize(props.backgroundSize);
+    const backgroundClip = BackgroundParser.parseBackgroundClip(html2canvasCache.current, props.backgroundClip);
+    const backgroundOrigin = BackgroundParser.parseBackgroundOrigin(html2canvasCache.current, props.backgroundOrigin);
+    const backgroundPosition = BackgroundParser.parseBackgroundPosition(html2canvasCache.current, props.backgroundPosition);
+    const backgroundRepeat = BackgroundParser.parseBackgroundRepeat(html2canvasCache.current, props.backgroundRepeat);
+    const backgroundSize = BackgroundParser.parseBackgroundSize(html2canvasCache.current, props.backgroundSize);
 
     //  Apply background-* properties
     // ===============================
@@ -353,6 +354,7 @@ function _calcBoundingRect(backgroundRefs: React.RefObject<HTMLElement>[]) {
 }
 
 async function _getAverageColorOfBackgrounds(
+    html2canvasCache: React.MutableRefObject<Context | undefined>,
     backgroundRefs: React.RefObject<HTMLElement>[],
     backgroundProps: ComputedBackgroundProperties[],
     selfRef: React.RefObject<HTMLElement>,
@@ -367,7 +369,7 @@ async function _getAverageColorOfBackgrounds(
     if (backgroundRefs.length === 0) return [ 0, 0, 0 ] as RGB;
 
     const ctx = OFFSCREEN_CANVAS.getContext('2d');
-    if (ctx !== null) {
+    if (ctx !== null && html2canvasCache.current !== undefined) {
         // const canvasRect = backgroundHtmlRef.current.getBoundingClientRect();
         const canvasRect = _calcBoundingRect(backgroundRefs);
         setCanvasSize(OFFSCREEN_CANVAS, canvasRect.width, canvasRect.height);
@@ -375,10 +377,10 @@ async function _getAverageColorOfBackgrounds(
 
         try {
             for (let i = 0; i < backgroundRefs.length; ++i) {
-                const backgroundImage = BackgroundParser.parseBackgroundImage(backgroundProps[i]!.backgroundImage);
+                const backgroundImage = BackgroundParser.parseBackgroundImage(html2canvasCache.current, backgroundProps[i]!.backgroundImage);
                 const { border: wBorder, padding: wPadding, fontSize: wFontSize } = getComputedBorderPaddingAndFontSize(backgroundRefs[i].current!);
                 // eslint-disable-next-line no-await-in-loop
-                await renderToCanvas(OFFSCREEN_CANVAS, backgroundImage, backgroundProps[i]!, canvasRect, wBorder, wPadding, wFontSize, ct);
+                await renderToCanvas(html2canvasCache, OFFSCREEN_CANVAS, backgroundImage, backgroundProps[i]!, canvasRect, wBorder, wPadding, wFontSize, ct);
                 if (ct.isCancelled()) return Promise.reject();
             }
         } catch (err) {
@@ -452,30 +454,29 @@ function _lerpBackgroundColors(
 //  EXPORTED FUNCTIONS
 // ====================
 
-function useHtml2canvasCache(id: string): React.MutableRefObject<Cache | undefined> {
-    const html2canvasCache = useRef<Cache>();
+function useHtml2canvasCache(bounds: Bounds): React.MutableRefObject<Context | undefined> {
+    const html2canvasCache = useRef<Context>();
+    const w = bounds.width;
+    const h = bounds.height;
     useEffect(() => {
-        const cacheId = `${id}-${(Math.round(Math.random() * 1000) + Date.now()).toString(16)}`;
-        html2canvasCache.current = CacheStorage.create(cacheId, {
+        html2canvasCache.current = new Context({
             allowTaint: false,
             imageTimeout: 15000,
             proxy: undefined,
             useCORS: false,
-        });
-        Logger.create({ id: cacheId, enabled: true });
+            logging: true,
+        } as ContextOptions, new Bounds(0, 0, w, h));
 
         return () => {
-            CacheStorage.destroy(cacheId);
-            Logger.destroy(cacheId);
             html2canvasCache.current = undefined;
         };
-    }, [id]);
+    }, [ w, h ]);
 
     return html2canvasCache;
 }
 
 function chooseAppropriateSpotifyColor(
-    html2canvasCache: React.MutableRefObject<Cache | undefined>,
+    html2canvasCache: React.MutableRefObject<Context | undefined>,
     /** Back to front. */ backgroundRefs: React.RefObject<HTMLElement>[],
     /** Back to front. */ backgroundProps: ComputedBackgroundProperties[],
     selfRef: React.RefObject<HTMLElement>,
@@ -494,10 +495,9 @@ function chooseAppropriateSpotifyColor(
     // If there's a single background that is not a simple background-color,
     // then render everything on the offscreen canvas and compute the average color.
     if (_.some(backgroundProps, p => p?.backgroundImage.toLowerCase() !== PropertyDescriptors.backgroundImage.initialValue)) {
-        CacheStorage.attachInstance(html2canvasCache.current);
-        _getAverageColorOfBackgrounds(backgroundRefs, backgroundProps, selfRef, cts.current.token).then(rgb => {
+        _getAverageColorOfBackgrounds(html2canvasCache, backgroundRefs, backgroundProps, selfRef, cts.current.token).then(rgb => {
             callback(_chooseColor(rgb, preferMonochrome));
-        }).catch(() => {}).finally(() => CacheStorage.detachInstance());
+        }).catch(() => {});
     } else {
         const rgb = _lerpBackgroundColors(backgroundProps.length - 1, new Stack<RGBA>(), backgroundProps);
         callback(_chooseColor(rgb, preferMonochrome));

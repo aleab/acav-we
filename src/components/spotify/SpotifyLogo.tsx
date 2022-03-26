@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef } from 'react';
 
 import SpotifyUtils from '../../app/spotify-utils';
+import Bounds from '../../common/Bounds';
 import { CancellationTokenSource } from '../../common/CancellationToken';
 import { getComputedBackgroundProperties } from '../../common/Css';
 import SpotifyOverlayContext from './SpotifyOverlayContext';
@@ -41,7 +42,7 @@ export default function SpotifyLogo(props: SpotifyLogoProps) {
         return newColor;
     }, SpotifyUtils.SPOTIFY_LIGHT_GREEN);
 
-    const html2canvasCache = SpotifyUtils.useHtml2canvasCache('SpotifyLogo');
+    const html2canvasCache = SpotifyUtils.useHtml2canvasCache(new Bounds(0, 0, window.innerWidth, window.innerHeight));
 
     const computedBackgroundPropertiesReducer = useCallback((prevProps: ComputedBackgroundProperties, newProps: ComputedBackgroundProperties) => {
         if (prevProps !== null && newProps !== null && _.isMatch(prevProps, newProps)) return prevProps;
