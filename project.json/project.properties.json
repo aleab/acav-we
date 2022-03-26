@@ -133,16 +133,16 @@
         "mode": "ondemand",
         "condition": "background_type.value === 'Playlist'"
     },
-    "background_playlistTimer": {
+    "background_playlistTimer_minutes": {
         "order": 53,
         "type": "slider",
         "text": "ui_background_playlistTimer",
-        "value": 1,
-        "min": 0.5,
-        "max": 24,
-        "fraction": true,
-        "step": 0.5,
-        "editable": false,
+        "value": 30,
+        "min": 5,
+        "max": 1440,
+        "fraction": false,
+        "step": 5,
+        "editable": true,
         "condition": "background_type.value === 'Playlist'"
     },
 

@@ -115,7 +115,7 @@ function getProjectJson() {
                     ui_background_videoObjectFit: indent(withPropertyIcon('far fa-compress-arrows-alt', 'object-fit')) + `&nbsp;${withTextColor('sup', 'primary', '[4]')}`,
                     ui_background_css: indent(withPropertyIcon('fab fa-css3-alt', 'CSS')),
                     ui_background_playlist: indent(withPropertyIcon('fas fa-images', 'Playlist')),
-                    ui_background_playlistTimer: indent(withPropertyIcon('far fa-stopwatch', 'Interval (hours)')),
+                    ui_background_playlistTimer: indent(withPropertyIcon('far fa-stopwatch', 'Interval (min)')),
                     ui_background_$_css: note('Only the <samp>background&#8209;*</samp> style properties and the <samp>background</samp> shorthand are allowed.'),
 
                     // [FOREGROUND]

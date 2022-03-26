@@ -111,7 +111,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(backgroundOptions, 'videoObjectFit', raw.background_videoObjectFit as WEProperty<'combo'>, _r => parseComboProperty(_r, CssObjectFit));
     setProperty(backgroundOptions, 'css', raw.background_css as WEProperty<'textinput'>, _r => _r.value);
     setProperty(backgroundOptions, 'playlistDirectory', raw.background_playlist as WEProperty<'directory'>, _r => _r.value);
-    setProperty(backgroundOptions, 'playlistTimerMinutes', raw.background_playlistTimer as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r) * 60));
+    setProperty(backgroundOptions, 'playlistTimerMinutes', raw.background_playlistTimer_minutes as WEProperty<'slider'>, _r => Math.round(parseSliderProperty(_r)));
 
     // .foreground
     const foregroundOptions: MappedProperties['foreground'] = {};
