@@ -5,7 +5,7 @@ type MappedProperties = DeepPartial<import('../app/properties/Properties').defau
 type SpotifyState = import('xstate').State<import('../app/SpotifyStateMachine').SpotifyStateMachineContext, import('xstate').AnyEventObject, any, {
     value: any,
     context: import('../app/SpotifyStateMachine').SpotifyStateMachineContext
-}>;
+}, any>;
 
 // PROPERTIES
 

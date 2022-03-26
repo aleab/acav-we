@@ -5,9 +5,9 @@ import faCircleNotch from '@fortawesome/fontawesome-free/svgs/solid/circle-notch
 import faFilter from '@fortawesome/fontawesome-free/svgs/solid/filter.svg';
 import faPlug from '@fortawesome/fontawesome-free/svgs/solid/plug.svg';
 import faSkull from '@fortawesome/fontawesome-free/svgs/solid/skull.svg';
-import faCheckCircle from '@fortawesome/fontawesome-free/svgs/solid/check-circle.svg';
-import faChevronCircleDown from '@fortawesome/fontawesome-free/svgs/solid/chevron-circle-down.svg';
-import faExclamationTriangle from '@fortawesome/fontawesome-free/svgs/solid/exclamation-triangle.svg';
+import faCheckCircle from '@fortawesome/fontawesome-free/svgs/solid/circle-check.svg';
+import faChevronCircleDown from '@fortawesome/fontawesome-free/svgs/solid/circle-chevron-down.svg';
+import faExclamationTriangle from '@fortawesome/fontawesome-free/svgs/solid/triangle-exclamation.svg';
 
 function hoc(SvgIcon: React.FunctionComponent<React.SVGAttributes<SVGElement>>): React.FunctionComponent<React.SVGAttributes<SVGElement>> {
     return function FaIcon(props: React.SVGAttributes<SVGElement>) {
