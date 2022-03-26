@@ -52,7 +52,7 @@ async function buildProjectJson(options) {
     );
 
     if (removePrebuildDir) {
-        fs.rmdirSync(prebuildDir, { recursive: true });
+        fs.rmSync(prebuildDir, { recursive: true });
     }
 }
 
