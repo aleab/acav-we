@@ -361,9 +361,9 @@ function getProjectJson() {
                     ui_clock_analog_hands_secondsColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
                     //
                     // [CLOCK > BASS EFFECT]
-                    ui_clock_bass_effect: subSection('Bass Effect'),
-                    ui_clock_bass_effect_frequency: indent('Range (Hz)', { n: 3 }),
-                    ui_clock_bass_effect_smoothing: indent('Smoothing', { n: 3 }),
+                    ui_bass_effect: subSection('Bass Effect'),
+                    ui_bass_effect_frequency: indent('Range (Hz)', { n: 3 }),
+                    ui_bass_effect_smoothing: indent('Smoothing', { n: 3 }),
 
                     // [TASKBAR]
                     ui_taskbar: section('Taskbar', false, 'text-white fab fa-windows'),

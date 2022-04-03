@@ -3,6 +3,7 @@ import { RGB } from 'color-convert/conversions';
 import { Pivot } from '../../common/Pivot';
 import { ClockFontFamily } from '../ClockFontFamily';
 import { ClockType } from '../ClockType';
+import BassEffectProperties from './BassEffectProperties';
 
 export default interface ClockProperties {
     enabled: boolean;
@@ -50,9 +51,5 @@ export default interface ClockProperties {
             secondsColor: RGB;
         };
     };
-    bassEffect: {
-        enabled: boolean;
-        frequency: number;
-        smoothing: number;
-    };
+    bassEffect: BassEffectProperties;
 }

@@ -521,6 +521,33 @@
         "value": "0.4 0.839 0.8",
         "condition": "visualizer_color_responseType.value === 'Hue'"
     },
+    
+    // [VISUALIZER > BASS EFFECT]
+    "visualizer_bass_effect": {
+        "order": 1090,
+        "type": "bool",
+        "text": "ui_bass_effect",
+        "value": false
+    },
+    "visualizer_bass_effect_frequency": {
+        "order": 1091,
+        "type": "slider",
+        "text": "ui_bass_effect_frequency",
+        "value": 200,
+        "min": 60,
+        "max": 500,
+        "step": 5,
+        "condition": "visualizer_bass_effect.value"
+    },
+    "visualizer_bass_effect_smoothing": {
+        "order": 1092,
+        "type": "slider",
+        "text": "ui_bass_effect_smoothing",
+        "value": 35,
+        "min": 0,
+        "max": 100,
+        "condition": "visualizer_bass_effect.value"
+    },
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~
     // [VERTICAL VISUALIZER]
@@ -1492,14 +1519,14 @@
     "clock_bass_effect": {
         "order": 2100,
         "type": "bool",
-        "text": "ui_clock_bass_effect",
+        "text": "ui_bass_effect",
         "value": false,
         "condition": "clock.value"
     },
     "clock_bass_effect_frequency": {
         "order": 2101,
         "type": "slider",
-        "text": "ui_clock_bass_effect_frequency",
+        "text": "ui_bass_effect_frequency",
         "value": 200,
         "min": 60,
         "max": 500,
@@ -1509,7 +1536,7 @@
     "clock_bass_effect_smoothing": {
         "order": 2102,
         "type": "slider",
-        "text": "ui_clock_bass_effect_smoothing",
+        "text": "ui_bass_effect_smoothing",
         "value": 35,
         "min": 0,
         "max": 100,

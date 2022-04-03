@@ -4,10 +4,12 @@ import { VisualizerType } from '../VisualizerType';
 import { AudioResponsiveValueProvider } from '../AudioResponsiveValueProvider';
 import { ColorReactionType } from '../ColorReactionType';
 import { VisualizerFlipType } from '../VisualizerFlipType';
+import BassEffectProperties from './BassEffectProperties';
 
 export interface VisualizerProperties {
     type: VisualizerType;
     flip: VisualizerFlipType;
+    bassEffect: BassEffectProperties;
 
     responseType: ColorReactionType;
     responseProvider: AudioResponsiveValueProvider;
