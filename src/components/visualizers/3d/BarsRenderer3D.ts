@@ -187,7 +187,7 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
             const angleX = -O.light.angleX * Math.DEG2RAD;
             this.light.position.set(0, -this.camera.position.z * Math.sin(angleX), this.camera.position.z * Math.cos(angleX));
 
-            this.light.power = O.light.power;
+            this.light.power = O.light.power * 2.5;
             this.light.distance = 2 * (this.camera.position.z + Math.abs(z1));
             this.light.color.setRGB(O.light.color[0] / 255, O.light.color[1] / 255, O.light.color[2] / 255);
         }

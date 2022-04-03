@@ -1144,7 +1144,7 @@
         "order": 1202,
         "type": "slider",
         "text": "ui_3dVisualizer_bars_light_power",
-        "value": 85,
+        "value": 75,
         "min": 25,
         "max": 125,
         "editable": false,
