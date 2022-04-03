@@ -6,4 +6,5 @@ export default interface VisualizerRenderArgs {
     readonly peak: number;
     readonly isSilent: boolean;
     readonly bass: number;
+    readonly bassEffectIntensity: number;
 }

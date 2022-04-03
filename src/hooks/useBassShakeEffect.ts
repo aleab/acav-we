@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { getClosestFrequencyIndex } from '../app/freq-utils';
 import { WallpaperContextType } from '../app/WallpaperContext';
@@ -31,6 +31,7 @@ export default function useBassShakeEffect(options: UseBassShakeEffectOptions): 
     const smoothing = options.smoothing;
     const context = options.context;
 
+    const [ bass, setBass ] = useState(0);
     const bassRef = useRef(0);
     useEffect(() => {
         if (!enabled) return () => {};
@@ -38,6 +39,7 @@ export default function useBassShakeEffect(options: UseBassShakeEffectOptions): 
         const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
             context?.renderer.queue(RENDER_ID, () => {
                 bassRef.current = calcBassShakeEffect(args, frequency, smoothing);
+                setBass(bassRef.current);
             });
         };
         context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
@@ -45,8 +47,10 @@ export default function useBassShakeEffect(options: UseBassShakeEffectOptions): 
         return () => {
             context?.renderer.cancel(RENDER_ID);
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
+            bassRef.current = 0;
+            setBass(0);
         };
     }, [ RENDER_ID, context?.renderer, context?.wallpaperEvents.onAudioSamples, enabled, frequency, smoothing ]);
 
-    return [ bassRef, bassRef.current ];
+    return [ bassRef, bass ];
 }

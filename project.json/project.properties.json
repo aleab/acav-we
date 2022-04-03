@@ -548,6 +548,18 @@
         "max": 100,
         "condition": "visualizer_bass_effect.value"
     },
+    "visualizer_bass_effect_intensity": {
+        "order": 1093,
+        "type": "slider",
+        "text": "ui_bass_effect_intensity",
+        "value": 1,
+        "min": 0.1,
+        "max": 2,
+        "fraction": true,
+        "step": 0.1,
+        "editable": false,
+        "condition": "visualizer_bass_effect.value"
+    },
 
     // ~ ~ ~ ~ ~ ~ ~ ~ ~
     // [VERTICAL VISUALIZER]

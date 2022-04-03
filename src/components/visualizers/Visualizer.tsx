@@ -176,7 +176,7 @@ export default function Visualizer(props: VisualizerProps) {
             samples.smooth(audioSamplesOptions.current.spatialSmoothingFactor);                             // SPATIAL SMOOTHING
 
             // render job
-            const renderArgs = { samplesBuffer, samples, peak, isSilent, bass: bassRef.current };
+            const renderArgs = { samplesBuffer, samples, peak, isSilent, bass: bassRef.current, bassEffectIntensity: O.current.bassEffect.intensity };
             const t0 = performance.now();
             const visualizerReturnArgs = visualizerRenderer.render(e.eventTimestamp, renderArgs);
             const t1 = performance.now();

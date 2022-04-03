@@ -148,6 +148,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(visualizerOptions.bassEffect!, 'enabled', raw.visualizer_bass_effect as WEProperty<'bool'>, _r => _r.value);
     setProperty(visualizerOptions.bassEffect!, 'frequency', raw.visualizer_bass_effect_frequency as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(visualizerOptions.bassEffect!, 'smoothing', raw.visualizer_bass_effect_smoothing as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(visualizerOptions.bassEffect!, 'intensity', raw.visualizer_bass_effect_intensity as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     if (_.isEmpty(visualizerOptions.bassEffect)) delete visualizerOptions.bassEffect;
 
     setProperty(visualizerOptions, 'responseType', raw.visualizer_color_responseType as WEProperty<'combo'>, _r => parseComboProperty(_r, ColorReactionType));

@@ -68,14 +68,23 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
             const Ov = this.options.visualizerOptions;
             const O = this.options.commonOptions;
 
+            const bassEffect = args.bass > 0 ? 1 + args.bass * args.bassEffectIntensity : 1;
+            // const bassEffectDisplacement = { x: 0, y: 0 };
+            // if (args.bass > 0 && Math.random() <= args.bass) {
+            //     const signX = Math.random() > 0.5 ? 1 : -1;
+            //     const signY = Math.random() > 0.5 ? 1 : -1;
+            //     bassEffectDisplacement.x = signX * args.bass * 4;
+            //     bassEffectDisplacement.y = signY * args.bass * 4;
+            // }
+
             const minDimension = Math.min(canvasContext.canvas.width, canvasContext.canvas.height);
             const visualizerAngle = O.angle;
             const angularDelta = (visualizerAngle * Math.DEG2RAD) / N;
 
             const flipFrequencies = Ov.current.flip;
-            const x = canvasContext.canvas.width * (O.x / 100);
-            const y = canvasContext.canvas.height * (O.y / 100);
-            const radius = minDimension * (O.radius / 100);
+            const x = canvasContext.canvas.width * (O.x / 100); //+ bassEffectDisplacement.x
+            const y = canvasContext.canvas.height * (O.y / 100); //+ bassEffectDisplacement.y
+            const radius = minDimension * (O.radius / 100) * bassEffect;
             const rotation = O.rotation * Math.DEG2RAD;
 
             const colorRgba = this.getColor(args);
@@ -90,7 +99,7 @@ export default abstract class CircularRenderer<T extends CircularVisualizerType>
             const colorReactionValueProvider = AudioResponsiveValueProviderFactory.buildAudioResponsiveValueProvider(Ov.current.responseProvider, Ov.current.responseValueGain);
 
             const maxHeight = Math.clamp(minDimension / 2 - radius, 0, minDimension / 2);
-            const height = this.getHeight(maxHeight);
+            const height = this.getHeight(maxHeight * bassEffect);
 
             if (colorReaction === undefined) {
                 this.setCanvasColor(canvasContext, colorRgb as RGB);
