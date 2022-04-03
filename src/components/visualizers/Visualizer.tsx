@@ -5,6 +5,7 @@ import Log from '../../common/Log';
 import AudioSamplesArray from '../../common/AudioSamplesArray';
 import { CircularVisualizerType, ThreeDimensionalVisualizerType, VerticalVisualizerType, VisualizerType } from '../../app/VisualizerType';
 import WallpaperContext from '../../app/WallpaperContext';
+import useBassShakeEffect from '../../hooks/useBassShakeEffect';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
 import { IVisualizerRenderer, NullRenderer } from './VisualizerBaseRenderer';
@@ -29,6 +30,9 @@ export default function Visualizer(props: VisualizerProps) {
     const threeDVisualizerOptions = useRef(context.wallpaperProperties.threeDVisualizer);
 
     const [ visualizerType, setVisualizerType ] = useState(O.current.type);
+    const [ bassEffectEnabled, setBassEffectEnabled ] = useState(O.current.bassEffect.enabled);
+    const [ bassEffectFrequency, setBassEffectFrequency ] = useState(O.current.bassEffect.frequency);
+    const [ bassEffectSmoothing, setBassEffectSmoothing ] = useState(O.current.bassEffect.smoothing);
 
     const onRendered = useMemo(() => props.onRendered, [props.onRendered]);
     const onRenderedCallback = useRef((e: [PerformanceEventArgs, PerformanceEventArgs, PerformanceEventArgs]) => { if (onRendered) onRendered(e); });
@@ -41,6 +45,12 @@ export default function Visualizer(props: VisualizerProps) {
     // =====================
     useUserPropertiesListener(p => p.visualizer, visualizerProps => {
         if (visualizerProps.type !== undefined) setVisualizerType(visualizerProps.type);
+
+        if (visualizerProps.bassEffect !== undefined) {
+            if (visualizerProps.bassEffect.enabled !== undefined) setBassEffectEnabled(visualizerProps.bassEffect.enabled);
+            if (visualizerProps.bassEffect.frequency !== undefined) setBassEffectFrequency(visualizerProps.bassEffect.frequency);
+            if (visualizerProps.bassEffect.smoothing !== undefined) setBassEffectSmoothing(visualizerProps.bassEffect.smoothing);
+        }
     }, []);
 
     // ==========
@@ -60,6 +70,17 @@ export default function Visualizer(props: VisualizerProps) {
             canvas3d.current.height = window.innerHeight;
         }
     }, []); // just once
+
+    // ===================
+    //  BASS SHAKE EFFECT
+    // ===================
+    const [ bassRef, _bass ] = useBassShakeEffect({
+        renderId: RENDER_ID,
+        enabled: bassEffectEnabled,
+        frequency: bassEffectFrequency,
+        smoothing: bassEffectSmoothing,
+        context,
+    });
 
     // =================================
     //  AUDIO SAMPLES LISTENER + RENDER
@@ -155,7 +176,7 @@ export default function Visualizer(props: VisualizerProps) {
             samples.smooth(audioSamplesOptions.current.spatialSmoothingFactor);                             // SPATIAL SMOOTHING
 
             // render job
-            const renderArgs = { samplesBuffer, samples, peak, isSilent };
+            const renderArgs = { samplesBuffer, samples, peak, isSilent, bass: bassRef.current };
             const t0 = performance.now();
             const visualizerReturnArgs = visualizerRenderer.render(e.eventTimestamp, renderArgs);
             const t1 = performance.now();
@@ -177,7 +198,7 @@ export default function Visualizer(props: VisualizerProps) {
             context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
             visualizerRenderer.clear();
         };
-    }, [ context.pluginManager, context?.wallpaperEvents.onAudioSamples, visualizerRenderer ]);
+    }, [ bassRef, context.pluginManager, context?.wallpaperEvents.onAudioSamples, visualizerRenderer ]);
 
     const is3d = useMemo(() => visualizerType === VisualizerType['3DBars'], [visualizerType]);
     return (

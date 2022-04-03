@@ -1,15 +1,15 @@
 import _ from 'lodash';
-import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useReducer, useRef, useState } from 'react';
 
 import { parseCustomCss } from '../../common/Css';
 import { calculatePivotTransform } from '../../common/Pivot';
-import { getClosestFrequencyIndex } from '../../app/freq-utils';
 import { ClockType } from '../../app/ClockType';
 import WallpaperContext from '../../app/WallpaperContext';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
 import AnalogClock from './AnalogClock';
 import DigitalClock from './DigitalClock';
+import useBassShakeEffect from '../../hooks/useBassShakeEffect';
 
 type ClockStyle = {
     left: number;
@@ -68,30 +68,13 @@ export default function Clock(props: ClockProps) {
     // ========================
     //  AUDIO SAMPLES LISTENER
     // ========================
-    const [ bass, setBass ] = useState(0);
-    useEffect(() => {
-        if (!bassEffectEnabled) return () => {};
-
-        const audioSamplesEventCallback = (args: AudioSamplesEventArgs) => {
-            const bassIndex = getClosestFrequencyIndex(bassEffectFrequency);
-
-            const currSample = args.samples.slice(0, bassIndex + 1).raw;
-            const currentMean = _.mean(currSample);
-            const smoothedPrevMean = args.samplesBuffer.reduce((avg, samples, i, rawArray) => {
-                return avg + _.mean(samples.slice(0, bassIndex + 1).raw) / rawArray.length;
-            }, 0);
-
-            context?.renderer.queue(RENDER_ID, () => {
-                setBass(Math.lerp(smoothedPrevMean, currentMean, Math.clamp(1 - bassEffectSmoothing / 100, 0, 1)));
-            });
-        };
-        context?.wallpaperEvents.onAudioSamples.subscribe(audioSamplesEventCallback);
-
-        return () => {
-            context?.renderer.cancel(RENDER_ID);
-            context?.wallpaperEvents.onAudioSamples.unsubscribe(audioSamplesEventCallback);
-        };
-    }, [ RENDER_ID, bassEffectEnabled, bassEffectFrequency, bassEffectSmoothing, context ]);
+    const [ _bassRef, bass ] = useBassShakeEffect({
+        renderId: RENDER_ID,
+        enabled: bassEffectEnabled,
+        frequency: bassEffectFrequency,
+        smoothing: bassEffectSmoothing,
+        context,
+    });
 
     const ClockComponent = useCallback(() => {
         switch (clockType) {
