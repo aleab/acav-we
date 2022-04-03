@@ -65,9 +65,11 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
             const Ov = this.options.visualizerOptions;
             const O = this.options.commonOptions;
 
+            const bassEffect = args.bass > 0 ? 1 + args.bass * args.bassEffectIntensity : 1;
+
             const flipFrequencies = Ov.current.flip;
             const visualizerPosition = canvasContext.canvas.height * (O.position / 100);
-            const visualizerWidth = canvasContext.canvas.width * (O.width / 100);
+            const visualizerWidth = canvasContext.canvas.width * (O.width / 100) * bassEffect;
             const alignment = O.alignment;
 
             const colorRgba = this.getColor(args);
@@ -85,7 +87,7 @@ export default abstract class VerticalRenderer<T extends VerticalVisualizerType>
                 (2 / (1 - alignment)) * visualizerPosition,                                   // (1-a)/2: section of the bar below the pivot point
                 (2 / (1 + alignment)) * (canvasContext.canvas.height - visualizerPosition),   // (1+a)/2: section of the bar above the pivot point
             );
-            const height = this.getHeight(maxHeight);
+            const height = this.getHeight(maxHeight * bassEffect);
 
             if (colorReaction === undefined) {
                 this.setCanvasColor(canvasContext, colorRgb as RGB);

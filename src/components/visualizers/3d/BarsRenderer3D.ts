@@ -153,6 +153,8 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
 
         const O = this.options.options;
 
+        const bassEffect = args.bass > 0 ? 1 + args.bass * args.bassEffectIntensity * 10 : 1;
+
         const {
             flip,
             zoom,
@@ -177,6 +179,9 @@ export default class BarsRenderer3D extends Renderer3D<ThreeDimensionalVisualize
 
         const N = args.samples.length;
         const { p0, p1, z1, D, ϕx, ϕy, ϕz } = this.findBarsPositionLine(vfov, vHeight, vWidth, N);
+
+        p0[0] *= bassEffect;
+        p0[2] *= bassEffect;
 
         const k = O.width / 100;
         const λ = (D / N) * k;

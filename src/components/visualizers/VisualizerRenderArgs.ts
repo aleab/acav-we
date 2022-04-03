@@ -5,4 +5,6 @@ export default interface VisualizerRenderArgs {
     readonly samplesBuffer: AudioSamplesArray[] | undefined;
     readonly peak: number;
     readonly isSilent: boolean;
+    readonly bass: number;
+    readonly bassEffectIntensity: number;
 }
