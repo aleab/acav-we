@@ -2065,8 +2065,14 @@
     },
 
     // ---
-    "_clearLocalStorage": {
+    "misc": {
         "order": 9000,
+        "type": "text",
+        "text": "ui_misc",
+        "condition": "showAdvancedOptions.value"
+    },
+    "_clearLocalStorage": {
+        "order": 9001,
         "type": "bool",
         "text": "ui__clearLocalStorage",
         "value": false,
