@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';
+import { parseLocalStorageStringValue } from '../common/util';
 import { BackgroundMode, CssBackground, generateCssStyle } from '../app/BackgroundMode';
 import { CssObjectFit } from '../app/CssObjectFit';
 import Properties from '../app/properties/Properties';
@@ -38,7 +39,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
             setStyleBackground({});
         } else if (imagePath !== backgroundImagePath.current) {
             backgroundImagePath.current = imagePath;
-            window.localStorage.setItem(args.localStorageKeys.currentImage, imagePath);
+            window.localStorage.setItem(args.localStorageKeys.currentImage, JSON.stringify(imagePath));
 
             setStyleBackground(generateCssStyle(BackgroundMode.Image, { imagePath }));
 
@@ -49,7 +50,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
     const setBackgroundVideo = useCallback((videoPath: string, objectFit: CssObjectFit) => {
         if (videoPath !== backgroundVideoPath.current) {
             backgroundVideoPath.current = videoPath;
-            window.localStorage.setItem(args.localStorageKeys.currentVideo, videoPath);
+            window.localStorage.setItem(args.localStorageKeys.currentVideo, JSON.stringify(videoPath));
 
             setStyleBackground(generateCssStyle(BackgroundMode.Video, null));
             setVideoSource(`file:///${videoPath}`);
@@ -80,7 +81,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
                     applyNewRandomImage(maxTries - 1);
                 } else {
                     setBackgroundImage(filePath);
-                    window.localStorage.setItem(args.localStorageKeys.playlistTimer, Date.now().toString());
+                    window.localStorage.setItem(args.localStorageKeys.playlistTimer, JSON.stringify(Date.now().toString()));
                     scheduleBackgroundImageChange(applyNewRandomImage, O.current.background.playlistTimerMinutes * 60 * 1000);
                 }
             });
@@ -107,7 +108,7 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
         if (O.current.background.mode === BackgroundMode.Playlist) {
             // If the wallpaper app just started and the local storage has a LOCALSTORAGE_BG_PLAYLIST_TIMER set
             // from a previous execution, then use that to determine when we need to request a new wallpaper.
-            const prevChangeTime = window.localStorage.getItem(args.localStorageKeys.playlistTimer);
+            const prevChangeTime = parseLocalStorageStringValue(args.localStorageKeys.playlistTimer);
             if (prevChangeTime && firstBackgroundUpdate.current) {
                 const timeElapsed = Date.now() - Number(prevChangeTime);
                 if (timeElapsed >= O.current.background.playlistTimerMinutes * 60 * 1000) {
@@ -151,12 +152,12 @@ export default function useWallpaperBackground(args: UseWallpaperBackgroundArgs)
     // init background
     useEffect(() => {
         if (O.current.background.mode === BackgroundMode.Video) {
-            const currentVideo = window.localStorage.getItem(args.localStorageKeys.currentVideo);
+            const currentVideo = parseLocalStorageStringValue(args.localStorageKeys.currentVideo);
             if (currentVideo && currentVideo.length > 0) {
                 setBackgroundVideo(currentVideo, O.current.background.videoObjectFit);
             }
         } else {
-            const currentImage = window.localStorage.getItem(args.localStorageKeys.currentImage);
+            const currentImage = parseLocalStorageStringValue(args.localStorageKeys.currentImage);
             if (currentImage && currentImage.length > 0) {
                 setBackgroundImage(currentImage);
             }

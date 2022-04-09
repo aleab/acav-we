@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
 
 import Log from '../common/Log';
+import { parseLocalStorageStringValue } from '../common/util';
 import { CssBackground, ForegroundMode, generateCssStyle } from '../app/BackgroundMode';
 import Properties from '../app/properties/Properties';
 
@@ -25,7 +26,7 @@ export default function useWallpaperForeground(args: UseWallpaperForegroundArgs)
             setStyleForeground({});
         } else if (imagePath !== foregroundImagePath.current) {
             foregroundImagePath.current = imagePath;
-            window.localStorage.setItem(args.localStorageKeys.currentImage, imagePath);
+            window.localStorage.setItem(args.localStorageKeys.currentImage, JSON.stringify(imagePath));
 
             setStyleForeground(generateCssStyle(ForegroundMode.Image, { imagePath }));
 
@@ -51,7 +52,7 @@ export default function useWallpaperForeground(args: UseWallpaperForegroundArgs)
 
     // init foreground
     useEffect(() => {
-        const currentImage = window.localStorage.getItem(args.localStorageKeys.currentImage);
+        const currentImage = parseLocalStorageStringValue(args.localStorageKeys.currentImage);
         if (currentImage && currentImage.length > 0) {
             setForegroundImage(currentImage);
         }

@@ -5,7 +5,9 @@ import { openDB } from 'idb';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
+import EventHandler from '../common/EventHandler';
 import { Pivot } from '../common/Pivot';
+import { parseLocalStorageStringValue } from '../common/util';
 import AudioHistory from '../app/AudioHistory';
 import { BackgroundMode } from '../app/BackgroundMode';
 import { PINK_NOISE } from '../app/noise';
@@ -30,7 +32,6 @@ import Clock from './clock/Clock';
 import Spotify, { IDB_MB_CACHE } from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
 import WinTaskBar from './WinTaskBar';
-import EventHandler from '../common/EventHandler';
 
 const LOCALSTORAGE_APP_VERSION = 'aleab.acav.version';
 const LOCALSTORAGE_BG_CURRENT_IMAGE = 'aleab.acav.bgCurrentImage';
@@ -399,7 +400,7 @@ export default function App(props: AppProps) {
     useEffect(() => {
         const timeout = setTimeout((() => {
             if (!O.current.enableUpdateNoticePopup || !process.env.APP_VERSION) return;
-            const lsVersion = localStorage.getItem(LOCALSTORAGE_APP_VERSION);
+            const lsVersion: string | null = parseLocalStorageStringValue(LOCALSTORAGE_APP_VERSION);
 
             const versionRegex = /^([0-9]+)\.([0-9]+)\.?.*$/;
             const cV = versionRegex.exec(process.env.APP_VERSION)?.map((v, i) => (i > 0 ? Number(v) : v)) as [string, number, number] | undefined;
@@ -414,7 +415,7 @@ export default function App(props: AppProps) {
                     setShowUpdateNoticePopup(true);
                 }
 
-                localStorage.setItem(LOCALSTORAGE_APP_VERSION, process.env.APP_VERSION);
+                localStorage.setItem(LOCALSTORAGE_APP_VERSION, JSON.stringify(process.env.APP_VERSION));
             }
         }) as TimerHandler, 5000);
 
