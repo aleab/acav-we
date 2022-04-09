@@ -1,7 +1,7 @@
 /* eslint-disable no-multi-spaces */
 import _ from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { openDB } from 'idb';
+import { IDBPObjectStore, StoreNames, openDB } from 'idb';
 
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
@@ -41,19 +41,57 @@ const LOCALSTORAGE_FG_CURRENT_IMAGE = 'aleab.acav.fgCurrentImage';
 
 const Logc = Log.getLogger('App', 'darkgreen');
 
-function clearLocalStorage() {
-    localStorage.removeItem(LOCALSTORAGE_APP_VERSION);
-    localStorage.removeItem(LOCALSTORAGE_SPOTIFY_TOKEN);
-    localStorage.removeItem(LOCALSTORAGE_BG_CURRENT_IMAGE);
-    localStorage.removeItem(LOCALSTORAGE_BG_CURRENT_VIDEO);
-    localStorage.removeItem(LOCALSTORAGE_BG_PLAYLIST_TIMER);
-    localStorage.removeItem(LOCALSTORAGE_FG_CURRENT_IMAGE);
+function dbGetAllValues<
+    DBTypes extends unknown = unknown,
+    TxStores extends ArrayLike<StoreNames<DBTypes>> = ArrayLike<StoreNames<DBTypes>>,
+    StoreName extends StoreNames<DBTypes> = StoreNames<DBTypes>
+>(store: IDBPObjectStore<DBTypes, TxStores, StoreName, 'readonly'>) {
+    return store.getAllKeys().then(x => x.map(async k => {
+        const v = await store.get(k);
+        return v ? { key: k, value: v } : undefined;
+    }));
+}
 
-    openDB<MusicbrainzDB>(IDB_MB_CACHE).then(async db => {
-        await db.clear('musicbrainz-covers');
-        await db.clear('musicbrainz-cover-urls');
+function clearLocalStorage() {
+    const lsKeys = [
+        LOCALSTORAGE_APP_VERSION,
+        LOCALSTORAGE_SPOTIFY_TOKEN,
+        LOCALSTORAGE_BG_CURRENT_IMAGE,
+        LOCALSTORAGE_BG_CURRENT_VIDEO,
+        LOCALSTORAGE_BG_PLAYLIST_TIMER,
+        LOCALSTORAGE_FG_CURRENT_IMAGE,
+    ];
+    const purgedData: Array<{ name: string, data: any }> = [];
+
+    lsKeys.forEach(k => {
+        purgedData.push({ name: k, data: JSON.parse(localStorage.getItem(k) as any) });
+        localStorage.removeItem(k);
     });
-    openDB<PreferredLocalArtDB>(IDB_PREFERRED_COVERS).then(db => db.clear('preferences'));
+
+    const promiseClearMusicbrainzDB = openDB<MusicbrainzDB>(IDB_MB_CACHE).then(async db => {
+        const txCovers = db.transaction('musicbrainz-covers', 'readonly');
+        const dataCovers = await Promise.all(await dbGetAllValues(txCovers.store));
+        purgedData.push({ name: 'MusicbrainzDB[musicbrainz-covers]', data: dataCovers.slice() });
+        await txCovers.done;
+        await db.clear('musicbrainz-covers');
+
+        const txCoverUrls = db.transaction('musicbrainz-cover-urls', 'readonly');
+        const dataCoverUrls = await Promise.all(await dbGetAllValues(txCoverUrls.store));
+        purgedData.push({ name: 'MusicbrainzDB[musicbrainz-cover-urls]', data: dataCoverUrls.slice() });
+        await txCoverUrls.done;
+        return db.clear('musicbrainz-cover-urls');
+    });
+    const promiseClearLocalArtDB = openDB<PreferredLocalArtDB>(IDB_PREFERRED_COVERS).then(async db => {
+        const tx = db.transaction('preferences', 'readonly');
+        const data = await Promise.all(await dbGetAllValues(tx.store));
+        purgedData.push({ name: 'PreferredLocalArtDB[preferences]', data: data.slice() });
+        await tx.done;
+        return db.clear('preferences');
+    });
+
+    Promise.all([ promiseClearMusicbrainzDB, promiseClearLocalArtDB ]).then(() => {
+        Logc.info('Local Storage cleared:', purgedData.filter(x => (Array.isArray(x.data) ? x.data.length > 0 : !!x.data)));
+    });
 }
 
 interface AppProps {
