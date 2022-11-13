@@ -65,6 +65,7 @@
         "react/jsx-key": ["warn", { "checkFragmentShorthand": true }],
         "react/jsx-filename-extension": [1, { "extensions": [".jsx", ".tsx"] }],
         "react/jsx-max-props-per-line": [1, { "maximum": 4, "when": "multiline" }],
+        "react/jsx-no-useless-fragment": "off",
         "react/jsx-props-no-spreading": "off",
         "react/jsx-wrap-multilines": [
             "error",

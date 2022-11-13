@@ -188,8 +188,10 @@ function getWebpackConfig(env, argv) {
             port: 3000,
             hot: true,
             open: true,
-            contentBase: DIST_PATH,
-            publicPath: '/',
+            static: {
+                directory: DIST_PATH,
+                publicPath: '/',
+            },
             historyApiFallback: true,
         },
         devtool: 'inline-source-map',

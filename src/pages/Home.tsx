@@ -4,11 +4,11 @@ import React, { useCallback, useReducer, useRef } from 'react';
 
 import Details from '../components/Details';
 
-export default function Home() {
-    const VideoAlt = ({ href }: { href: string }) => (
-      <p>Your browser doesn&apos;t support HTML5 video. Here is a <a href={href}>link to the video</a> instead.</p>
-    );
+function VideoAlt({ href }: { href: string })  {
+    return <p>Your browser doesn&apos;t support HTML5 video. Here is a <a href={href}>link to the video</a> instead.</p>;
+}
 
+export default function Home() {
     const openDetail = useRef<HTMLElement>();
     const [ _currentlyOpenDetail, setCurrentlyOpenDetail ] = useReducer((_current: HTMLElement | undefined, value: HTMLElement | undefined) => {
         openDetail.current = value;
