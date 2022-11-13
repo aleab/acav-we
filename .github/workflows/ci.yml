@@ -20,7 +20,7 @@ jobs:
   check-changes:
     runs-on: ubuntu-latest
     steps:
-      - uses: MrSquaare/ssh-setup-action@v1
+      - uses: MrSquaare/ssh-setup-action@v2
         if: ${{ env.SSH_KEY }}
         with:
           host: github.com
@@ -169,20 +169,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
 
       - name: Set up npm cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
 
       - name: Set up ssh
-        uses: MrSquaare/ssh-setup-action@v1
+        uses: MrSquaare/ssh-setup-action@v2
         if: ${{ env.SSH_KEY }}
         with:
           host: github.com
@@ -213,20 +213,20 @@ jobs:
     environment: acav-we
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
 
       - name: Set up npm cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
 
       - name: Set up ssh
-        uses: MrSquaare/ssh-setup-action@v1
+        uses: MrSquaare/ssh-setup-action@v2
         if: ${{ env.SSH_KEY }}
         with:
           host: github.com
@@ -260,7 +260,7 @@ jobs:
         run: npm run build:dev -- --env NO_LINT
 
       - name: 'Upload artifact: dist'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist
@@ -272,20 +272,20 @@ jobs:
     environment: acav-we
     steps:
       - name: Clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
 
       - name: Set up npm cache
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('package.json') }}-${{ hashFiles('package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
 
       - name: Set up ssh
-        uses: MrSquaare/ssh-setup-action@v1
+        uses: MrSquaare/ssh-setup-action@v2
         if: ${{ env.SSH_KEY }}
         with:
           host: github.com
@@ -319,13 +319,13 @@ jobs:
         run: npm run build -- --env NO_LINT
 
       - name: 'Upload artifact: dist'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist
 
       - name: 'Upload artifact: bundle-report'
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: bundle-report
           path: bundle-report.*
