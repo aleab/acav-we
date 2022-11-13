@@ -18,7 +18,7 @@ function hoc(SvgIcon: React.FunctionComponent<React.SVGAttributes<SVGElement>>):
         return (
           <SvgIcon
             role="img" aria-hidden="true" focusable={false} fill="currentColor"
-            className={`svg-inline--fa fa-w-16 ${className ?? ''}`}
+            className={`svg-inline--fa fa-w-16 ${className ?? ''}`.trim()}
             {...otherProps}
           />
         );

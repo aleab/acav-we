@@ -55,6 +55,11 @@ function _calcClockHandsRotations(now: Date, showSeconds: boolean): [number, num
     return [ hR % 360, mR % 360, sR % 360 ];
 }
 
+// eslint-disable-next-line react/display-name, react/no-unused-prop-types
+const ClockHandAnimation = React.forwardRef<SVGAnimationElement, { dur: number, rotation: number, a: number }>((p, ref) => (
+  <animateTransform ref={ref} attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur={`${p.dur.toFixed(3)}s`} fill="freeze" to={`${p.rotation} ${p.a} ${p.a}`} />
+));
+
 export default function AnalogClock() {
     const RENDER_ID = useMemo(() => `AnalogClock-${(Math.random() * (10 ** 6)).toFixed(6)}`, []);
     const context = useContext(WallpaperContext)!;
@@ -243,11 +248,6 @@ export default function AnalogClock() {
     useEffect(() => clockHandMinutesAnimationRef.current?.beginElement(), [clockHandMinutesAnimationRef]);
     useEffect(() => clockHandSecondsAnimationRef.current?.beginElement(), [clockHandSecondsAnimationRef]);
 
-    // eslint-disable-next-line react/display-name, react/no-unused-prop-types
-    const ClockHandAnimation = React.forwardRef<SVGAnimationElement, { dur: number, rotation: number, a: number }>((p, ref) => (
-      <animateTransform ref={ref} attributeName="transform" attributeType="XML" type="rotate" begin="indefinite" dur={`${p.dur.toFixed(3)}s`} fill="freeze" to={`${p.rotation} ${p.a} ${p.a}`} />
-    ));
-
     const ClockNumbers = useCallback((p: { viewWidth: number, radius: number, style: ClockNumbersStyle }) => {
         const a = p.viewWidth / 2;
 
@@ -315,8 +315,6 @@ export default function AnalogClock() {
         animations: [number, number, number] | undefined,
         animationRefs: [React.RefObject<SVGAnimationElement>, React.RefObject<SVGAnimationElement>, React.RefObject<SVGAnimationElement>]
     }) => {
-        ((_: any) => {})(ClockHandAnimation); // eslint react-hooks/exhaustive-deps
-
         const a = p.viewWidth / 2;
         const rotations = _calcClockHandsRotations(p.now, p.showSeconds);
 
@@ -345,7 +343,7 @@ export default function AnalogClock() {
             }
           </g>
         );
-    }, [ClockHandAnimation]);
+    }, []);
 
     const halfWidth = useMemo(() => radius + clockBorderStyle.strokeWidth, [ clockBorderStyle.strokeWidth, radius ]);
     const width = useMemo(() => 2 * halfWidth, [halfWidth]);
