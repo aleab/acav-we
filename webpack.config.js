@@ -240,8 +240,9 @@ function getWebpackConfig(env, argv) {
                             loader: path.resolve(__dirname, 'build-scripts', 'jsonc-loader.js'),
                         },
                         {
-                            test: /\.svg$/,
-                            loader: 'svg-react-loader',
+                            test: /\.svg$/i,
+                            issuer: /\.(js|ts)x?$/,
+                            loader: '@svgr/webpack',
                         },
                         {
                             type: 'asset/resource',
