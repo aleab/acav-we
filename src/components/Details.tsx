@@ -4,13 +4,13 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 
 interface DetailsProps {
-    toggleCallback?: (t: HTMLElement, open: boolean) => void;
+    toggleCallback?: (t: HTMLDetailsElement, open: boolean) => void;
     children?: any;
 }
 
 export default function Details(props: DetailsProps) {
     const toggleCallback = useMemo(() => props.toggleCallback, [props.toggleCallback]);
-    const ref = useRef<HTMLElement>(null);
+    const ref = useRef<HTMLDetailsElement>(null);
 
     const onMouseDown = useCallback((event: React.MouseEvent<HTMLElement, MouseEvent>) => {
         // Prevent focus on click
@@ -24,7 +24,7 @@ export default function Details(props: DetailsProps) {
     }, [toggleCallback]);
 
     return (
-      <details ref={ref} onMouseDown={onMouseDown} onToggle={onToggle}>
+      <details ref={ref} open={false} onMouseDown={onMouseDown} onToggle={onToggle}>
         {props.children}
       </details>
     );

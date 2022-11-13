@@ -15,7 +15,7 @@ export default function Home() {
         return value;
     }, undefined);
 
-    const onDetailsToggle = useCallback((t: HTMLElement, open: boolean) => {
+    const onDetailsToggle = useCallback((t: HTMLDetailsElement, open: boolean) => {
         if (open) {
             if (Object.is(openDetail.current, t)) return;
             openDetail.current?.removeAttribute('open');
