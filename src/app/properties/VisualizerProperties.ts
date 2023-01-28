@@ -44,6 +44,7 @@ export interface VerticalVisualizerProperties {
         fill: boolean;
         thickness: number;
         smoothness: number;
+        smoothColorTransitions: boolean;
         hideWhenSilent: boolean;
     };
 }
@@ -76,6 +77,7 @@ export interface CircularVisualizerProperties {
         fill: boolean;
         thickness: number;
         smoothness: number;
+        smoothColorTransitions: boolean;
         hideWhenSilent: boolean;
     };
 }

@@ -18,6 +18,14 @@ export type CircularRendererOptions<T extends CircularVisualizerType> = Visualiz
         : never
 >;
 
+export type RenderWaveOptions = {
+    showMirrorWave: boolean;
+    fill: boolean;
+    thickness: number;
+    smoothness: number;
+    smoothColorTransitions: boolean;
+};
+
 export interface VisualizerParams {
     canvasContext: CanvasRenderingContext2D;
     N: number;

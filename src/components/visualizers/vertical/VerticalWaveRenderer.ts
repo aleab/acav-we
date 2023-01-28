@@ -4,25 +4,35 @@ import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { VerticalVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
+import { RenderWaveOptions } from '../circular/CircularRenderer';
 import VerticalRenderer, { VisualizerParams } from './VerticalRenderer';
 
 import { curveTo, getCurveToPoints, stroke } from '../wave-util';
 
-/**
- * @param {number} x x coordinate of the top-left corner of the bar.
- * @param {number} y y coordinate of the top-left corner of the bar.
- */
+type WavePointProps = {
+    /** X coordinate of the top-left corner of the bar. */
+    x: number;
+    /** Y coordinate of the top-left corner of the bar. */
+    y: number;
+    height: number;
+    color: Readonly<RGB>;
+};
+
 function renderWave(
     canvasContext: CanvasRenderingContext2D,
-    x: number, y: number, height: number,
+    props: WavePointProps,
     alignment: number,
-    thickness: number,
-    smoothness: number,
-    showMirrorWave: boolean, fill: boolean,
-    prev: { x: number, y: number, height: number } | null,
-    next: { x: number, y: number, height: number } | null,
+    options: RenderWaveOptions,
+    prev: WavePointProps | null,
+    next: WavePointProps | null,
 ) {
     if (prev === null) return;
+
+    const { x, y, height, color } = props;
+    const { showMirrorWave, fill, thickness, smoothness, smoothColorTransitions } = options;
+
+    canvasContext.setFillColorRgb(color as RGB);
+    canvasContext.setStrokeColorRgb(color as RGB);
 
     canvasContext.beginPath();
 
@@ -73,7 +83,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         return maxHeight * (this.options.options.height / 100);
     }
 
-    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs, spacing: number) {
+    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs, spacing: number): Tuple<WavePointProps, 2> | null {
         if (i >= samples.length) return null;
 
         const sample = samples.getSample(i);
@@ -98,14 +108,10 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         const dx = this.getSampleDx(samples.length, i, flip, spacing);
         const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
-        return {
-            fillColor,
-            position: [
-                { x: canvasContext.canvas.width / 2 - dx[0], y: y[0] },
-                { x: canvasContext.canvas.width / 2 + dx[1], y: y[1] },
-            ],
-            height: [ sample[0] * height, sample[1] * height ],
-        };
+        return [
+            { x: canvasContext.canvas.width / 2 - dx[0], y: y[0], height: sample[0] * height, color: fillColor[0] },
+            { x: canvasContext.canvas.width / 2 + dx[1], y: y[1], height: sample[1] * height, color: fillColor[1] },
+        ];
     }
 
     renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void {
@@ -122,31 +128,17 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             alignment,
         } = visualizerParams;
 
-        const waveThickness = O.thickness;
-        const smoothness = O.smoothness;
-        const showMirrorWave = O.showMirrorWave;
-        const fill = O.fill;
-
         const spacing = visualizerWidth / N_BARS;
 
-        let prev: { x: number, y: number, height: number }[] | null = null;
-        let first: { x: number, y: number, height: number }[] | null = null;
-        let second: { x: number, y: number, height: number }[] | null = null;
+        let prev: Tuple<WavePointProps, 2> | null = null;
+        let first: Tuple<WavePointProps, 2> | null = null;
+        let second: Tuple<WavePointProps, 2> | null = null;
         args.samples.forEach((sample, i, samples) => {
             const sampleRenderProps = this.getSampleRenderProps(samples, i, visualizerParams, args, spacing);
             if (sampleRenderProps === null) return;
 
-            const { fillColor, position: samplePosition, height: sampleHeight } = sampleRenderProps;
-            const current = [
-                { x: samplePosition[0].x, y: samplePosition[0].y, height: sampleHeight[0] },
-                { x: samplePosition[1].x, y: samplePosition[1].y, height: sampleHeight[1] },
-            ];
-
-            const nextSampleRenderProps = this.getSampleRenderProps(samples, i + 1, visualizerParams, args, spacing);
-            const next = nextSampleRenderProps !== null ? [
-                { x: nextSampleRenderProps.position[0].x, y: nextSampleRenderProps.position[0].y, height: nextSampleRenderProps.height[0] },
-                { x: nextSampleRenderProps.position[1].x, y: nextSampleRenderProps.position[1].y, height: nextSampleRenderProps.height[1] },
-            ] : null;
+            const current = sampleRenderProps;
+            const next = this.getSampleRenderProps(samples, i + 1, visualizerParams, args, spacing);
 
             if (first === null) {
                 first = current;
@@ -157,19 +149,12 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             // Render left and right samples
             canvasContext.save();
 
-            canvasContext.setFillColorRgb(fillColor[0] as RGB);
-            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderWave(canvasContext, current[0].x, current[0].y, current[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[0] ?? null, next?.[0] ?? null);
-
-            if (fillColor.length > 0) {
-                canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-            }
-            renderWave(canvasContext, current[1].x, current[1].y, current[1].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[1] ?? null, next?.[1] ?? null);
+            renderWave(canvasContext, current[0], alignment, O, prev?.[0] ?? null, next?.[0] ?? null);
+            renderWave(canvasContext, current[1], alignment, O, prev?.[1] ?? null, next?.[1] ?? null);
 
             prev = current;
 
-            const q: Array<[ typeof current[0], typeof current[0] | null, typeof current[0] | null ]> = [];
+            const q: Array<[ WavePointProps, WavePointProps | null, WavePointProps | null ]> = [];
             switch (flip) {
                 case VisualizerFlipType.LeftChannel:
                     // Link last L to first R
@@ -202,7 +187,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             }
 
             q.forEach(o => {
-                renderWave(canvasContext, o[0].x, o[0].y, o[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, o[1], o[2]);
+                renderWave(canvasContext, o[0], alignment, O, o[1], o[2]);
             });
 
             canvasContext.restore();

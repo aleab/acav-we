@@ -773,8 +773,15 @@
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalWave'"
     },
-    "verticalVisualizer_wave_hideWhenSilent": {
+    "verticalVisualizer_wave_smoothColorTransitions": {
         "order": 1126,
+        "type": "bool",
+        "text": "ui_verticalVisualizer_wave_smoothColorTransitions",
+        "value": true,
+        "condition": "visualizer_type.value === 'VerticalWave'"
+    },
+    "verticalVisualizer_wave_hideWhenSilent": {
+        "order": 1127,
         "type": "bool",
         "text": "ui_verticalVisualizer_wave_hideWhenSilent",
         "value": true,
@@ -1029,8 +1036,15 @@
         "editable": false,
         "condition": "visualizer_type.value === 'CircularWave'"
     },
-    "circularVisualizer_wave_hideWhenSilent": {
+    "circularVisualizer_wave_smoothColorTransitions": {
         "order": 1126,
+        "type": "bool",
+        "text": "ui_circularVisualizer_wave_smoothColorTransitions",
+        "value": true,
+        "condition": "visualizer_type.value === 'CircularWave'"
+    },
+    "circularVisualizer_wave_hideWhenSilent": {
+        "order": 1127,
         "type": "bool",
         "text": "ui_circularVisualizer_wave_hideWhenSilent",
         "value": false,

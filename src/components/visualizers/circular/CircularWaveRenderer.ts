@@ -4,7 +4,7 @@ import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { CircularVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
-import CircularRenderer, { VisualizerParams } from './CircularRenderer';
+import CircularRenderer, { RenderWaveOptions, VisualizerParams } from './CircularRenderer';
 
 import { curveTo, getCurveToPoints, stroke } from '../wave-util';
 
@@ -16,6 +16,12 @@ function getPointOnCircumference(radius: number, center: { x: number; y: number 
     };
 }
 
+type WavePointProps = {
+    height: number;
+    angle: number,
+    color: Readonly<RGB>;
+};
+
 /**
  * @param {number} x x coordinate of the center of the circle.
  * @param {number} y y coordinate of the center of the circle.
@@ -23,14 +29,18 @@ function getPointOnCircumference(radius: number, center: { x: number; y: number 
 function renderWave(
     canvasContext: CanvasRenderingContext2D,
     x: number, y: number, radius: number,
-    height: number, angle: number,
-    thickness: number,
-    smoothness: number,
-    showMirrorWave: boolean, fill: boolean,
+    props: WavePointProps,
+    options: RenderWaveOptions,
     prev: { height: number, angle: number } | null,
     next: { height: number, angle: number } | null,
 ) {
     if (prev === null) return;
+
+    const { height, angle, color } = props;
+    const { showMirrorWave, fill, thickness, smoothness, smoothColorTransitions } = options;
+
+    canvasContext.setFillColorRgb(color as RGB);
+    canvasContext.setStrokeColorRgb(color as RGB);
 
     canvasContext.beginPath();
 
@@ -88,7 +98,7 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
         return maxHeight * (this.options.options.height / 100);
     }
 
-    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs) {
+    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs): Tuple<WavePointProps, 2> | null {
         if (i >= samples.length) return null;
 
         const sample = samples.getSample(i);
@@ -106,11 +116,10 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
         const angle = this.getSampleAngle(samples.length, i, flip, angularDelta);
         const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
-        return {
-            fillColor,
-            angle: [ rotation - angle[0], rotation + angle[1] ],
-            height: [ sample[0] * height, sample[1] * height ],
-        };
+        return [
+            { height: sample[0] * height, angle: rotation - angle[0], color: fillColor[0] },
+            { height: sample[1] * height, angle: rotation + angle[1], color: fillColor[1] },
+        ];
     }
 
     renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void {
@@ -129,29 +138,15 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
             radius,
         } = visualizerParams;
 
-        const waveThickness = O.thickness;
-        const smoothness = O.smoothness;
-        const showMirrorWave = O.showMirrorWave;
-        const fill = O.fill;
-
-        let prev: { height: number, angle: number }[] | null = null;
-        let first: { height: number, angle: number }[] | null = null;
-        let second: { height: number, angle: number }[] | null = null;
+        let prev: Tuple<WavePointProps, 2> | null = null;
+        let first: Tuple<WavePointProps, 2> | null = null;
+        let second: Tuple<WavePointProps, 2> | null = null;
         args.samples.forEach((sample, i, samples) => {
             const sampleRenderProps = this.getSampleRenderProps(samples, i, visualizerParams, args);
             if (sampleRenderProps === null) return;
 
-            const { fillColor, angle, height: sampleHeight } = sampleRenderProps;
-            const current = [
-                { height: sampleHeight[0], angle: angle[0] },
-                { height: sampleHeight[1], angle: angle[1] },
-            ];
-
-            const nextSampleRenderProps = this.getSampleRenderProps(samples, i + 1, visualizerParams, args);
-            const next = nextSampleRenderProps !== null ? [
-                { height: nextSampleRenderProps.height[0], angle: nextSampleRenderProps.angle[0] },
-                { height: nextSampleRenderProps.height[1], angle: nextSampleRenderProps.angle[1] },
-            ] : null;
+            const current = sampleRenderProps;
+            const next = this.getSampleRenderProps(samples, i + 1, visualizerParams, args);
 
             if (first === null) {
                 first = current;
@@ -161,19 +156,12 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
 
             canvasContext.save();
 
-            canvasContext.setFillColorRgb(fillColor[0] as RGB);
-            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderWave(canvasContext, x, y, radius, current[0].height, current[0].angle, waveThickness, smoothness, showMirrorWave, fill, prev?.[0] ?? null, next?.[0] ?? null);
-
-            if (fillColor.length > 0) {
-                canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-            }
-            renderWave(canvasContext, x, y, radius, current[1].height, current[1].angle, waveThickness, smoothness, showMirrorWave, fill, prev?.[1] ?? null, next?.[1] ?? null);
+            renderWave(canvasContext, x, y, radius, current[0], O, prev?.[0] ?? null, next?.[0] ?? null);
+            renderWave(canvasContext, x, y, radius, current[1], O, prev?.[1] ?? null, next?.[1] ?? null);
 
             prev = current;
 
-            const q: Array<[ typeof current[0], typeof current[0] | null, typeof current[0] | null ]> = [];
+            const q: Array<[ WavePointProps, WavePointProps | null, WavePointProps | null ]> = [];
             switch (flip) {
                 case VisualizerFlipType.LeftChannel:
                     if (i === N_SAMPLES - 1) {
@@ -218,7 +206,7 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
             }
 
             q.forEach(o => {
-                renderWave(canvasContext, x, y, radius, o[0].height, o[0].angle, waveThickness, smoothness, showMirrorWave, fill, o[1], o[2]);
+                renderWave(canvasContext, x, y, radius, o[0], O, o[1], o[2]);
             });
 
             canvasContext.restore();
