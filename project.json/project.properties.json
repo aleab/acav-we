@@ -21,35 +21,29 @@
         "text": "ui_showAdvancedOptions",
         "value": false
     },
-    "enableUpdateNoticePopup": {
-        "order": 3,
-        "type": "bool",
-        "text": "ui_enableUpdateNoticePopup",
-        "value": true
-    },
     "showStats": {
-        "order": 4,
+        "order": 3,
         "type": "bool",
         "text": "ui_showStats",
         "value": false,
         "condition": "showAdvancedOptions.value"
     },
     "limitFps": {
-        "order": 5,
+        "order": 4,
         "type": "bool",
         "text": "ui_limitFps",
         "value": true,
         "condition": "showAdvancedOptions.value"
     },
     "customFpsLimit": {
-        "order": 6,
+        "order": 5,
         "type": "bool",
         "text": "ui_customFpsLimit",
         "value": false,
         "condition": "showAdvancedOptions.value && limitFps.value"
     },
     "customFpsLimit_value": {
-        "order": 7,
+        "order": 6,
         "type": "slider",
         "text": "ui_customFpsLimit_value",
         "value": 60,

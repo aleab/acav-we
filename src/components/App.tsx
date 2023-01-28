@@ -6,8 +6,6 @@ import { IDBPObjectStore, StoreNames, openDB } from 'idb';
 import Log from '../common/Log';
 import AudioSamplesArray from '../common/AudioSamplesArray';
 import EventHandler from '../common/EventHandler';
-import { Pivot } from '../common/Pivot';
-import { parseLocalStorageStringValue } from '../common/util';
 import AudioHistory from '../app/AudioHistory';
 import { BackgroundMode } from '../app/BackgroundMode';
 import { PINK_NOISE } from '../app/noise';
@@ -27,7 +25,6 @@ import { LOCALSTORAGE_SPOTIFY_TOKEN } from '../app/SpotifyStateMachine';
 import { IDB_PREFERRED_COVERS } from './spotify/SpotifyAlbumArt';
 
 import Stats from './Stats';
-import ModalDialog from './ModalDialog';
 import Clock from './clock/Clock';
 import Spotify, { IDB_MB_CACHE } from './spotify/Spotify';
 import Visualizer from './visualizers/Visualizer';
@@ -105,7 +102,6 @@ export default function App(props: AppProps) {
     const [ showStats, setShowStats ] = useState(O.current.showStats);
     const [ showSpotify, setShowSpotify ] = useState(O.current.spotify.showOverlay);
     const [ showClock, setShowClock ] = useState(O.current.clock.enabled);
-    const [ showUpdateNoticePopup, setShowUpdateNoticePopup ] = useState(false);
 
     const [ weCuePluginLoaded, setWeCuePluginLoaded ] = useState(false);
     const [ useICue, setUseICue ] = useState(O.current.icuePlugin.enabled);
@@ -434,55 +430,6 @@ export default function App(props: AppProps) {
     const clockRef = useRef<HTMLDivElement>(null);
     const spotifyRef = useRef<HTMLDivElement | null>(null);
 
-    // Check app version
-    useEffect(() => {
-        const timeout = setTimeout((() => {
-            if (!O.current.enableUpdateNoticePopup || !process.env.APP_VERSION) return;
-            const lsVersion: string | null = parseLocalStorageStringValue(LOCALSTORAGE_APP_VERSION);
-
-            const versionRegex = /^([0-9]+)\.([0-9]+)\.?.*$/;
-            const cV = versionRegex.exec(process.env.APP_VERSION)?.map((v, i) => (i > 0 ? Number(v) : v)) as [string, number, number] | undefined;
-            const kV = lsVersion !== null ? versionRegex.exec(lsVersion)?.map((v, i) => (i > 0 ? Number(v) : v)) as [string, number, number] | undefined : undefined;
-
-            if (cV && Number.isInteger(cV[1]) && Number.isInteger(cV[2])) {
-                if (kV && Number.isInteger(kV[1]) && Number.isInteger(kV[2])) {
-                    if (cV[1] > kV[1] || cV[2] > kV[2]) {
-                        setShowUpdateNoticePopup(true);
-                    }
-                } else if (process.env.APP_VERSION === '1.6.0') {
-                    setShowUpdateNoticePopup(true);
-                }
-
-                localStorage.setItem(LOCALSTORAGE_APP_VERSION, JSON.stringify(process.env.APP_VERSION));
-            }
-        }) as TimerHandler, 5000);
-
-        return () => {
-            clearTimeout(timeout);
-        };
-    }, []);
-    const versionPopupPosition = useMemo(() => {
-        const element = clockRef.current ?? spotifyRef.current;
-        const r = element ? element.getBoundingClientRect() : undefined;
-        if (r === undefined) {
-            return {
-                top: window.innerHeight - 42,
-                left: Math.round(window.innerWidth / 2),
-                pivot: Pivot.Bottom,
-            };
-        }
-
-        const top = r.top > window.innerHeight - r.bottom ? r.top - 8 : r.bottom + 8;
-        return {
-            top,
-            left: r.left + 0.5 * r.width,
-            pivot: top > r.top ? Pivot.Top : Pivot.Bottom,
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [showUpdateNoticePopup]);
-    const justUpdatedVersionOnTimeoutCallback = useCallback(() => { setShowUpdateNoticePopup(false); }, []);
-
-    const APP_VERSION = useMemo(() => process.env.APP_VERSION.replace(/^([0-9]+\.[0-9]+)(?:\..*)?$/, '$1.x'), []);
     return (
       <>
         {
@@ -507,23 +454,6 @@ export default function App(props: AppProps) {
             }
           </WallpaperContext.Provider>
         </div>
-        {
-            showUpdateNoticePopup ? (
-              <ModalDialog
-                top={versionPopupPosition.top} left={versionPopupPosition.left} pivot={versionPopupPosition.pivot}
-                id="ju" title={`Major Update (v${APP_VERSION})`} maxWidth={325}
-                fadein={600} fadeout={200} timeout={12000} onTimeoutCallback={justUpdatedVersionOnTimeoutCallback}
-              >
-                <>
-                  <p className="mt-0">
-                    <span className="d-block">This wallpaper has just been updated.</span>
-                    <span>You can check the changelog on the Steam&nbsp;Workshop page.</span>
-                  </p>
-                  <span className="text-muted">You can permanently disable this popup.</span>
-                </>
-              </ModalDialog>
-            ) : null
-        }
       </>
     );
 }
