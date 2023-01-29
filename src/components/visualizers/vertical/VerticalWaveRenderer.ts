@@ -1,4 +1,4 @@
-import { RGB } from 'color-convert/conversions';
+import { RGB, rgb } from 'color-convert/conversions';
 
 import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
@@ -18,6 +18,19 @@ type WavePointProps = {
     color: Readonly<RGB>;
 };
 
+function getPrimaryAndMirrorParts(alignment: number, x: number, y: number, height: number, prev: WavePointProps, next: WavePointProps | null): Tuple<[Point, Point, Point | null], 2> {
+    const top = { x, y };
+    const bottom = { x, y: y + height };
+    const prevTop = { x: prev.x, y: prev.y };
+    const prevBottom = { x: prev.x, y: prev.y + prev.height };
+    const nextTop = next !== null ? { x: next.x, y: next.y } : null;
+    const nextBottom = next !== null ? { x: next.x, y: next.y + next.height } : null;
+
+    return alignment >= 0
+        ? [ [ top, prevTop, nextTop ], [ bottom, prevBottom, nextBottom ] ]
+        : [ [ bottom, prevBottom, nextBottom ], [ top, prevTop, nextTop ] ];
+}
+
 function renderWave(
     canvasContext: CanvasRenderingContext2D,
     props: WavePointProps,
@@ -31,50 +44,59 @@ function renderWave(
     const { x, y, height, color } = props;
     const { showMirrorWave, fill, thickness, smoothness, smoothColorTransitions } = options;
 
-    canvasContext.setFillColorRgb(color as RGB);
-    canvasContext.setStrokeColorRgb(color as RGB);
+    const [ [ currentPrimary, prevPrimary, nextPrimary ], [ currentMirror, prevMirror, nextMirror ] ] = getPrimaryAndMirrorParts(alignment, x, y, height, prev, next);
+
+    const [ primaryCurveStart, primaryCurveEnd ] = getCurveToPoints(prevPrimary, currentPrimary, nextPrimary, smoothness);
+
+    const baseline = y + 0.5 * (1 + alignment) * height;
+    const dx = primaryCurveEnd.x - primaryCurveStart.x;
+
+    if (smoothColorTransitions) {
+        const gradient = canvasContext.createLinearGradient(primaryCurveStart.x - dx / 2, baseline, primaryCurveEnd.x + dx / 2, baseline);
+
+        gradient.addColorStop(0.0, '#' + rgb.hex(prev.color as RGB));
+        gradient.addColorStop(0.5, '#' + rgb.hex(color as RGB));
+        gradient.addColorStop(1.0, '#' + rgb.hex((next?.color ?? color) as RGB));
+
+        canvasContext.fillStyle = gradient;
+        canvasContext.strokeStyle = gradient;
+    } else {
+        canvasContext.setFillColorRgb(color as RGB);
+        canvasContext.setStrokeColorRgb(color as RGB);
+    }
 
     canvasContext.beginPath();
-
-    const main = alignment >= 0 ? { x, y } : { x, y: y + height };
-    const prevMain = alignment >= 0 ? { x: prev.x, y: prev.y } : { x: prev.x, y: prev.y + prev.height };
-    const nextMain = next !== null ? (alignment >= 0 ? { x: next.x, y: next.y } : { x: next.x, y: next.y + next.height }) : null;
-
-    const [ mainCurveStart, mainCurveEnd ] = getCurveToPoints(prevMain, main, nextMain, smoothness);
-    canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
-    curveTo(canvasContext, prevMain, main, nextMain, mainCurveEnd, smoothness);
+    canvasContext.moveTo(primaryCurveStart.x, primaryCurveStart.y);
+    curveTo(canvasContext, prevPrimary, currentPrimary, nextPrimary, primaryCurveEnd, smoothness);
 
     if (showMirrorWave) {
-        const mirror = alignment >= 0 ? { x, y: y + height } : { x, y };
-        const prevMirror = alignment >= 0 ? { x: prev.x, y: prev.y + prev.height } : { x: prev.x, y: prev.y };
-        const nextMirror = next !== null ? (alignment >= 0 ? { x: next.x, y: next.y + next.height } : { x: next.x, y: next.y }) : null;
+        const shouldFill = fill && (Math.abs(currentPrimary.y - currentMirror.y) >= 1 || Math.abs(prevPrimary.y - prevMirror.y) >= 1);
 
-        const d1 = Math.sqrt((prevMain.x - prevMirror.x) ** 2 + (prevMain.y - prevMirror.y) ** 2);
-        const d2 = Math.sqrt((main.x - mirror.x) ** 2 + (main.y - mirror.y) ** 2);
-        const shouldFill = fill && (d1 >= 1 || d2 >= 1);
-
-        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, mirror, nextMirror, smoothness);
+        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, currentMirror, nextMirror, smoothness);
         if (shouldFill) {
-            canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
+            canvasContext.lineTo(primaryCurveEnd.x, baseline);
+            canvasContext.lineTo(primaryCurveStart.x, baseline);
             canvasContext.closePath();
             canvasContext.fill();
-            canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
-            canvasContext.lineTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
+
+            canvasContext.moveTo(mirrorCurveStart.x, mirrorCurveStart.y);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
+            canvasContext.lineTo(mirrorCurveEnd.x, baseline);
+            canvasContext.lineTo(mirrorCurveStart.x, baseline);
             canvasContext.closePath();
             canvasContext.fill();
 
             // Fix gap between wave sections, probably caused by the use of floating point coordinates
-            canvasContext.moveTo(mainCurveEnd.x, mainCurveEnd.y);
+            canvasContext.moveTo(primaryCurveEnd.x, primaryCurveEnd.y);
             canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
             stroke(canvasContext, 1);
         } else {
             canvasContext.moveTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
-            stroke(canvasContext, thickness);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
+            stroke(canvasContext, fill ? 1 : thickness);
         }
     } else {
-        stroke(canvasContext, thickness);
+        stroke(canvasContext, fill ? 1 : thickness);
     }
 }
 
