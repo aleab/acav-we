@@ -131,8 +131,8 @@ function getProjectJson() {
                     ui_audioSamples_freqThreshold: withPropertyIcon('far fa-tachometer-slowest', 'Threshold'),
                     ui_audioSamples_normalize: withPropertyIcon('far fa-balance-scale', 'Normalize') + asterisk(),
                     ui_audioSamples_smoothing: subSection('Smoothing', 'text-white fas fa-wave-sine'),
-                    ui_audioSamples_temporalSmoothing_factor: indent('Temporal Smoothing', { n: 3 }),
-                    ui_audioSamples_spatialSmoothing_factor: indent('Spatial Smoothing', { n: 3 }),
+                    ui_audioSamples_temporalSmoothing_factor: indent('Temporal', { n: 3 }),
+                    ui_audioSamples_spatialSmoothing_factor: indent('Spatial', { n: 3 }),
                     //
                     // [AUDIO SAMPLES > SCALE]
                     ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;${withTextColor('sup', 'primary', '[1]')}`,
@@ -458,7 +458,7 @@ function getProjectJson() {
                     ui_icue_spectrum_width: indent('Spectrum Width (%)'),
                     ui_$_icue_spectrum_width: note('The amount of audio samples to use.', null),
 
-                    ui_misc: section('Misc'),
+                    ui_misc: section('Misc.'),
                     ui__clearLocalStorage: indent(withTextColor('span', 'muted', 'Clear Local Storage')) + asterisk(),
 
                     // [NOTES]
