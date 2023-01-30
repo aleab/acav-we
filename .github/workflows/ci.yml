@@ -131,7 +131,7 @@ jobs:
             fi
 
             if [ -n "$v" ]; then
-              echo "::set-output name=$1::1"
+              echo "$1=1" >> $GITHUB_OUTPUT
               echo "$1"
             fi
           }
