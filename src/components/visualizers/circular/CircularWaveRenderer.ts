@@ -1,15 +1,20 @@
-import { RGB } from 'color-convert/conversions';
+import { RGB, rgb } from 'color-convert/conversions';
 
 import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { CircularVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
-import CircularRenderer, { VisualizerParams } from './CircularRenderer';
+import CircularRenderer, { RenderWaveOptions, VisualizerParams } from './CircularRenderer';
 
 import { curveTo, getCurveToPoints, stroke } from '../wave-util';
 
-function getPointOnCircumference(radius: number, center: { x: number; y: number }, angleRad: number) {
-    const { x, y } = center;
+type WavePointProps = {
+    height: number;
+    angle: number,
+    color: Readonly<RGB>;
+};
+
+function getPointOnCircle(radius: number, x: number, y: number, angleRad: number): Point {
     return {
         x: radius * Math.cos(angleRad) + x,
         y: -(radius * Math.sin(angleRad) - y),
@@ -23,63 +28,81 @@ function getPointOnCircumference(radius: number, center: { x: number; y: number 
 function renderWave(
     canvasContext: CanvasRenderingContext2D,
     x: number, y: number, radius: number,
-    height: number, angle: number,
-    thickness: number,
-    smoothness: number,
-    showMirrorWave: boolean, fill: boolean,
-    prev: { height: number, angle: number } | null,
-    next: { height: number, angle: number } | null,
+    props: WavePointProps,
+    options: RenderWaveOptions,
+    prev: WavePointProps | null,
+    next: WavePointProps | null,
 ) {
     if (prev === null) return;
 
+    const { height, angle, color } = props;
+    const { showMirrorWave, fill, thickness, smoothness, smoothColorTransitions } = options;
+
+    const mirrorHeight = Math.clamp(height / 2, 0, radius / 2);
+    const prevMirrorHeight = Math.clamp(prev.height / 2, 0, radius / 2);
+
+    const currentAngle = -(angle - Math.PI_2);
+    const prevAngle = -(prev.angle - Math.PI_2);
+    const nextAngle = next !== null ? -(next.angle - Math.PI_2) : undefined;
+
+    const currentPrimary = getPointOnCircle(radius + height, x, y, currentAngle);
+    const prevPrimary = getPointOnCircle(radius + prev.height, x, y, prevAngle);
+    const nextPrimary = next !== null ? getPointOnCircle(radius + next.height, x, y, nextAngle!) : null;
+
+    const [ primaryCurveStart, primaryCurveEnd ] = getCurveToPoints(prevPrimary, currentPrimary, nextPrimary, smoothness);
+
+    const dθ = currentAngle - prevAngle;
+
+    if (smoothColorTransitions) {
+        const from = getPointOnCircle(radius, x, y, prevAngle - dθ / 2);
+        const to = getPointOnCircle(radius, x, y, currentAngle + dθ / 2);
+        const gradient = canvasContext.createLinearGradient(from.x, from.y, to.x, to.y);
+
+        gradient.addColorStop(0.0, '#' + rgb.hex(prev.color as RGB));
+        gradient.addColorStop(0.5, '#' + rgb.hex(color as RGB));
+        gradient.addColorStop(1.0, '#' + rgb.hex((next?.color ?? color) as RGB));
+
+        canvasContext.fillStyle = gradient;
+        canvasContext.strokeStyle = gradient;
+    } else {
+        canvasContext.setFillColorRgb(color as RGB);
+        canvasContext.setStrokeColorRgb(color as RGB);
+    }
+
     canvasContext.beginPath();
-
-    const stdAngle = -(angle - Math.PI_2);
-    const prevStdAngle = -(prev.angle - Math.PI_2);
-    const nextStdAngle = next !== null ? -(next.angle - Math.PI_2) : undefined;
-
-    const main = getPointOnCircumference(radius + height, { x, y }, stdAngle);
-    const prevMain = getPointOnCircumference(radius + prev.height, { x, y }, prevStdAngle);
-    const nextMain = next !== null ? getPointOnCircumference(radius + next.height, { x, y }, nextStdAngle!) : null;
-
-    const [ mainCurveStart, mainCurveEnd ] = getCurveToPoints(prevMain, main, nextMain, smoothness);
-    canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
-    curveTo(canvasContext, prevMain, main, nextMain, mainCurveEnd, smoothness);
+    canvasContext.moveTo(primaryCurveStart.x, primaryCurveStart.y);
+    curveTo(canvasContext, prevPrimary, currentPrimary, nextPrimary, primaryCurveEnd, smoothness);
 
     if (showMirrorWave) {
-        const mirrorHeight = Math.clamp(height / 2, 0, radius / 2);
-        const prevMirrorHeight = Math.clamp(prev.height / 2, 0, radius / 2);
+        const currentMirror = getPointOnCircle(radius - mirrorHeight, x, y, currentAngle);
+        const prevMirror = getPointOnCircle(radius - prevMirrorHeight, x, y, prevAngle);
+        const nextMirror = next !== null ? getPointOnCircle(radius - Math.clamp(next.height / 2, 0, radius / 2), x, y, nextAngle!) : null;
 
-        const mirror = getPointOnCircumference(radius - mirrorHeight, { x, y }, stdAngle);
-        const prevMirror = getPointOnCircumference(radius - prevMirrorHeight, { x, y }, prevStdAngle);
-        const nextMirror = next !== null ? getPointOnCircumference(radius - Math.clamp(next.height / 2, 0, radius / 2), { x, y }, nextStdAngle!) : null;
+        const shouldFill = fill && (prevMirrorHeight + prev.height >= 1 || mirrorHeight + height >= 1);
 
-        const d1 = prevMirrorHeight + prev.height;
-        const d2 = mirrorHeight + height;
-        const shouldFill = fill && (d1 >= 1 || d2 >= 1);
-
-        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, mirror, nextMirror, smoothness);
+        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, currentMirror, nextMirror, smoothness);
         if (shouldFill) {
             canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
             canvasContext.closePath();
             canvasContext.fill();
-            canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
+
+            canvasContext.moveTo(primaryCurveStart.x, primaryCurveStart.y);
             canvasContext.lineTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
             canvasContext.closePath();
             canvasContext.fill();
 
             // Fix gap between wave sections, probably caused by the use of floating point coordinates
-            canvasContext.moveTo(mainCurveEnd.x, mainCurveEnd.y);
+            canvasContext.moveTo(primaryCurveEnd.x, primaryCurveEnd.y);
             canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
             stroke(canvasContext, 1);
         } else {
             canvasContext.moveTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
-            stroke(canvasContext, thickness);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
+            stroke(canvasContext, fill ? 1 : thickness);
         }
     } else {
-        stroke(canvasContext, thickness);
+        stroke(canvasContext, fill ? 1 : thickness);
     }
 }
 
@@ -88,7 +111,7 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
         return maxHeight * (this.options.options.height / 100);
     }
 
-    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs) {
+    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs): Tuple<WavePointProps, 2> | null {
         if (i >= samples.length) return null;
 
         const sample = samples.getSample(i);
@@ -106,11 +129,10 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
         const angle = this.getSampleAngle(samples.length, i, flip, angularDelta);
         const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
-        return {
-            fillColor,
-            angle: [ rotation - angle[0], rotation + angle[1] ],
-            height: [ sample[0] * height, sample[1] * height ],
-        };
+        return [
+            { height: sample[0] * height, angle: rotation - angle[0], color: fillColor[0] },
+            { height: sample[1] * height, angle: rotation + angle[1], color: fillColor[1] },
+        ];
     }
 
     renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void {
@@ -129,29 +151,15 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
             radius,
         } = visualizerParams;
 
-        const waveThickness = O.thickness;
-        const smoothness = O.smoothness;
-        const showMirrorWave = O.showMirrorWave;
-        const fill = O.fill;
-
-        let prev: { height: number, angle: number }[] | null = null;
-        let first: { height: number, angle: number }[] | null = null;
-        let second: { height: number, angle: number }[] | null = null;
+        let prev: Tuple<WavePointProps, 2> | null = null;
+        let first: Tuple<WavePointProps, 2> | null = null;
+        let second: Tuple<WavePointProps, 2> | null = null;
         args.samples.forEach((sample, i, samples) => {
             const sampleRenderProps = this.getSampleRenderProps(samples, i, visualizerParams, args);
             if (sampleRenderProps === null) return;
 
-            const { fillColor, angle, height: sampleHeight } = sampleRenderProps;
-            const current = [
-                { height: sampleHeight[0], angle: angle[0] },
-                { height: sampleHeight[1], angle: angle[1] },
-            ];
-
-            const nextSampleRenderProps = this.getSampleRenderProps(samples, i + 1, visualizerParams, args);
-            const next = nextSampleRenderProps !== null ? [
-                { height: nextSampleRenderProps.height[0], angle: nextSampleRenderProps.angle[0] },
-                { height: nextSampleRenderProps.height[1], angle: nextSampleRenderProps.angle[1] },
-            ] : null;
+            const current = sampleRenderProps;
+            const next = this.getSampleRenderProps(samples, i + 1, visualizerParams, args);
 
             if (first === null) {
                 first = current;
@@ -161,19 +169,12 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
 
             canvasContext.save();
 
-            canvasContext.setFillColorRgb(fillColor[0] as RGB);
-            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderWave(canvasContext, x, y, radius, current[0].height, current[0].angle, waveThickness, smoothness, showMirrorWave, fill, prev?.[0] ?? null, next?.[0] ?? null);
-
-            if (fillColor.length > 0) {
-                canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-            }
-            renderWave(canvasContext, x, y, radius, current[1].height, current[1].angle, waveThickness, smoothness, showMirrorWave, fill, prev?.[1] ?? null, next?.[1] ?? null);
+            renderWave(canvasContext, x, y, radius, current[0], O, prev?.[0] ?? null, next?.[0] ?? null);
+            renderWave(canvasContext, x, y, radius, current[1], O, prev?.[1] ?? null, next?.[1] ?? null);
 
             prev = current;
 
-            const q: Array<[ typeof current[0], typeof current[0] | null, typeof current[0] | null ]> = [];
+            const q: Array<[ WavePointProps, WavePointProps | null, WavePointProps | null ]> = [];
             switch (flip) {
                 case VisualizerFlipType.LeftChannel:
                     if (i === N_SAMPLES - 1) {
@@ -218,7 +219,7 @@ export default class CircularWaveRenderer extends CircularRenderer<CircularVisua
             }
 
             q.forEach(o => {
-                renderWave(canvasContext, x, y, radius, o[0].height, o[0].angle, waveThickness, smoothness, showMirrorWave, fill, o[1], o[2]);
+                renderWave(canvasContext, x, y, radius, o[0], O, o[1], o[2]);
             });
 
             canvasContext.restore();

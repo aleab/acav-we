@@ -54,8 +54,8 @@ export default abstract class VisualizerBaseRenderer<T extends VisualizerRendere
         baseColor: Readonly<RGB>,
         colorReaction: ((value: number) => RGB) | undefined,
         colorReactionValueProvider: AudioResponsiveValueProviderFunction,
-    ): Readonly<RGB>[] {
-        const fillColor = [ baseColor, baseColor ];
+    ): [Readonly<RGB>, Readonly<RGB>] {
+        const fillColor: [Readonly<RGB>, Readonly<RGB>] = [ baseColor, baseColor ];
         if (args.samples !== undefined) {
             const sample = args.samples.getSample(i);
             if (colorReaction !== undefined) {

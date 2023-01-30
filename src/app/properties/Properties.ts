@@ -182,6 +182,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(verticalVisualizerOptions.wave!, 'fill', raw.verticalVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
     setProperty(verticalVisualizerOptions.wave!, 'thickness', raw.verticalVisualizer_wave_thickness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(verticalVisualizerOptions.wave!, 'smoothness', raw.verticalVisualizer_wave_smoothness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
+    setProperty(verticalVisualizerOptions.wave!, 'smoothColorTransitions', raw.verticalVisualizer_wave_smoothColorTransitions as WEProperty<'bool'>, _r => _r.value);
     setProperty(verticalVisualizerOptions.wave!, 'hideWhenSilent', raw.verticalVisualizer_wave_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(verticalVisualizerOptions.wave)) delete verticalVisualizerOptions.wave;
 
@@ -214,6 +215,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(circularVisualizerOptions.wave!, 'smoothness', raw.circularVisualizer_wave_smoothness as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(circularVisualizerOptions.wave!, 'showMirrorWave', raw.circularVisualizer_wave_showMirrorWave as WEProperty<'bool'>, _r => _r.value);
     setProperty(circularVisualizerOptions.wave!, 'fill', raw.circularVisualizer_wave_fill as WEProperty<'bool'>, _r => _r.value);
+    setProperty(circularVisualizerOptions.wave!, 'smoothColorTransitions', raw.circularVisualizer_wave_smoothColorTransitions as WEProperty<'bool'>, _r => _r.value);
     setProperty(circularVisualizerOptions.wave!, 'hideWhenSilent', raw.circularVisualizer_wave_hideWhenSilent as WEProperty<'bool'>, _r => _r.value);
     if (_.isEmpty(circularVisualizerOptions.wave)) delete circularVisualizerOptions.wave;
 

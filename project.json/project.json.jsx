@@ -241,6 +241,7 @@ function getProjectJson() {
                     ui_verticalVisualizer_wave_fill: indent('Fill'),
                     ui_verticalVisualizer_wave_thickness: indent('Thickness (px)'),
                     ui_verticalVisualizer_wave_smoothness: indent('Smoothness'),
+                    ui_verticalVisualizer_wave_smoothColorTransitions: indent('Smooth Color Transitions'),
                     ui_verticalVisualizer_wave_hideWhenSilent: indent('Hide when Silent'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~
@@ -280,6 +281,7 @@ function getProjectJson() {
                     ui_circularVisualizer_wave_fill: indent('Fill'),
                     ui_circularVisualizer_wave_thickness: indent('Thickness (px)'),
                     ui_circularVisualizer_wave_smoothness: indent('Smoothness'),
+                    ui_circularVisualizer_wave_smoothColorTransitions: indent('Smooth Color Transitions'),
                     ui_circularVisualizer_wave_hideWhenSilent: indent('Hide when Silent'),
 
                     // ~ ~ ~ ~ ~ ~ ~ ~ ~

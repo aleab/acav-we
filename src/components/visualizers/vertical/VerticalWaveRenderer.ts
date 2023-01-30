@@ -1,70 +1,102 @@
-import { RGB } from 'color-convert/conversions';
+import { RGB, rgb } from 'color-convert/conversions';
 
 import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
 import { VerticalVisualizerType } from '../../../app/VisualizerType';
 import VisualizerRenderArgs from '../VisualizerRenderArgs';
+import { RenderWaveOptions } from '../circular/CircularRenderer';
 import VerticalRenderer, { VisualizerParams } from './VerticalRenderer';
 
 import { curveTo, getCurveToPoints, stroke } from '../wave-util';
 
-/**
- * @param {number} x x coordinate of the top-left corner of the bar.
- * @param {number} y y coordinate of the top-left corner of the bar.
- */
+type WavePointProps = {
+    /** X coordinate of the top-left corner of the bar. */
+    x: number;
+    /** Y coordinate of the top-left corner of the bar. */
+    y: number;
+    height: number;
+    color: Readonly<RGB>;
+};
+
+function getPrimaryAndMirrorParts(alignment: number, x: number, y: number, height: number, prev: WavePointProps, next: WavePointProps | null): Tuple<[Point, Point, Point | null], 2> {
+    const top = { x, y };
+    const bottom = { x, y: y + height };
+    const prevTop = { x: prev.x, y: prev.y };
+    const prevBottom = { x: prev.x, y: prev.y + prev.height };
+    const nextTop = next !== null ? { x: next.x, y: next.y } : null;
+    const nextBottom = next !== null ? { x: next.x, y: next.y + next.height } : null;
+
+    return alignment >= 0
+        ? [ [ top, prevTop, nextTop ], [ bottom, prevBottom, nextBottom ] ]
+        : [ [ bottom, prevBottom, nextBottom ], [ top, prevTop, nextTop ] ];
+}
+
 function renderWave(
     canvasContext: CanvasRenderingContext2D,
-    x: number, y: number, height: number,
+    props: WavePointProps,
     alignment: number,
-    thickness: number,
-    smoothness: number,
-    showMirrorWave: boolean, fill: boolean,
-    prev: { x: number, y: number, height: number } | null,
-    next: { x: number, y: number, height: number } | null,
+    options: RenderWaveOptions,
+    prev: WavePointProps | null,
+    next: WavePointProps | null,
 ) {
     if (prev === null) return;
 
+    const { x, y, height, color } = props;
+    const { showMirrorWave, fill, thickness, smoothness, smoothColorTransitions } = options;
+
+    const [ [ currentPrimary, prevPrimary, nextPrimary ], [ currentMirror, prevMirror, nextMirror ] ] = getPrimaryAndMirrorParts(alignment, x, y, height, prev, next);
+
+    const [ primaryCurveStart, primaryCurveEnd ] = getCurveToPoints(prevPrimary, currentPrimary, nextPrimary, smoothness);
+
+    const baseline = y + 0.5 * (1 + alignment) * height;
+    const dx = primaryCurveEnd.x - primaryCurveStart.x;
+
+    if (smoothColorTransitions) {
+        const gradient = canvasContext.createLinearGradient(primaryCurveStart.x - dx / 2, baseline, primaryCurveEnd.x + dx / 2, baseline);
+
+        gradient.addColorStop(0.0, '#' + rgb.hex(prev.color as RGB));
+        gradient.addColorStop(0.5, '#' + rgb.hex(color as RGB));
+        gradient.addColorStop(1.0, '#' + rgb.hex((next?.color ?? color) as RGB));
+
+        canvasContext.fillStyle = gradient;
+        canvasContext.strokeStyle = gradient;
+    } else {
+        canvasContext.setFillColorRgb(color as RGB);
+        canvasContext.setStrokeColorRgb(color as RGB);
+    }
+
     canvasContext.beginPath();
-
-    const main = alignment >= 0 ? { x, y } : { x, y: y + height };
-    const prevMain = alignment >= 0 ? { x: prev.x, y: prev.y } : { x: prev.x, y: prev.y + prev.height };
-    const nextMain = next !== null ? (alignment >= 0 ? { x: next.x, y: next.y } : { x: next.x, y: next.y + next.height }) : null;
-
-    const [ mainCurveStart, mainCurveEnd ] = getCurveToPoints(prevMain, main, nextMain, smoothness);
-    canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
-    curveTo(canvasContext, prevMain, main, nextMain, mainCurveEnd, smoothness);
+    canvasContext.moveTo(primaryCurveStart.x, primaryCurveStart.y);
+    curveTo(canvasContext, prevPrimary, currentPrimary, nextPrimary, primaryCurveEnd, smoothness);
 
     if (showMirrorWave) {
-        const mirror = alignment >= 0 ? { x, y: y + height } : { x, y };
-        const prevMirror = alignment >= 0 ? { x: prev.x, y: prev.y + prev.height } : { x: prev.x, y: prev.y };
-        const nextMirror = next !== null ? (alignment >= 0 ? { x: next.x, y: next.y + next.height } : { x: next.x, y: next.y }) : null;
+        const shouldFill = fill && (Math.abs(currentPrimary.y - currentMirror.y) >= 1 || Math.abs(prevPrimary.y - prevMirror.y) >= 1);
 
-        const d1 = Math.sqrt((prevMain.x - prevMirror.x) ** 2 + (prevMain.y - prevMirror.y) ** 2);
-        const d2 = Math.sqrt((main.x - mirror.x) ** 2 + (main.y - mirror.y) ** 2);
-        const shouldFill = fill && (d1 >= 1 || d2 >= 1);
-
-        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, mirror, nextMirror, smoothness);
+        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, currentMirror, nextMirror, smoothness);
         if (shouldFill) {
-            canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
+            canvasContext.lineTo(primaryCurveEnd.x, baseline);
+            canvasContext.lineTo(primaryCurveStart.x, baseline);
             canvasContext.closePath();
             canvasContext.fill();
-            canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
-            canvasContext.lineTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
+
+            canvasContext.moveTo(mirrorCurveStart.x, mirrorCurveStart.y);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
+            canvasContext.lineTo(mirrorCurveEnd.x, baseline);
+            canvasContext.lineTo(mirrorCurveStart.x, baseline);
             canvasContext.closePath();
             canvasContext.fill();
 
             // Fix gap between wave sections, probably caused by the use of floating point coordinates
-            canvasContext.moveTo(mainCurveEnd.x, mainCurveEnd.y);
+            canvasContext.moveTo(primaryCurveEnd.x, primaryCurveEnd.y);
             canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
             stroke(canvasContext, 1);
         } else {
             canvasContext.moveTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
-            stroke(canvasContext, thickness);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
+            stroke(canvasContext, fill ? 1 : thickness);
         }
     } else {
-        stroke(canvasContext, thickness);
+        stroke(canvasContext, fill ? 1 : thickness);
     }
 }
 
@@ -73,7 +105,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         return maxHeight * (this.options.options.height / 100);
     }
 
-    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs, spacing: number) {
+    private getSampleRenderProps(samples: AudioSamplesArray, i: number, visualizerParams: VisualizerParams, args: VisualizerRenderArgs, spacing: number): Tuple<WavePointProps, 2> | null {
         if (i >= samples.length) return null;
 
         const sample = samples.getSample(i);
@@ -98,14 +130,10 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
         const dx = this.getSampleDx(samples.length, i, flip, spacing);
         const fillColor = this.computeFillColor(i, args, colorRgb, colorReaction, colorReactionValueProvider);
 
-        return {
-            fillColor,
-            position: [
-                { x: canvasContext.canvas.width / 2 - dx[0], y: y[0] },
-                { x: canvasContext.canvas.width / 2 + dx[1], y: y[1] },
-            ],
-            height: [ sample[0] * height, sample[1] * height ],
-        };
+        return [
+            { x: canvasContext.canvas.width / 2 - dx[0], y: y[0], height: sample[0] * height, color: fillColor[0] },
+            { x: canvasContext.canvas.width / 2 + dx[1], y: y[1], height: sample[1] * height, color: fillColor[1] },
+        ];
     }
 
     renderSamples(args: VisualizerRenderArgs, visualizerParams: VisualizerParams): void {
@@ -122,31 +150,17 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             alignment,
         } = visualizerParams;
 
-        const waveThickness = O.thickness;
-        const smoothness = O.smoothness;
-        const showMirrorWave = O.showMirrorWave;
-        const fill = O.fill;
-
         const spacing = visualizerWidth / N_BARS;
 
-        let prev: { x: number, y: number, height: number }[] | null = null;
-        let first: { x: number, y: number, height: number }[] | null = null;
-        let second: { x: number, y: number, height: number }[] | null = null;
+        let prev: Tuple<WavePointProps, 2> | null = null;
+        let first: Tuple<WavePointProps, 2> | null = null;
+        let second: Tuple<WavePointProps, 2> | null = null;
         args.samples.forEach((sample, i, samples) => {
             const sampleRenderProps = this.getSampleRenderProps(samples, i, visualizerParams, args, spacing);
             if (sampleRenderProps === null) return;
 
-            const { fillColor, position: samplePosition, height: sampleHeight } = sampleRenderProps;
-            const current = [
-                { x: samplePosition[0].x, y: samplePosition[0].y, height: sampleHeight[0] },
-                { x: samplePosition[1].x, y: samplePosition[1].y, height: sampleHeight[1] },
-            ];
-
-            const nextSampleRenderProps = this.getSampleRenderProps(samples, i + 1, visualizerParams, args, spacing);
-            const next = nextSampleRenderProps !== null ? [
-                { x: nextSampleRenderProps.position[0].x, y: nextSampleRenderProps.position[0].y, height: nextSampleRenderProps.height[0] },
-                { x: nextSampleRenderProps.position[1].x, y: nextSampleRenderProps.position[1].y, height: nextSampleRenderProps.height[1] },
-            ] : null;
+            const current = sampleRenderProps;
+            const next = this.getSampleRenderProps(samples, i + 1, visualizerParams, args, spacing);
 
             if (first === null) {
                 first = current;
@@ -157,19 +171,12 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             // Render left and right samples
             canvasContext.save();
 
-            canvasContext.setFillColorRgb(fillColor[0] as RGB);
-            canvasContext.setStrokeColorRgb(fillColor[0] as RGB);
-            renderWave(canvasContext, current[0].x, current[0].y, current[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[0] ?? null, next?.[0] ?? null);
-
-            if (fillColor.length > 0) {
-                canvasContext.setFillColorRgb(fillColor[1] as RGB);
-                canvasContext.setStrokeColorRgb(fillColor[1] as RGB);
-            }
-            renderWave(canvasContext, current[1].x, current[1].y, current[1].height, alignment, waveThickness, smoothness, showMirrorWave, fill, prev?.[1] ?? null, next?.[1] ?? null);
+            renderWave(canvasContext, current[0], alignment, O, prev?.[0] ?? null, next?.[0] ?? null);
+            renderWave(canvasContext, current[1], alignment, O, prev?.[1] ?? null, next?.[1] ?? null);
 
             prev = current;
 
-            const q: Array<[ typeof current[0], typeof current[0] | null, typeof current[0] | null ]> = [];
+            const q: Array<[ WavePointProps, WavePointProps | null, WavePointProps | null ]> = [];
             switch (flip) {
                 case VisualizerFlipType.LeftChannel:
                     // Link last L to first R
@@ -202,7 +209,7 @@ export default class VerticalWaveRenderer extends VerticalRenderer<VerticalVisua
             }
 
             q.forEach(o => {
-                renderWave(canvasContext, o[0].x, o[0].y, o[0].height, alignment, waveThickness, smoothness, showMirrorWave, fill, o[1], o[2]);
+                renderWave(canvasContext, o[0], alignment, O, o[1], o[2]);
             });
 
             canvasContext.restore();
