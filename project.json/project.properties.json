@@ -777,7 +777,7 @@
         "order": 1126,
         "type": "bool",
         "text": "ui_verticalVisualizer_wave_smoothColorTransitions",
-        "value": true,
+        "value": false,
         "condition": "visualizer_type.value === 'VerticalWave'"
     },
     "verticalVisualizer_wave_hideWhenSilent": {
@@ -1040,7 +1040,7 @@
         "order": 1126,
         "type": "bool",
         "text": "ui_circularVisualizer_wave_smoothColorTransitions",
-        "value": true,
+        "value": false,
         "condition": "visualizer_type.value === 'CircularWave'"
     },
     "circularVisualizer_wave_hideWhenSilent": {
