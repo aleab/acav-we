@@ -241,6 +241,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
 
     // .clock
     const clockOptions: MappedProperties['clock'] = { digital: {}, analog: {}, bassEffect: {} };
+    clockOptions.digital = { border: {} };
     clockOptions.analog = { border: {}, ticks: {}, numbers: {}, hands: {} };
     setProperty(clockOptions, 'enabled', raw.clock as WEProperty<'bool'>, _r => _r.value);
     setProperty(clockOptions, 'type', raw.clock_type as WEProperty<'combo'>, _r => parseComboProperty(_r, ClockType));
@@ -252,6 +253,13 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(clockOptions.digital!, 'font', raw.clock_digital_font as WEProperty<'combo'>, _r => parseComboProperty(_r, ClockFontFamily));
     setProperty(clockOptions.digital!, 'fontSize', raw.clock_digital_fontsize as WEProperty<'slider'>, _r => parseSliderProperty(_r));
     setProperty(clockOptions.digital!, 'textColor', raw.clock_digital_text_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(clockOptions.digital!.border!, 'enabled', raw.clock_digital_border as WEProperty<'bool'>, _r => _r.value);
+    setProperty(clockOptions.digital!.border!, 'thickness', raw.clock_digital_border_thickness as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.digital!.border!, 'style', raw.clock_digital_border_style as WEProperty<'combo'>, _r => _r.value);
+    setProperty(clockOptions.digital!.border!, 'color', raw.clock_digital_border_color as WEProperty<'color'>, _r => parseColorProperty(_r));
+    setProperty(clockOptions.digital!.border!, 'paddingVertical', raw.clock_digital_border_padding_v as WEProperty<'slider'>, _r => _r.value);
+    setProperty(clockOptions.digital!.border!, 'paddingHorizontal', raw.clock_digital_border_padding_h as WEProperty<'slider'>, _r => _r.value);
+    if (_.isEmpty(clockOptions.digital!.border)) delete clockOptions.digital!.border;
     setProperty(clockOptions.digital!, 'locale', raw.clock_digital_locale as WEProperty<'textinput'>, _r => _r.value);
     setProperty(clockOptions.digital!, 'showSeconds', raw.clock_digital_seconds as WEProperty<'bool'>, _r => _r.value);
     setProperty(clockOptions.digital!, 'is24h', raw.clock_digital_24h as WEProperty<'bool'>, _r => _r.value);

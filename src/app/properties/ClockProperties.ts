@@ -16,6 +16,14 @@ export default interface ClockProperties {
         font: ClockFontFamily;
         fontSize: number;
         textColor: RGB;
+        border: {
+            enabled: boolean;
+            thickness: number;
+            style: string;
+            color: RGB;
+            paddingVertical: number;
+            paddingHorizontal: number;
+        };
         showSeconds: boolean;
         is24h: boolean;
         locale: string;

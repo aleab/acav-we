@@ -1293,6 +1293,67 @@
         "value": "1 1 1",
         "condition": "clock.value && clock_type.value === 'Digital'"
     },
+    "clock_digital_border": {
+        "order": 2023,
+        "type": "bool",
+        "text": "ui_clock_digital_border",
+        "value": false,
+        "condition": "clock.value && clock_type.value === 'Digital'"
+    },
+    "clock_digital_border_thickness": {
+        "order": 2024,
+        "type": "slider",
+        "text": "ui_clock_digital_border_thickness",
+        "value": 1,
+        "min": 1,
+        "max": 100,
+        "editable": false,
+        "condition": "clock.value && clock_type.value === 'Digital' && clock_digital_border.value"
+    },
+    "clock_digital_border_style": {
+        "order": 2025,
+        "type": "combo",
+        "text": "ui_clock_digital_border_style",
+        "options": [
+            { "label": "Solid", "value": "solid" },
+            { "label": "Dotted", "value": "dotted" },
+            { "label": "Dashed", "value": "dashed" },
+            { "label": "Double", "value": "double" },
+            { "label": "Groove", "value": "groove" },
+            { "label": "Ridge", "value": "ridge" },
+            { "label": "Inset", "value": "inset" },
+            { "label": "Outset", "value": "outset" }
+        ],
+        "value": "solid",
+        "condition": "clock.value && clock_type.value === 'Digital' && clock_digital_border.value"
+    },
+    "clock_digital_border_color": {
+        "order": 2026,
+        "type": "color",
+        "text": "ui_clock_digital_border_color",
+        "value": "1 1 1",
+        "condition": "clock.value && clock_type.value === 'Digital' && clock_digital_border.value"
+    },
+    "clock_digital_border_padding_v": {
+        "order": 2027,
+        "type": "slider",
+        "text": "ui_clock_digital_border_padding_v",
+        "value": 0,
+        "min": 0,
+        "max": 100,
+        "editable": false,
+        "condition": "clock.value && clock_type.value === 'Digital' && clock_digital_border.value"
+    },
+    "clock_digital_border_padding_h": {
+        "order": 2028,
+        "type": "slider",
+        "text": "ui_clock_digital_border_padding_h",
+        "value": 5,
+        "min": 0,
+        "max": 100,
+        "editable": false,
+        "condition": "clock.value && clock_type.value === 'Digital' && clock_digital_border.value"
+    },
     "clock_digital_seconds": {
         "order": 2030,
         "type": "bool",

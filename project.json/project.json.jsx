@@ -319,6 +319,14 @@ function getProjectJson() {
                     ui_clock_digital_font: indent('Font'),
                     ui_clock_digital_fontsize: indent('Font Size (px)'),
                     ui_clock_digital_text_color: indent('Text Color'),
+                    // [CLOCK > DIGITAL > BORDER]
+                    ui_clock_digital_border: subSection('Border'),
+                    ui_clock_digital_border_thickness: indent('Thickness (px)', { n: 3 }),
+                    ui_clock_digital_border_style: indent('Style', { n: 3 }),
+                    ui_clock_digital_border_color: indent('Color', { n: 3 }),
+                    ui_clock_digital_border_padding_v: indent('V. Padding (px)', { n: 3 }),
+                    ui_clock_digital_border_padding_h: indent('H. Padding (px)', { n: 3 }),
+                    //
                     ui_clock_digital_seconds: indent('Show Seconds'),
                     ui_clock_digital_locale: indent('Locale') + asterisk(),
                     ui_clock_digital_24h: indent('24H'),

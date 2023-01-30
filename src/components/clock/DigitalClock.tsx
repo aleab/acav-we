@@ -6,6 +6,7 @@ import React, { useCallback, useContext, useEffect, useMemo, useReducer, useRef,
 
 import { ClockFontFamily } from '../../app/ClockFontFamily';
 import WallpaperContext from '../../app/WallpaperContext';
+import useComplexStateMerging from '../../hooks/useComplexStateMerging';
 import useLocalFontFile from '../../hooks/useLocalFontFile';
 import useUserPropertiesListener from '../../hooks/useUserPropertiesListener';
 
@@ -13,6 +14,16 @@ type DigitalClockStyle = {
     fontFamily: string;
     fontSize: number;
     color: string;
+};
+
+type DigitalClockBorderStyle = {
+    borderWidth: number;
+    borderStyle: string;
+    borderColor: string;
+    paddingTop: number;
+    paddingBottom: number;
+    paddingLeft: number;
+    paddingRight: number;
 };
 
 interface DigitalClockProps {
@@ -48,6 +59,16 @@ export default function DigitalClock(props: DigitalClockProps) {
         fontSize: O.current.fontSize,
         color: `#${ColorConvert.rgb.hex(O.current.textColor as RGB)}`,
     });
+    const [ showBorder, setShowBorder ] = useState(O.current.border.enabled);
+    const [ borderStyle, setBorderStyle ] = useComplexStateMerging<DigitalClockBorderStyle>({
+        borderWidth: O.current.border.thickness,
+        borderStyle: O.current.border.style,
+        borderColor: `#${ColorConvert.rgb.hex(O.current.border.color as RGB)}`,
+        paddingTop: O.current.border.paddingVertical,
+        paddingBottom: O.current.border.paddingVertical,
+        paddingLeft: O.current.border.paddingHorizontal,
+        paddingRight: O.current.border.paddingHorizontal,
+    });
 
     const [ now, setNow ] = useState(new Date());
     const [ loaded, setLoaded ] = useState(false);
@@ -71,14 +92,33 @@ export default function DigitalClock(props: DigitalClockProps) {
     //  PROPERTIES LISTENER
     // =====================
     useUserPropertiesListener(p => p.clock?.digital, digitalProps => {
-        const s: Partial<DigitalClockStyle> = {};
-        if (digitalProps.font !== undefined) {
-            s.fontFamily = digitalProps.font === ClockFontFamily.LocalFont ? 'inherit' : digitalProps.font;
-            setShowBrowseFontButton(digitalProps.font === ClockFontFamily.LocalFont);
+        {
+            const s: Partial<DigitalClockStyle> = {};
+            if (digitalProps.font !== undefined) {
+                s.fontFamily = digitalProps.font === ClockFontFamily.LocalFont ? 'inherit' : digitalProps.font;
+                setShowBrowseFontButton(digitalProps.font === ClockFontFamily.LocalFont);
+            }
+            if (digitalProps.fontSize !== undefined) s.fontSize = digitalProps.fontSize;
+            if (digitalProps.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(digitalProps.textColor as RGB)}`;
+            setStyle(s);
         }
-        if (digitalProps.fontSize !== undefined) s.fontSize = digitalProps.fontSize;
-        if (digitalProps.textColor !== undefined) s.color = `#${ColorConvert.rgb.hex(digitalProps.textColor as RGB)}`;
-        setStyle(s);
+
+        if (digitalProps.border) {
+            if (digitalProps.border.enabled !== undefined) setShowBorder(digitalProps.border.enabled);
+            const s: Partial<DigitalClockBorderStyle> = {};
+            if (digitalProps.border.thickness !== undefined) s.borderWidth = digitalProps.border.thickness;
+            if (digitalProps.border.style !== undefined) s.borderStyle = digitalProps.border.style;
+            if (digitalProps.border.color !== undefined) s.borderColor = `#${ColorConvert.rgb.hex(digitalProps.border.color as RGB)}`;
+            if (digitalProps.border.paddingVertical !== undefined) {
+                s.paddingTop = digitalProps.border.paddingVertical;
+                s.paddingBottom = digitalProps.border.paddingVertical;
+            }
+            if (digitalProps.border.paddingHorizontal !== undefined) {
+                s.paddingLeft = digitalProps.border.paddingHorizontal;
+                s.paddingRight = digitalProps.border.paddingHorizontal;
+            }
+            setBorderStyle(s);
+        }
 
         if (digitalProps.locale !== undefined) setLocale(digitalProps.locale);
         if (digitalProps.showSeconds !== undefined) setShowSeconds(digitalProps.showSeconds);
@@ -110,7 +150,7 @@ export default function DigitalClock(props: DigitalClockProps) {
       <>
         {showBrowseFontButton ? <input id="browseFont" type="file" style={{ color: style.color }} accept=".ttf, .otf, .eot, .woff, .woff2" onChange={onLocalFontChange} /> : null}
         {localFontBlobUrl !== null ? <style dangerouslySetInnerHTML={{ __html: `@font-face { font-family: "LocalFont"; src: url(${localFontBlobUrl}); }` }} /> : null}
-        <div className="digital" style={{ ...style, ...props.customCss }}>
+        <div className="digital" style={{ ...style, ...(showBorder ? borderStyle : {}), ...props.customCss }}>
           {time}
         </div>
       </>
