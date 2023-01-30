@@ -127,7 +127,7 @@ function getProjectJson() {
                     // [AUDIO SAMPLES]
                     ui_audioSamples: section('Audio Samples'),
                     ui_audioSamples_correct: withPropertyIcon('fas fa-filter', 'Correct Samples') + asterisk(),
-                    ui_audioSamples_volumeGain: withPropertyIcon('fas fa-microphone', 'Linear Gain'),
+                    ui_audioSamples_volumeGain: withPropertyIcon('fas fa-microphone', 'Linear Gain (%)'),
                     ui_audioSamples_freqThreshold: withPropertyIcon('far fa-tachometer-slowest', 'Threshold'),
                     ui_audioSamples_normalize: withPropertyIcon('far fa-balance-scale', 'Normalize') + asterisk(),
                     ui_audioSamples_smoothing: subSection('Smoothing', 'text-white fas fa-wave-sine'),

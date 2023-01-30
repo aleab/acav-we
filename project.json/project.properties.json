@@ -203,8 +203,8 @@
         "text": "ui_audioSamples_volumeGain",
         "value": 35,
         "min": -100,
-        "max": 100,
-        "editable": false
+        "max": 300,
+        "editable": true
     },
     "audioSamples_freqThreshold": {
         "order": 105,
