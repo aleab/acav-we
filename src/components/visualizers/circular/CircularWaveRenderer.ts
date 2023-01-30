@@ -1,4 +1,4 @@
-import { RGB } from 'color-convert/conversions';
+import { RGB, rgb } from 'color-convert/conversions';
 
 import AudioSamplesArray from '../../../common/AudioSamplesArray';
 import { VisualizerFlipType } from '../../../app/VisualizerFlipType';
@@ -8,19 +8,18 @@ import CircularRenderer, { RenderWaveOptions, VisualizerParams } from './Circula
 
 import { curveTo, getCurveToPoints, stroke } from '../wave-util';
 
-function getPointOnCircumference(radius: number, center: { x: number; y: number }, angleRad: number) {
-    const { x, y } = center;
-    return {
-        x: radius * Math.cos(angleRad) + x,
-        y: -(radius * Math.sin(angleRad) - y),
-    };
-}
-
 type WavePointProps = {
     height: number;
     angle: number,
     color: Readonly<RGB>;
 };
+
+function getPointOnCircle(radius: number, x: number, y: number, angleRad: number): Point {
+    return {
+        x: radius * Math.cos(angleRad) + x,
+        y: -(radius * Math.sin(angleRad) - y),
+    };
+}
 
 /**
  * @param {number} x x coordinate of the center of the circle.
@@ -31,65 +30,79 @@ function renderWave(
     x: number, y: number, radius: number,
     props: WavePointProps,
     options: RenderWaveOptions,
-    prev: { height: number, angle: number } | null,
-    next: { height: number, angle: number } | null,
+    prev: WavePointProps | null,
+    next: WavePointProps | null,
 ) {
     if (prev === null) return;
 
     const { height, angle, color } = props;
     const { showMirrorWave, fill, thickness, smoothness, smoothColorTransitions } = options;
 
-    canvasContext.setFillColorRgb(color as RGB);
-    canvasContext.setStrokeColorRgb(color as RGB);
+    const mirrorHeight = Math.clamp(height / 2, 0, radius / 2);
+    const prevMirrorHeight = Math.clamp(prev.height / 2, 0, radius / 2);
+
+    const currentAngle = -(angle - Math.PI_2);
+    const prevAngle = -(prev.angle - Math.PI_2);
+    const nextAngle = next !== null ? -(next.angle - Math.PI_2) : undefined;
+
+    const currentPrimary = getPointOnCircle(radius + height, x, y, currentAngle);
+    const prevPrimary = getPointOnCircle(radius + prev.height, x, y, prevAngle);
+    const nextPrimary = next !== null ? getPointOnCircle(radius + next.height, x, y, nextAngle!) : null;
+
+    const [ primaryCurveStart, primaryCurveEnd ] = getCurveToPoints(prevPrimary, currentPrimary, nextPrimary, smoothness);
+
+    const dθ = currentAngle - prevAngle;
+
+    if (smoothColorTransitions) {
+        const from = getPointOnCircle(radius, x, y, prevAngle - dθ / 2);
+        const to = getPointOnCircle(radius, x, y, currentAngle + dθ / 2);
+        const gradient = canvasContext.createLinearGradient(from.x, from.y, to.x, to.y);
+
+        gradient.addColorStop(0.0, '#' + rgb.hex(prev.color as RGB));
+        gradient.addColorStop(0.5, '#' + rgb.hex(color as RGB));
+        gradient.addColorStop(1.0, '#' + rgb.hex((next?.color ?? color) as RGB));
+
+        canvasContext.fillStyle = gradient;
+        canvasContext.strokeStyle = gradient;
+    } else {
+        canvasContext.setFillColorRgb(color as RGB);
+        canvasContext.setStrokeColorRgb(color as RGB);
+    }
 
     canvasContext.beginPath();
-
-    const stdAngle = -(angle - Math.PI_2);
-    const prevStdAngle = -(prev.angle - Math.PI_2);
-    const nextStdAngle = next !== null ? -(next.angle - Math.PI_2) : undefined;
-
-    const main = getPointOnCircumference(radius + height, { x, y }, stdAngle);
-    const prevMain = getPointOnCircumference(radius + prev.height, { x, y }, prevStdAngle);
-    const nextMain = next !== null ? getPointOnCircumference(radius + next.height, { x, y }, nextStdAngle!) : null;
-
-    const [ mainCurveStart, mainCurveEnd ] = getCurveToPoints(prevMain, main, nextMain, smoothness);
-    canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
-    curveTo(canvasContext, prevMain, main, nextMain, mainCurveEnd, smoothness);
+    canvasContext.moveTo(primaryCurveStart.x, primaryCurveStart.y);
+    curveTo(canvasContext, prevPrimary, currentPrimary, nextPrimary, primaryCurveEnd, smoothness);
 
     if (showMirrorWave) {
-        const mirrorHeight = Math.clamp(height / 2, 0, radius / 2);
-        const prevMirrorHeight = Math.clamp(prev.height / 2, 0, radius / 2);
+        const currentMirror = getPointOnCircle(radius - mirrorHeight, x, y, currentAngle);
+        const prevMirror = getPointOnCircle(radius - prevMirrorHeight, x, y, prevAngle);
+        const nextMirror = next !== null ? getPointOnCircle(radius - Math.clamp(next.height / 2, 0, radius / 2), x, y, nextAngle!) : null;
 
-        const mirror = getPointOnCircumference(radius - mirrorHeight, { x, y }, stdAngle);
-        const prevMirror = getPointOnCircumference(radius - prevMirrorHeight, { x, y }, prevStdAngle);
-        const nextMirror = next !== null ? getPointOnCircumference(radius - Math.clamp(next.height / 2, 0, radius / 2), { x, y }, nextStdAngle!) : null;
+        const shouldFill = fill && (prevMirrorHeight + prev.height >= 1 || mirrorHeight + height >= 1);
 
-        const d1 = prevMirrorHeight + prev.height;
-        const d2 = mirrorHeight + height;
-        const shouldFill = fill && (d1 >= 1 || d2 >= 1);
-
-        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, mirror, nextMirror, smoothness);
+        const [ mirrorCurveStart, mirrorCurveEnd ] = getCurveToPoints(prevMirror, currentMirror, nextMirror, smoothness);
         if (shouldFill) {
             canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
             canvasContext.closePath();
             canvasContext.fill();
-            canvasContext.moveTo(mainCurveStart.x, mainCurveStart.y);
+
+            canvasContext.moveTo(primaryCurveStart.x, primaryCurveStart.y);
             canvasContext.lineTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
             canvasContext.closePath();
             canvasContext.fill();
 
             // Fix gap between wave sections, probably caused by the use of floating point coordinates
-            canvasContext.moveTo(mainCurveEnd.x, mainCurveEnd.y);
+            canvasContext.moveTo(primaryCurveEnd.x, primaryCurveEnd.y);
             canvasContext.lineTo(mirrorCurveEnd.x, mirrorCurveEnd.y);
             stroke(canvasContext, 1);
         } else {
             canvasContext.moveTo(mirrorCurveStart.x, mirrorCurveStart.y);
-            curveTo(canvasContext, prevMirror, mirror, nextMirror, mirrorCurveEnd, smoothness);
-            stroke(canvasContext, thickness);
+            curveTo(canvasContext, prevMirror, currentMirror, nextMirror, mirrorCurveEnd, smoothness);
+            stroke(canvasContext, fill ? 1 : thickness);
         }
     } else {
-        stroke(canvasContext, thickness);
+        stroke(canvasContext, fill ? 1 : thickness);
     }
 }
 
