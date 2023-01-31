@@ -1475,8 +1475,21 @@
         "text": "ui_clock_analog_ticks",
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
-    "clock_analog_ticks_radius": {
+    "clock_analog_ticks_show": {
         "order": 2041,
+        "type": "combo",
+        "text": "ui_clock_analog_ticks_show",
+        "options": [
+            { "label": "All", "value": "All" },
+            { "label": "Hours", "value": "Hours" },
+            { "label": "Quarters", "value": "Quarters" },
+            { "label": "Hours Except Quarters", "value": "HoursExceptQuarters" }
+        ],
+        "value": "All",
+        "condition": "clock.value && clock_type.value === 'Analog'"
+    },
+    "clock_analog_ticks_radius": {
+        "order": 2042,
         "type": "slider",
         "text": "ui_clock_analog_ticks_radius",
         "value": 95,
@@ -1485,7 +1498,7 @@
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
     "clock_analog_ticks_thickness": {
-        "order": 2042,
+        "order": 2043,
         "type": "slider",
         "text": "ui_clock_analog_ticks_thickness",
         "value": 2,
@@ -1494,7 +1507,7 @@
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
     "clock_analog_ticks_length": {
-        "order": 2043,
+        "order": 2044,
         "type": "slider",
         "text": "ui_clock_analog_ticks_length",
         "value": 6,
@@ -1503,7 +1516,7 @@
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
     "clock_analog_ticks_color": {
-        "order": 2044,
+        "order": 2045,
         "type": "color",
         "text": "ui_clock_analog_ticks_color",
         "value": "1 1 1",
@@ -1511,12 +1524,24 @@
     },
     "clock_analog_numbers": {
         "order": 2050,
-        "type": "text",
+        "type": "bool",
         "text": "ui_clock_analog_numbers",
+        "value": true,
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
-    "clock_analog_numbers_font": {
+    "clock_analog_numbers_show": {
         "order": 2051,
+        "type": "combo",
+        "text": "ui_clock_analog_numbers_show",
+        "options": [
+            { "label": "All", "value": "All" },
+            { "label": "Quarters", "value": "Quarters" }
+        ],
+        "value": "All",
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_numbers.value"
+    },
+    "clock_analog_numbers_font": {
+        "order": 2052,
         "type": "combo",
         "text": "ui_clock_analog_numbers_font",
         "options": [
@@ -1526,32 +1551,32 @@
             { "label": "<em>Local Font</em>", "value": "LocalFont" }
         ],
         "value": "OpenSans",
-        "condition": "clock.value && clock_type.value === 'Analog'"
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_numbers.value"
     },
     "clock_analog_numbers_fontsize": {
-        "order": 2052,
+        "order": 2053,
         "type": "slider",
         "text": "ui_clock_analog_numbers_fontsize",
         "value": 28,
         "min": 8,
         "max": 85,
-        "condition": "clock.value && clock_type.value === 'Analog'"
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_numbers.value"
     },
     "clock_analog_numbers_radius": {
-        "order": 2053,
+        "order": 2054,
         "type": "slider",
         "text": "ui_clock_analog_numbers_radius",
         "value": 85,
         "min": 40,
         "max": 100,
-        "condition": "clock.value && clock_type.value === 'Analog'"
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_numbers.value"
     },
     "clock_analog_numbers_color": {
-        "order": 2054,
+        "order": 2055,
         "type": "color",
         "text": "ui_clock_analog_numbers_color",
         "value": "1 1 1",
-        "condition": "clock.value && clock_type.value === 'Analog'"
+        "condition": "clock.value && clock_type.value === 'Analog' && clock_analog_numbers.value"
     },
     "clock_analog_hands": {
         "order": 2060,

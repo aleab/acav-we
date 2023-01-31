@@ -4,6 +4,7 @@ import { RGB } from 'color-convert/conversions';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ClockFontFamily } from '../../app/ClockFontFamily';
+import { AnalogClockNumberDisplayType, AnalogClockTickDisplayType } from '../../app/ClockType';
 import WallpaperContext from '../../app/WallpaperContext';
 import useComplexStateMerging from '../../hooks/useComplexStateMerging';
 import useLocalFontFile from '../../hooks/useLocalFontFile';
@@ -67,6 +68,7 @@ export default function AnalogClock() {
 
     const [ radius, setRadius ] = useState(calcWindowSizePercentage(O.current.radius));
     const [ showSeconds, setShowSeconds ] = useState(O.current.showSeconds);
+    const [ showNumbers, setShowNumbers ] = useState(O.current.numbers.enabled);
 
     const [ style, setStyle ] = useComplexStateMerging<AnalogClockStyle>({});
     const [ clockBackgroundStyle, setClockBackgroundStyle ] = useComplexStateMerging<ClockBackgroundStyle>({
@@ -89,10 +91,14 @@ export default function AnalogClock() {
         strokeWidth: O.current.border.thickness,
     });
 
+    const [ clockTicksShow, setClockTicksShow ] = useState(O.current.ticks.show);
     const [ clockTicksRadius, setClockTicksRadius ] = useState(radius * (O.current.ticks.radius / 100));
     const [ clockTicksThickness, setClockTicksThickness ] = useState(O.current.ticks.thickness);
     const [ clockTicksLength, setClockTicksLength ] = useState(O.current.ticks.length);
+
+    const [ clockNumbersShow, setClockNumbersShow ] = useState(O.current.numbers.show);
     const [ clockNumbersRadius, setClockNumbersRadius ] = useState(radius * (O.current.numbers.radius / 100));
+
     const [ clockHandsHoursLength, setClockHandsHoursLength ] = useState(radius * (O.current.hands.hoursLength / 100));
     const [ clockHandsMinutesLength, setClockHandsMinutesLength ] = useState(radius * (O.current.hands.minutesLength / 100));
     const [ clockHandsSecondsLength, setClockHandsSecondsLength ] = useState(radius * (O.current.hands.secondsLength / 100));
@@ -163,6 +169,8 @@ export default function AnalogClock() {
 
         // ticks
         if (analogProps.ticks) {
+            if (analogProps.ticks.show !== undefined) setClockTicksShow(analogProps.ticks.show);
+
             const s: Partial<ClockTicksStyle> = {};
             if (analogProps.ticks.color !== undefined) s.fill = `#${ColorConvert.rgb.hex(analogProps.ticks.color as RGB)}`;
             setClockTicksStyle(s);
@@ -174,6 +182,9 @@ export default function AnalogClock() {
 
         // numbers
         if (analogProps.numbers) {
+            if (analogProps.numbers.enabled !== undefined) setShowNumbers(analogProps.numbers.enabled);
+            if (analogProps.numbers.show !== undefined) setClockNumbersShow(analogProps.numbers.show);
+
             const s: Partial<ClockNumbersStyle> = {};
             if (analogProps.numbers.font !== undefined) {
                 s.fontFamily = analogProps.numbers.font === ClockFontFamily.LocalFont ? 'inherit' : analogProps.numbers.font;
@@ -248,11 +259,15 @@ export default function AnalogClock() {
     useEffect(() => clockHandMinutesAnimationRef.current?.beginElement(), [clockHandMinutesAnimationRef]);
     useEffect(() => clockHandSecondsAnimationRef.current?.beginElement(), [clockHandSecondsAnimationRef]);
 
-    const ClockNumbers = useCallback((p: { viewWidth: number, radius: number, style: ClockNumbersStyle }) => {
+    const ClockNumbers = useCallback((p: { viewWidth: number, radius: number, show: AnalogClockNumberDisplayType, style: ClockNumbersStyle }) => {
         const a = p.viewWidth / 2;
 
         const clockNumbers = [];
         for (let i = 0; i < 12; ++i) {
+            if (p.show === AnalogClockNumberDisplayType.Quarters && (i % 3 !== 0)) {
+                continue;
+            }
+
             const angle = H2DEG * i * Math.DEG2RAD;
 
             const baseline = i >= 11 || i <= 1 ? 'hanging'
@@ -281,11 +296,24 @@ export default function AnalogClock() {
         );
     }, []);
 
-    const ClockTicks = useCallback((p: { viewWidth: number, radius: number, thickness: number, length: number, style: ClockTicksStyle }) => {
+    const ClockTicks = useCallback((p: { viewWidth: number, radius: number, thickness: number, length: number, show: AnalogClockTickDisplayType, style: ClockTicksStyle }) => {
         const a = p.viewWidth / 2;
 
         const ticks = [];
-        for (let i = 0; i < 5 * 12; ++i) {
+        for (let i = 0; i < 60; ++i) {
+            switch (p.show) {
+                case AnalogClockTickDisplayType.Hours:
+                    if (i % 5 !== 0) continue;
+                    break;
+                case AnalogClockTickDisplayType.Quarters:
+                    if (i % 15 !== 0) continue;
+                    break;
+                case AnalogClockTickDisplayType.HoursExceptQuarters:
+                    if (i % 5 !== 0 || i % 15 === 0) continue;
+                    break;
+                default: break;
+            }
+
             let width = p.thickness;
             let height = p.length;
             if ((i % 5) === 0) {
@@ -355,8 +383,8 @@ export default function AnalogClock() {
         <div className="analog" style={style}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox={`0 0 ${width} ${width}`} width={width}>
             <circle id="clock-face" cx={halfWidth} cy={halfWidth} r={radius} style={clockBackgroundStyle} />
-            <ClockTicks viewWidth={width} radius={clockTicksRadius} style={clockTicksStyle} thickness={clockTicksThickness} length={clockTicksLength} />
-            <ClockNumbers viewWidth={width} radius={clockNumbersRadius} style={clockNumbersStyle} />
+            <ClockTicks viewWidth={width} radius={clockTicksRadius} thickness={clockTicksThickness} length={clockTicksLength} show={clockTicksShow} style={clockTicksStyle} />
+            {showNumbers ? <ClockNumbers viewWidth={width} radius={clockNumbersRadius} show={clockNumbersShow} style={clockNumbersStyle} /> : null}
             <ClockHands
               now={now} showSeconds={showSeconds} viewWidth={width} radius={radius}
               lengths={[ clockHandsHoursLength, clockHandsMinutesLength, clockHandsSecondsLength ]}

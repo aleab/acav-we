@@ -2,7 +2,7 @@ import { RGB } from 'color-convert/conversions';
 
 import { Pivot } from '../../common/Pivot';
 import { ClockFontFamily } from '../ClockFontFamily';
-import { ClockType } from '../ClockType';
+import { AnalogClockNumberDisplayType, AnalogClockTickDisplayType, ClockType } from '../ClockType';
 import BassEffectProperties from './BassEffectProperties';
 
 export default interface ClockProperties {
@@ -39,12 +39,15 @@ export default interface ClockProperties {
             color: RGB;
         };
         ticks: {
+            show: AnalogClockTickDisplayType;
             radius: number;
             thickness: number;
             length: number;
             color: RGB;
         };
         numbers: {
+            enabled: boolean;
+            show: AnalogClockNumberDisplayType;
             font: ClockFontFamily;
             fontSize: number;
             radius: number;

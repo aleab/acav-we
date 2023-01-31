@@ -351,12 +351,14 @@ function getProjectJson() {
                     ui_clock_analog_border_color: indent('Color', { n: 3 }),
                     // [CLOCK > ANALOG > TICKS]
                     ui_clock_analog_ticks: subSection('Ticks'),
+                    ui_clock_analog_ticks_show: indent('Show', { n: 3 }),
                     ui_clock_analog_ticks_radius: indent('Radius (%)', { n: 3 }),
                     ui_clock_analog_ticks_thickness: indent('Thickness (px)', { n: 3 }),
                     ui_clock_analog_ticks_length: indent('Length (px)', { n: 3 }),
                     ui_clock_analog_ticks_color: indent('Color', { n: 3 }),
                     // [CLOCK > ANALOG > NUMBERS]
                     ui_clock_analog_numbers: subSection('Numbers'),
+                    ui_clock_analog_numbers_show: indent('Show', { n: 3 }),
                     ui_clock_analog_numbers_font: indent('Font', { n: 3 }),
                     ui_clock_analog_numbers_fontsize: indent('Font Size (px)', { n: 3 }),
                     ui_clock_analog_numbers_radius: indent('Radius (%)', { n: 3 }),

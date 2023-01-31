@@ -43,6 +43,7 @@
         "no-bitwise": "off",
         "no-cond-assign": "off",
         "no-console": "off",
+        "no-continue": "off",
         "no-loss-of-precision": "off",
         "no-multi-spaces": "off",
         "no-multiple-empty-lines": "off",
