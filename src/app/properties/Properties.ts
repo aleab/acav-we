@@ -126,6 +126,7 @@ export function mapProperties(raw: DeepReadonly<RawWallpaperProperties>): Mapped
     setProperty(audioSamplesOptions, 'normalize', raw.audioSamples_normalize as WEProperty<'bool'>, _r => _r.value);
     setProperty(audioSamplesOptions, 'temporalSmoothingFactor', raw.audioSamples_temporalSmoothing_factor as WEProperty<'slider'>, _r => parseSliderProperty(_r) / 100);
     setProperty(audioSamplesOptions, 'spatialSmoothingFactor', raw.audioSamples_spatialSmoothing_factor as WEProperty<'slider'>, _r => parseSliderProperty(_r) / 100);
+    setProperty(audioSamplesOptions, 'syncDelayMs', raw.audioSamples_syncDelay as WEProperty<'slider'>, _r => parseSliderProperty(_r) * 1000);
     // .audioSamples.scale
     setProperty(audioSamplesOptions.scale!, 'function', raw.audioSamples_scale as WEProperty<'combo'>, _r => parseComboProperty(_r, ScaleFunction));
     setProperty(audioSamplesOptions.scale!, 'powExponent', raw.audioSamples_scale_Power_exponent as WEProperty<'slider'>, _r => parseSliderProperty(_r));

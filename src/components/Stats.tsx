@@ -43,6 +43,7 @@ export default function Stats() {
     const [ visualizerRenderTime, setVisualizerRenderTime ] = useState(0);
     const [ visualizerPluginsRenderTime, setVisualizerPluginsRenderTime ] = useState(0);
     const [ visualizerRenderDelay, setVisualizerRenderDelay ] = useState(0);
+    const [ visualizerArtificialDelay, setVisualizerArtificialDelay ] = useState(0);
 
     const [ spotifyState, setSpotifyState ] = useState<SpotifyStateMachineState | null>(null);
     const [ spotifyCurrentlyPlaying, setSpotifyCurrentlyPlaying ] = useState<string | null>(null);
@@ -204,6 +205,9 @@ export default function Stats() {
         const userPropertiesChangedCallback = (args: UserPropertiesChangedEventArgs) => {
             if (args.newProps.audioprocessing === false) {
                 audioSamples?.clear();
+            }
+            if (args.newProps.audioSamples?.syncDelayMs !== undefined) {
+                setVisualizerArtificialDelay(args.newProps.audioSamples.syncDelayMs);
             }
         };
         context?.wallpaperEvents.onUserPropertiesChanged.subscribe(userPropertiesChangedCallback);
@@ -382,7 +386,7 @@ export default function Stats() {
             </tr>
             <tr>
               <th>Render Delay</th>
-              <td colSpan={3}>{`${visualizerRenderDelay.toFixed(0)}ms`}</td>
+              <td colSpan={3}>{`${visualizerRenderDelay.toFixed(0)}ms + ${visualizerArtificialDelay.toFixed(0)}ms`}</td>
             </tr>
           </tbody>
         </table>

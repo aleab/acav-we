@@ -146,7 +146,7 @@ export default function App(props: AppProps) {
 
     // Context
     const renderer = useRenderer();
-    const audioHistory = useMemo(() => new AudioHistory(), []);
+    const audioHistory = useMemo(() => new AudioHistory(O.current.audioSamples.syncDelayMs), []);
     const wallpaperContext = useMemo<WallpaperContextType>(() => {
         Logc.info('Creating WallpaperContext...');
         return {
@@ -267,6 +267,10 @@ export default function App(props: AppProps) {
                 if (!_.isEmpty(_foreground)) updateForeground();
             }
 
+            if (newProps.audioSamples !== undefined) {
+                if (newProps.audioSamples.syncDelayMs !== undefined) audioHistory.artificialDelay = newProps.audioSamples.syncDelayMs;
+            }
+
             if (newProps.clock !== undefined) {
                 if (newProps.clock.enabled !== undefined) setShowClock(newProps.clock.enabled);
             }
@@ -297,7 +301,7 @@ export default function App(props: AppProps) {
             //onUserPropertiesChangedSubs.clear();
             delete window.wallpaperPropertyListener?.applyUserProperties;
         };
-    }, [ onSpotifyStateChangedHandler, onUserPropertiesChangedEventHandler, renderer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
+    }, [ audioHistory, onSpotifyStateChangedHandler, onUserPropertiesChangedEventHandler, renderer, scheduleBackgroundImageChange, updateBackground, updateForeground ]);
 
     // =================
     //  PAUSED LISTENER
@@ -386,7 +390,7 @@ export default function App(props: AppProps) {
         window.acav.resetAudioListener = () => window.wallpaperRegisterAudioListener(audioListener);
 
         const onRender = (e: RenderEventArgs) => {
-            const [ samples, frameTimestamp ] = audioHistory.getAudioFrame(e.timestamp - audioHistory.delay);
+            const [ samples, frameTimestamp ] = audioHistory.getAudioFrame(e.timestamp - audioHistory.delay - audioHistory.artificialDelay);
             if (samples !== null && frameTimestamp > 0) {
                 const samplesBuffer: AudioSamplesArray[] = [];
                 if (temporalSmoothingBufferLengthMs.current > 0) {

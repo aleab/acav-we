@@ -383,6 +383,16 @@
         "min": 0,
         "max": 100
     },
+    "audioSamples_syncDelay": {
+        "order": 124,
+        "type": "slider",
+        "text": "ui_audioSamples_syncDelay",
+        "value": 0,
+        "min": 0,
+        "max": 5,
+        "fraction": true,
+        "step": 0.1
+    },
     
     "___audioSamples": {
         "order": 999,

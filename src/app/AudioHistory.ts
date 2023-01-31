@@ -8,6 +8,7 @@ type AudioHistoryItem = {
 
 export interface IReadonlyAudioHistory {
     readonly delay: number;
+    readonly artificialDelay: number;
     getAudioFrame(timestamp: number): [ DeepReadonly<AudioSamplesArray> | null, number ];
     getSince(timestamp: number): DeepReadonly<AudioHistoryItem>[];
     getAudioFramesSince(timestamp: number): DeepReadonly<AudioSamplesArray>[];
@@ -19,8 +20,13 @@ export default class AudioHistory implements IReadonlyAudioHistory {
     private _delay: number = 10;
     get delay() { return this._delay; }
 
-    constructor() {
+    private _artificialDelay: number = 0;
+    get artificialDelay() { return this._artificialDelay; }
+    set artificialDelay(ms: number) { this._artificialDelay = ms; }
+
+    constructor(artificialDelay: number = 0) {
         this.frames = new LinkedList<AudioHistoryItem>();
+        this._artificialDelay = artificialDelay;
     }
 
     push(timestamp: number, data: AudioSamplesArray) {
@@ -39,7 +45,7 @@ export default class AudioHistory implements IReadonlyAudioHistory {
             this._delay = dt > this._delay ? dt : Math.round(Math.lerp(dt, this._delay, 0.69)); // nice!
         }
 
-        this.deleteOlderThan(timestamp - 1000);
+        this.deleteOlderThan(timestamp - 1000 - this._artificialDelay);
     }
 
     deleteOlderThan(time: number) {

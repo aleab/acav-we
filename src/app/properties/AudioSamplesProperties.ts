@@ -8,4 +8,5 @@ export default interface AudioSamplesProperties {
     normalize: boolean;
     temporalSmoothingFactor: number;
     spatialSmoothingFactor: number;
+    syncDelayMs: number;
 }

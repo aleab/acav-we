@@ -133,6 +133,7 @@ function getProjectJson() {
                     ui_audioSamples_smoothing: subSection('Smoothing', 'text-white fas fa-wave-sine'),
                     ui_audioSamples_temporalSmoothing_factor: indent('Temporal', { n: 3 }),
                     ui_audioSamples_spatialSmoothing_factor: indent('Spatial', { n: 3 }),
+                    ui_audioSamples_syncDelay: withPropertyIcon('far fa-timer', 'Sync Delay (s)'),
                     //
                     // [AUDIO SAMPLES > SCALE]
                     ui_audioSamples_scale: withPropertyIcon('far fa-function', 'Scale') + asterisk() + `&nbsp;${withTextColor('sup', 'primary', '[1]')}`,
