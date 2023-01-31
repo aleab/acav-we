@@ -582,7 +582,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
-        "editable": false,
+        "editable": true,
         "condition": "visualizer_type.value.startsWith('Vertical')"
     },
     "verticalVisualizer_width": {
@@ -590,7 +590,7 @@
         "type": "slider",
         "text": "ui_verticalVisualizer_width",
         "value": 45,
-        "min": 25,
+        "min": 10,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value.startsWith('Vertical')"
@@ -651,7 +651,7 @@
         "type": "slider",
         "text": "ui_verticalVisualizer_bars_height",
         "value": 45,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalBars'"
@@ -701,7 +701,7 @@
         "type": "slider",
         "text": "ui_verticalVisualizer_blocks_height",
         "value": 32,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalBlocks'"
@@ -736,7 +736,7 @@
         "type": "slider",
         "text": "ui_verticalVisualizer_wave_height",
         "value": 30,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === 'VerticalWave'"
@@ -809,7 +809,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
-        "editable": false,
+        "editable": true,
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
     "circularVisualizer_y": {
@@ -821,7 +821,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
-        "editable": false,
+        "editable": true,
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
     "circularVisualizer_radius": {
@@ -829,8 +829,8 @@
         "type": "slider",
         "text": "ui_circularVisualizer_radius",
         "value": 16,
-        "min": 10,
-        "max": 35,
+        "min": 1,
+        "max": 40,
         "editable": false,
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
@@ -841,7 +841,7 @@
         "value": 0,
         "min": 0,
         "max": 360,
-        "editable": false,
+        "editable": true,
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
     "circularVisualizer_angle": {
@@ -851,7 +851,7 @@
         "value": 360,
         "min": 90,
         "max": 360,
-        "editable": false,
+        "editable": true,
         "condition": "visualizer_type.value.startsWith('Circular')"
     },
     "circularVisualizer_color": {
@@ -898,7 +898,7 @@
         "type": "slider",
         "text": "ui_circularVisualizer_bars_height",
         "value": 55,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === 'CircularBars'"
@@ -951,7 +951,7 @@
         "type": "slider",
         "text": "ui_circularVisualizer_blocks_height",
         "value": 50,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === 'CircularBlocks'"
@@ -999,7 +999,7 @@
         "type": "slider",
         "text": "ui_circularVisualizer_wave_height",
         "value": 30,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === 'CircularWave'"
@@ -1124,7 +1124,7 @@
         "type": "slider",
         "text": "ui_3dVisualizer_bars_height",
         "value": 35,
-        "min": 10,
+        "min": 1,
         "max": 100,
         "editable": false,
         "condition": "visualizer_type.value === '3DBars'"
@@ -1266,6 +1266,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
+        "editable": true,
         "condition": "clock.value"
     },
     "clock_position_y": {
@@ -1277,6 +1278,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
+        "editable": true,
         "condition": "clock.value"
     },
     "clock_custom_css": {
@@ -1418,7 +1420,7 @@
         "type": "slider",
         "text": "ui_clock_analog_radius",
         "value": 14,
-        "min": 10,
+        "min": 4,
         "max": 35,
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
@@ -1531,7 +1533,7 @@
         "type": "slider",
         "text": "ui_clock_analog_numbers_fontsize",
         "value": 28,
-        "min": 18,
+        "min": 8,
         "max": 85,
         "condition": "clock.value && clock_type.value === 'Analog'"
     },
@@ -1800,6 +1802,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
+        "editable": true,
         "condition": "spotify.value"
     },
     "spotify_position_y": {
@@ -1811,6 +1814,7 @@
         "max": 100,
         "fraction": true,
         "step": 0.1,
+        "editable": true,
         "condition": "spotify.value"
     },
     "spotify_width": {
@@ -1820,6 +1824,7 @@
         "value": 270,
         "min": 230,
         "max": 500,
+        "editable": true,
         "condition": "spotify.value"
     },
     "spotify_font_size": {

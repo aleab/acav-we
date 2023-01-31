@@ -363,11 +363,11 @@ function getProjectJson() {
                     ui_clock_analog_numbers_color: indent('Color', { n: 3 }),
                     // [CLOCK > ANALOG > HANDS]
                     ui_clock_analog_hands: subSection('Hands'),
-                    ui_clock_analog_hands_hoursLength: indent('Hours Length (%)', { n: 3 }),
+                    ui_clock_analog_hands_hoursLength: indent('h Length (%)', { n: 3 }),
                     ui_clock_analog_hands_hoursColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
-                    ui_clock_analog_hands_minutesLength: indent('Minutes Length (%)', { n: 3 }),
+                    ui_clock_analog_hands_minutesLength: indent('min Length (%)', { n: 3 }),
                     ui_clock_analog_hands_minutesColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
-                    ui_clock_analog_hands_secondsLength: indent('Seconds Length (%)', { n: 3 }),
+                    ui_clock_analog_hands_secondsLength: indent('sec Length (%)', { n: 3 }),
                     ui_clock_analog_hands_secondsColor: indent('&nbsp;—&nbsp; Color', { n: 3 }),
                     //
                     // [CLOCK > BASS EFFECT]
